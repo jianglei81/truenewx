@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+    
+    <display-name>truenewx-web-res</display-name>
+    
+    <!-- IE9新的安全机制要求web server送过来的 HTTP response header中的content-type必需指明css文件的MIME-type为'text/css'，否则IE9不会把它作为css文件来处理 -->
+    <mime-mapping>
+		<extension>css</extension>
+		<mime-type>text/css</mime-type>
+	</mime-mapping>
+    
+</web-app>

@@ -1,0 +1,176 @@
+package org.truenewx.data.orm.hibernate;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.TypeHelper;
+import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.type.Type;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.truenewx.core.enums.annotation.EnumValue;
+import org.truenewx.data.orm.DataAccessTemplate;
+import org.truenewx.hibernate.usertype.EnumValueMapType;
+
+import com.google.common.base.Enums;
+
+/**
+ * Hibernate数据访问模板
+ *
+ * @author jianglei
+ * @since JDK 1.8
+ */
+public final class HibernateTemplate extends DataAccessTemplate {
+
+    private SessionFactory sessionFactory;
+
+    @Autowired(required = false)
+    public void setSessionFactory(final SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
+    public SessionFactory getSessionFactory() {
+        return this.sessionFactory;
+    }
+
+    public Session getSession() {
+        return getSessionFactory().getCurrentSession();
+    }
+
+    public Dialect getDialect() {
+        return ((SessionFactoryImplementor) getSessionFactory()).getDialect();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> List<T> list(final CharSequence ql, final String paramName, final Object paramValue,
+                    final int pageSize, final int pageNo) {
+        final Query query = getSession().createQuery(ql.toString());
+        applyParamToQuery(query, paramName, paramValue);
+        applyPagingToQuery(query, pageSize, pageNo, false);
+        return query.list();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> List<T> list(final CharSequence ql, final Map<String, ?> params, final int pageSize,
+                    final int pageNo) {
+        final Query query = getSession().createQuery(ql.toString());
+        applyParamsToQuery(query, params);
+        applyPagingToQuery(query, pageSize, pageNo, false);
+        return query.list();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> List<T> listWithOneMore(final CharSequence ql, final String paramName,
+                    final Object paramValue, final int pageSize, final int pageNo) {
+        final Query query = getSession().createQuery(ql.toString());
+        applyParamToQuery(query, paramName, paramValue);
+        applyPagingToQuery(query, pageSize, pageNo, true);
+        return query.list();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> List<T> listWithOneMore(final CharSequence ql, final int pageSize, final int pageNo,
+                    final Map<String, ?> params) {
+        final Query query = getSession().createQuery(ql.toString());
+        applyParamsToQuery(query, params);
+        applyPagingToQuery(query, pageSize, pageNo, true);
+        return query.list();
+    }
+
+    @Override
+    public int update(final CharSequence ul, final String paramName, final Object paramValue) {
+        final Query query = getSession().createQuery(ul.toString());
+        applyParamToQuery(query, paramName, paramValue);
+        return query.executeUpdate();
+    }
+
+    @Override
+    public int update(final CharSequence ul, final Map<String, ?> params) {
+        final Query query = getSession().createQuery(ul.toString());
+        applyParamsToQuery(query, params);
+        return query.executeUpdate();
+    }
+
+    public void applyParamsToQuery(final Query query, final Map<String, ?> params) {
+        if (params != null) {
+            for (final Entry<String, ?> entry : params.entrySet()) {
+                applyParamToQuery(query, entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    /**
+     * 将指定参数名和参数值写入指定Hibernate查询对象中
+     *
+     * @param query
+     *            Hibernate查询对象
+     * @param name
+     *            参数名
+     * @param value
+     *            参数值，除常见类型外，还支持Collection、数组、枚举
+     */
+    public void applyParamToQuery(final Query query, final String name, final Object value) {
+        if (value instanceof Collection) {
+            query.setParameterList(name, (Collection<?>) value);
+        } else if (value instanceof Object[]) { // 对象数组
+            query.setParameterList(name, (Object[]) value);
+        } else if (value != null) {
+            final Class<? extends Object> clazz = value.getClass();
+            if (clazz.isArray()) { // 基础数据数组
+                final Collection<Object> collection = new ArrayList<Object>();
+                final int length = Array.getLength(value);
+                for (int i = 0; i < length; i++) {
+                    collection.add(Array.get(value, i));
+                }
+                query.setParameterList(name, collection);
+            } else if (clazz.isEnum()) {
+                final Enum<?> enumConstant = (Enum<?>) value;
+                final Field field = Enums.getField(enumConstant);
+                final EnumValue ev = field.getAnnotation(EnumValue.class);
+                if (ev != null) { // 含有@EnumValue注解的枚举参数值，需通过自定义类型转换
+                    final Properties parameters = new Properties();
+                    parameters.put(EnumValueMapType.PARAMETER_CLASS, clazz.getName());
+                    query.setParameter(name, value, customType(EnumValueMapType.class, parameters));
+                }
+            } else {
+                query.setParameter(name, value);
+            }
+        } else {
+            query.setParameter(name, value);
+        }
+    }
+
+    public void applyPagingToQuery(final Query query, final int pageSize, int pageNo,
+                    final boolean oneMore) {
+        if (pageSize > 0) { // 用页大小判断是否分页查询
+            if (pageNo <= 0) { // 页码最小为1
+                pageNo = 1;
+            }
+            query.setFirstResult(pageSize * (pageNo - 1));
+            query.setMaxResults(oneMore ? (pageSize + 1) : pageSize);
+        }
+    }
+
+    /**
+     * 获取Hibernate自定义映射类型<br/>
+     *
+     * 详见：{@link org.hibernate.TypeHelper#custom(Class, Properties)}
+     */
+    public Type customType(final Class<?> userTypeClass, final Properties properties) {
+        final TypeHelper typeHelper = getSessionFactory().getTypeHelper();
+        return typeHelper.custom(userTypeClass, properties);
+    }
+}

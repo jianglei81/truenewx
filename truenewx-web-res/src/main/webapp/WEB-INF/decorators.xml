@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<decorators defaultdir="/">
+    <excludes>
+        <pattern>/header*</pattern>
+        <pattern>/footer*</pattern>
+        <pattern>/component/*.html</pattern>
+        <pattern>/component/**/*.html</pattern>
+        <pattern>*.htm</pattern>
+        <pattern>*.json</pattern>
+        <pattern>*.json?*</pattern>
+    </excludes>
+    <decorator name="ajax" page="dec/ajax.jsp">
+        <pattern>*.ajax</pattern>
+    </decorator>
+    <decorator name="bs3" page="dec/bs3.jsp">
+        <pattern>*-bs3.*</pattern>
+        <pattern>*/bs3</pattern>
+        <pattern>*/bs3/*</pattern>
+    </decorator>
+    <decorator name="bs2" page="dec/bs2.jsp">
+        <pattern>*-bs2.*</pattern>
+        <pattern>*/bs2</pattern>
+        <pattern>*/bs2/*</pattern>
+    </decorator>
+    <decorator name="default" page="dec/default.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+</decorators>

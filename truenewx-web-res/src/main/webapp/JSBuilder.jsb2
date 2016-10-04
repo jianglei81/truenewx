@@ -1,0 +1,50 @@
+{
+    "projectName": "res",
+    "deployDir": "assets/js",
+    "pkgs": [
+        {
+            "name": "res",
+            "file": "all.js",
+            "isDebug": false,
+            "fileIncludes": [
+                {
+                    "text": "truenewx.js",
+                    "path": "/component/js/"
+                },
+                {
+                    "text": "extend.js",
+                    "path": "/vendor/js/"
+                },
+                {
+                    "text": "sugar.min.js",
+                    "path": "/vendor/js/"
+                },
+                {
+                    "text": "jquery.json.min.js",
+                    "path": "/vendor/jquery/js/"
+                },
+                {
+                    "text": "bootstrap.js",
+                    "path": "/vendor/bootstrap/v2/js/"
+                },
+                {
+                    "text": "prototype.js",
+                    "path": "/component/js/"
+                },
+                {
+                    "text": "truenewx-bs2.js",
+                    "path": "/component/js/"
+                },
+                {
+                    "text": "jquery.lazyload.min.js",
+                    "path": "/vendor/jquery/js/"
+                },
+                {
+                    "text": "truenewx-domain.js",
+                    "path": "/component/js/"
+                }
+            ]
+        }
+    ],
+    "resources":[]
+}

@@ -1,0 +1,9 @@
+.carousel-inner.item {
+    display: none;
+    position: relative;
+    transition: left 0.6s ease-in-out 0s;
+}
+
+.carousel-inner .active {
+    display: block;
+}

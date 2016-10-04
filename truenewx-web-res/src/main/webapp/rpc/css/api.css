@@ -1,0 +1,37 @@
+.tab-content > .tab-pane {
+    border-bottom: 1px solid #dddddd;
+    border-left: 1px solid #dddddd;
+    border-right: 1px solid #dddddd;
+    padding: 15px;
+}
+
+td[rowspan] p {
+    margin-bottom: 0px;
+}
+
+td.arg-type {
+    padding-bottom: 0px;
+}
+
+div.arg-type:not(:first-child) {
+    border-top: 1px solid #dddddd;
+    padding-top: 8px;
+}
+
+[title], [onclick] {
+    cursor: pointer;
+}
+
+[title]:not(.label) {
+    color: #0088cc;
+}
+
+[expandable='true'] {
+    text-decoration: underline;
+}
+
+.deprecated {
+    color: #999999;
+    text-decoration: line-through;
+    font-style: italic;
+}

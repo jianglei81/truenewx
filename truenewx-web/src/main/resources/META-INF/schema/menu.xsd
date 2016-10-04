@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.truenewx.org/schema/menu"
+    targetNamespace="http://www.truenewx.org/schema/menu">
+    <xs:element name="menu">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="item" minOccurs="1" maxOccurs="unbounded" />
+                <xs:element ref="operation" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="item">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="link" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:attribute name="href" type="xs:string" use="required" />
+                        <xs:attribute name="method" type="HttpMethod" use="optional" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element ref="caption" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="options" minOccurs="0" />
+                <xs:element ref="item" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="operation" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+            <xs:attribute name="caption" type="xs:string" use="required" />
+            <xs:attribute name="href" type="xs:string" use="optional" />
+            <xs:attribute name="target" type="xs:string" use="optional" />
+            <xs:attribute name="type" type="xs:string" use="optional" />
+            <xs:attribute name="auth" type="xs:string" use="optional" />
+            <xs:attribute name="profile" type="xs:string" use="optional" />
+            <xs:attribute name="icon" type="xs:string" use="optional" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="options">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="option" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:simpleContent>
+                            <xs:extension base="xs:string">
+                                <xs:attribute name="name" type="xs:string" use="required" />
+                                <xs:attribute name="type" type="xs:string" use="optional" />
+                            </xs:extension>
+                        </xs:simpleContent>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="inherit" type="xs:boolean" use="optional" default="true" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="operation">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="caption" minOccurs="0" maxOccurs="unbounded" />
+                <xs:choice maxOccurs="unbounded">
+                    <xs:element name="link">
+                        <xs:complexType>
+                            <xs:attribute name="href" type="xs:string" use="required" />
+                            <xs:attribute name="method" type="HttpMethod" use="optional" />
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="rpc">
+                        <xs:complexType>
+                            <xs:attribute name="id" type="xs:string" use="required" />
+                            <xs:attribute name="method" type="xs:string" use="required" />
+                            <xs:attribute name="args" type="xs:nonNegativeInteger" use="optional" />
+                        </xs:complexType>
+                    </xs:element>
+                </xs:choice>
+                <xs:element ref="options" minOccurs="0" />
+            </xs:sequence>
+            <xs:attribute name="caption" use="required" />
+            <xs:attribute name="type" type="xs:string" use="optional" />
+            <xs:attribute name="auth" type="xs:string" use="required" />
+            <xs:attribute name="profile" type="xs:string" use="optional" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="caption">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="locale" type="xs:string" use="required" />
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:simpleType name="HttpMethod">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="GET" />
+            <xs:enumeration value="POST" />
+            <xs:enumeration value="PUT" />
+            <xs:enumeration value="DELETE" />
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>
