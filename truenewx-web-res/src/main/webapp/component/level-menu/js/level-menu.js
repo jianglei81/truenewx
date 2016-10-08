@@ -136,8 +136,9 @@
             var v3 = $.bootstrap.getVersion() == 3;
             var nodeClass = v3 ? "col-md-12" : "span12";
             $("span:first", item).addClass(nodeClass).css({
-                "padding" : "0px",
-                "minHeight" : "0px"
+                margin : "0px",
+                padding : "0px",
+                minHeight : "0px"
             });
 
             var parentNodeIcon;

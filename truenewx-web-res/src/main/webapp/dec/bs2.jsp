@@ -19,12 +19,12 @@ function selectMenu(index){
 <decorator:head/>
 </head>
 
-<body style="padding-top: 50px; position: relative;"<decorator:getProperty property="body.required-class" writeEntireProperty="true"/><decorator:getProperty property="body.component" writeEntireProperty="true"/><decorator:getProperty property="body.script" writeEntireProperty="true"/>>
+<body style="padding-top: 55px; position: relative;"<decorator:getProperty property="body.required-class" writeEntireProperty="true"/><decorator:getProperty property="body.component" writeEntireProperty="true"/><decorator:getProperty property="body.script" writeEntireProperty="true"/>>
 <jsp:include page="/header">
     <jsp:param name="bsVersion" value="2"/>
 </jsp:include>
-<div class="container-fluid">
-    <div class="row-fluid">
+<div class="container">
+    <div class="row">
         <div class="span2">
             <ul class="nav nav-list">
                 <li><a href="${context}/component/bs2/simple">简单组件</a></li>

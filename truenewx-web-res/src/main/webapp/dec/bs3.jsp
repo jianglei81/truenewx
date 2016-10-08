@@ -20,11 +20,12 @@ function selectMenu(index){
 <decorator:head/>
 </head>
 
-<body style="padding-top: 60px; position: relative;"<decorator:getProperty property="body.required-class" writeEntireProperty="true"/><decorator:getProperty property="body.component" writeEntireProperty="true"/><decorator:getProperty property="body.script" writeEntireProperty="true"/>>
+<body style="padding-top: 65px; position: relative;"<decorator:getProperty property="body.required-class" writeEntireProperty="true"/><decorator:getProperty property="body.component" writeEntireProperty="true"/><decorator:getProperty property="body.script" writeEntireProperty="true"/>>
 <jsp:include page="/header">
     <jsp:param name="bsVersion" value="3"/>
+    <jsp:param name="navIndex" value="3"/>
 </jsp:include>
-<div class="container-fluid">
+<div class="container">
     <div class="col-md-2">
         <div class="panel panel-default">
             <div class="list-group" style="margin-bottom: 0px;">
@@ -39,10 +40,5 @@ function selectMenu(index){
     </div>
 </div>
 <jsp:include page="/footer.jsp"></jsp:include>
-<script type="text/javascript">
-    $(function() {
-        selectNav(3);
-    });
-</script>
 </body>
 </html>

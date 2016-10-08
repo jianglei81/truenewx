@@ -13,18 +13,18 @@
         <pattern>*.ajax</pattern>
     </decorator>
     <decorator name="bs3" page="dec/bs3.jsp">
-        <pattern>*-bs3.*</pattern>
-        <pattern>*-bs3</pattern>
+        <pattern>*/*-bs3</pattern>
         <pattern>*/bs3</pattern>
         <pattern>*/bs3/*</pattern>
     </decorator>
     <decorator name="bs2" page="dec/bs2.jsp">
-        <pattern>*-bs2.*</pattern>
-        <pattern>*-bs2</pattern>
+        <pattern>*/*-bs2</pattern>
         <pattern>*/bs2</pattern>
         <pattern>*/bs2/*</pattern>
     </decorator>
-    <decorator name="default" page="dec/default.jsp">
-        <pattern>/*</pattern>
+    <decorator name="basic" page="dec/basic.jsp">
+        <pattern>*/basic</pattern>
+        <pattern>*/basic/*</pattern>
+        <pattern>/rpc/api</pattern>
     </decorator>
 </decorators>

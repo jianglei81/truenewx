@@ -4,12 +4,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>通用组件</title>
+<title>基础组件</title>
 </head>
 <body>
 <div class="hero-unit">
-    <h1>通用组件</h1>
-    <p><tnx:json value="${pageContext.request.locale}" /></p>
+    <h1>基础组件</h1>
+    <p>当前Locale：<tnx:json value="${pageContext.request.locale}" /></p>
 </div>
 </body>
 </html>

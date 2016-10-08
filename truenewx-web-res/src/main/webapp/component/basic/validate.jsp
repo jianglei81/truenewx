@@ -7,7 +7,7 @@
 <title>字段校验</title>
 <script type="text/javascript" language="javascript">
 $(function() {
-    selectMenu(1);
+    selectMenu(0);
 });
 </script>
 </head>

@@ -57,6 +57,7 @@ function getData() {
 </script>
 </head>
 <body>
-<div id="levelMenuContainer"></div>
+<!-- 要求菜单容器或父级包含有.row-fluid样式，否则菜单项宽度会超宽 -->
+<div id="levelMenuContainer" class="row-fluid"></div>
 </body>
 </html>

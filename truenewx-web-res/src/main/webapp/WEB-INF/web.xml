@@ -88,7 +88,7 @@
     </filter-mapping>
     
     <welcome-file-list>
-        <welcome-file>/home.jsp</welcome-file>
+        <welcome-file>/index.jsp</welcome-file>
     </welcome-file-list>
     
     <session-config>
