@@ -106,8 +106,7 @@ public class RpcServerController implements RpcServerInterceptor {
 
     @Override
     public void beforeInvoke(final String beanId, final Method method,
-                    final HttpServletRequest request, final HttpServletResponse response)
-                    throws Exception {
+            final HttpServletRequest request, final HttpServletResponse response) throws Exception {
         final RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
         // 检查局域网限制
         final String ip = WebUtil.getRemoteAddrIp(request);
@@ -124,16 +123,16 @@ public class RpcServerController implements RpcServerInterceptor {
             }
             if (rpcMethod.logined() && this.authorityValidator != null) { // 登录校验RPC权限
                 final HandlerMethod handler = new HandlerMethod(this.context.getBean(beanId),
-                                method);
+                        method);
                 // 先校验@RpcAuth注解中限定的权限
                 String validatedAuthority = RpcUtil.getAuthority(rpcMethod);
                 this.authorityValidator.validate(request, response, handler, validatedAuthority);
                 // 再校验菜单配置中限定的权限
                 if (this.menu != null) {
                     validatedAuthority = this.menu.getAuth(beanId, method.getName(),
-                                    method.getParameterTypes().length);
+                            method.getParameterTypes().length);
                     this.authorityValidator.validate(request, response, handler,
-                                    validatedAuthority);
+                            validatedAuthority);
                 }
             }
         }
@@ -147,29 +146,28 @@ public class RpcServerController implements RpcServerInterceptor {
         return this.serializer.serializeCollection(methodNames);
     }
 
-    @RequestMapping(value = "/invoke/{beanId}/{methodName}", method = { RequestMethod.POST,
-                    RequestMethod.GET })
+    @RequestMapping(value = "/invoke/{beanId}/{methodName}",
+            method = { RequestMethod.POST, RequestMethod.GET })
     @HandleableExceptionMessage
     @ResponseBody
     public String invoke(@PathVariable("beanId") final String beanId,
-                    @PathVariable("methodName") final String methodName,
-                    @RequestParam(value = "args", required = false) final String argString,
-                    final HttpServletRequest request, final HttpServletResponse response)
-                    throws Throwable {
+            @PathVariable("methodName") final String methodName,
+            @RequestParam(value = "args", required = false) final String argString,
+            final HttpServletRequest request, final HttpServletResponse response) throws Throwable {
         response.setHeader("Timestamp-Before", String.valueOf(System.currentTimeMillis()));
         final RpcInvokeResult result = this.server.invoke(beanId, methodName, argString, request,
-                        response);
+                response);
         response.setHeader("Timestamp-After", String.valueOf(System.currentTimeMillis()));
         return this.serializer.serializeBean(result.getValue(), result.getFilters());
     }
 
     @RequestMapping(value = "/api", method = RequestMethod.GET)
     public ModelAndView api(final HttpServletRequest request, final HttpServletResponse response)
-                    throws IOException {
-        final ModelAndView mav = new ModelAndView("rpc/api");
+            throws IOException {
+        final ModelAndView mav = new ModelAndView("/rpc/api");
         if (NetUtil.isLanIp(WebUtil.getRemoteAddrIp(request))) {
             final Map<String, Object> beans = this.context
-                            .getBeansWithAnnotation(RpcController.class);
+                    .getBeansWithAnnotation(RpcController.class);
             final Map<String, List<RpcControllerMeta>> controllerMap = new TreeMap<>();
             for (final Entry<String, Object> entry : beans.entrySet()) {
                 final String beanId = entry.getKey();
@@ -188,7 +186,7 @@ public class RpcServerController implements RpcServerInterceptor {
             }
             mav.addObject("controllerMap", controllerMap);
         } else {
-            response.sendError(HttpStatus.NOT_FOUND.value()); // 禁止非局域网访问
+            response.sendError(HttpStatus.FORBIDDEN.value(), "Non-LAN cann't access this page."); // 禁止非局域网访问
         }
         return mav;
     }
@@ -197,13 +195,13 @@ public class RpcServerController implements RpcServerInterceptor {
     @RequestMapping("/properties/arg/{beanId}/{methodName}/{argCount}/{argIndex}")
     @ResponseBody
     public String argProperties(@PathVariable("beanId") final String beanId,
-                    @PathVariable("methodName") final String methodName,
-                    @PathVariable("argCount") final int argCount,
-                    @PathVariable("argIndex") final int argIndex, final HttpServletRequest request,
-                    final HttpServletResponse response) throws IOException {
+            @PathVariable("methodName") final String methodName,
+            @PathVariable("argCount") final int argCount,
+            @PathVariable("argIndex") final int argIndex, final HttpServletRequest request,
+            final HttpServletResponse response) throws IOException {
         if (NetUtil.isLanIp(WebUtil.getRemoteAddrIp(request))) {
             final RpcVariableMeta argMeta = this.server.getArgMeta(beanId, methodName, argCount,
-                            argIndex);
+                    argIndex);
             if (argMeta == null) {
                 return "null";
             }
@@ -214,12 +212,11 @@ public class RpcServerController implements RpcServerInterceptor {
             if (clazz.isEnum()) {
                 final Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
                 final String subType = this.server.getEnumSubType(beanId, methodName, argCount,
-                                enumClass);
+                        enumClass);
                 metas = getConstantMetas(enumClass, subType);
             } else {
                 final Collection<PropertyMeta> propertyMetas = ClassUtil.findPropertyMetas(clazz,
-                                false, true, true, argTypeMeta.getIncludes(),
-                                argTypeMeta.getExcludes());
+                        false, true, true, argTypeMeta.getIncludes(), argTypeMeta.getExcludes());
                 metas = getPropertyVariableMetas(clazz, propertyMetas, false);
             }
             return this.serializer.serializeBean(metas);
@@ -230,9 +227,9 @@ public class RpcServerController implements RpcServerInterceptor {
     }
 
     private List<RpcVariableMeta> getConstantMetas(final Class<? extends Enum<?>> enumClass,
-                    final String subType) {
+            final String subType) {
         final EnumType enumType = this.enumDictResolver.getEnumType(enumClass.getName(), subType,
-                        SpringWebContext.getLocale());
+                SpringWebContext.getLocale());
         if (enumType != null) {
             final List<RpcVariableMeta> metas = new ArrayList<>();
             for (final Enum<?> constant : enumClass.getEnumConstants()) {
@@ -251,7 +248,7 @@ public class RpcServerController implements RpcServerInterceptor {
     }
 
     private List<RpcVariableMeta> getPropertyVariableMetas(final Class<?> clazz,
-                    final Collection<PropertyMeta> propertyMetas, final boolean getter) {
+            final Collection<PropertyMeta> propertyMetas, final boolean getter) {
         final List<RpcVariableMeta> metas = new ArrayList<>();
         for (final PropertyMeta propertyMeta : propertyMetas) {
             final String propertyName = propertyMeta.getName();
@@ -282,11 +279,10 @@ public class RpcServerController implements RpcServerInterceptor {
     @RequestMapping("/properties/result/{beanId}/{methodName}/{argCount}/{className}")
     @ResponseBody
     public String resultProperties(@PathVariable("beanId") final String beanId,
-                    @PathVariable("methodName") final String methodName,
-                    @PathVariable("argCount") final int argCount,
-                    @PathVariable("className") final String className,
-                    final HttpServletRequest request, final HttpServletResponse response)
-                    throws IOException {
+            @PathVariable("methodName") final String methodName,
+            @PathVariable("argCount") final int argCount,
+            @PathVariable("className") final String className, final HttpServletRequest request,
+            final HttpServletResponse response) throws IOException {
         if (NetUtil.isLanIp(WebUtil.getRemoteAddrIp(request))) {
             Class<?> clazz;
             try {
@@ -299,15 +295,15 @@ public class RpcServerController implements RpcServerInterceptor {
             if (clazz.isEnum()) {
                 final Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
                 final String subType = this.server.getEnumSubType(beanId, methodName, argCount,
-                                enumClass);
+                        enumClass);
                 metas = getConstantMetas(enumClass, subType);
             } else {
                 final RpcResultFilter filter = this.server.getResultFilter(beanId, methodName,
-                                argCount, clazz);
+                        argCount, clazz);
                 final String[] includes = filter == null ? null : filter.includes();
                 final String[] excludues = filter == null ? null : filter.excludes();
                 final Collection<PropertyMeta> propertyMetas = ClassUtil.findPropertyMetas(clazz,
-                                true, false, true, includes, excludues);
+                        true, false, true, includes, excludues);
                 metas = getPropertyVariableMetas(clazz, propertyMetas, true);
             }
             return this.serializer.serializeBean(metas);
