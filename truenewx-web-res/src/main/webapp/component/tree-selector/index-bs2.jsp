@@ -36,7 +36,7 @@ var nodes = [
 ];
 var hcolumn;
 $(function(){
-    selectMenu(0, 3);
+    selectMenu(3);
     /*$("#title").treeSelector({	//初始化树选择器控件
 		type : "default",
 	    id : "id",

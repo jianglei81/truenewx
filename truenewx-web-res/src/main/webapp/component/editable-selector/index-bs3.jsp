@@ -7,7 +7,7 @@
 <script src="js/editable-selector-bs3.js" type="text/javascript" language="javascript"></script>
 <script type="text/javascript" language="javascript">
 $(function() {
-    selectMenu(0, 1);
+    selectMenu(1);
     $("select").editableSelector();
 });
 </script>

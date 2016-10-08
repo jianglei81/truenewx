@@ -14,11 +14,13 @@
     </decorator>
     <decorator name="bs3" page="dec/bs3.jsp">
         <pattern>*-bs3.*</pattern>
+        <pattern>*-bs3</pattern>
         <pattern>*/bs3</pattern>
         <pattern>*/bs3/*</pattern>
     </decorator>
     <decorator name="bs2" page="dec/bs2.jsp">
         <pattern>*-bs2.*</pattern>
+        <pattern>*-bs2</pattern>
         <pattern>*/bs2</pattern>
         <pattern>*/bs2/*</pattern>
     </decorator>

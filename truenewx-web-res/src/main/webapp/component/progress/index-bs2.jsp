@@ -12,7 +12,7 @@
 <script type="text/javascript" src="js/progress.js" language="javascript"></script>
 <script type="text/javascript" language="javascript">
 $(function(){
-    selectMenu(0, 5);
+    selectMenu(3);
     
     $("#divProgress").progress({
         percent : 0.2,
@@ -31,9 +31,9 @@ function changePercent() {
 <body>
     <div id="divProgress" class="percentBox"></div>
 	<input type="text" id="txtPercent" value="0.2" />
-    <button onclick="changePercent()">改变进度</button>
+    <button class="btn btn-default" onclick="changePercent()">改变进度</button>
     <br />
     <input type="text" id="txtColor" value="#33ff00" />
-    <button onclick="changePercent()">改变颜色</button>
+    <button class="btn btn-default" onclick="changePercent()">改变颜色</button>
 </body>
 </html>

@@ -7,7 +7,7 @@
 <title>多级菜单</title>
 <script type="text/javascript" language="javascript">
 $(function() {
-    selectMenu(0, 7);
+    selectMenu(5);
     
     $("#levelMenuContainer").levelMenu({
         hideOnClickOutside: false,

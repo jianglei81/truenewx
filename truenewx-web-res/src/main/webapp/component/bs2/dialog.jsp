@@ -51,7 +51,7 @@ function formFlash(formObj) {
     });
 }
 $(function() {
-    selectMenu(0, 1);
+    selectMenu(1);
 });
 </script>
 </head>

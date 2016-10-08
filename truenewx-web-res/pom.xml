@@ -11,7 +11,7 @@
     <packaging>war</packaging>
     <build>
         <finalName>res</finalName>
-        <plugins>
+        <!-- <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -27,7 +27,7 @@
                     </webResources>
                 </configuration>
             </plugin>
-        </plugins>
+        </plugins> -->
     </build>
     <properties>
         <packaging.excludes></packaging.excludes>

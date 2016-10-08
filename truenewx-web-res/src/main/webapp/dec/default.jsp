@@ -14,15 +14,9 @@
     <jsp:param name="bsVersion" value="2"/>
 </jsp:include>
 <script type="text/javascript">
-    function selectMenu(parentIndex, subIndex){
-        var accordions = $(".accordion-body");
-        accordions.removeClass("in");
-        var accordion = accordions.eq(parentIndex);
-        accordion.addClass("in");
-        var lis = $("li", accordion);
-        lis.removeClass("active");
-        lis.eq(subIndex).addClass("active");
-    }
+function selectMenu(index){
+    $(".nav-list li:eq(" + index + ")").addClass("active");
+}
 </script>
 <decorator:head/>
 </head>
@@ -35,34 +29,11 @@
     <div class="row-fluid">
     <c:if test="${showMenu != false}">
         <div class="span2">
-            <div class="accordion" id="accordion1">
-                <div class="accordion-group">
-                    <div class="accordion-heading">
-                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#collapseOne">技术类</a>
-                    </div>
-                    <div id="collapseOne" class="accordion-body collapse in">
-                        <div class="accordion-inner">
-                            <ul class="nav nav-list">
-                                <li><a href="${context}/component/index">功能组件</a></li>
-                                <li><a href="${context}/component/validate">字段校验</a></li>
-                                <li><a href="${context}/rpc/api">RPC API</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-group">
-                    <div class="accordion-heading">
-                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#collapseTwo">业务类</a>
-                    </div>
-                    <div id="collapseTwo" class="accordion-body collapse">
-                        <div class="accordion-inner">
-                            <ul class="nav nav-list">
-                                <li><a href="${context}/sms">短信</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <ul class="nav nav-list">
+                <li><a href="${context}/component/index">功能组件</a></li>
+                <li><a href="${context}/component/validate">字段校验</a></li>
+                <li><a href="${context}/rpc/api">RPC API</a></li>
+            </ul>
         </div>
         <div class="span10">
             <decorator:body />

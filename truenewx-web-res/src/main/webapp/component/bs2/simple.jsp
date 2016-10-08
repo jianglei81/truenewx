@@ -6,7 +6,7 @@
 <script type="text/javascript" src="${context}/component/input-limiter/js/input-limiter.js" language="javascript"></script>
 <script type="text/javascript" language="javascript">
 $(function() {
-    selectMenu(0, 0);
+    selectMenu(0);
 });
 
 function applyPopover(form) {

@@ -15,7 +15,7 @@ function rpc(formObj) {
     }
 }
 $(function() {
-    selectMenu(0, 0);
+    selectMenu(0);
 });
 </script>
 </head>

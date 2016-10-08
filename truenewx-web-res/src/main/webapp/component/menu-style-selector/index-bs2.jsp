@@ -7,7 +7,7 @@
 <title>二级菜单选择</title>
 <script type="text/javascript" language="javascript">
 $(function(){
-    selectMenu(0, 4);
+    selectMenu(4);
     $("#dLabel1").menuStyleSelector({
         textField: "text",
         valueField: "value",

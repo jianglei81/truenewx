@@ -8,7 +8,7 @@
 <link href="${context}/rpc/css/api.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" language="javascript">
 $(function() {
-    selectMenu(0, 2);
+    selectMenu(2);
 });
 </script>
 <script src="${context}/rpc/js/api.js" type="text/javascript" language="javascript"></script>

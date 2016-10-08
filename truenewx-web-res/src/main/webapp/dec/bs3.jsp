@@ -13,15 +13,9 @@
     <jsp:param name="bsVersion" value="3"/>
 </jsp:include>
 <script type="text/javascript">
-    function selectMenu(parentIndex, subIndex){
-        var panels = $(".panel-collapse");
-        panels.removeClass("in");
-        var panel = panels.eq(parentIndex);
-        panel.addClass("in");
-        var as = $("a", panel);
-        as.removeClass("active");
-        as.eq(subIndex).addClass("active");
-    }
+function selectMenu(index){
+    $(".list-group-item:eq(" + index + ")").addClass("active");
+}
 </script>
 <decorator:head/>
 </head>
@@ -32,33 +26,11 @@
 </jsp:include>
 <div class="container-fluid">
     <div class="col-md-2">
-        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" 
-                            aria-expanded="true" aria-controls="collapseOne">技术类</a>
-                    </h4>
-                </div>
-                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel">
-                    <div class="list-group" style="margin-bottom: 0px;">
-                        <a class="list-group-item" href="${context}/component/bs3/dialog">对话框类</a>
-                        <a class="list-group-item" href="${context}/component/editable-selector/index-bs3">可编辑选择器</a>
-                        <a class="list-group-item" href="${context}/component/level-menu/index-bs3">多级菜单</a>
-                    </div>
-                </div>
-            </div>
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" 
-                            aria-expanded="false" aria-controls="collapseTwo">业务类</a>
-                    </h4>
-                </div>
-                <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel">
-                    <div class="list-group" style="margin-bottom: 0px;">&nbsp;
-                    </div>
-                </div>
+        <div class="panel panel-default">
+            <div class="list-group" style="margin-bottom: 0px;">
+                <a class="list-group-item" href="${context}/component/bs3/dialog">对话框类</a>
+                <a class="list-group-item" href="${context}/component/editable-selector/index-bs3">可编辑选择器</a>
+                <a class="list-group-item" href="${context}/component/level-menu/index-bs3">多级菜单</a>
             </div>
         </div>
     </div>

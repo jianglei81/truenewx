@@ -21,7 +21,7 @@ var arry1 = [
 	{"caption":"角色管理员"}
 ];
 $(function(){
-    selectMenu(0, 2);
+    selectMenu(2);
     //$.tnx.domain.site.init();
     
     multi = $("#users").multiselectView({
