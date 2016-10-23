@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import org.truenewx.core.Strings;
 import org.truenewx.core.exception.AjaxException;
 import org.truenewx.core.tuple.Binate;
-import org.truenewx.web.http.client.ClientRequestSupport;
+import org.truenewx.core.util.ClientRequestSupport;
 import org.truenewx.web.rpc.serializer.RpcSerializer;
 
 /**

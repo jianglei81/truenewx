@@ -1,4 +1,4 @@
-package org.truenewx.web.http.client;
+package org.truenewx.core.util;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.truenewx.core.Strings;
 import org.truenewx.core.tuple.Binary;
 import org.truenewx.core.tuple.Binate;
-import org.truenewx.web.util.WebUtil;
 
 /**
  * HTTP客户端请求支持
@@ -80,7 +79,7 @@ public class ClientRequestSupport {
         final HttpRequestBase request;
         switch (this.httpMethod.toUpperCase()) {
         case "GET":
-            request = new HttpGet(WebUtil.mergeParams(url, params, null));
+            request = new HttpGet(NetUtil.mergeParams(url, params, null));
             break;
         case "POST":
             final HttpPost post = new HttpPost(url);

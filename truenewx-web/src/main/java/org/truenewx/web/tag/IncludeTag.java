@@ -11,6 +11,7 @@ import javax.servlet.jsp.JspException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
+import org.truenewx.core.util.NetUtil;
 import org.truenewx.web.tagext.SimpleDynamicAttributeTagSupport;
 import org.truenewx.web.util.WebUtil;
 
@@ -71,13 +72,13 @@ public class IncludeTag extends SimpleDynamicAttributeTagSupport {
                 }
                 String result = casheMap.get(this.url);
                 if (StringUtils.isEmpty(result)) {
-                    result = WebUtil.requestByGet(this.url, this.attributes, null);
+                    result = NetUtil.requestByGet(this.url, this.attributes, null);
                     casheMap.put(this.url, result);
                 }
                 print(result);
                 application.setAttribute(INCLUDE_CACHED, casheMap);
             } else {
-                print(WebUtil.requestByGet(this.url, this.attributes, null));
+                print(NetUtil.requestByGet(this.url, this.attributes, null));
             }
         } catch (final Throwable e) {
             // 任何异常均只打印堆栈日志，以避免影响页面整体显示

@@ -42,7 +42,7 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
     protected abstract DataAccessTemplate getDataAccessTemplate(String entityName);
 
     protected List<T> find(final String entityName, final Map<String, ?> params,
-                    final String... fuzzyNames) {
+            final String... fuzzyNames) {
         final StringBuffer hql = new StringBuffer("from ").append(entityName);
         Map<String, Object> qp = null;
         if (params != null && !params.isEmpty()) {
@@ -54,14 +54,14 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
                 final boolean fuzzy = ArrayUtils.contains(fuzzyNames, field);
                 Object paramValue = entry.getValue();
                 if (fuzzy && paramValue instanceof String
-                                && StringUtils.isBlank((String) paramValue)) {
+                        && StringUtils.isBlank((String) paramValue)) {
                     paramValue = null;
                 }
                 if (paramValue != null) {
                     final Comparison comparison = fuzzy ? Comparison.LIKE : Comparison.EQUAL;
                     final String paramName = field.replace('.', '_'); // 含有.的字段名用_替换形成绑定参数名
                     hql.append(field).append(comparison.toQlString()).append(Strings.COLON)
-                                    .append(paramName).append(junction);
+                            .append(paramName).append(junction);
                     if (fuzzy && paramValue instanceof String) {
                         paramValue = StringUtils.join(Strings.PERCENT, paramValue, Strings.PERCENT);
                     }
@@ -72,11 +72,11 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
                 hql.delete(hql.length() - junction.length(), hql.length());
             }
         }
-        return getDataAccessTemplate(entityName).list(hql.toString(), qp);
+        return getDataAccessTemplate(entityName).list(hql, qp);
     }
 
     protected QueryResult<T> pagingQuery(final String entityName, CharSequence ql,
-                    final Map<String, Object> params, final QueryParameter parameter) {
+            final Map<String, Object> params, final QueryParameter parameter) {
         final int pageSize = parameter == null ? 0 : parameter.getPageSize();
         final boolean totalable = parameter == null ? true : parameter.isTotalable();
         int total;
@@ -105,7 +105,7 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
         } else {
             dataList = new ArrayList<>();
         }
-        return new QueryResultImpl<T>(dataList, pageSize, pageNo, total);
+        return new QueryResultImpl<>(dataList, pageSize, pageNo, total);
     }
 
     protected int countAll(final String entityName) {
@@ -141,14 +141,14 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
     }
 
     protected QueryResult<T> find(final String entityName, final Class<?> dependedClass,
-                    final Serializable dependedKey, final QueryParameter parameter) {
+            final Serializable dependedKey, final QueryParameter parameter) {
         final String keyProperty = getDependedKeyProperty(dependedClass);
         if (keyProperty == null) {
             return new QueryResultImpl<>(new ArrayList<T>(), parameter.getPageSize(),
-                            parameter.getPageNo());
+                    parameter.getPageNo());
         }
         final StringBuffer hql = new StringBuffer("select count(*) from ").append(entityName)
-                        .append(" where ").append(keyProperty).append("=:dependedKey");
+                .append(" where ").append(keyProperty).append("=:dependedKey");
         final Map<String, Object> params = new HashMap<>();
         params.put("dependedKey", dependedKey);
 
@@ -156,9 +156,9 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
     }
 
     protected int delete(final String entityName, final Class<?> dependedClass,
-                    final Serializable dependedKey) {
+            final Serializable dependedKey) {
         final StringBuffer hql = new StringBuffer("delete from ").append(entityName)
-                        .append(" where ");
+                .append(" where ");
         final String keyProperty = getDependedKeyProperty(dependedClass);
         if (keyProperty == null) {
             return Paging.UNKNOWN_TOTAL;

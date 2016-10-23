@@ -1,22 +1,9 @@
 package org.truenewx.web.util;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -33,14 +20,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.util.WebUtils;
 import org.truenewx.core.Strings;
-import org.truenewx.core.util.IOUtil;
 import org.truenewx.core.util.StringUtil;
 
 /**
@@ -243,245 +228,6 @@ public class WebUtil {
             }
         }
         return s;
-    }
-
-    /**
-     * 将指定参数集合转换为参数字符串，形如: a=1&b=true
-     *
-     * @param params
-     *            参数集合
-     * @param encoding
-     *            字符编码
-     * @return 参数字符串
-     */
-    @SuppressWarnings("unchecked")
-    public static String map2Params(final Map<String, Object> params, final String encoding) {
-        final StringBuffer result = new StringBuffer();
-        for (final Map.Entry<String, Object> entry : params.entrySet()) {
-            final String key = entry.getKey();
-            final Object value = entry.getValue();
-            if (value != null) {
-                if (value instanceof Collection) {
-                    for (final Object o : (Collection<Object>) value) {
-                        result.append(key).append(Strings.EQUAL).append(encodeParam(o, encoding))
-                                        .append(Strings.AND);
-                    }
-                } else if (value instanceof Object[]) {
-                    for (final Object o : (Object[]) value) {
-                        result.append(key).append(Strings.EQUAL).append(encodeParam(o, encoding))
-                                        .append(Strings.AND);
-                    }
-                } else {
-                    result.append(key).append(Strings.EQUAL).append(encodeParam(value, encoding))
-                                    .append(Strings.AND);
-                }
-            }
-        }
-        if (result.length() > 0) {
-            result.delete(result.length() - Strings.AND.length(), result.length());
-        }
-        return result.toString();
-    }
-
-    private static String encodeParam(final Object param, final String encoding) {
-        if (StringUtils.isNotBlank(encoding)) {
-            try {
-                return URLEncoder.encode(param.toString(), encoding);
-            } catch (final UnsupportedEncodingException e) {
-            }
-        }
-        // 编码为空或不被支持，则不做编码转换
-        return param.toString();
-    }
-
-    /**
-     * 将指定参数字符串（形如: a=1&b=true）转换为Map参数集合
-     *
-     * @param paramString
-     *            参数字符串
-     * @return 参数集合
-     */
-    private static Map<String, Object> paramString2Map(final String paramString) {
-        final Map<String, Object> map = new HashMap<>();
-        final String[] pairArray = paramString.split(Strings.AND);
-        for (final String pair : pairArray) {
-            final String[] entry = pair.split(Strings.EQUAL);
-            if (entry.length == 2) {
-                final String key = entry[0];
-                final Object value = map.get(key);
-                if (value instanceof Collection) {
-                    @SuppressWarnings("unchecked")
-                    final Collection<Object> collection = (Collection<Object>) value;
-                    collection.add(entry[1]);
-                } else if (value != null) {
-                    final Collection<Object> collection = new ArrayList<>();
-                    collection.add(entry[1]);
-                    map.put(key, collection);
-                } else {
-                    map.put(key, entry[1]);
-                }
-            }
-        }
-        return map;
-    }
-
-    /**
-     * 将指定参数集合中的参数与指定URL中的参数合并，返回新的URL
-     *
-     * @param url
-     *            URL
-     * @param params
-     *            参数集合
-     * @param encoding
-     *            字符编码
-     * @return 合并之后的新URL
-     * @throws UnsupportedEncodingException
-     *             字符编码错误
-     */
-    public static String mergeParams(String url, final Map<String, Object> params,
-                    final String encoding) {
-        final String[] pair = url.split("\\?");
-        url = pair[0];
-        String paramString = "";
-        if (pair.length == 2) {
-            paramString = pair[1];
-        }
-        final Map<String, Object> paramMap = paramString2Map(paramString);
-        paramMap.putAll(params);
-        paramString = map2Params(paramMap, encoding);
-        return url + "?" + paramString;
-    }
-
-    private static String getQueryString(final Map<String, Object> params) {
-        final String result = mergeParams(Strings.EMPTY, params, Strings.DEFAULT_ENCODING);
-        if (result.length() > 0) {
-            return result.substring(1); // 去掉首部问号
-        }
-        return Strings.EMPTY;
-    }
-
-    /**
-     * 下载指定URL和参数表示的资源到指定本地文件
-     *
-     * @param url
-     *            下载资源链接
-     * @param params
-     *            下载资源链接的参数
-     * @param localFile
-     *            本地文件
-     */
-    public static void download(String url, final Map<String, Object> params,
-                    final File localFile) {
-        url = mergeParams(url, params, Strings.DEFAULT_ENCODING);
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-            final URL urlObj = new URL(url);
-            in = urlObj.openStream();
-            IOUtil.createFile(localFile);
-            out = new BufferedOutputStream(new FileOutputStream(localFile));
-            IOUtil.writeAll(in, out);
-            in.close();
-            out.flush();
-            out.close();
-        } catch (final MalformedURLException e) {
-            e.printStackTrace();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-                if (out != null) {
-                    out.close();
-                }
-            } catch (final IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * 从后台向指定URL地址发送GET方式请求，获取响应结果
-     *
-     * @param url
-     *            URL地址
-     * @param params
-     *            请求参数
-     * @return 响应结果
-     */
-    public static String requestByGet(String url, final Map<String, Object> params,
-                    String encoding) {
-        if (StringUtils.isBlank(encoding)) {
-            encoding = Strings.DEFAULT_ENCODING;
-        }
-        url = mergeParams(url, params, encoding);
-        String result = Strings.EMPTY;
-        InputStream in = null;
-        try {
-            final URL urlObj = new URL(url);
-            in = urlObj.openStream();
-            result = IOUtils.toString(in);
-        } catch (final MalformedURLException e) {
-            e.printStackTrace();
-        } catch (final FileNotFoundException e) {
-            // e.printStackTrace();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return new String(result);
-    }
-
-    public static String requestByPost(final String url, final Map<String, Object> params,
-                    String encoding) {
-        InputStream in = null;
-        PrintWriter out = null;
-        String response = "";
-        try {
-            final URLConnection connection = new URL(url).openConnection();
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-            if (StringUtils.isBlank(encoding)) {
-                encoding = Strings.DEFAULT_ENCODING;
-            }
-            connection.setRequestProperty("contentType", "text/html;charset=" + encoding);
-            out = new PrintWriter(new OutputStreamWriter(connection.getOutputStream(), encoding));
-            out.write(getQueryString(params));
-            out.flush();
-            in = connection.getInputStream();
-            final byte[] b = new byte[in.available()];
-            in.read(b);
-            response = new String(b, encoding);
-        } catch (final MalformedURLException e) {
-            e.printStackTrace();
-        } catch (final FileNotFoundException e) {
-            // e.printStackTrace();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                }
-                in = null;
-            }
-            if (out != null) {
-                out.close();
-                out = null;
-            }
-        }
-        return response;
     }
 
     private static String getHostByFullUrl(String url) {

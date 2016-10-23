@@ -7,8 +7,11 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.truenewx.core.util.CollectionUtil;
+import org.truenewx.data.orm.dao.EntityDao;
+import org.truenewx.data.orm.dao.support.DaoFactory;
 import org.truenewx.test.util.TestUtil;
 
 /**
@@ -20,6 +23,8 @@ import org.truenewx.test.util.TestUtil;
 @Component
 public class DataInitFactory {
     private Map<Class<?>, SortedSet<DataInitializer<?>>> initializers = new HashMap<>();
+    @Autowired
+    private DaoFactory daoFactory;
 
     /**
      * 注册数据初始化器
@@ -98,6 +103,11 @@ public class DataInitFactory {
                     list.addAll((List<T>) initializer.getDataList());
                 }
                 return list;
+            }
+        } else {
+            final EntityDao<T> dao = this.daoFactory.getDaoByEntityClass(modelClass);
+            if (dao != null) {
+                return dao.find((Map<String, ?>) null);
             }
         }
         return null;
