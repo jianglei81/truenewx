@@ -19,7 +19,7 @@ import freemarker.template.TemplateException;
  * 通过FreeMarker实现的模板解析器
  *
  * @author jianglei
- * @since JDK 1.7
+ * @since JDK 1.8
  */
 public class FreeMarkerTemplateParser implements TemplateParser {
 

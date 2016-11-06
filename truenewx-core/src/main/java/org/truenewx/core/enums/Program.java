@@ -7,7 +7,7 @@ import org.truenewx.core.enums.annotation.EnumValue;
  * 程序类型
  *
  * @author jianglei
- * @since JDK 1.7
+ * @since JDK 1.8
  */
 public enum Program {
 

@@ -16,7 +16,7 @@ import org.truenewx.core.util.StringUtil;
  * 简单EL表达式模板的解析器。以简单方式解析模板内容中的EL表达式，生成实际内容
  *
  * @author jianglei
- * @since JDK 1.7
+ * @since JDK 1.8
  */
 public class SimpleElTemplateParser implements TemplateParser {
     private static final String REPLACE_KEY_PREFIX = "${";

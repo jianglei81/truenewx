@@ -6,4 +6,51 @@
 
     <context:component-scan base-package="org.truenewx.core" />
 
+    <bean id="regionOptionsParser" class="org.truenewx.core.region.StatsGovCnRegionOptionsParser">
+        <property name="excludedCaption" value="*市辖区,县,*行政区划,台湾,香港,澳门" />
+    </bean>
+
+    <bean id="regionOptionSource" class="org.truenewx.core.region.RegionOptionSourceImpl">
+        <property name="nationalOptionSources">
+            <list>
+                <bean class="org.truenewx.core.region.NationalRegionOptionSourceImpl">
+                    <property name="nation" value="CN" />
+                    <property name="parser" ref="regionOptionsParser" />
+                </bean>
+                <bean class="org.truenewx.core.region.NationalRegionOptionSourceImpl">
+                    <property name="nation" value="OT" />
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="regionInetAddressSetMapParser" class="org.truenewx.core.region.address.Cz88RegionInetAddressSetMapParser">
+        <property name="regionOptionSource" ref="regionOptionSource" />
+        <property name="lineMapping">
+            <map>
+                <entry key="台湾省.*" value="台湾省" />
+            </map>
+        </property>
+        <property name="removedProvinceSuffix" value="省,市" />
+        <property name="provinceSuffix" value="省,北京市,天津市,上海市,重庆市,新疆,西藏,内蒙古,宁夏,广西,香港,澳门,大学,学院" />
+        <property name="provinceMapping">
+            <map>
+                <entry key="对外经济贸易大学" value="北京市" />
+                <entry key="中央财经大学" value="北京市" />
+            </map>
+        </property>
+        <property name="citySuffix" value="自治州,市,区,盟,县,旗,大学,学院" />
+        <property name="cityMapping">
+            <map>
+                <entry key="对外经济贸易大学" value="朝阳区" />
+                <entry key="中央财经大学" value="海淀区" />
+                <entry key="北京外国语大学" value="海淀区" />
+                <entry key="北京交通大学" value="海淀区" />
+                <entry key="北京林业大学" value="海淀区" />
+                <entry key="中央音乐学院" value="西城区" />
+            </map>
+        </property>
+        <property name="countySuffix" value="县,区,旗,市,大学,学院" />
+    </bean>
+
 </beans>

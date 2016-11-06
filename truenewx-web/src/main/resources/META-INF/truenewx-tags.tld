@@ -1112,4 +1112,47 @@
         </attribute>
     </tag>
 
+    <tag>
+        <name>region</name>
+        <tag-class>org.truenewx.web.region.tag.Inet4AddressRegionTag</tag-class>
+        <body-content>empty</body-content>
+        <description>显示当前访问者或指定IP对应的行政区域</description>
+        <attribute>
+            <name>ip</name>
+            <rtexprvalue>true</rtexprvalue>
+            <description>指定需要转换的IP地址</description>
+        </attribute>
+    </tag>
+
+    <tag>
+        <name>region-view</name>
+        <tag-class>org.truenewx.web.region.tag.RegionViewTag</tag-class>
+        <body-content>empty</body-content>
+        <description>显示指定行政区划代号的各级名称</description>
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>指定行政区划代号</description>
+        </attribute>
+        <attribute>
+            <name>delimiter</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>选项分隔符</description>
+        </attribute>
+        <attribute>
+            <name>startLevel</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>起始层级</description>
+        </attribute>
+        <attribute>
+            <name>endLevel</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>结束层级</description>
+        </attribute>
+    </tag>
+
 </taglib>
