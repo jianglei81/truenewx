@@ -69,34 +69,33 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
      *            目标菜单项集合
      */
     private void copyMatchedItemTo(final MenuItem item, final String[] authorites,
-                    final List<MenuItem> items) {
+            final List<MenuItem> items) {
         // 当前菜单项权限为空，则需要检查包含的子菜单项和操作中是否有匹配的，才决定是否加入目标集合中
         // 否则当前菜单项权限匹配时，才加入目标集合中
-        final boolean blankAuthority = StringUtils.isBlank(item.getAuth());
-        if (blankAuthority || ArrayUtils.contains(authorites, item.getAuth())) {
-            final List<MenuItem> newSubs = new ArrayList<>();
-            for (final MenuItem sub : item.getSubs()) {
-                copyMatchedItemTo(sub, authorites, newSubs);
-            }
-            final List<MenuOperation> newOperations = new ArrayList<>();
-            for (final MenuOperation operation : item.getOperations()) {
-                if (ArrayUtils.contains(authorites, operation.getAuth())) {
-                    newOperations.add(operation);
-                }
-            }
-            if (blankAuthority && newSubs.isEmpty() && newOperations.isEmpty()) {
-                return; // 当前菜单权限为空，且不包含匹配的子菜单和操作，则忽略当前菜单项
-            }
-            final MenuItem newItem = new MenuItem(item.getAuth(), item.getCaption(), item.getHref(),
-                            item.getTarget(), item.getIcon());
-            newItem.getLinks().addAll(item.getLinks());
-            newItem.getOptions().putAll(item.getOptions());
-            newItem.getCaptions().putAll(item.getCaptions());
-            newItem.getSubs().addAll(newSubs);
-            newItem.getOperations().addAll(newOperations);
-
-            items.add(newItem);
+        final List<MenuItem> newSubs = new ArrayList<>();
+        for (final MenuItem sub : item.getSubs()) {
+            copyMatchedItemTo(sub, authorites, newSubs);
         }
+        final List<MenuOperation> newOperations = new ArrayList<>();
+        for (final MenuOperation operation : item.getOperations()) {
+            if (ArrayUtils.contains(authorites, operation.getAuth())) {
+                newOperations.add(operation);
+            }
+        }
+        final String auth = item.getAuth();
+        if ((StringUtils.isBlank(auth) || !ArrayUtils.contains(authorites, auth))
+                && newSubs.isEmpty() && newOperations.isEmpty()) {
+            return; // 当前菜单权限为空或权限不匹配，且不包含匹配的子菜单和操作，则忽略当前菜单项
+        }
+        final MenuItem newItem = new MenuItem(auth, item.getCaption(), item.getHref(),
+                item.getTarget(), item.getIcon());
+        newItem.getLinks().addAll(item.getLinks());
+        newItem.getOptions().putAll(item.getOptions());
+        newItem.getCaptions().putAll(item.getCaptions());
+        newItem.getSubs().addAll(newSubs);
+        newItem.getOperations().addAll(newOperations);
+
+        items.add(newItem);
     }
 
     @Override
@@ -122,7 +121,7 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
      *            目标权限集
      */
     private void addMatchedAuthority(final MenuAction action, final Map<String, Object> options,
-                    final Set<String> authorities) {
+            final Set<String> authorities) {
         if (isMatchedOptions(action, options)) {
             final String auth = action.getAuth();
             if (StringUtils.isNotBlank(auth)) {
