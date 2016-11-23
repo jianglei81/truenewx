@@ -33,6 +33,7 @@ function selectMenu(index){
                 <li><a href="${context}/component/progress/index-bs2">圆形进度条</a></li>
                 <li><a href="${context}/component/editable-selector/index-bs2">可编辑选择器</a></li>
                 <li><a href="${context}/component/level-menu/index-bs2">多级菜单</a></li>
+                <li><a href="${context}/component/region-selector/index-bs2">地区选择器</a></li>
                 <!-- <li><a href="${context}/component/tree-selector/index-bs2">树形选择组件</a></li> -->
                 <!-- <li><a href="${context}/component/menu-style-selector/index-bs2">二级菜单选择</a></li> -->
             </ul>
