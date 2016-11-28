@@ -25,7 +25,7 @@ public class DefaultAuthorityValidator implements AuthorityValidator {
 
     @Override
     public void validate(final HttpServletRequest request, final HttpServletResponse response,
-                    final Object handler, final String validatedAuthority) throws Exception {
+            final Object handler, final String validatedAuthority) throws Exception {
         if (StringUtils.isNotBlank(validatedAuthority)) {
             final String[] userAuthorities = this.resolver.getAuthorities(request);
             validate(validatedAuthority, userAuthorities);
@@ -33,8 +33,8 @@ public class DefaultAuthorityValidator implements AuthorityValidator {
     }
 
     protected void validate(final String validatedAuthority, final String[] userAuthorities)
-                    throws AuthorityException {
-        if (!ArrayUtils.contains(userAuthorities, validatedAuthority)) {
+            throws AuthorityException {
+        if (userAuthorities == null || !ArrayUtils.contains(userAuthorities, validatedAuthority)) {
             throw new NoAuthorityException(validatedAuthority);
         }
     }
