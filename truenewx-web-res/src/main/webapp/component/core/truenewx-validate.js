@@ -1,6 +1,6 @@
 /**
  * truenewx-validate.js v1.0.0
- * 
+ *
  * Depends on: truenewx.js
  */
 // 为避免一行过宽导致整个文档格式缩进过多，单独设置Email的正则表达式
@@ -285,7 +285,7 @@ $.tnx.Validator = Class.extend({
     },
     /**
      * 扩展校验
-     * 
+     *
      * @param name
      *            校验名
      * @param message
@@ -620,38 +620,40 @@ $.tnx.Validator = Class.extend({
         return requiredClass;
     },
     appendRequiredTag : function(fieldObj, requriedTag, requiredClass) {
-        var appendObj = $("<" + requriedTag + "></" + requriedTag + ">").addClass(requiredClass)
-                .html(" * ");
-        var requiredAppend = fieldObj.attr("required-append");
-        if (requiredAppend == undefined) { // 字段上无附加函数，则从所属表单上获取
-            var formObj = $(fieldObj.from);
-            requiredAppend = formObj.attr("required-append");
-            if (requiredAppend == undefined) { // 所属表单上无附加函数，则从BODY上获取
-                requiredAppend = $("body").attr("required-append");
-                if (requiredAppend == undefined) { // BODY无附加函数，则从站点框架上取
-                    if (typeof $.tnx.domain.site.requiredAppend == "function") {
-                        requiredAppend = "$.tnx.domain.site.requiredAppend";
-                        $("body").attr("required-append", requiredAppend);
+        if (requriedTag) {
+            var appendObj = $("<" + requriedTag + "></" + requriedTag + ">")
+                    .addClass(requiredClass).html(" * ");
+            var requiredAppend = fieldObj.attr("required-append");
+            if (requiredAppend == undefined) { // 字段上无附加函数，则从所属表单上获取
+                var formObj = $(fieldObj.from);
+                requiredAppend = formObj.attr("required-append");
+                if (requiredAppend == undefined) { // 所属表单上无附加函数，则从BODY上获取
+                    requiredAppend = $("body").attr("required-append");
+                    if (requiredAppend == undefined) { // BODY无附加函数，则从站点框架上取
+                        if (typeof $.tnx.domain.site.requiredAppend == "function") {
+                            requiredAppend = "$.tnx.domain.site.requiredAppend";
+                            $("body").attr("required-append", requiredAppend);
+                        }
+                    }
+                    formObj.attr("required-append", requiredAppend);
+                }
+            }
+
+            var funcRequiredAppend;
+            if (requiredAppend) {
+                eval("funcRequiredAppend = " + requiredAppend);
+            } else { // 都未指定附加函数，则使用默认的附加函数
+                funcRequiredAppend = function(fieldObj, appendObj) {
+                    var parent = fieldObj.parent();
+                    if (parent.hasClass("input-group")) {
+                        parent.append(appendObj);
+                    } else {
+                        fieldObj.after(appendObj);
                     }
                 }
-                formObj.attr("required-append", requiredAppend);
             }
+            funcRequiredAppend(fieldObj, appendObj);
         }
-
-        var funcRequiredAppend;
-        if (requiredAppend) {
-            eval("funcRequiredAppend = " + requiredAppend);
-        } else { // 都未指定附加函数，则使用默认的附加函数
-            funcRequiredAppend = function(fieldObj, appendObj) {
-                var parent = fieldObj.parent();
-                if (parent.hasClass("input-group")) {
-                    parent.append(appendObj);
-                } else {
-                    fieldObj.after(appendObj);
-                }
-            }
-        }
-        funcRequiredAppend(fieldObj, appendObj);
     },
     render : function() {
         var validator = this;
@@ -687,6 +689,7 @@ $.tnx.Validator = Class.extend({
     },
     init : function() {
         this.checkers.parent = this;
+        this.render();
     }
 });
 
