@@ -156,8 +156,10 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
             if (value == null) { // 菜单动作的选项集中没有当前选项，则从默认选项集中取
                 value = this.defaultOptions.get(key);
             }
-            if (!entry.getValue().equals(value)) {
-                return false;
+            if (value != null) {
+                if (!entry.getValue().equals(value)) {
+                    return false;
+                }
             }
         }
         return true;
