@@ -4,7 +4,7 @@ import java.util.Map;
 
 /**
  * 属性动态的
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -12,7 +12,7 @@ public interface PropertyDynamic {
 
     /**
      * 设置属性值
-     * 
+     *
      * @param name
      *            属性名
      * @param value
@@ -22,7 +22,7 @@ public interface PropertyDynamic {
 
     /**
      * 获取属性值
-     * 
+     *
      * @param name
      *            属性名
      * @return 属性值
@@ -31,7 +31,7 @@ public interface PropertyDynamic {
 
     /**
      * 设置所有属性，这会清除原有的所有属性
-     * 
+     *
      * @param map
      *            所有属性-值映射集
      */
@@ -39,14 +39,14 @@ public interface PropertyDynamic {
 
     /**
      * 获取所有属性-值映射集，修改该映射集对当前对象无影响
-     * 
+     *
      * @return 名值映射集
      */
     Map<String, Object> getAll();
 
     /**
-     * 讲指定的旧名称的值切换到新名称
-     * 
+     * 将指定的旧名称的值切换到新名称
+     *
      * @param oldName
      *            旧名称
      * @param newName
