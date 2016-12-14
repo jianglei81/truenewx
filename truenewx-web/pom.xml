@@ -45,5 +45,10 @@
             <artifactId>yuicompressor</artifactId>
             <version>2.3.6</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>2.3.0</version>
+        </dependency>
     </dependencies>
 </project>
