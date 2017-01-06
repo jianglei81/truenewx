@@ -17,7 +17,7 @@ import org.truenewx.web.rpc.server.annotation.RpcMethod;
 @RpcController
 public class TestController {
 
-    @RpcMethod
+    @RpcMethod(logined = false)
     public String append(final String s, final String other) throws BusinessException {
         final StringBuffer sb = new StringBuffer(s);
         if ("be".equals(other)) {
@@ -27,7 +27,7 @@ public class TestController {
         return sb.toString();
     }
 
-    @RpcMethod
+    @RpcMethod(logined = false)
     public String appendArray(final String s, final String[] others) throws BusinessException {
         final StringBuffer sb = new StringBuffer(s);
         for (final String other : others) {
@@ -39,7 +39,7 @@ public class TestController {
         return sb.toString();
     }
 
-    @RpcMethod
+    @RpcMethod(logined = false)
     public String appendList(final String s, final List<String> others) throws BusinessException {
         final StringBuffer sb = new StringBuffer(s);
         for (final String other : others) {
@@ -51,9 +51,9 @@ public class TestController {
         return sb.toString();
     }
 
-    @RpcMethod
+    @RpcMethod(logined = false)
     public String appendSyntheticArray(final String s, final Image[] images)
-                    throws BusinessException {
+            throws BusinessException {
         final StringBuffer sb = new StringBuffer(s);
         for (final Image image : images) {
             final String extension = image.getExtension();
@@ -65,10 +65,10 @@ public class TestController {
         return sb.toString();
     }
 
-    @RpcMethod(args = { @RpcArg(name = "s"),
-                    @RpcArg(name = "images", componentType = Image.class) })
+    @RpcMethod(logined = false, args = { @RpcArg(name = "s"),
+            @RpcArg(name = "images", componentType = Image.class) })
     public String appendSyntheticList(final String s, final List<Image> images)
-                    throws BusinessException {
+            throws BusinessException {
         final StringBuffer sb = new StringBuffer(s);
         for (final Image image : images) {
             final String extension = image.getExtension();
@@ -80,7 +80,7 @@ public class TestController {
         return sb.toString();
     }
 
-    @RpcMethod
+    @RpcMethod(logined = false)
     public String[] split(final String s, final String regex) {
         return s.split(regex);
     }

@@ -35,7 +35,7 @@ public @interface RpcMethod {
      *
      * @return 是否登录后才能访问
      */
-    boolean logined() default false;
+    boolean logined() default true;
 
     /**
      *

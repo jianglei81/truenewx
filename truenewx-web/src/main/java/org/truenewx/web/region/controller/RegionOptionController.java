@@ -29,8 +29,8 @@ public class RegionOptionController {
     @Autowired
     private RegionOptionSource regionOptionSource;
 
-    @RpcMethod(result = @RpcResult(filter = @RpcResultFilter(type = RegionOption.class,
-            includes = { "code", "caption", "subs", "includingGrandSub" })))
+    @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = RegionOption.class, includes = {
+            "code", "caption", "subs", "includingGrandSub" })))
     public Map<String, RegionOption> getAll() {
         final Locale locale = SpringWebContext.getLocale();
         final Map<String, RegionOption> result = new LinkedHashMap<>();
@@ -42,8 +42,8 @@ public class RegionOptionController {
         return result;
     }
 
-    @RpcMethod(result = @RpcResult(filter = @RpcResultFilter(type = RegionOption.class,
-            includes = { "code", "caption", "subs", "includingGrandSub" })))
+    @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = RegionOption.class, includes = {
+            "code", "caption", "subs", "includingGrandSub" })))
     public Map<String, RegionOption> getLimits(final String[] limits) {
         if (ArrayUtils.isEmpty(limits)) {
             return null;
@@ -80,8 +80,8 @@ public class RegionOptionController {
         }
     }
 
-    @RpcMethod(result = @RpcResult(filter = @RpcResultFilter(type = RegionOption.class,
-            includes = { "code", "caption", "parentCode", "subs" })))
+    @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = RegionOption.class, includes = {
+            "code", "caption", "parentCode", "subs" })))
     public RegionOption getNationalRegionOption(final String nation) {
         final Locale locale = SpringWebContext.getLocale();
         return this.regionOptionSource.getNationalRegionOption(nation, locale);
@@ -94,7 +94,7 @@ public class RegionOptionController {
      *            区划代号
      * @return 各级父级代号集合
      */
-    @RpcMethod
+    @RpcMethod(logined = false)
     public Iterable<String> getParentCodes(final String region) {
         final List<String> codes = new ArrayList<>();
         final Locale locale = SpringWebContext.getLocale();
@@ -107,6 +107,5 @@ public class RegionOptionController {
             }
         }
         return codes;
-
     }
 }

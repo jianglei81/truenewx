@@ -149,6 +149,7 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
      * @return 指定选项映射集是否与指定菜单动作匹配
      */
     private boolean isMatchedOptions(final MenuAction action, final Map<String, Object> options) {
+        // 菜单动作中的选项集必须包含指定选项集中的所有选项，且选项值要相等
         // 遍历选项集中的每一个选项，只要有一个选项不匹配，则匹配失败
         for (final Entry<String, Object> entry : options.entrySet()) {
             final String key = entry.getKey();
@@ -156,10 +157,12 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
             if (value == null) { // 菜单动作的选项集中没有当前选项，则从默认选项集中取
                 value = this.defaultOptions.get(key);
             }
-            if (value != null) {
-                if (!entry.getValue().equals(value)) {
-                    return false;
-                }
+            // 菜单动作中不包含某选项，或选项值不相等，则表示不匹配
+            if (value == null) {
+                return false;
+            }
+            if (!entry.getValue().equals(value)) {
+                return false;
             }
         }
         return true;

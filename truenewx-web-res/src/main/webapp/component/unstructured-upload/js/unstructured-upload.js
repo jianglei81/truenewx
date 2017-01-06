@@ -6,7 +6,7 @@
 
 	var rpc = $.tnx.rpc.imports("unstructuredAuthorizeController");
 
-	var authorizeTypes = ["DOCTOR_HEAD_IMAGE", "DOCTOR_WORK_CARD"];
+	var authorizeTypes = ["DOCTOR_HEAD_IMAGE", "DOCTOR_WORK_CARD","SPECIAL_COLUMN_IMAGE"];
 
 	var defaultOptions = {
 		authorizeType: null,// 授权类型
@@ -97,12 +97,18 @@
 				return;
 			}
 
-			filename = !filename || filename == "" || filename == null ? file.name: filename
-			var suffix = getSuffix(filename) if (suffix == "" || suffix == null) {
-				suffix = getSuffix(file.name);
-				filename = filename + suffix;
+			filename = !filename || filename == "" || filename == null ? file.name: filename;
+			var suffix = getSuffix(filename)[0];
+			var oldSuffix=getSuffix(file.name)[0];
+			if (suffix == "" || suffix == null) {		
+				suffix = getSuffix(file.name);					
 			}
-
+			if(filename!=file.name){
+				filename=filename.replace(suffix,"");
+				filename=filename+oldSuffix
+			}else{
+				filename=filename+suffix;
+			}
 			validationAuthorizeType(type); // 校验授权类型是否正确
 			var token = rpc.authorizePrivateWrite(type); // 请求授权
 			if (!token) {
@@ -129,6 +135,17 @@
 							callback(result);
 						}
 					});
+				}else{
+					if (callback && typeof callback == "function") {
+						var innerUrl = token.innerUrl + filename
+						var protocol = window.location.protocol.replace(":");
+						var outerUrl = rpc.getOuterUrl(type, innerUrl, protocol);
+						var result = {
+							"innerUrl": innerUrl,
+							"outerUrl": outerUrl
+						};
+						callback(result);
+					}
 				}
 			}); // 上传文件
 		}

@@ -9,7 +9,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
@@ -78,15 +77,14 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
      * @author jianglei
      */
     private List<MenuItem> getItems(final Element element,
-                    final Map<String, Object> parentOptions) {
+            final Map<String, Object> parentOptions) {
         final List<MenuItem> items = new ArrayList<>();
         for (final Object itemObj : element.elements("item")) {
             final Element itemElement = (Element) itemObj;
             final String auth = getAuth(itemElement);
             final MenuItem menuItem = new MenuItem(auth, itemElement.attributeValue("caption"),
-                            itemElement.attributeValue("href"),
-                            itemElement.attributeValue("target"),
-                            itemElement.attributeValue("icon"));
+                    itemElement.attributeValue("href"), itemElement.attributeValue("target"),
+                    itemElement.attributeValue("icon"));
             menuItem.getLinks().addAll(getLinks(itemElement));
             menuItem.getProfiles().addAll(getProfiles(itemElement));
             menuItem.getOptions().putAll(getOptions(itemElement, parentOptions));
@@ -133,7 +131,7 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
         for (final Object captionObj : element.elements("caption")) {
             final Element captionElement = (Element) captionObj;
             captions.put(new Locale(captionElement.attributeValue("locale")),
-                            captionElement.getTextTrim());
+                    captionElement.getTextTrim());
         }
         return captions;
     }
@@ -149,13 +147,13 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
      * @author jianglei
      */
     private List<MenuOperation> getOperations(final Element element,
-                    final Map<String, Object> parentOptions) {
+            final Map<String, Object> parentOptions) {
         final List<MenuOperation> operations = new ArrayList<>();
         for (final Object operationObj : element.elements("operation")) {
             final Element operationElement = (Element) operationObj;
             final String auth = getAuth(operationElement);
             final MenuOperation operation = new MenuOperation(auth,
-                            operationElement.attributeValue("caption"));
+                    operationElement.attributeValue("caption"));
             operation.getCaptions().putAll(getCaptions(operationElement));
             operation.getOptions().putAll(getOptions(operationElement, parentOptions));
             operation.getLinks().addAll(getLinks(operationElement));
@@ -182,7 +180,7 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
             final String method = linkElement.attributeValue("method");
             if (StringUtils.isNotBlank(method)) {
                 links.add(new HttpLink(linkElement.attributeValue("href"),
-                                EnumUtils.getEnum(HttpMethod.class, method)));
+                        EnumUtils.getEnum(HttpMethod.class, method)));
             } else {
                 links.add(new HttpLink(linkElement.attributeValue("href")));
             }
@@ -223,7 +221,7 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
         for (final Object rpcObj : element.elements("rpc")) {
             final Element rpcElement = (Element) rpcObj;
             rpcs.add(new RpcPort(rpcElement.attributeValue("id"),
-                            rpcElement.attributeValue("method")));
+                    rpcElement.attributeValue("method")));
         }
         return rpcs;
     }
@@ -240,20 +238,30 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
      * @author jianglei
      */
     private Map<String, Object> getOptions(final Element element,
-                    final Map<String, Object> parentOptions) {
+            final Map<String, Object> parentOptions) {
         final Map<String, Object> options = new HashMap<>();
         final Element optionsElement = element.element("options");
+        // 需要继承父级选项集时，先继承父级选项集
+        if (requiresInheritOptions(optionsElement, parentOptions)) {
+            options.putAll(parentOptions);
+        }
+        // 设置了选项集则再加入自身选项集
         if (optionsElement != null) {
-            final String inherit = optionsElement.attributeValue("inherit");
-            if (parentOptions != null && StringUtils.isNotBlank(inherit)) {
-                if (BooleanUtils.isTrue(new Boolean(inherit))) { // 继承父级options
-                    options.putAll(parentOptions);
-                }
-            }
             options.putAll(getOption(optionsElement));
         }
-
         return options;
+    }
+
+    private boolean requiresInheritOptions(final Element optionsElement,
+            final Map<String, Object> parentOptions) {
+        if (parentOptions == null || parentOptions.isEmpty()) { // 如果父级选项集为空，则不需要继承
+            return false;
+        }
+        if (optionsElement == null) { // 未设置选项集则默认需要继承
+            return true;
+        }
+        // 设置有选项集，则根据inherit属性判断，inherit未设置时默认视为false
+        return Boolean.valueOf(optionsElement.attributeValue("inherit"));
     }
 
     /**
