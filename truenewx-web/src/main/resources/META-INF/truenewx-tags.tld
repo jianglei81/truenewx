@@ -1035,8 +1035,8 @@
         <attribute>
             <name>pageSizeOptions</name>
             <required>false</required>
-            <rtexprvalue>false</rtexprvalue>
-            <description>每页显示数选项集,例子：10,20,30</description>
+            <rtexprvalue>true</rtexprvalue>
+            <description>每页显示数选项集，如：10,20,50</description>
         </attribute>
         <attribute>
             <name>pageNoSpan</name>
