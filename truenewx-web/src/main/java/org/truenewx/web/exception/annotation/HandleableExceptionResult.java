@@ -24,7 +24,14 @@ public @interface HandleableExceptionResult {
     public static final String DEFAULT_VIEW = "error-global";
 
     /**
-     * @return 结果视图名称，默认为{@link HandleableExceptionResult#DEFAULT_VIEW} = "error-global"
+     * 表示前一个页面的视图名称
+     */
+    public static final String PREV_VIEW = "prev:";
+
+    /**
+     * @return 结果视图名称，默认为{@link HandleableExceptionResult#DEFAULT_VIEW} =
+     *         "error-global"，也可以使用{@link HandleableExceptionResult#PREV_VIEW} =
+     *         "prev:" 返回前一个页面
      */
     String value() default HandleableExceptionResult.DEFAULT_VIEW;
 
@@ -34,7 +41,8 @@ public @interface HandleableExceptionResult {
     Class<? extends Model>[] validate() default {};
 
     /**
-     * @return 是否使用自定义的异常处理器，默认为false，当前控制器必须实现 {@link HandleableExceptionHandler}以处理异常
+     * @return 是否使用自定义的异常处理器，默认为false，当前控制器必须实现
+     *         {@link HandleableExceptionHandler}以处理异常
      */
     boolean handler() default false;
 

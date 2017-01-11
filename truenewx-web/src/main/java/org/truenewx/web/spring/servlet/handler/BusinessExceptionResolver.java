@@ -26,6 +26,7 @@ import org.truenewx.core.util.JsonUtil;
 import org.truenewx.web.exception.annotation.HandleableExceptionMessage;
 import org.truenewx.web.exception.annotation.HandleableExceptionResult;
 import org.truenewx.web.tagext.ErrorTagSupport;
+import org.truenewx.web.util.WebUtil;
 import org.truenewx.web.validation.generate.HandlerValidationGenerator;
 import org.truenewx.web.validation.generate.annotation.ValidationGeneratable;
 
@@ -57,13 +58,13 @@ public class BusinessExceptionResolver extends SimpleMappingExceptionResolver {
 
     @Autowired
     public void setHandlerValidationGenerator(
-                    final HandlerValidationGenerator handlerValidationGenerator) {
+            final HandlerValidationGenerator handlerValidationGenerator) {
         this.handlerValidationGenerator = handlerValidationGenerator;
     }
 
     @Override
     protected ModelAndView doResolveException(final HttpServletRequest request,
-                    final HttpServletResponse response, final Object handler, final Exception e) {
+            final HttpServletResponse response, final Object handler, final Exception e) {
         ModelAndView mav = null;
         if (handler instanceof HandlerMethod) {
             final HandlerMethod handlerMethod = (HandlerMethod) handler;
@@ -73,7 +74,7 @@ public class BusinessExceptionResolver extends SimpleMappingExceptionResolver {
                 mav = handleExceptionToPage(request, handlerMethod, (HandleableException) e);
             }
             final ValidationGeneratable vg = handlerMethod
-                            .getMethodAnnotation(ValidationGeneratable.class);
+                    .getMethodAnnotation(ValidationGeneratable.class);
             if (vg != null) {
                 this.handlerValidationGenerator.generate(request, vg.value(), mav);
             }
@@ -99,7 +100,7 @@ public class BusinessExceptionResolver extends SimpleMappingExceptionResolver {
      * @return 模型视图
      */
     private ModelAndView handleExceptionToMessage(final Exception e, final Locale locale,
-                    final HttpServletResponse response) {
+            final HttpServletResponse response) {
         final List<BusinessError> errors = new ArrayList<>();
         if (e instanceof BusinessException) { // 业务异常，转换错误消息
             final BusinessException be = (BusinessException) e;
@@ -111,7 +112,7 @@ public class BusinessExceptionResolver extends SimpleMappingExceptionResolver {
                 if (se instanceof BusinessException) {
                     final BusinessException be = (BusinessException) se;
                     final String message = BusinessExceptionResolver.this.messageResolver
-                                    .resolveMessage(be, locale);
+                            .resolveMessage(be, locale);
                     errors.add(new BusinessError(be.getCode(), message, be.getProperty()));
                 }
             }
@@ -144,12 +145,16 @@ public class BusinessExceptionResolver extends SimpleMappingExceptionResolver {
      * @author jianglei
      */
     private ModelAndView handleExceptionToPage(final HttpServletRequest request,
-                    final HandlerMethod handlerMethod, final HandleableException he) {
+            final HandlerMethod handlerMethod, final HandleableException he) {
         final ModelAndView mav = new ModelAndView(HandleableExceptionResult.DEFAULT_VIEW);
         final HandleableExceptionResult ber = handlerMethod
-                        .getMethodAnnotation(HandleableExceptionResult.class);
+                .getMethodAnnotation(HandleableExceptionResult.class);
         if (ber != null) {
-            mav.setViewName(ber.value());
+            String view = ber.value();
+            if (HandleableExceptionResult.PREV_VIEW.equals(view)) {
+                view = WebUtil.getRelativePreviousUrl(request, false);
+            }
+            mav.setViewName(view);
             mav.addObject("back", ber.back());
             if (ber.handler()) { // 自定义处理器
                 final Object controller = handlerMethod.getBean();
@@ -198,7 +203,7 @@ public class BusinessExceptionResolver extends SimpleMappingExceptionResolver {
             }
             if (be.isBoundProperty()) {
                 message.append(Strings.LEFT_BRACKET).append(be.getProperty())
-                                .append(Strings.RIGHT_BRACKET);
+                        .append(Strings.RIGHT_BRACKET);
             }
             this.logger.error(message);
         }
