@@ -7,7 +7,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
-import org.truenewx.core.util.StringUtil;
 import org.truenewx.web.authority.validator.AuthorityValidator;
 import org.truenewx.web.menu.MenuResolver;
 import org.truenewx.web.menu.model.Menu;
@@ -19,7 +18,8 @@ import org.truenewx.web.util.WebUtil;
  * @author jianglei
  * @since JDK 1.8
  */
-public class LoginAuthorityValidateInterceptor implements HandlerInterceptor {
+public class LoginAuthorityValidateInterceptor extends UrlPatternMatchSupport
+        implements HandlerInterceptor {
 
     /**
      * 请求转发的前缀
@@ -31,16 +31,6 @@ public class LoginAuthorityValidateInterceptor implements HandlerInterceptor {
      */
     private LoginValidator loginValidator;
 
-    /**
-     * 不可匿名访问的URL模板集
-     */
-    private String[] includeUrlPatterns;
-
-    /**
-     * 可匿名访问的URL模板集
-     */
-    private String[] excludeUrlPatterns;
-
     private Menu menu;
 
     private AuthorityValidator authorityValidator;
@@ -50,20 +40,6 @@ public class LoginAuthorityValidateInterceptor implements HandlerInterceptor {
      */
     public void setLoginValidator(final LoginValidator loginValidator) {
         this.loginValidator = loginValidator;
-    }
-
-    /**
-     * 不可匿名访问的URL模板集
-     */
-    public void setIncludeUrlPatterns(final String[] includeUrlPatterns) {
-        this.includeUrlPatterns = includeUrlPatterns;
-    }
-
-    /**
-     * 可匿名访问的URL模板集
-     */
-    public void setExcludeUrlPatterns(final String[] excludeUrlPatterns) {
-        this.excludeUrlPatterns = excludeUrlPatterns;
     }
 
     public void setMenuResolver(final MenuResolver menuResolver) {
@@ -82,7 +58,7 @@ public class LoginAuthorityValidateInterceptor implements HandlerInterceptor {
             return true;
         }
         final String url = WebUtil.getRelativeRequestUrl(request);
-        if (isValidatableUrl(url)) {
+        if (matches(url)) {
             String loginPage = this.loginValidator.validateLogin(request, response);
             if (loginPage != null) { // 登录校验失败
                 if (loginPage.startsWith(FORWARD_PREFIX)) {
@@ -101,27 +77,6 @@ public class LoginAuthorityValidateInterceptor implements HandlerInterceptor {
             }
         }
         return true;
-    }
-
-    private boolean isValidatableUrl(final String url) {
-        if (this.includeUrlPatterns == null && this.excludeUrlPatterns == null) { // 所有url都作验证
-            return true;
-        } else if (this.includeUrlPatterns == null && this.excludeUrlPatterns != null) { // 只验证除exclude以外的url
-            if (!StringUtil.wildcardMatchOneOf(url, this.excludeUrlPatterns)) {
-                return true;
-            }
-        } else if (this.includeUrlPatterns != null && this.excludeUrlPatterns == null) { // 只验证include内的url
-            if (StringUtil.wildcardMatchOneOf(url, this.includeUrlPatterns)) {
-                return true;
-            }
-        } else if (this.includeUrlPatterns != null && this.excludeUrlPatterns != null) { // 验证include内及exclude以外的url
-            if (StringUtil.wildcardMatchOneOf(url, this.includeUrlPatterns)
-                    && !StringUtil.wildcardMatchOneOf(url, this.excludeUrlPatterns)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Override

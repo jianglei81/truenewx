@@ -1205,5 +1205,18 @@
             <rtexprvalue>false</rtexprvalue>
         </attribute>
     </tag>
+    
+    <tag>
+        <name>prev-url</name>
+        <tag-class>org.truenewx.web.tag.PrevUrlTag</tag-class>
+        <body-content>empty</body-content>
+        <description>输出前一个请求的URL</description>
+        <attribute>
+            <name>default</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>默认值</description>
+        </attribute>
+    </tag>
 
 </taglib>

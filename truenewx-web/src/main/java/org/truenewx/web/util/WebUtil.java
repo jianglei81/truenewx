@@ -45,12 +45,13 @@ public class WebUtil {
     public static final String DEV_MODE = WebUtil.class.getPackage().getName() + ".devMode";
 
     public static void forward(final ServletRequest request, final ServletResponse response,
-                    final String url) throws ServletException, IOException {
+            final String url) throws ServletException, IOException {
         request.getRequestDispatcher(url).forward(request, response);
     }
 
     /**
-     * 直接重定向至指定URL。请求将被重置，POST请求参数将丢失，浏览器地址栏显示的URL将更改为指定URL。 URL如果为绝对路径，则必须以http://或https://开头
+     * 直接重定向至指定URL。请求将被重置，POST请求参数将丢失，浏览器地址栏显示的URL将更改为指定URL。
+     * URL如果为绝对路径，则必须以http://或https://开头
      *
      * @param url
      *            URL
@@ -58,10 +59,10 @@ public class WebUtil {
      *             如果重定向时出现IO错误
      */
     public static void redirect(final HttpServletRequest request,
-                    final HttpServletResponse response, final String url) throws IOException {
+            final HttpServletResponse response, final String url) throws IOException {
         String location = url;
         if (!location.toLowerCase().startsWith("http://")
-                        && !location.toLowerCase().startsWith("https://")) {
+                && !location.toLowerCase().startsWith("https://")) {
             if (!location.startsWith(Strings.SLASH)) {
                 location = Strings.SLASH + location;
             }
@@ -108,18 +109,18 @@ public class WebUtil {
     }
 
     /**
-     * 获取相对于web项目的请求URL，并指定是否需要包含请求参数串
+     * 获取相对于web项目的包含请求参数串的请求URL
      *
      * @param request
      *            请求
      * @param encode
      *            是否进行字符转码
      * @param ignoredParameterNames
-     *            不包含在参数串中的参数名清单，仅在includeQueryString为true时有效
+     *            不包含在参数串中的参数名清单
      * @return 相对于web项目的请求URL
      */
     public static String getRelativeRequestUrlWithQueryString(final HttpServletRequest request,
-                    final boolean encode, final String... ignoredParameterNames) {
+            final boolean encode, final String... ignoredParameterNames) {
         String encoding = request.getCharacterEncoding();
         if (encoding == null) {
             encoding = System.getProperty("file.encoding", Strings.DEFAULT_ENCODING);
@@ -202,6 +203,39 @@ public class WebUtil {
     }
 
     /**
+     * 获取相对于web项目的前一个请求的URL
+     *
+     * @param request
+     *            请求
+     * @param containsQueryString
+     *            是否需要包含请求参数
+     * @return 前一个请求的URL
+     * @author jianglei
+     */
+    public static String getRelativePreviousUrl(final HttpServletRequest request,
+            final boolean containsQueryString) {
+        final String referrer = request.getHeader("Referer");
+        if (StringUtils.isNotBlank(referrer)) {
+            String root = getProtocolAndHost(request);
+            final String contextPath = request.getContextPath();
+            if (!contextPath.equals(Strings.SLASH)) {
+                root += contextPath;
+            }
+            if (referrer.startsWith(root)) {
+                String url = referrer.substring(root.length());
+                if (!containsQueryString) {
+                    final int index = url.indexOf("?");
+                    if (index > 0) {
+                        url = url.substring(0, index);
+                    }
+                }
+                return url;
+            }
+        }
+        return null;
+    }
+
+    /**
      * 从指定ServletContext的属性中获取占位符对应值，替换指定字符串中的占位符，返回新的字符串
      *
      * @param s
@@ -211,7 +245,7 @@ public class WebUtil {
      * @return 替换后的新字符串
      */
     public static String replacePlaceholderFromServletContext(String s,
-                    final ServletContext servletContext) {
+            final ServletContext servletContext) {
         if (StringUtils.isEmpty(s)) {
             return s;
         }
@@ -220,7 +254,7 @@ public class WebUtil {
         final String[] placeholders = StringUtil.substringsBetweens(s, begin, end);
         for (String placeholder : placeholders) {
             final String key = placeholder.substring(begin.length(),
-                            placeholder.length() - end.length());
+                    placeholder.length() - end.length());
             final Object value = servletContext.getAttribute(key);
             if (value != null) {
                 placeholder = "\\$\\{" + key + "\\}";
@@ -293,7 +327,7 @@ public class WebUtil {
     }
 
     /**
-     * 从指定HTTP请求中获取访问的主机地址（协议 域名[:端口]）
+     * 从指定HTTP请求中获取访问的主机地址（协议://域名[:端口]）
      *
      * @param request
      *            指定请求
@@ -374,10 +408,10 @@ public class WebUtil {
      * @return 指定相对于WEB上下文的文件的二进制内容
      */
     public static byte[] readWebContextFile(final ServletContext context,
-                    final String relativePath) {
+            final String relativePath) {
         try {
             final Resource resource = new ServletContextResource(context,
-                            standardizeRelativeUrl(relativePath));
+                    standardizeRelativeUrl(relativePath));
             return FileUtils.readFileToByteArray(resource.getFile());
         } catch (final IOException e) {
             e.printStackTrace();
@@ -478,8 +512,8 @@ public class WebUtil {
      * @author jianglei
      */
     public static void addCookie(final HttpServletRequest request,
-                    final HttpServletResponse response, final String cookieName,
-                    final String cookieValue, final int maxAge) {
+            final HttpServletResponse response, final String cookieName, final String cookieValue,
+            final int maxAge) {
         final Cookie cookie = new Cookie(cookieName, cookieValue);
         cookie.setMaxAge(maxAge);
         String contextPath = request.getContextPath();
@@ -488,6 +522,24 @@ public class WebUtil {
         }
         cookie.setPath(contextPath);
         response.addCookie(cookie);
+    }
+
+    /**
+     * 添加有效期最大的cookie
+     *
+     * @param request
+     *            请求
+     * @param response
+     *            响应
+     * @param cookieName
+     *            cookie名称
+     * @param cookieValue
+     *            cookie值
+     * @author jianglei
+     */
+    public static void addCookie(final HttpServletRequest request,
+            final HttpServletResponse response, final String cookieName, final String cookieValue) {
+        addCookie(request, response, cookieName, cookieValue, Integer.MAX_VALUE);
     }
 
     /**
@@ -503,7 +555,7 @@ public class WebUtil {
      * @author jianglei
      */
     public static void removeCookie(final HttpServletRequest request,
-                    final HttpServletResponse response, final String cookieName) {
+            final HttpServletResponse response, final String cookieName) {
         final Cookie cookie = new Cookie(cookieName, Strings.EMPTY);
         cookie.setMaxAge(0);
         String contextPath = request.getContextPath();
@@ -536,7 +588,7 @@ public class WebUtil {
      */
     public static boolean isAjaxRequest(final HttpServletRequest request) {
         return request.getHeader("X-Requested-With") != null
-                        && "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+                && "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
     }
 
     /**
