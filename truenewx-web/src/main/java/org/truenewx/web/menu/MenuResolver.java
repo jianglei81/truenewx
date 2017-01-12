@@ -22,17 +22,17 @@ public interface MenuResolver {
     /**
      * 获取仅包含指定权限集动作的菜单
      *
-     * @param authorites
+     * @param authorities
      *            权限集
      * @return 仅包含指定权限集动作的菜单
      */
-    public Menu getAuthorizedMenu(String[] authorites);
+    public Menu getAuthorizedMenu(String[] authorities);
 
     /**
      * 获取指定选项映射集限定的权限集
      *
      * @return 指定选项映射集限定的权限集
      */
-    public String[] getAuthorites(Map<String, Object> options);
+    public String[] getAuthorities(Map<String, Object> options);
 
 }

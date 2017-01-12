@@ -1,7 +1,6 @@
 package org.truenewx.web.menu.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +46,7 @@ public class MenuItem extends MenuAction {
     private List<MenuOperation> operations = new ArrayList<>();
 
     public MenuItem(final String auth, final String caption, final String href, final String target,
-                    final String icon) {
+            final String icon) {
         super(auth, caption);
         this.link = new HttpLink(href);
         this.target = target;
@@ -172,7 +171,7 @@ public class MenuItem extends MenuAction {
      * @return 匹配指定RPC的菜单操作集合
      */
     public List<MenuOperation> getOperations(final String beanId, final String methodName,
-                    final Integer argCount) {
+            final Integer argCount) {
         final List<MenuOperation> operations = new ArrayList<>();
         for (final MenuOperation operation : this.operations) {
             if (operation.contains(beanId, methodName, argCount)) {
@@ -197,19 +196,19 @@ public class MenuItem extends MenuAction {
     public List<Binate<Integer, MenuAction>> indexesOf(final String href, final HttpMethod method) {
         for (int i = 0; i < this.subs.size(); i++) {
             final MenuItem sub = this.subs.get(i);
-            if (sub.contains(href, method)) { // 直接下级即包含，则添加下标和动作对后返回
-                final List<Binate<Integer, MenuAction>> indexes = new ArrayList<>();
+            final List<Binate<Integer, MenuAction>> indexes = sub.indexesOf(href, method);
+            // 先在更下级中找
+            if (indexes.size() > 0) { // 在更下级中找到
+                indexes.add(0, new Binary<Integer, MenuAction>(i, sub)); // 加上对应的下级索引
+                return indexes;
+            }
+            // 更下级中没找到再到直接下级找，以免更下级中包含有与直接下级一样的链接
+            if (sub.contains(href, method)) { // 直接下级中找到
                 indexes.add(new Binary<Integer, MenuAction>(i, sub));
                 return indexes;
-            } else { // 否则尝试从更下级中查找
-                final List<Binate<Integer, MenuAction>> indexes = sub.indexesOf(href, method);
-                if (indexes.size() > 0) { // 在更下级中找到
-                    indexes.add(0, new Binary<Integer, MenuAction>(i, sub));
-                    return indexes;
-                }
             }
         }
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 
     @Override

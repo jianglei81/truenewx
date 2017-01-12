@@ -2,7 +2,6 @@ package org.truenewx.web.menu.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -76,7 +75,7 @@ public class Menu implements Serializable {
 
     /**
      * 获取指定菜单项
-     * 
+     *
      * @param index
      *            菜单项索引下标
      * @return 菜单项
@@ -162,19 +161,19 @@ public class Menu implements Serializable {
         }
         for (int i = 0; i < this.items.size(); i++) {
             final MenuItem item = this.items.get(i);
-            if (item.contains(href, method)) {
-                final List<Binate<Integer, MenuAction>> indexes = new ArrayList<>();
+            // 先在更下级中找
+            final List<Binate<Integer, MenuAction>> indexes = item.indexesOf(href, method);
+            if (indexes.size() > 0) { // 在下级中找到
+                indexes.add(0, new Binary<Integer, MenuAction>(i, item)); // 加上对应的下级索引
+                return indexes;
+            }
+            // 更下级中没找到再到直接下级找，以免更下级中包含有与直接下级一样的链接
+            if (item.contains(href, method)) { // 在当前级别找到
                 indexes.add(new Binary<Integer, MenuAction>(i, item));
                 return indexes;
-            } else {
-                final List<Binate<Integer, MenuAction>> indexes = item.indexesOf(href, method);
-                if (indexes.size() > 0) { // 在更下级中找到
-                    indexes.add(0, new Binary<Integer, MenuAction>(i, item));
-                    return indexes;
-                }
             }
         }
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 
     /**
@@ -189,7 +188,7 @@ public class Menu implements Serializable {
      * @return 匹配指定RPC的菜单操作集合
      */
     public List<MenuOperation> getOperations(final String beanId, final String methodName,
-                    final Integer argCount) {
+            final Integer argCount) {
         if (StringUtils.isNotBlank(beanId) && StringUtils.isNotBlank(methodName)) {
             final List<MenuOperation> operations = new ArrayList<>();
             for (final MenuItem item : this.items) {

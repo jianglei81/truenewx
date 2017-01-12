@@ -50,10 +50,10 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
     }
 
     @Override
-    public Menu getAuthorizedMenu(final String[] authorites) {
+    public Menu getAuthorizedMenu(final String[] authorities) {
         final List<MenuItem> items = new ArrayList<>();
         for (final MenuItem item : this.menu.getItems()) {
-            copyMatchedItemTo(item, authorites, items);
+            copyMatchedItemTo(item, authorities, items);
         }
         return new Menu(this.menu.getName(), items);
     }
@@ -63,27 +63,27 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
      *
      * @param item
      *            菜单项
-     * @param authorites
+     * @param authorities
      *            权限集
      * @param items
      *            目标菜单项集合
      */
-    private void copyMatchedItemTo(final MenuItem item, final String[] authorites,
+    private void copyMatchedItemTo(final MenuItem item, final String[] authorities,
             final List<MenuItem> items) {
         // 当前菜单项权限为空，则需要检查包含的子菜单项和操作中是否有匹配的，才决定是否加入目标集合中
         // 否则当前菜单项权限匹配时，才加入目标集合中
         final List<MenuItem> newSubs = new ArrayList<>();
         for (final MenuItem sub : item.getSubs()) {
-            copyMatchedItemTo(sub, authorites, newSubs);
+            copyMatchedItemTo(sub, authorities, newSubs);
         }
         final List<MenuOperation> newOperations = new ArrayList<>();
         for (final MenuOperation operation : item.getOperations()) {
-            if (ArrayUtils.contains(authorites, operation.getAuth())) {
+            if (ArrayUtils.contains(authorities, operation.getAuth())) {
                 newOperations.add(operation);
             }
         }
         final String auth = item.getAuth();
-        if ((StringUtils.isBlank(auth) || !ArrayUtils.contains(authorites, auth))
+        if ((StringUtils.isBlank(auth) || !ArrayUtils.contains(authorities, auth))
                 && newSubs.isEmpty() && newOperations.isEmpty()) {
             return; // 当前菜单权限为空或权限不匹配，且不包含匹配的子菜单和操作，则忽略当前菜单项
         }
@@ -99,7 +99,7 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
     }
 
     @Override
-    public String[] getAuthorites(final Map<String, Object> options) {
+    public String[] getAuthorities(final Map<String, Object> options) {
         if (options == null) {
             return null;
         }

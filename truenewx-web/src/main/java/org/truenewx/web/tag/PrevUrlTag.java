@@ -36,7 +36,7 @@ public class PrevUrlTag extends TagSupport {
         String previousUrl = WebUtil.getRelativePreviousUrl(request, true);
         final ApplicationContext context = SpringWebUtil.getApplicationContext(request);
         final Loginer loginer = SpringUtil.getFirstBeanByClass(context, Loginer.class);
-        if (loginer != null && loginer.isLoginUrl(previousUrl)) {
+        if (loginer != null && previousUrl != null && loginer.isLoginUrl(previousUrl)) {
             previousUrl = null;
         }
         final JspWriter out = this.pageContext.getOut();
