@@ -1,6 +1,6 @@
 /**
  * truenewx-domain.js v1.1.0
- * 
+ *
  * Depends on: truenewx.js
  */
 $.tnx.domain = {
@@ -345,7 +345,7 @@ $.tnx.domain.site = {
     },
     /**
      * 用模态窗体打开指定URL
-     * 
+     *
      * @param url
      *            URL
      * @param params
@@ -356,10 +356,10 @@ $.tnx.domain.site = {
      *            boolean或字符串'static'，boolean表示是否显示遮罩层，字符串'static'表示显示遮罩层且点击窗体外部不会关闭窗体
      * @param extendToWin
      *            附加到弹出窗体对象上的参数对象
-     * @param toLogin
-     *            跳去登录页的处理函数，在指定URL要求用户登录却没登录时调用
+     * @param unLogined
+     *            未登录异常处理函数，在指定URL要求用户登录却没登录时调用
      */
-    open : function(url, params, buttons, backdrop, extendToWin, toLogin) {
+    open : function(url, params, buttons, backdrop, extendToWin, unLogined) {
         if (typeof backdrop == "object") {
             extendToWin = backdrop;
             backdrop = undefined;
@@ -378,10 +378,15 @@ $.tnx.domain.site = {
                 $.tnx.domain.site.init(container, win);
             }
         };
-        if (typeof toLogin == "function") {
+        if (typeof unLogined != "function") {
+            unLogined = site.open.unLogined; // 默认的未登录异常处理方法
+        }
+        if (typeof unLogined == "function") {
             options.error = function(response, textStatus, errorThrown) {
-                if (response.status == 401 || response.status == 511) {
-                    toLogin.call();
+                if (response.called != true
+                        && (response.status == 401 || response.status == 511)) {
+                    unLogined.call();
+                    response.called = true; // 为避免错误回调函数被调用两次
                 }
             }
         }
