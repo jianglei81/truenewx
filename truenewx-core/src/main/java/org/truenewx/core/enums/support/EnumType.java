@@ -4,11 +4,12 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.truenewx.core.enums.BooleanEnum;
 import org.truenewx.core.model.Named;
 
 /**
  * 枚举类型
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -62,7 +63,10 @@ public class EnumType implements Named {
         this.items.put(item.getKey(), item);
     }
 
-    public EnumItem getItem(final String key, final String... keys) {
+    public EnumItem getItem(String key, final String... keys) {
+        if (BooleanEnum.class.getName().equals(this.name)) {
+            key = key.toUpperCase();
+        }
         EnumItem item = this.items.get(key);
         if (item != null && keys.length > 0) {
             final String[] subkeys = new String[keys.length - 1];
@@ -76,7 +80,7 @@ public class EnumType implements Named {
 
     /**
      * 获取所有直接枚举项
-     * 
+     *
      * @return 所有直接枚举项
      */
     public Collection<EnumItem> getItems() {
@@ -85,7 +89,7 @@ public class EnumType implements Named {
 
     /**
      * 设置直接枚举项集
-     * 
+     *
      * @param items
      *            直接枚举项集
      */
