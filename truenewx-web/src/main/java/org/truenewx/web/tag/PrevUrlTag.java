@@ -7,7 +7,11 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.springframework.context.ApplicationContext;
 import org.truenewx.core.Strings;
+import org.truenewx.core.spring.util.SpringUtil;
+import org.truenewx.web.login.Loginer;
+import org.truenewx.web.spring.util.SpringWebUtil;
 import org.truenewx.web.util.WebUtil;
 
 /**
@@ -29,7 +33,12 @@ public class PrevUrlTag extends TagSupport {
     @Override
     public int doEndTag() throws JspException {
         final HttpServletRequest request = (HttpServletRequest) this.pageContext.getRequest();
-        final String previousUrl = WebUtil.getRelativePreviousUrl(request, true);
+        String previousUrl = WebUtil.getRelativePreviousUrl(request, true);
+        final ApplicationContext context = SpringWebUtil.getApplicationContext(request);
+        final Loginer loginer = SpringUtil.getFirstBeanByClass(context, Loginer.class);
+        if (loginer != null && loginer.isLoginUrl(previousUrl)) {
+            previousUrl = null;
+        }
         final JspWriter out = this.pageContext.getOut();
         try {
             if (previousUrl != null) {

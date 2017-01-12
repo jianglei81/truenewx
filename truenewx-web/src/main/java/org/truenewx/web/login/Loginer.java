@@ -31,4 +31,13 @@ public interface Loginer extends LoginPredicate {
     String login(String loginName, String password, HttpServletRequest request,
             HttpServletResponse response) throws HandleableException;
 
+    /**
+     * 判断指定URL是否登录链接
+     *
+     * @param url
+     *            URL
+     * @return 指定URL是否登录链接
+     */
+    boolean isLoginUrl(String url);
+
 }
