@@ -6,12 +6,27 @@
 
 	var rpc = $.tnx.rpc.imports("unstructuredAuthorizeController");
 
-	var authorizeTypes = ["DOCTOR_HEAD_IMAGE", "DOCTOR_WORK_CARD","SPECIAL_COLUMN_IMAGE"];
 
 	var defaultOptions = {
-		authorizeType: null,// 授权类型
-		maxCapacity: null,// 最大容量,以byte为单位
-		progress: function(p) {}//上传进度回调
+		authorizeType: null, // 授权类型
+		maxCapacity: null, // 最大容量,以byte为单位
+		progress: function(p,cpt) {} // 上传进度回调
+	};
+
+	var uploadOptions = {
+		filename:null,
+		resize:{
+			width:0,
+			height:0
+		},
+		crop:{
+			x:0,
+			y:0,
+			width:0,
+			height:0
+		},
+		successCallback:function(result){},
+		errorCallback:function(error){}
 	};
 
 	UnstructuredUpload.prototype = {
@@ -24,22 +39,19 @@
 		}
 	};
 
-	var validationAuthorizeType = function(type) {
-		if (type == "") {
-			throw "UnstructuredAuthorizeType is null";
-		}
-		if (authorizeTypes.indexOf(type) < 0) {
-			throw "UnstructuredAuthorizeType does not exist";
-		}
-	};
-
 	var getSuffix = function(fileName) {
-		var result = /\.[^\.]+/.exec(fileName);
-		return result;
+		 var ldot = fileName.lastIndexOf(".");
+		 if(ldot<0){
+			 return "";
+		 }
+		 var type = fileName.substring(ldot);
+		return type;
 	}
 
 	var bytesToSize = function(bytes) {
-		if (bytes === 0) return '0 B';
+		if (bytes === 0) {
+            return '0 B';
+        }
 		var k = 1024,
 		sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
 		i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -74,17 +86,22 @@
 			});
 			return result;
 		},
-		upload: function(filename, callback) {
+		upload: function(options) {
 			// 判断浏览器是否支持文件 api
 			if (! (window.File || window.FileReader || window.FileList || window.Blob)) {
 				throw "Browser nonsupport file api";
 			}
+			uploadOptions=$.extend(uploadOptions, options);
+			var filename=uploadOptions.filename,
+				successCallback=uploadOptions.successCallback,
+				errorCallback=uploadOptions.errorCallback,
+				crop=uploadOptions.crop;
+
 			var type = defaultOptions.authorizeType,
 			maxCapacity = defaultOptions.maxCapacity;
 			if (!type || type == "" || type == null) {
 				throw "Please set the authorization type";
 			}
-
 			var $el = !this.element ? $(this) : $(this.element);
 			var files = $el.prop("files"); // 得到文件
 			if (files.length == 0) {
@@ -97,11 +114,12 @@
 				return;
 			}
 
-			filename = !filename || filename == "" || filename == null ? file.name: filename;
-			var suffix = getSuffix(filename)[0];
-			var oldSuffix=getSuffix(file.name)[0];
-			if (suffix == "" || suffix == null) {		
-				suffix = getSuffix(file.name);					
+			var token = rpc.authorizePrivateWrite(type); // 请求授权
+			filename = !filename || filename == "" || filename == null ? token.uuid: filename;
+			var suffix = getSuffix(filename);
+			var oldSuffix=getSuffix(file.name);
+			if (suffix == "" || suffix == null) {
+				suffix = getSuffix(file.name);
 			}
 			if(filename!=file.name){
 				filename=filename.replace(suffix,"");
@@ -109,8 +127,8 @@
 			}else{
 				filename=filename+suffix;
 			}
-			validationAuthorizeType(type); // 校验授权类型是否正确
-			var token = rpc.authorizePrivateWrite(type); // 请求授权
+
+
 			if (!token) {
 				throw "Request authorization failed";
 			}
@@ -122,31 +140,55 @@
 			});
 			var storeAs = token.path + filename;
 			client.multipartUpload(storeAs, file, defaultOptions.progress).then(function(res) {
+				var innerUrl = token.innerUrl + filename
+				var protocol = window.location.protocol.replace(":");
+				var imageProcess="";
+				if(uploadOptions.resize&&uploadOptions.resize.width>0&&uploadOptions.resize.height>0){
+					// 图片缩放
+					imageProcess="/resize,m_fixed";
+					imageProcess+=",w_"+uploadOptions.resize.width;
+					imageProcess+=",h_"+uploadOptions.resize.height;
+					imageProcess+=",limit_0";
+				}
+				if(uploadOptions.crop&&uploadOptions.crop.width>0&&uploadOptions.crop.height>0){
+					// 图片裁剪
+					imageProcess+="/crop";
+					imageProcess+=",x_"+uploadOptions.crop.x+",y_"+uploadOptions.crop.y;
+					imageProcess+=",w_"+uploadOptions.crop.width+",h_"+uploadOptions.crop.height;
+				}
+				if(imageProcess){
+					// 拼接使用图片处理
+					imageProcess="?x-oss-process=image"+imageProcess
+				}
 				if (token.publicReadable) {
 					client.putACL(storeAs, 'public-read').then(function(result) {
-						if (callback && typeof callback == "function") {
-							var innerUrl = token.innerUrl + filename
-							var protocol = window.location.protocol.replace(":");
+						if (successCallback && typeof successCallback == "function") {
+							if(imageProcess!=""){
+								innerUrl+=imageProcess;
+							}
 							var outerUrl = rpc.getOuterUrl(type, innerUrl, protocol);
 							var result = {
 								"innerUrl": innerUrl,
 								"outerUrl": outerUrl
 							};
-							callback(result);
+							successCallback(result);
 						}
 					});
 				}else{
-					if (callback && typeof callback == "function") {
-						var innerUrl = token.innerUrl + filename
-						var protocol = window.location.protocol.replace(":");
+					if (successCallback  && typeof successCallback == "function") {
+						if(crop!=""){
+							innerUrl+=crop;
+						}
 						var outerUrl = rpc.getOuterUrl(type, innerUrl, protocol);
 						var result = {
 							"innerUrl": innerUrl,
 							"outerUrl": outerUrl
 						};
-						callback(result);
+						successCallback(result);
 					}
 				}
+			}).catch(function(err){
+				errorCallback(err);
 			}); // 上传文件
 		}
 	};
