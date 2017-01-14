@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
@@ -26,15 +27,15 @@ import org.truenewx.web.spring.util.SpringWebUtil;
  * @since JDK 1.8
  */
 public class SimpleDynamicAttributeTagSupport extends SimpleTagSupport
-                implements DynamicAttributes {
+        implements DynamicAttributes {
     /**
      * 属性名-值映射集
      */
-    protected Map<String, Object> attributes = new HashMap<String, Object>();
+    protected Map<String, Object> attributes = new HashMap<>();
 
     @Override
     public final void setDynamicAttribute(final String uri, final String localName,
-                    final Object value) throws JspException {
+            final Object value) throws JspException {
         if (value != null) {
             this.attributes.put(localName, value);
         }
@@ -53,8 +54,8 @@ public class SimpleDynamicAttributeTagSupport extends SimpleTagSupport
             final String name = entry.getKey();
             if (!ArrayUtils.contains(ignoredAttributes, name)) {
                 sb.append(Strings.SPACE).append(name).append(Strings.EQUAL)
-                                .append(Strings.DOUBLE_QUOTES).append(entry.getValue())
-                                .append(Strings.DOUBLE_QUOTES);
+                        .append(Strings.DOUBLE_QUOTES).append(entry.getValue())
+                        .append(Strings.DOUBLE_QUOTES);
             }
         }
         return sb.toString();
@@ -62,6 +63,10 @@ public class SimpleDynamicAttributeTagSupport extends SimpleTagSupport
 
     protected final PageContext getPageContext() {
         return (PageContext) getJspContext();
+    }
+
+    protected final HttpServletRequest getRequest() {
+        return (HttpServletRequest) getPageContext().getRequest();
     }
 
     protected final Locale getLocale() {
@@ -98,9 +103,9 @@ public class SimpleDynamicAttributeTagSupport extends SimpleTagSupport
      */
     @SuppressWarnings("unchecked")
     protected final <T> T getElExpressionValue(final String attributeName, final String expression,
-                    final Class<T> expectedType) throws JspException {
+            final Class<T> expectedType) throws JspException {
         return (T) ExpressionEvaluatorManager.evaluate(attributeName, expression, expectedType,
-                        getPageContext());
+                getPageContext());
     }
 
     /**
