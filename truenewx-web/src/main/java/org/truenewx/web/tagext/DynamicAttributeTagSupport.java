@@ -14,7 +14,10 @@ import javax.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
+import org.springframework.context.ApplicationContext;
 import org.truenewx.core.Strings;
+import org.truenewx.core.spring.util.SpringUtil;
+import org.truenewx.web.spring.util.SpringWebUtil;
 
 /**
  * 动态属性标签支持
@@ -28,11 +31,11 @@ public class DynamicAttributeTagSupport extends TagSupport implements DynamicAtt
     /**
      * 属性名-值映射集
      */
-    protected Map<String, Object> dynamicAttributes = new HashMap<String, Object>();
+    protected Map<String, Object> dynamicAttributes = new HashMap<>();
 
     @Override
     public final void setDynamicAttribute(final String uri, final String localName,
-                    final Object value) throws JspException {
+            final Object value) throws JspException {
         if (value != null) {
             this.dynamicAttributes.put(localName, value);
         }
@@ -51,8 +54,8 @@ public class DynamicAttributeTagSupport extends TagSupport implements DynamicAtt
             final String name = entry.getKey();
             if (!ArrayUtils.contains(ignoredAttributes, name)) {
                 sb.append(Strings.SPACE).append(name).append(Strings.EQUAL)
-                                .append(Strings.DOUBLE_QUOTES).append(entry.getValue())
-                                .append(Strings.DOUBLE_QUOTES);
+                        .append(Strings.DOUBLE_QUOTES).append(entry.getValue())
+                        .append(Strings.DOUBLE_QUOTES);
             }
         }
         return sb.toString();
@@ -64,6 +67,21 @@ public class DynamicAttributeTagSupport extends TagSupport implements DynamicAtt
 
     protected final Locale getLocale() {
         return getPageContext().getRequest().getLocale();
+    }
+
+    /**
+     * 从Spring上下文容器中获取指定类型的bean对象
+     *
+     * @param beanClass
+     *            bean类型
+     * @return bean对象
+     */
+    protected final <T> T getBeanFromApplicationContext(final Class<T> beanClass) {
+        final ApplicationContext context = SpringWebUtil.getApplicationContext(getPageContext());
+        if (context != null) {
+            return SpringUtil.getFirstBeanByClass(context, beanClass);
+        }
+        return null;
     }
 
     /**
@@ -81,9 +99,9 @@ public class DynamicAttributeTagSupport extends TagSupport implements DynamicAtt
      */
     @SuppressWarnings("unchecked")
     protected final <T> T getElExpressionValue(final String attributeName, final String expression,
-                    final Class<T> expectedType) throws JspException {
+            final Class<T> expectedType) throws JspException {
         return (T) ExpressionEvaluatorManager.evaluate(attributeName, expression, expectedType,
-                        getPageContext());
+                getPageContext());
     }
 
     /**

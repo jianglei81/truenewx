@@ -4,16 +4,14 @@ import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
 
-import org.springframework.context.ApplicationContext;
 import org.truenewx.core.enums.support.EnumDictResolver;
 import org.truenewx.core.enums.support.EnumItem;
 import org.truenewx.core.enums.support.EnumType;
-import org.truenewx.web.spring.util.SpringWebUtil;
 import org.truenewx.web.tagext.ItemTagSupport;
 
 /**
  * 基于枚举选项的标签支持
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -31,10 +29,10 @@ public abstract class EnumItemTagSupport extends ItemTagSupport {
 
     @Override
     public final void doTag() throws JspException, IOException {
-        final ApplicationContext context = SpringWebUtil.getApplicationContext(getPageContext());
-        final EnumDictResolver enumDictResolver = context.getBean(EnumDictResolver.class);
+        final EnumDictResolver enumDictResolver = getBeanFromApplicationContext(
+                EnumDictResolver.class);
         final EnumType enumType = enumDictResolver.getEnumType(this.type, this.subtype,
-                        getLocale());
+                getLocale());
         if (enumType != null) {
             this.items = enumType.getItems();
             super.doTag();

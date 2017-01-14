@@ -4,10 +4,7 @@ import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
 
-import org.springframework.context.ApplicationContext;
-import org.truenewx.core.spring.util.SpringUtil;
 import org.truenewx.core.version.VersionReader;
-import org.truenewx.web.spring.util.SpringWebUtil;
 import org.truenewx.web.tagext.DynamicAttributeTagSupport;
 
 /**
@@ -36,9 +33,7 @@ public class VersionTag extends DynamicAttributeTagSupport {
 
     @Override
     public void doTag() throws JspException, IOException {
-        final ApplicationContext context = SpringWebUtil.getApplicationContext(getPageContext());
-        final VersionReader versionReader = SpringUtil.getFirstBeanByClass(context,
-                        VersionReader.class);
+        final VersionReader versionReader = getBeanFromApplicationContext(VersionReader.class);
         if (versionReader != null) {
             String version;
             switch (this.type) {
