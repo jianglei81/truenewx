@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.EnumUtils;
@@ -11,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.request.ServletWebRequest;
 
 /**
  * Spring Web上下文工具类<br/>
@@ -31,8 +33,12 @@ public class SpringWebContext {
 
     public static HttpServletRequest getRequest() {
         final ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder
-                        .currentRequestAttributes();
+                .currentRequestAttributes();
         return sra.getRequest();
+    }
+
+    public static HttpServletResponse getResponse() {
+        return ((ServletWebRequest) RequestContextHolder.getRequestAttributes()).getResponse();
     }
 
     public static HttpSession getSession() {
