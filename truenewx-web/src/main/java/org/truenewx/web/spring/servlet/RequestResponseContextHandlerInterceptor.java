@@ -48,8 +48,8 @@ public class RequestResponseContextHandlerInterceptor implements HandlerIntercep
             final HttpServletResponse response, final Object handler, final Exception ex)
             throws Exception {
         final RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
-        if (attributes instanceof ServletWebRequestAttributes) {
-            ((ServletWebRequestAttributes) attributes).requestCompleted();
+        if (attributes instanceof ServletWebRequest) {
+            ((ServletWebRequest) attributes).requestCompleted();
         }
     }
 
