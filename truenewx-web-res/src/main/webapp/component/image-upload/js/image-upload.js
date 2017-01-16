@@ -30,7 +30,7 @@
             this.options = $.extend({}, $.fn.imageUpload.defaults, options);
             this.render();
         },
-        reSizeImage:function(maxWidth,maxHeight,imgObj){
+        reSizeImage : function(maxWidth, maxHeight, imgObj) {
             var hRatio;
             var wRatio;
             var Ratio = 1;
@@ -38,18 +38,22 @@
             var h = imgObj.height();
             wRatio = maxWidth / w;
             hRatio = maxHeight / h;
-            if (maxWidth ==0 && maxHeight==0){
-            Ratio = 1;
-            }else if (maxWidth==0){//
-            if (hRatio<1){Ratio = hRatio;}
-            }else if (maxHeight==0){
-            if (wRatio<1){Ratio = wRatio;}
-            }else if (wRatio<1 || hRatio<1){
-            Ratio = (wRatio<=hRatio?wRatio:hRatio);
+            if (maxWidth == 0 && maxHeight == 0) {
+                Ratio = 1;
+            } else if (maxWidth == 0) {//
+                if (hRatio < 1) {
+                    Ratio = hRatio;
+                }
+            } else if (maxHeight == 0) {
+                if (wRatio < 1) {
+                    Ratio = wRatio;
+                }
+            } else if (wRatio < 1 || hRatio < 1) {
+                Ratio = (wRatio <= hRatio ? wRatio : hRatio);
             }
-            if (Ratio<1){
-            w =parseInt( w * Ratio);
-            h =parseInt (h * Ratio);
+            if (Ratio < 1) {
+                w = parseInt(w * Ratio);
+                h = parseInt(h * Ratio);
             }
             imgObj.height(h);
             imgObj.width(w);
@@ -63,12 +67,13 @@
                 var $image = $("<img/>");
                 $image.unbind("load");
                 $image.bind("load", function() {
-                    _this.reSizeImage(oOptions.crop.width,oOptions.crop.height,$image);
+                    _this.reSizeImage(oOptions.crop.width, oOptions.crop.height, $image);
                     $image.show();
                     var imageWidth = $image.width();
                     var imageHeight = $image.height();
                     var selectWidth = 0, selectHeight = 0;
                     var maxWidth = Math.min(oOptions.maxWidth, imageWidth);// 最大的宽度
+                    var maxHeight = Math.min(oOptions.maxWidth, imageWidth);
                     if (oOptions.minWidth == oOptions.maxWidth) {
                         selectWidth = oOptions.minWidth;
                     } else {
@@ -81,7 +86,9 @@
                                 - Math.max(oOptions.minHeight, 0);
                     }
                     var minWidth = Math.max(oOptions.minWidth, 0);// 最小的选择框宽度
-                    minWidth = Math.min(oOptions.minWidth, imageWidth);// 为了防止最小选择框宽度比图片宽度还大
+                    minWidth = Math.min(minWidth, imageWidth);// 为了防止最小选择框宽度比图片宽度还大
+                    var minHeight = Math.max(oOptions.minHeight, 0);// 最小的选择框高度
+                    minHeight = Math.min(minHeight, imageHeight);
                     // $image.imageView();
                     $image.Jcrop({
                         keySupport : false,
@@ -89,8 +96,8 @@
                         allowResize : oOptions.crop.allowResize,
                         allowMove : oOptions.crop.allowMove,
                         allowSelect : oOptions.crop.allowSelect,
-                        minSize : [ minWidth, minWidth ],
-                        maxSize : [ maxWidth, maxWidth ],
+                        minSize : [ minWidth, minHeight ],
+                        maxSize : [ maxWidth, maxHeight ],
                         boxWidth : $image.width(),
                         boxHeight : $image.height(),
                         sideHandles : true
@@ -117,7 +124,10 @@
                                             text : "确定",
                                             "class" : 'btn-primary',
                                             click : function() {
-                                                oOptions.beginCallback($ele);
+                                                if (oOptions.beginCallback
+                                                        && typeof oOptions.beginCallback == "function") {
+                                                    oOptions.beginCallback($ele);
+                                                }
                                                 var winThis = this;
                                                 var select = _this.jcrop.tellSelect();
                                                 var imageWidth = $image.width();
@@ -147,6 +157,9 @@
                                                                             && typeof oOptions.successCallback == 'function') {
                                                                         oOptions
                                                                                 .successCallback(result);
+                                                                    }
+                                                                    if (oOptions.endCallback
+                                                                            && typeof oOptions.endCallback == 'function') {
                                                                         oOptions.endCallback($ele);
                                                                     }
                                                                     winThis.close();
@@ -223,12 +236,14 @@
                                                 $previewTarget.html($previewImage);
                                             }
                                         }
-                                        _this.reSizeImage(oOptions.crop.width,oOptions.crop.height,$image);
+                                        _this.reSizeImage(oOptions.crop.width,
+                                                oOptions.crop.height, $image);
                                         $image.show();
                                         var imageWidth = $image.width();
                                         var imageHeight = $image.height();
                                         var selectWidth = 0, selectHeight = 0;
-                                        var maxWidth = Math.min(oOptions.maxWidth, imageWidth); // 最大的宽度
+                                        var maxWidth = Math.min(oOptions.maxWidth, imageWidth);// 最大的宽度
+                                        var maxHeight = Math.min(oOptions.maxWidth, imageWidth);
                                         if (oOptions.minWidth == oOptions.maxWidth) {
                                             selectWidth = oOptions.minWidth;
                                         } else {
@@ -241,8 +256,10 @@
                                                     .min(oOptions.maxHeight, imageHeight)
                                                     - Math.max(oOptions.minHeight, 0);
                                         }
-                                        var minWidth = Math.max(oOptions.minWidth, 0); // 最小的选择框宽度
-                                        minWidth = Math.min(oOptions.minWidth, imageWidth); // 为了防止最小选择框宽度比图片宽度还大
+                                        var minWidth = Math.max(oOptions.minWidth, 0);// 最小的选择框宽度
+                                        minWidth = Math.min(minWidth, imageWidth);// 为了防止最小选择框宽度比图片宽度还大
+                                        var minHeight = Math.max(oOptions.minHeight, 0);// 最小的选择框高度
+                                        minHeight = Math.min(minHeight, imageHeight);
                                         // $image.imageView();
                                         $image
                                                 .Jcrop(
@@ -252,8 +269,8 @@
                                                             allowMove : oOptions.crop.allowMove,
                                                             allowSelect : oOptions.crop.allowSelect,
                                                             onChange : preview,
-                                                            minSize : [ minWidth, minWidth ],
-                                                            maxSize : [ maxWidth, maxWidth ]
+                                                            minSize : [ minWidth, minHeight ],
+                                                            maxSize : [ maxWidth, maxHeight ]
                                                         },
                                                         function() {
                                                             _this.jcrop = this;
@@ -301,8 +318,11 @@
                                                                                                     result) {
                                                                                                 oOptions
                                                                                                         .successCallback(result);
-                                                                                                oOptions
-                                                                                                        .endCallback($ele);
+                                                                                                if (oOptions.endCallback
+                                                                                                        && typeof oOptions.endCallback == "function") {
+                                                                                                    oOptions
+                                                                                                            .endCallback($ele);
+                                                                                                }
                                                                                             },
                                                                                             errorCallback : function(
                                                                                                     err) {
@@ -345,7 +365,7 @@
                             function(e) {
                                 var files = this.files;
                                 var imageUrl;
-                                var reg = /^.*[^a][^b][^c]\.(?:png|jpg|bmp|gif|jpeg)$/;
+                                var reg = /\.jpg$|\.jpeg$|\.gif$|\.png$/i;
                                 if (isIe6 || isIe7) {
                                     imageUrl = $ele[0].value;
                                 } else {
@@ -369,7 +389,10 @@
                                             _this.showModalCrop.call(_this, imageUrl);
                                         }
                                     } else {
-                                        oOptions.beginCallback($ele);
+                                        if (oOptions.beginCallback
+                                                && typeof oOptions.beginCallback == "function") {
+                                            oOptions.beginCallback($ele);
+                                        }
                                         var endNumber = 0;
                                         var fail = false;
                                         var results = [];
@@ -380,7 +403,10 @@
                                             var file = files[i];
                                             if (!reg.test(file.name)) {
                                                 $.tnx.alert("选择的文件不是图片，请重新选择", "提示");
-                                                oOptions.endCallback($ele);
+                                                if (oOptions.endCallback
+                                                        && typeof oOptions.endCallback == "function") {
+                                                    oOptions.endCallback($ele);
+                                                }
                                                 return;
                                             }
                                             if (file && oOptions.maxCapacity
@@ -438,24 +464,32 @@
                                                 }
                                                 var filename = oOptions.originalFilename ? file.name
                                                         : null;
-                                                _this.unstructuredUpload.upload({
-                                                    filename : filename,
-                                                    successCallback : function(result) {
-                                                        endNumber++;
-                                                        results.push(result);
-                                                        if (endNumber == files.length) {
-                                                            oOptions.successCallback(results);
-                                                            oOptions.endCallback($ele);
-                                                        }
-                                                    },
-                                                    errorCallback : function(error) {
-                                                        oOptions.errorCallback(error);
-                                                        endNumber++;
-                                                        if (endNumber == files.length) {
-                                                            oOptions.endCallback($ele);
-                                                        }
-                                                    }
-                                                });
+                                                _this.unstructuredUpload
+                                                        .upload({
+                                                            filename : filename,
+                                                            successCallback : function(result) {
+                                                                endNumber++;
+                                                                results.push(result);
+                                                                if (endNumber == files.length) {
+                                                                    oOptions
+                                                                            .successCallback(results);
+                                                                    if (oOptions.endCallback
+                                                                            && typeof oOptions.endCallback == "function") {
+                                                                        oOptions.endCallback($ele);
+                                                                    }
+                                                                }
+                                                            },
+                                                            errorCallback : function(error) {
+                                                                oOptions.errorCallback(error);
+                                                                endNumber++;
+                                                                if (endNumber == files.length) {
+                                                                    if (oOptions.endCallback
+                                                                            && typeof oOptions.endCallback == "function") {
+                                                                        oOptions.endCallback($ele);
+                                                                    }
+                                                                }
+                                                            }
+                                                        });
                                             }
 
                                         }
