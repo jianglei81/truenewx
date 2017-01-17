@@ -566,7 +566,7 @@ public class ClassUtil {
      */
     public static Method findPropertyMethod(final Class<?> clazz, final String propertyName,
             final boolean getter) {
-        for (final Method method : clazz.getDeclaredMethods()) {
+        for (final Method method : clazz.getMethods()) {
             if (isPropertyMethod(method, propertyName, getter)) {
                 return method;
             }
@@ -648,42 +648,9 @@ public class ClassUtil {
     public static Collection<Method> findPublicMethods(final Class<?> type, final String methodName,
             final int argCount) {
         final Collection<Method> methods = new ArrayList<>();
-        // 先从父类中查找
-        final Class<?> superclass = type.getSuperclass();
-        if (superclass != Object.class) {
-            methods.addAll(findPublicMethods(superclass, methodName, argCount));
-        }
-        // getMethods()可能获得接口上的泛型方法，故使用getDeclaredMethods()
-        for (final Method method : type.getDeclaredMethods()) {
-            if (method.getName().equals(methodName) && Modifier.isPublic(method.getModifiers())
+        for (final Method method : type.getMethods()) {
+            if (method.getName().equals(methodName)
                     && (argCount < 0 || method.getParameterTypes().length == argCount)) {
-                methods.add(method);
-            }
-        }
-        return methods;
-    }
-
-    /**
-     * 获取指定类型（包括父类）中具有指定注解的公开方法清单
-     *
-     * @param type
-     *            类型
-     * @param annotationClass
-     *            注解类型
-     * @return 指定类型（包括父类）中具有指定注解的公开方法清单
-     */
-    public static Collection<Method> findPublicMethods(final Class<?> type,
-            final Class<? extends Annotation> annotationClass) {
-        final Collection<Method> methods = new ArrayList<>();
-        // 先从父类中查找
-        final Class<?> superclass = type.getSuperclass();
-        if (superclass != Object.class) {
-            methods.addAll(findPublicMethods(type, annotationClass));
-        }
-        // getMethods()可能获得接口上的泛型方法，故使用getDeclaredMethods()
-        for (final Method method : type.getDeclaredMethods()) {
-            if (Modifier.isPublic(method.getModifiers())
-                    && method.getAnnotation(annotationClass) != null) {
                 methods.add(method);
             }
         }

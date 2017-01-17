@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.truenewx.core.util.ClassUtil;
 import org.truenewx.web.rpc.server.annotation.RpcController;
 import org.truenewx.web.rpc.server.annotation.RpcMethod;
 
@@ -92,15 +91,15 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
             synchronized (this.beanId) {
                 if (this.methodMetas == null) {
                     this.methodMetas = new ArrayList<RpcMethodMeta>();
-                    Collection<Method> methods;
+                    Method[] methods;
                     try {
-                        methods = ClassUtil.findPublicMethods(this.controller.getClass(),
-                                RpcMethod.class);
+                        methods = this.controller.getClass().getMethods();
                     } catch (final SecurityException e) {
-                        methods = Collections.emptyList();
+                        methods = new Method[0];
                     }
+                    // 从所有方法中查找
                     for (final Method method : methods) {
-                        if (!method.isVarArgs() && !Modifier.isStatic(method.getModifiers())) {
+                        if (isRpcMethod(method)) {
                             this.methodMetas.add(new RpcMethodMeta(method));
                         }
                     }
@@ -109,6 +108,19 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
             }
         }
         return this.methodMetas;
+    }
+
+    /**
+     * 判断指定方法是否有效的RPC方法
+     *
+     * @param method
+     *            方法
+     * @return 是否有效的RPC方法
+     */
+    private boolean isRpcMethod(final Method method) {
+        return method.getAnnotation(RpcMethod.class) != null && !method.isVarArgs()
+                && !method.isBridge() && Modifier.isPublic(method.getModifiers())
+                && !Modifier.isStatic(method.getModifiers());
     }
 
     public Set<String> getMethodNames() {
