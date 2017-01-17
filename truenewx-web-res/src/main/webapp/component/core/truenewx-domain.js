@@ -234,7 +234,8 @@ $.tnx.domain = {
     bindInputTrim : function() {
         $("input,textarea").focusout(function() {
             var fieldObj = $(this);
-            if (fieldObj.attr("trim") !== "false") { // 未设置trim，默认执行trim动作
+            // 未设置trim且不是file类型，默认执行trim动作
+            if (fieldObj.attr("trim") !== "false" && fieldObj.attr("type") != "file") {
                 fieldObj.val(fieldObj.val().trim());
             }
         });
@@ -383,8 +384,7 @@ $.tnx.domain.site = {
         }
         if (typeof unLogined == "function") {
             options.error = function(response, textStatus, errorThrown) {
-                if (response.called != true
-                        && (response.status == 401 || response.status == 511)) {
+                if (response.called != true && (response.status == 401 || response.status == 511)) {
                     unLogined.call();
                     response.called = true; // 为避免错误回调函数被调用两次
                 }

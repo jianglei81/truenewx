@@ -105,4 +105,21 @@ public class RpcMethodMeta implements Comparable<RpcMethodMeta> {
         return this.method.getAnnotation(Deprecated.class) != null;
     }
 
+    @Override
+    public int hashCode() {
+        return this.method.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final RpcMethodMeta other = (RpcMethodMeta) obj;
+        return this.method.equals(other.method);
+    }
+
 }

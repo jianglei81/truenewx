@@ -6,7 +6,7 @@ import com.google.common.base.Function;
 
 /**
  * 函数：计算hashCode
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -47,6 +47,9 @@ public class FuncHashCode implements Function<Object, Integer> {
                 return BOOLEAN_FALSE_CODE;
             }
         }
+        if (obj instanceof Class) { // Class类未实现hashCode()，转为调用完整类名字符串的hashCode()
+            return ((Class<?>) obj).getName().hashCode();
+        }
         if (obj instanceof Iterable) {
             return evaluateIterable((Iterable<?>) obj);
         }
@@ -61,7 +64,7 @@ public class FuncHashCode implements Function<Object, Integer> {
 
     /**
      * 计算可迭代集合的hashCode值
-     * 
+     *
      * @param iterable
      *            可迭代集合
      * @return hashCode值
@@ -76,7 +79,7 @@ public class FuncHashCode implements Function<Object, Integer> {
 
     /**
      * 计算数组的hashCode值
-     * 
+     *
      * @param array
      *            数组
      * @return hashCode值

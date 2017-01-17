@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.truenewx.core.util.ClassUtil;
 import org.truenewx.web.rpc.server.annotation.RpcController;
 import org.truenewx.web.rpc.server.annotation.RpcMethod;
 
@@ -48,7 +49,7 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
 
     public String getCaption() {
         final RpcController rpcController = this.controller.getClass()
-                        .getAnnotation(RpcController.class);
+                .getAnnotation(RpcController.class);
         return rpcController == null ? null : rpcController.caption();
     }
 
@@ -91,15 +92,15 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
             synchronized (this.beanId) {
                 if (this.methodMetas == null) {
                     this.methodMetas = new ArrayList<RpcMethodMeta>();
-                    Method[] methods;
+                    Collection<Method> methods;
                     try {
-                        methods = this.controller.getClass().getMethods();
+                        methods = ClassUtil.findPublicMethods(this.controller.getClass(),
+                                RpcMethod.class);
                     } catch (final SecurityException e) {
-                        methods = new Method[0];
+                        methods = Collections.emptyList();
                     }
-                    // 从所有方法中查找
                     for (final Method method : methods) {
-                        if (isRpcMethod(method)) {
+                        if (!method.isVarArgs() && !Modifier.isStatic(method.getModifiers())) {
                             this.methodMetas.add(new RpcMethodMeta(method));
                         }
                     }
@@ -108,19 +109,6 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
             }
         }
         return this.methodMetas;
-    }
-
-    /**
-     * 判断指定方法是否有效的RPC方法
-     *
-     * @param method
-     *            方法
-     * @return 是否有效的RPC方法
-     */
-    private boolean isRpcMethod(final Method method) {
-        return method.getAnnotation(RpcMethod.class) != null && !method.isVarArgs()
-                        && Modifier.isPublic(method.getModifiers())
-                        && !Modifier.isStatic(method.getModifiers());
     }
 
     public Set<String> getMethodNames() {
@@ -146,15 +134,15 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
      *             如果不存在这种方法
      */
     public Method getMethod(final String methodName, final Integer argCount)
-                    throws DuplicatedRpcMethodException, NoSuchRpcMethodException {
+            throws DuplicatedRpcMethodException, NoSuchRpcMethodException {
         Method result = null;
         for (final RpcMethodMeta methodMeta : getMethodMetas()) {
             final Method method = methodMeta.getMethod();
-            if (method.getName().equals(methodName) && (argCount == null
-                            || method.getParameterTypes().length == argCount)) {
+            if (method.getName().equals(methodName)
+                    && (argCount == null || method.getParameterTypes().length == argCount)) {
                 if (result != null) {
                     throw new DuplicatedRpcMethodException(this.controller.getClass(), methodName,
-                                    argCount);
+                            argCount);
                 }
                 result = method;
             }
@@ -177,7 +165,7 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
     public RpcMethodMeta getMethodMeta(final String methodName, final int argCount) {
         for (final RpcMethodMeta methodMeta : getMethodMetas()) {
             if (methodMeta.getName().equals(methodName)
-                            && methodMeta.getArgMetas().size() == argCount) {
+                    && methodMeta.getArgMetas().size() == argCount) {
                 return methodMeta;
             }
         }

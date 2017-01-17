@@ -36,6 +36,7 @@
             var Ratio = 1;
             var w = imgObj.width();
             var h = imgObj.height();
+            var oOptions = this.options;
             wRatio = maxWidth / w;
             hRatio = maxHeight / h;
             if (maxWidth == 0 && maxHeight == 0) {
@@ -54,6 +55,12 @@
             if (Ratio < 1) {
                 w = parseInt(w * Ratio);
                 h = parseInt(h * Ratio);
+            }
+            if(w<oOptions.minWidth){
+                w=oOptions.minWidth;
+            }
+            if(h<oOptions.minHeight){
+                w=oOptions.minWidth;
             }
             imgObj.height(h);
             imgObj.width(w);
@@ -112,7 +119,7 @@
                         $(".modal-body .jcrop-holder").css("margin", "auto");
                     });
                 });
-                var content = "<div id='concent' style='display: block; width: "
+                var content = "<div id='concent' style='display: flex; width: "
                         + oOptions.crop.width + "px; height: " + oOptions.crop.height
                         + "px;margin:auto'></div>";
                 $.tnx
