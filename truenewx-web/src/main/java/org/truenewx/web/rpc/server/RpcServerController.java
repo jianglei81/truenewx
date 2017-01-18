@@ -146,8 +146,8 @@ public class RpcServerController implements RpcServerInterceptor {
         return this.serializer.serializeCollection(methodNames);
     }
 
-    @RequestMapping(value = "/invoke/{beanId}/{methodName}",
-            method = { RequestMethod.POST, RequestMethod.GET })
+    @RequestMapping(value = "/invoke/{beanId}/{methodName}", method = { RequestMethod.POST,
+            RequestMethod.GET })
     @HandleableExceptionMessage
     @ResponseBody
     public String invoke(@PathVariable("beanId") final String beanId,
@@ -234,13 +234,13 @@ public class RpcServerController implements RpcServerInterceptor {
             final List<RpcVariableMeta> metas = new ArrayList<>();
             for (final Enum<?> constant : enumClass.getEnumConstants()) {
                 final String name = constant.name();
-                final RpcVariableMeta meta = new RpcVariableMeta(enumClass);
-                meta.setName(name);
                 final EnumItem item = enumType.getItem(name);
                 if (item != null) {
+                    final RpcVariableMeta meta = new RpcVariableMeta(enumClass);
+                    meta.setName(name);
                     meta.setCaption(item.getCaption());
+                    metas.add(meta);
                 }
-                metas.add(meta);
             }
             return metas;
         }
