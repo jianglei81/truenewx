@@ -9,7 +9,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
+import org.truenewx.core.spring.core.env.functor.FuncProfile;
 import org.truenewx.web.http.HttpLink;
 
 /**
@@ -90,7 +93,7 @@ public abstract class MenuAction implements Serializable {
     }
 
     /**
-     * 
+     *
      * @return 可见环境集合
      */
     public Set<String> getProfiles() {
@@ -99,7 +102,7 @@ public abstract class MenuAction implements Serializable {
 
     /**
      * 判断当前菜单动作在指定环境中是否可见
-     * 
+     *
      * @param profile
      *            环境
      * @return 当前菜单动作在指定环境中是否可见
@@ -127,5 +130,20 @@ public abstract class MenuAction implements Serializable {
     }
 
     public abstract String getAuth(String beanId, String methodName, Integer argCount);
+
+    public boolean matchesProfile() {
+        final String profile = FuncProfile.INSTANCE.apply();
+        return StringUtils.isBlank(profile) || this.profiles.isEmpty()
+                || this.profiles.contains(profile);
+    }
+
+    public boolean matchesAuth(final String[] authorities) {
+        // 如果当前动作未指定权限，表示没有权限限制，视为匹配
+        if (StringUtils.isBlank(this.auth)) {
+            return true;
+        }
+        // 当前动作的权限在指定比较权限集中，视为匹配
+        return ArrayUtils.contains(authorities, this.auth);
+    }
 
 }

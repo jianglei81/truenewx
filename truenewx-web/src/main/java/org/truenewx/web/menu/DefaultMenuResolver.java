@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
@@ -70,6 +69,10 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
      */
     private void copyMatchedItemTo(final MenuItem item, final String[] authorities,
             final List<MenuItem> items) {
+        // 如果profile不匹配，则直接忽略，也不再查找子菜单
+        if (!item.matchesProfile()) {
+            return;
+        }
         // 当前菜单项权限为空，则需要检查包含的子菜单项和操作中是否有匹配的，才决定是否加入目标集合中
         // 否则当前菜单项权限匹配时，才加入目标集合中
         final List<MenuItem> newSubs = new ArrayList<>();
@@ -78,16 +81,14 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
         }
         final List<MenuOperation> newOperations = new ArrayList<>();
         for (final MenuOperation operation : item.getOperations()) {
-            if (ArrayUtils.contains(authorities, operation.getAuth())) {
+            if (operation.matchesAuth(authorities)) {
                 newOperations.add(operation);
             }
         }
-        final String auth = item.getAuth();
-        if ((StringUtils.isBlank(auth) || !ArrayUtils.contains(authorities, auth))
-                && newSubs.isEmpty() && newOperations.isEmpty()) {
-            return; // 当前菜单权限为空或权限不匹配，且不包含匹配的子菜单和操作，则忽略当前菜单项
+        if (!item.matchesAuth(authorities) && newSubs.isEmpty() && newOperations.isEmpty()) {
+            return; // 当前菜单权限不匹配，且不包含匹配的子菜单和操作，则忽略当前菜单项
         }
-        final MenuItem newItem = new MenuItem(auth, item.getCaption(), item.getHref(),
+        final MenuItem newItem = new MenuItem(item.getAuth(), item.getCaption(), item.getHref(),
                 item.getTarget(), item.getIcon());
         newItem.getLinks().addAll(item.getLinks());
         newItem.getOptions().putAll(item.getOptions());
