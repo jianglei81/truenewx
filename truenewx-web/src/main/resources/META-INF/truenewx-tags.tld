@@ -1218,5 +1218,23 @@
             <description>默认值</description>
         </attribute>
     </tag>
+    
+    <tag>
+        <name>to-html</name>
+        <tag-class>org.truenewx.web.tag.ToHtmlTag</tag-class>
+        <body-content>empty</body-content>
+        <description>输出指定内容的HTML格式内容</description>
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>notNull</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>是否不能为null，true-至少输出一个html空格</description>
+        </attribute>
+    </tag>
 
 </taglib>
