@@ -5,17 +5,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hibernate.LockOptions;
+import org.truenewx.core.Strings;
 import org.truenewx.core.tuple.Binate;
 import org.truenewx.data.model.relation.Relation;
 import org.truenewx.data.orm.dao.RelationDao;
 
 /**
- * Hibernate关系DAO支持
+ * HibernateDAO支持
  *
  * @author jianglei
  * @since JDK 1.8
  * @param <T>
- *            关系类型
+ *            类型
  * @param <L>
  *            左标识类型
  * @param <R>
@@ -98,6 +99,48 @@ public abstract class HibernateRelationDaoSupport<T extends Relation<L, R>, L ex
         final Serializable id = buildId(leftId, rightId);
         if (id != null) {
             return (T) getHibernateTemplate().getSession().get(getEntityName(), id, lockOption);
+        }
+        return null;
+    }
+
+    @Override
+    public T increaseNumber(final L leftId, final R rightId, final String propertyName,
+            final Number step) {
+        final Number maxValue = getNumberPropertyMaxValue(propertyName);
+        if (maxValue != null && step.doubleValue() != 0) { // 属性为数值类型且增量不为0时才处理
+            final Binate<String, String> idProperty = getIdProperty();
+            final String leftIdProperty = idProperty.getLeft();
+            final String rightIdProperty = idProperty.getRight();
+            StringBuffer hql = new StringBuffer("update ").append(getEntityName()).append(" set ")
+                    .append(propertyName).append(Strings.EQUAL).append(propertyName)
+                    .append(Strings.PLUS).append(":step where ").append(leftIdProperty)
+                    .append("=:leftId and ").append(rightIdProperty).append("=:rightId and ")
+                    .append(propertyName + "+:step<=:maxValue");
+            final Map<String, Object> params = new HashMap<>();
+            params.put("leftId", leftId);
+            params.put("rightId", rightId);
+            params.put("step", step);
+            params.put("maxValue", maxValue);
+            if (getHibernateTemplate().update(hql, params) == 0) { // 如果没有更新到记录，有可能是修改数值超出字段允许的最大值
+                // 此时，需要将数值字段修改为允许的最大值
+                hql = new StringBuffer("update ").append(getEntityName()).append(" set ")
+                        .append(propertyName).append(Strings.EQUAL).append(":maxValue where ")
+                        .append(leftIdProperty).append("=:leftId and ").append(rightIdProperty)
+                        .append("=:rightId and ").append(propertyName + "+:step>:maxValue");
+                if (getHibernateTemplate().update(hql, params) == 0) {
+                    // 如果还是没有更新到记录，说明根据id无法找到单体，直接返回null
+                    return null;
+                }
+            }
+            // 更新字段后需刷新实体
+            final T realtion = find(leftId, rightId);
+            try {
+                refresh(realtion);
+            } catch (final Exception e) { // 忽略刷新失败
+                e.printStackTrace();
+            }
+            ensurePropertyMinNumber(realtion, propertyName, step);
+            return realtion;
         }
         return null;
     }

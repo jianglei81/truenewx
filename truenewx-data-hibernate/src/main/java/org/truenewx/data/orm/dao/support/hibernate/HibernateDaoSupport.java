@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.mapping.Column;
+import org.truenewx.core.util.MathUtil;
 import org.truenewx.data.model.Entity;
 import org.truenewx.data.orm.dao.Dao;
 import org.truenewx.data.orm.hibernate.HibernateTemplate;
@@ -20,7 +21,7 @@ import org.truenewx.data.query.QueryResult;
  *            数据实体类型
  */
 public abstract class HibernateDaoSupport<T extends Entity> extends HibernateEntityDaoSupport<T>
-                implements Dao<T> {
+        implements Dao<T> {
 
     protected final HibernateTemplate getHibernateTemplate() {
         return getDataAccessTemplate(getEntityName());
@@ -36,6 +37,19 @@ public abstract class HibernateDaoSupport<T extends Entity> extends HibernateEnt
 
     protected final Column getColumn(final String propertyName) {
         return getColumn(getEntityName(), propertyName);
+    }
+
+    protected final Number getNumberPropertyMaxValue(final String propertyName) {
+        final Class<?> propertyClass = getPropertyClass(propertyName);
+        if (Number.class.isAssignableFrom(propertyClass)) {
+            @SuppressWarnings("unchecked")
+            final Class<? extends Number> type = (Class<? extends Number>) propertyClass;
+            final Column column = getColumn(propertyName);
+            final int precision = column.getPrecision();
+            final int scale = column.getScale();
+            return MathUtil.maxValue(type, precision, scale);
+        }
+        return null;
     }
 
     @Override
@@ -86,7 +100,7 @@ public abstract class HibernateDaoSupport<T extends Entity> extends HibernateEnt
     // 以下是对DependentDao的支持
 
     public QueryResult<T> find(final Class<?> dependedClass, final Serializable dependedKey,
-                    final QueryParameter parameter) {
+            final QueryParameter parameter) {
         return find(getEntityName(), dependedClass, dependedKey, parameter);
     }
 

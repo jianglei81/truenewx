@@ -6,7 +6,6 @@ import org.truenewx.core.exception.BusinessException;
 import org.truenewx.core.exception.HandleableException;
 import org.truenewx.data.finder.OwnedUnityFinder;
 import org.truenewx.data.model.unity.OwnedUnity;
-import org.truenewx.service.Service;
 
 /**
  * 具有所属者的单体服务
@@ -21,7 +20,7 @@ import org.truenewx.service.Service;
  *            所属者类型
  */
 public interface OwnedUnityService<T extends OwnedUnity<K, O>, K extends Serializable, O extends Serializable>
-                extends Service, OwnedUnityFinder<T, K, O> {
+        extends UnityService<T, K>, OwnedUnityFinder<T, K, O> {
     /**
      * 加载指定所属者和标识的单体，如果没找到则抛出异常
      *

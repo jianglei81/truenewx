@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hibernate.LockOptions;
-import org.hibernate.mapping.Column;
 import org.truenewx.core.Strings;
-import org.truenewx.core.util.MathUtil;
 import org.truenewx.data.model.unity.Unity;
 import org.truenewx.data.orm.dao.UnityDao;
 
@@ -70,19 +68,6 @@ public abstract class HibernateUnityDaoSupport<T extends Unity<K>, K extends Ser
             }
             ensurePropertyMinNumber(unity, propertyName, step);
             return unity;
-        }
-        return null;
-    }
-
-    private Number getNumberPropertyMaxValue(final String propertyName) {
-        final Class<?> propertyClass = getPropertyClass(propertyName);
-        if (Number.class.isAssignableFrom(propertyClass)) {
-            @SuppressWarnings("unchecked")
-            final Class<? extends Number> type = (Class<? extends Number>) propertyClass;
-            final Column column = getColumn(propertyName);
-            final int precision = column.getPrecision();
-            final int scale = column.getScale();
-            return MathUtil.maxValue(type, precision, scale);
         }
         return null;
     }

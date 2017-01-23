@@ -53,8 +53,8 @@ public abstract class HibernateEntityDaoSupport<T> extends EntityDaoSupport<T> {
      *
      * @author jianglei
      */
-    protected void ensurePropertyMinNumber(final T entity, final String propertyName,
-                    final Number step) {
+    protected final void ensurePropertyMinNumber(final T entity, final String propertyName,
+            final Number step) {
         final Number propertyValue = BeanUtil.getPropertyValue(entity, propertyName);
         // 此时的属性值必定为非空的数值
         if (step.doubleValue() > 0) { // 增量大于0，则属性值必须大于等于增量值
