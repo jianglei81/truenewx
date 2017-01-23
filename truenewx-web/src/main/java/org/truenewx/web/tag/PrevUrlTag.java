@@ -33,11 +33,16 @@ public class PrevUrlTag extends TagSupport {
     @Override
     public int doEndTag() throws JspException {
         final HttpServletRequest request = (HttpServletRequest) this.pageContext.getRequest();
+        final String currentAction = WebUtil.getRelativeRequestAction(request);
         String previousUrl = WebUtil.getRelativePreviousUrl(request, true);
-        final ApplicationContext context = SpringWebUtil.getApplicationContext(request);
-        final Loginer loginer = SpringUtil.getFirstBeanByClass(context, Loginer.class);
-        if (loginer != null && previousUrl != null && loginer.isLoginUrl(previousUrl)) {
+        if (previousUrl.startsWith(currentAction)) { // 如果前一页url以当前action开头，则执行默认的前一页规则，以避免跳转相同页
             previousUrl = null;
+        } else {
+            final ApplicationContext context = SpringWebUtil.getApplicationContext(request);
+            final Loginer loginer = SpringUtil.getFirstBeanByClass(context, Loginer.class);
+            if (loginer != null && previousUrl != null && loginer.isLoginUrl(previousUrl)) {
+                previousUrl = null;
+            }
         }
         final JspWriter out = this.pageContext.getOut();
         try {
