@@ -8,7 +8,7 @@ import java.util.Map;
  * @author jianglei
  * @since JDK 1.8
  */
-public interface QueryParameter extends QueryOrders {
+public interface QueryParameter extends QueryOrder {
 
     /**
      * @return 页大小

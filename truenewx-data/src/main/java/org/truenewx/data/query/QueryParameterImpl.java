@@ -10,7 +10,7 @@ import org.truenewx.core.util.BeanUtil;
  * @author jianglei
  * @since JDK 1.8
  */
-public class QueryParameterImpl extends QueryOrderSupport implements QueryParameter {
+public class QueryParameterImpl extends MultiQueryOrder implements QueryParameter {
     /**
      * 页大小
      */

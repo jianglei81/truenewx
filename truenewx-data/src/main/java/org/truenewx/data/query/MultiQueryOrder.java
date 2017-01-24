@@ -9,12 +9,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
 
 /**
- * 查询排序支持
+ * 多字段查询排序
  *
  * @author jianglei
  * @since JDK 1.8
  */
-public class QueryOrderSupport implements QueryOrders {
+public class MultiQueryOrder implements QueryOrder {
     /**
      * 字段-是否倒序(desc)映射集
      */
@@ -65,7 +65,7 @@ public class QueryOrderSupport implements QueryOrders {
 
     private void initOrderMap(final boolean clear) {
         if (this.orders == null) {
-            this.orders = new LinkedHashMap<String, Boolean>();
+            this.orders = new LinkedHashMap<>();
         } else if (clear) {
             this.orders.clear();
         }
@@ -96,7 +96,7 @@ public class QueryOrderSupport implements QueryOrders {
     /**
      * 只保留指定可排序对象中的排序
      */
-    public final void retainAllOrder(final QueryOrders order) {
+    public final void retainAllOrder(final QueryOrder order) {
         // 忽略自己覆盖自己
         if (this != order) {
             initOrderMap(true);

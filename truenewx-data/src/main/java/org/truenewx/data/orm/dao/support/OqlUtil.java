@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
 import org.truenewx.data.query.Comparison;
-import org.truenewx.data.query.QueryOrders;
+import org.truenewx.data.query.QueryOrder;
 
 /**
  * 对象查询语言(OQL)工具类
@@ -24,14 +24,14 @@ public class OqlUtil {
      * 根据指定可查询排序对象构建order by子句<br/>
      * 如果无排序设置，则返回""，否则返回以空格开头的形如：" order by ..."的order by子句
      *
-     * @param orderable
-     *            可查询排序对象
+     * @param queryOrder
+     *            查询排序
      * @return order by子句
      */
-    public static String buildOrderString(final QueryOrders orderable) {
+    public static String buildOrderString(final QueryOrder queryOrder) {
         final StringBuffer orderBy = new StringBuffer();
-        if (orderable != null) {
-            final Iterable<Entry<String, Boolean>> orders = orderable.getOrders();
+        if (queryOrder != null) {
+            final Iterable<Entry<String, Boolean>> orders = queryOrder.getOrders();
             if (orders != null) {
                 for (final Entry<String, Boolean> entry : orders) {
                     orderBy.append(Strings.COMMA).append(entry.getKey());
@@ -64,8 +64,7 @@ public class OqlUtil {
      * @author jianglei
      */
     public static String buildOrConditionString(final Map<String, Object> params,
-                    final String fieldName, final Collection<?> fieldParamValues,
-                    Comparison comparison) {
+            final String fieldName, final Collection<?> fieldParamValues, Comparison comparison) {
         final StringBuffer condition = new StringBuffer();
         if (fieldParamValues != null && fieldParamValues.size() > 0) {
             if (comparison == null) { // 默认为等于比较符
@@ -73,7 +72,7 @@ public class OqlUtil {
             }
             // 等于和不等于在参数个数大于5后使用IN/NOT IN代替
             if ((comparison != Comparison.EQUAL || comparison != Comparison.NOT_EQUAL)
-                            && fieldParamValues.size() > 5) {
+                    && fieldParamValues.size() > 5) {
                 condition.append(fieldName);
                 if (comparison == Comparison.EQUAL) {
                     condition.append(Comparison.IN.toQlString());
@@ -82,7 +81,7 @@ public class OqlUtil {
                 }
                 final String paramName = fieldName.replaceAll("\\.", Strings.UNDERLINE);
                 condition.append(Strings.LEFT_BRACKET).append(Strings.COLON).append(paramName)
-                                .append(Strings.RIGHT_BRACKET);
+                        .append(Strings.RIGHT_BRACKET);
                 params.put(paramName, fieldParamValues);
             } else {
                 final String junction = " or ";
@@ -91,12 +90,12 @@ public class OqlUtil {
                     condition.append(junction).append(fieldName);
                     if (fieldParamValue != null) { // 忽略为null的参数值
                         final String paramName = fieldName.replaceAll("\\.", Strings.UNDERLINE)
-                                        + (i++);
+                                + (i++);
                         condition.append(comparison.toQlString()).append(Strings.COLON)
-                                        .append(paramName);
+                                .append(paramName);
                         if (comparison == Comparison.LIKE || comparison == Comparison.NOT_LIKE) {
                             params.put(paramName, StringUtils.join(Strings.PERCENT,
-                                            fieldParamValue.toString(), Strings.PERCENT));
+                                    fieldParamValue.toString(), Strings.PERCENT));
                         } else {
                             params.put(paramName, fieldParamValue);
                         }
@@ -106,7 +105,7 @@ public class OqlUtil {
                     condition.delete(0, junction.length());
                 } else {
                     condition.replace(0, junction.length(), Strings.LEFT_BRACKET)
-                                    .append(Strings.RIGHT_BRACKET); // 去掉多余的or后添加括号
+                            .append(Strings.RIGHT_BRACKET); // 去掉多余的or后添加括号
                 }
             }
         }
@@ -129,8 +128,7 @@ public class OqlUtil {
      * @author jianglei
      */
     public static String buildOrConditionString(final Map<String, Object> params,
-                    final String fieldName, final Object[] fieldParamValues,
-                    Comparison comparison) {
+            final String fieldName, final Object[] fieldParamValues, Comparison comparison) {
         final StringBuffer condition = new StringBuffer();
         if (fieldParamValues != null && fieldParamValues.length > 0) {
             if (comparison == null) { // 默认为等于比较符
@@ -138,7 +136,7 @@ public class OqlUtil {
             }
             // 等于和不等于在参数个数大于5后使用IN/NOT IN代替
             if ((comparison == Comparison.EQUAL || comparison == Comparison.NOT_EQUAL)
-                            && fieldParamValues.length > 5) {
+                    && fieldParamValues.length > 5) {
                 condition.append(fieldName);
                 if (comparison == Comparison.EQUAL) {
                     condition.append(Comparison.IN.toQlString());
@@ -147,7 +145,7 @@ public class OqlUtil {
                 }
                 final String paramName = fieldName.replaceAll("\\.", Strings.UNDERLINE);
                 condition.append(Strings.LEFT_BRACKET).append(Strings.COLON).append(paramName)
-                                .append(Strings.RIGHT_BRACKET);
+                        .append(Strings.RIGHT_BRACKET);
                 params.put(paramName, fieldParamValues);
             } else {
                 final String junction = " or ";
@@ -156,12 +154,12 @@ public class OqlUtil {
                     condition.append(junction).append(fieldName);
                     if (fieldParamValue != null) { // 忽略为null的参数值
                         final String paramName = fieldName.replaceAll("\\.", Strings.UNDERLINE)
-                                        + (i++);
+                                + (i++);
                         condition.append(comparison.toQlString()).append(Strings.COLON)
-                                        .append(paramName);
+                                .append(paramName);
                         if (comparison == Comparison.LIKE || comparison == Comparison.NOT_LIKE) {
                             params.put(paramName, StringUtils.join(Strings.PERCENT,
-                                            fieldParamValue.toString(), Strings.PERCENT));
+                                    fieldParamValue.toString(), Strings.PERCENT));
                         } else {
                             params.put(paramName, fieldParamValue);
                         }
@@ -171,7 +169,7 @@ public class OqlUtil {
                     condition.delete(0, junction.length());
                 } else {
                     condition.replace(0, junction.length(), Strings.LEFT_BRACKET)
-                                    .append(Strings.RIGHT_BRACKET); // 去掉多余的or后添加括号
+                            .append(Strings.RIGHT_BRACKET); // 去掉多余的or后添加括号
                 }
             }
         }

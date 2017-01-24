@@ -4,12 +4,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * 查询排序集
- * 
+ * 查询排序
+ *
  * @author jianglei
  * @since JDK 1.8
  */
-public interface QueryOrders {
+public interface QueryOrder {
 
     boolean hasOrder();
 
