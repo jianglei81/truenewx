@@ -24,14 +24,14 @@ public class OqlUtil {
      * 根据指定可查询排序对象构建order by子句<br/>
      * 如果无排序设置，则返回""，否则返回以空格开头的形如：" order by ..."的order by子句
      *
-     * @param queryOrder
+     * @param order
      *            查询排序
      * @return order by子句
      */
-    public static String buildOrderString(final QueryOrder queryOrder) {
+    public static String buildOrderString(final QueryOrder order) {
         final StringBuffer orderBy = new StringBuffer();
-        if (queryOrder != null) {
-            final Iterable<Entry<String, Boolean>> orders = queryOrder.getOrders();
+        if (order != null) {
+            final Iterable<Entry<String, Boolean>> orders = order.getOrders();
             if (orders != null) {
                 for (final Entry<String, Boolean> entry : orders) {
                     orderBy.append(Strings.COMMA).append(entry.getKey());
