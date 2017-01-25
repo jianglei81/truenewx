@@ -18,7 +18,7 @@ public class QueryParameterImpl extends MultiQueryOrder implements QueryParamete
     /**
      * 页码
      */
-    private int pageNo;
+    private int pageNo = 1;
     /**
      * 是否计算总数
      */
@@ -37,6 +37,18 @@ public class QueryParameterImpl extends MultiQueryOrder implements QueryParamete
         this.pageSize = pageSize;
     }
 
+    /**
+     * 如果当前页大小未设定，则设定为指定页大小默认值
+     *
+     * @param pageSize
+     *            页大小默认值
+     */
+    public void setPageSizeDefault(final int pageSize) {
+        if (this.pageSize <= 0) {
+            this.pageSize = pageSize;
+        }
+    }
+
     @Override
     public int getPageNo() {
         return this.pageNo;
@@ -49,7 +61,7 @@ public class QueryParameterImpl extends MultiQueryOrder implements QueryParamete
     @Override
     public Map<String, Object> getAll() {
         return BeanUtil.toMap(this, "pageSize", "pageNo", "totalable", "listable", "orders",
-                        "orderString", "orderFieldNames", "all");
+                "orderString", "orderFieldNames", "all");
     }
 
     public final void setPaging(final int pageSize, final int pageNo) {
