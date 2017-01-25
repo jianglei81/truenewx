@@ -349,10 +349,10 @@ $.tnx.Validator = Class.extend({
         return validation;
     },
     _markFieldError : function(formObj, fieldObj) {
-        if (formObj.firstErrorFieldObj == undefined) {
-            formObj.firstErrorFieldObj = fieldObj; // 校验未通过，标记表单有错误
+        if (formObj.data("firstErrorFieldObj") == undefined) {
+            formObj.data("firstErrorFieldObj", fieldObj); // 校验未通过，标记表单有错误
         }
-        $(formObj).attr("validateError", "true");
+        formObj.attr("validateError", "true");
     },
     validateField : function(fieldObj) {
         if (!(fieldObj instanceof jQuery)) {
@@ -513,8 +513,11 @@ $.tnx.Validator = Class.extend({
         }
     },
     validateForm : function(formObj) {
-        formObj.firstErrorFieldObj = undefined; // 初始化表单无错误
-        $(formObj).removeAttr("validateError");
+        if (!(formObj instanceof jQuery)) {
+            formObj = $(formObj);
+        }
+        formObj.removeData("firstErrorFieldObj"); // 初始化表单无错误
+        formObj.removeAttr("validateError");
         this.hideFormErrors(formObj, true); // 先隐藏所有错误框
         var validator = this;
         var formErrorMessages = [];
@@ -527,21 +530,16 @@ $.tnx.Validator = Class.extend({
         });
         formErrorMessages = formErrorMessages.unique();
         this.showFormErrors(formObj, formErrorMessages);
-        if (formObj.firstErrorFieldObj) {
-            formObj.firstErrorFieldObj.select();
+        var firstErrorFieldObj = formObj.data("firstErrorFieldObj");
+        if (firstErrorFieldObj) {
+            firstErrorFieldObj.select();
         }
         return !this.hasFormError(formObj); // 表单无错误视为校验通过
     },
     hasFormError : function(formObj) {
-        if (!(formObj instanceof jQuery)) {
-            formObj = $(formObj);
-        }
         return formObj.attr("validateError") == "true";
     },
     getFormErrorObj : function(formObj) {
-        if (!(formObj instanceof jQuery)) {
-            formObj = $(formObj);
-        }
         var errorId = formObj.attr("errorId");
         if (!errorId) {
             var formId = formObj.attr("id");
