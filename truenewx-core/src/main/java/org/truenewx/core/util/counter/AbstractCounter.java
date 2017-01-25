@@ -1,8 +1,12 @@
 package org.truenewx.core.util.counter;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 
 /**
  * 抽象计数器
@@ -57,6 +61,31 @@ public abstract class AbstractCounter<K> implements Counter<K> {
     @Override
     public Set<Entry<K, Integer>> entrySet() {
         return this.map.entrySet();
+    }
+
+    @Override
+    public void toMap(final Map<K, Integer> map) {
+        map.putAll(this.map);
+    }
+
+    @Override
+    public Map<K, Integer> asMap() {
+        return Collections.unmodifiableMap(this.map);
+    }
+
+    @Override
+    public Iterator<Entry<K, Integer>> iterator() {
+        return entrySet().iterator();
+    }
+
+    @Override
+    public void forEach(final Consumer<? super Entry<K, Integer>> action) {
+        entrySet().forEach(action);
+    }
+
+    @Override
+    public Spliterator<Entry<K, Integer>> spliterator() {
+        return entrySet().spliterator();
     }
 
 }

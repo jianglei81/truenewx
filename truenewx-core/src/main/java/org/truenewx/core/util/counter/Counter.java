@@ -1,5 +1,6 @@
 package org.truenewx.core.util.counter;
 
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -9,7 +10,7 @@ import java.util.Set;
  * @author jianglei
  * @since JDK 1.8
  */
-public interface Counter<K> {
+public interface Counter<K> extends Iterable<Entry<K, Integer>> {
 
     int add(K key, int step);
 
@@ -24,5 +25,9 @@ public interface Counter<K> {
     Set<K> keySet();
 
     Set<Entry<K, Integer>> entrySet();
+
+    void toMap(final Map<K, Integer> map);
+
+    Map<K, Integer> asMap();
 
 }
