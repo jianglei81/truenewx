@@ -10,7 +10,7 @@ import java.util.HashMap;
  */
 public class HashCounter<K> extends AbstractCounter<K> {
 
-    protected HashCounter() {
+    public HashCounter() {
         super(new HashMap<>());
     }
 

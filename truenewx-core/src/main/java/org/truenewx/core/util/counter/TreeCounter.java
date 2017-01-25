@@ -10,7 +10,7 @@ import java.util.TreeMap;
  */
 public class TreeCounter<K> extends AbstractCounter<K> {
 
-    protected TreeCounter() {
+    public TreeCounter() {
         super(new TreeMap<>());
     }
 

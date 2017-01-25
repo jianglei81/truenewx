@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
  */
 public class LinkedHashCounter<K> extends AbstractCounter<K> {
 
-    protected LinkedHashCounter() {
+    public LinkedHashCounter() {
         super(new LinkedHashMap<>());
     }
 
