@@ -262,8 +262,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
                     }
                 }
             }
-        } else if (Number.class.isAssignableFrom(declaredArgType)
-                && Number.class.isAssignableFrom(actualArgType)) { // 声明和实际均为数字
+        } else { // 其它需要转换的情况，均先序列号成字符串再反序列化为指定声明类型
             args[i] = this.serializer.deserializeBean(this.serializer.serializeBean(arg),
                     declaredArgType);
         }
