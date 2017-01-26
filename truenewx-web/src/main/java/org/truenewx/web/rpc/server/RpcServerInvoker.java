@@ -91,8 +91,8 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
 
     private RpcControllerMeta buildMeta(final String beanId, final Object bean) {
         if (bean.getClass().getAnnotation(RpcController.class) == null) {
-            throw new IllegalArgumentException("The '" + beanId + "' is not an "
-                            + RpcController.class.getSimpleName());
+            throw new IllegalArgumentException(
+                    "The '" + beanId + "' is not an " + RpcController.class.getSimpleName());
         }
         final RpcControllerMeta meta = new RpcControllerMeta(beanId, bean);
         this.metaMap.put(beanId, meta);
@@ -123,8 +123,8 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
      */
     @Override
     public RpcInvokeResult invoke(final String beanId, final String methodName,
-                    final String argString, final HttpServletRequest request,
-                    final HttpServletResponse response) throws Throwable {
+            final String argString, final HttpServletRequest request,
+            final HttpServletResponse response) throws Throwable {
         final RpcControllerMeta meta = getMeta(beanId);
         Method method;
         Object[] args;
@@ -161,20 +161,21 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
                 // 集合或数组类型参数需重新按照元素类型反序列化
                 final RpcArg rpcArg = ArrayUtil.get(rpcArgs, i);
                 if ((Collection.class.isAssignableFrom(argType) && rpcArg != null
-                                && rpcArg.componentType() != Object.class)
-                                || (argType.isArray() && ClassUtil
-                                                .isComplex(argType.getComponentType()))) {
+                        && rpcArg.componentType() != Object.class)
+                        || (argType.isArray() && ClassUtil.isComplex(argType.getComponentType()))) {
                     final String argValueString = this.serializer.serializeBean(args[i]);
                     args[i] = deserializeArgValue(argValueString, argType, rpcArg);
                 }
             }
             final Class<?>[] argTypes = getArgTypes(args); // 实际参数类型集
             // 此时参数个数必然相等，但参数类型可能不等价，需要进行参数转换
-            if (requiresTransfer(declaredArgTypes, argTypes)) {
-                args = this.serializer.deserializeArray(argString, declaredArgTypes);
+            for (int i = 0; i < argTypes.length; i++) {
+                // 参数类型不等价，则该参数需要转换
+                if (args[i] != null // 参数值为null的不需要转换
+                        && !PredEquivalentClass.INSTANCE.apply(declaredArgTypes[i], argTypes[i])) {
+                    transferArgValue(method, declaredArgTypes, args, i);
+                }
             }
-            // 参数类型转换
-            transfer(method, declaredArgTypes, args);
         }
 
         // 执行调用
@@ -198,8 +199,78 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private void transferArgValue(final Method method, final Class<?>[] declaredArgTypes,
+            final Object[] args, final int i)
+            throws InstantiationException, IllegalAccessException {
+        final Class<?> declaredArgType = declaredArgTypes[i];
+        final Object arg = args[i];
+        final Class<?> actualArgType = arg.getClass();
+        if (Collection.class.isAssignableFrom(declaredArgType)) { // 声明为集合
+            if (actualArgType.isArray()) { // 实际为数组
+                final Collection<?> newCollection = (Collection<?>) declaredArgType.newInstance();
+                final Object array = arg;
+                CollectionUtils.mergeArrayIntoCollection(array, newCollection);
+                args[i] = newCollection;
+            } else if (Collection.class.isAssignableFrom(actualArgType)) { // 实际也为集合
+                final RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
+                final RpcArg rpcArg = ArrayUtil.get(rpcMethod.args(), i);
+                if (rpcArg != null) {
+                    final Class<?> componentType = rpcArg.componentType();
+                    if (componentType != Object.class) {
+                        @SuppressWarnings("rawtypes")
+                        final Collection newCollection = (Collection) actualArgType.newInstance();
+                        for (final Object obj : (Collection<?>) arg) {
+                            if (obj instanceof Map) { // 元素为Map才可转换
+                                final Map<String, Object> map = (Map<String, Object>) obj;
+                                final Object bean = BeanUtil.toBean(map, componentType);
+                                newCollection.add(bean);
+                            } else {
+                                newCollection.add(obj);
+                            }
+                        }
+                        args[i] = newCollection;
+                    }
+                }
+            }
+        } else if (Collection.class.isAssignableFrom(actualArgType) && declaredArgType.isArray()) { // 声明为数组，实际为集合
+            final Collection<?> collection = (Collection<?>) arg;
+            final Class<?> componentType = declaredArgType.getComponentType();
+            args[i] = Array.newInstance(componentType, collection.size());
+            int j = 0;
+            for (Object value : collection) {
+                if (value instanceof Map && !Map.class.isAssignableFrom(componentType)
+                        && !componentType.isPrimitive()) { // 实际值为Map，期望值为复合对象
+                    value = BeanUtil.toBean((Map<String, Object>) value, componentType);
+                }
+                Array.set(arg, j++, value);
+            }
+        } else if (Map.class.isAssignableFrom(declaredArgType)
+                && Map.class.isAssignableFrom(actualArgType)) { // 声明和实际均为Map
+            final RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
+            final RpcArg rpcArg = ArrayUtil.get(rpcMethod.args(), i);
+            if (rpcArg != null) {
+                final Class<?> componentType = rpcArg.componentType();
+                if (componentType != Object.class) {
+                    final Map<String, Object> map = (Map<String, Object>) arg;
+                    for (final Entry<String, Object> entry : map.entrySet()) {
+                        Object value = entry.getValue();
+                        if (value instanceof Map) { // Map的值为Map才可以转换
+                            value = BeanUtil.toBean((Map<String, Object>) value, componentType);
+                            entry.setValue(value);
+                        }
+                    }
+                }
+            }
+        } else if (Number.class.isAssignableFrom(declaredArgType)
+                && Number.class.isAssignableFrom(actualArgType)) { // 声明和实际均为数字
+            args[i] = this.serializer.deserializeBean(this.serializer.serializeBean(arg),
+                    declaredArgType);
+        }
+    }
+
     private Object deserializeArgValue(final String argValueString, final Class<?> argType,
-                    final RpcArg rpcArg) {
+            final RpcArg rpcArg) {
         if (Collection.class.isAssignableFrom(argType)) { // 声明参数类型为集合，则按指定元素类型反序列化
             final Class<?> elementType = rpcArg != null ? rpcArg.componentType() : Object.class;
             return this.serializer.deserializeList(argValueString, elementType);
@@ -217,99 +288,6 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
         } else { // 默认按声明参数类型反序列化
             return this.serializer.deserializeBean(argValueString, argType);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void transfer(final Method method, final Class<?>[] declaredArgTypes,
-                    final Object[] args) throws Exception {
-        for (int i = 0; i < declaredArgTypes.length; i++) {
-            if (args[i] != null) { // 实际值为null时，不需要转换
-                if (Collection.class.isAssignableFrom(declaredArgTypes[i])) { // 声明为集合
-                    if (args[i].getClass().isArray()) { // 实际为数组
-                        final Collection<?> newCollection = (Collection<?>) declaredArgTypes[i]
-                                        .newInstance();
-                        final Object array = args[i];
-                        CollectionUtils.mergeArrayIntoCollection(array, newCollection);
-                        args[i] = newCollection;
-                    } else if (Collection.class.isAssignableFrom(args[i].getClass())) { // 实际也为集合
-                        final RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
-                        final RpcArg rpcArg = ArrayUtil.get(rpcMethod.args(), i);
-                        if (rpcArg != null) {
-                            final Class<?> componentType = rpcArg.componentType();
-                            if (componentType != Object.class) {
-                                @SuppressWarnings("rawtypes")
-                                final Collection newCollection = (Collection) args[i].getClass()
-                                                .newInstance();
-                                for (final Object obj : (Collection<?>) args[i]) {
-                                    if (obj instanceof Map) { // 元素为Map才可转换
-                                        final Map<String, Object> map = (Map<String, Object>) obj;
-                                        final Object bean = BeanUtil.toBean(map, componentType);
-                                        newCollection.add(bean);
-                                    } else {
-                                        newCollection.add(obj);
-                                    }
-                                }
-                                args[i] = newCollection;
-                            }
-                        }
-                    }
-                } else if (Collection.class.isAssignableFrom(args[i].getClass())
-                                && declaredArgTypes[i].isArray()) { // 声明为数组，实际为集合
-                    final Collection<?> collection = (Collection<?>) args[i];
-                    final Class<?> componentType = declaredArgTypes[i].getComponentType();
-                    args[i] = Array.newInstance(componentType, collection.size());
-                    int j = 0;
-                    for (Object value : collection) {
-                        if (value instanceof Map && !Map.class.isAssignableFrom(componentType)
-                                        && !componentType.isPrimitive()) { // 实际值为Map，期望值为复合对象
-                            value = BeanUtil.toBean((Map<String, Object>) value, componentType);
-                        }
-                        Array.set(args[i], j++, value);
-                    }
-                } else if (Map.class.isAssignableFrom(declaredArgTypes[i])
-                                && Map.class.isAssignableFrom(args[i].getClass())) { // 声明和实际均为Map
-                    final RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
-                    final RpcArg rpcArg = ArrayUtil.get(rpcMethod.args(), i);
-                    if (rpcArg != null) {
-                        final Class<?> componentType = rpcArg.componentType();
-                        if (componentType != Object.class) {
-                            final Map<String, Object> map = (Map<String, Object>) args[i];
-                            for (final Entry<String, Object> entry : map.entrySet()) {
-                                Object value = entry.getValue();
-                                if (value instanceof Map) { // Map的值为Map才可以转换
-                                    value = BeanUtil.toBean((Map<String, Object>) value,
-                                                    componentType);
-                                    entry.setValue(value);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 判断是否需要进行参数类型转换<br/>
-     * 注意：必须确保两个类型集长度一致
-     *
-     * @param declaredArgTypes
-     *            声明类型集
-     * @param actualArgTypes
-     *            实际类型集
-     * @return 是否需要进行参数类型转换
-     *
-     * @author jianglei
-     */
-    private boolean requiresTransfer(final Class<?>[] declaredArgTypes,
-                    final Class<?>[] actualArgTypes) {
-        for (int i = 0; i < declaredArgTypes.length; i++) {
-            if (!PredEquivalentClass.INSTANCE.apply(declaredArgTypes[i], actualArgTypes[i])) {
-                // 只要有一个类型不是等价的，就需要进行转换
-                return true;
-            }
-        }
-        return false;
     }
 
     private Class<?>[] getArgTypes(final Object[] args) {
@@ -332,7 +310,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
 
     @Override
     public RpcVariableMeta getArgMeta(final String beanId, final String methodName,
-                    final int argCount, final int argIndex) {
+            final int argCount, final int argIndex) {
         final RpcControllerMeta meta = getMeta(beanId);
         try {
             final RpcMethodMeta methodMeta = meta.getMethodMeta(methodName, argCount);
@@ -346,7 +324,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
 
     @Override
     public String getEnumSubType(final String beanId, final String methodName, final int argCount,
-                    final Class<? extends Enum<?>> enumClass) {
+            final Class<? extends Enum<?>> enumClass) {
         final RpcControllerMeta meta = getMeta(beanId);
         try {
             final Method method = meta.getMethod(methodName, argCount);
@@ -365,7 +343,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
 
     @Override
     public RpcResultFilter getResultFilter(final String beanId, final String methodName,
-                    final int argCount, final Class<?> resultType) {
+            final int argCount, final Class<?> resultType) {
         final RpcControllerMeta meta = getMeta(beanId);
         try {
             final Method method = meta.getMethod(methodName, argCount);
