@@ -60,7 +60,7 @@
                 w=oOptions.minWidth;
             }
             if(h<oOptions.minHeight){
-                w=oOptions.minWidth;
+                h=oOptions.minHeight;
             }
             imgObj.height(h);
             imgObj.width(w);
@@ -146,6 +146,7 @@
                                                             && oOptions.newFilename != "") {
                                                         filename = oOptions.newFilename;
                                                     }
+                                                    winThis.close();
                                                     _this.unstructuredUpload
                                                             .upload({
                                                                 filename : filename,
@@ -169,7 +170,6 @@
                                                                             && typeof oOptions.endCallback == 'function') {
                                                                         oOptions.endCallback($ele);
                                                                     }
-                                                                    winThis.close();
                                                                 },
                                                                 errorCallback : function(err) {
                                                                     oOptions.errorCallback(err);
@@ -362,13 +362,19 @@
             var isIe7 = userAgent.indexOf("MSIE 7.0") > 0;
             var isIe6 = userAgent.indexOf("MSIE 6.0") > 0;
             var isIe8 = userAgent.indexOf("MSIE 8.0") > 0;
+            var isChrome=userAgent.indexOf("Chrome") > 0;
+            var eventNames="input propertychange";
             this.unstructuredUpload = $ele.unstructuredUpload({
                 authorizeType : oOptions.authorizeType
             }); // 渲染非结构化上传插件
-            $ele.prop("accept", "image/*")
+            if(!isChrome){
+                $ele.prop("accept", "image/*");
+            }else{
+                eventNames="change";
+            }
+
             $ele
-                    .bind(
-                            'input propertychange',
+                    .bind(eventNames,
                             function(e) {
                                 var files = this.files;
                                 var imageUrl;
