@@ -10,8 +10,8 @@ import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
 import org.springframework.context.ApplicationContext;
-import org.truenewx.core.region.RegionOption;
-import org.truenewx.core.region.RegionOptionSource;
+import org.truenewx.core.region.Region;
+import org.truenewx.core.region.RegionSource;
 import org.truenewx.core.spring.util.SpringUtil;
 import org.truenewx.web.spring.util.SpringWebUtil;
 
@@ -79,15 +79,15 @@ public class RegionViewTag extends TagSupport {
 
     public String getParentCaptions() {
         final ApplicationContext context = SpringWebUtil.getApplicationContext(this.pageContext);
-        final RegionOptionSource regionOptionSource = SpringUtil.getFirstBeanByClass(context,
-                RegionOptionSource.class);
-        final RegionOption option = regionOptionSource.getRegionOption(this.value,
+        final RegionSource regionSource = SpringUtil.getFirstBeanByClass(context,
+                RegionSource.class);
+        final Region option = regionSource.getRegion(this.value,
                 this.pageContext.getRequest().getLocale());
 
         final List<String> options = new ArrayList<>();
         final StringBuffer caption = new StringBuffer();
         if (option != null) {
-            RegionOption parent = option.getParent();
+            Region parent = option.getParent();
             options.add(option.getCaption());
             while (parent != null) {
                 options.add(0, parent.getCaption());

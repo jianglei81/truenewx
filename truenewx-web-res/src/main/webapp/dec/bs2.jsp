@@ -22,6 +22,7 @@ function selectMenu(index){
 <body style="padding-top: 55px; position: relative;"<decorator:getProperty property="body.required-class" writeEntireProperty="true"/><decorator:getProperty property="body.component" writeEntireProperty="true"/><decorator:getProperty property="body.script" writeEntireProperty="true"/>>
 <jsp:include page="/header">
     <jsp:param name="bsVersion" value="2"/>
+    <jsp:param name="navIndex" value="2"/>
 </jsp:include>
 <div class="container">
     <div class="row">

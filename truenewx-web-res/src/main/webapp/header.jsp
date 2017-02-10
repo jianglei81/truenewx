@@ -21,6 +21,8 @@
                         <a href="${context}/component/bs2">Bootstrap2组件</a></li>
                     <li<c:if test="${param.navIndex == 3}"> class="active"</c:if>>
                         <a href="${context}/component/bs3">Bootstrap3组件</a></li>
+                    <li<c:if test="${param.navIndex == 4}"> class="active"</c:if>>
+                        <a href="${context}/tool">工具</a></li>
                 </ul>
             </div>
         </div>
@@ -48,6 +50,8 @@
                     <a href="${context}/component/bs2">Bootstrap2组件</a></li>
                 <li<c:if test="${param.navIndex == 3}"> class="active"</c:if>>
                     <a href="${context}/component/bs3">Bootstrap3组件</a></li>
+                <li<c:if test="${param.navIndex == 4}"> class="active"</c:if>>
+                    <a href="${context}/tool">工具</a></li>
             </ul>
         </div>
     </div>

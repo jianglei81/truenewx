@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.truenewx.core.Strings;
 import org.truenewx.core.net.InetAddressRange;
 import org.truenewx.core.net.InetAddressSet;
-import org.truenewx.core.region.RegionOption;
-import org.truenewx.core.region.RegionOptionSource;
+import org.truenewx.core.region.Region;
+import org.truenewx.core.region.RegionSource;
 import org.truenewx.core.util.ArrayUtil;
 import org.truenewx.core.util.NetUtil;
 
@@ -30,7 +30,7 @@ import org.truenewx.core.util.NetUtil;
  */
 public class Cz88RegionInetAddressSetMapParser implements RegionInetAddressSetMapParser {
 
-    private RegionOptionSource regionOptionSource;
+    private RegionSource regionSource;
     private String defaultNation = "CN";
 
     private String[] removedProvinceSuffixes = new String[0];
@@ -42,8 +42,8 @@ public class Cz88RegionInetAddressSetMapParser implements RegionInetAddressSetMa
     private Map<String, String> cityMapping = new HashMap<>();
     private Map<String, String> countyMapping = new HashMap<>();
 
-    public void setRegionOptionSource(final RegionOptionSource regionOptionSource) {
-        this.regionOptionSource = regionOptionSource;
+    public void setRegionSource(final RegionSource regionSource) {
+        this.regionSource = regionSource;
     }
 
     public void setDefaultNation(final String defaultNation) {
@@ -218,19 +218,19 @@ public class Cz88RegionInetAddressSetMapParser implements RegionInetAddressSetMa
                     }
                 }
             }
-            RegionOption regionOption = this.regionOptionSource.getRegionOption(this.defaultNation,
+            Region region = this.regionSource.getRegion(this.defaultNation,
                     provinceCaption, cityCaption, countyCaption, locale);
             // 如果无法取得区划选项，则尝试取上一级的区划选项
-            if (regionOption == null && countyCaption != null) {
-                regionOption = this.regionOptionSource.getRegionOption(this.defaultNation,
+            if (region == null && countyCaption != null) {
+                region = this.regionSource.getRegion(this.defaultNation,
                         provinceCaption, cityCaption, null, locale);
             }
-            if (regionOption == null && cityCaption != null) {
-                regionOption = this.regionOptionSource.getRegionOption(this.defaultNation,
+            if (region == null && cityCaption != null) {
+                region = this.regionSource.getRegion(this.defaultNation,
                         provinceCaption, null, null, locale);
             }
-            if (regionOption != null) {
-                return regionOption.getCode();
+            if (region != null) {
+                return region.getCode();
             }
         }
         return null;

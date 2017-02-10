@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.truenewx.core.region.RegionOption;
-import org.truenewx.core.region.RegionOptionSource;
+import org.truenewx.core.region.Region;
+import org.truenewx.core.region.RegionSource;
 import org.truenewx.web.rpc.server.annotation.RpcController;
 import org.truenewx.web.rpc.server.annotation.RpcMethod;
 import org.truenewx.web.rpc.server.annotation.RpcResult;
@@ -24,54 +24,52 @@ import org.truenewx.web.spring.context.SpringWebContext;
  * @author jianglei
  * @since JDK 1.8
  */
-@RpcController("regionOptionController")
-public class RegionOptionController {
+@RpcController("regionController")
+public class RegionController {
     @Autowired
-    private RegionOptionSource regionOptionSource;
+    private RegionSource regionSource;
 
-    @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = RegionOption.class, includes = {
+    @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = Region.class, includes = {
             "code", "caption", "subs", "includingGrandSub" })))
-    public Map<String, RegionOption> getAll() {
+    public Map<String, Region> getAll() {
         final Locale locale = SpringWebContext.getLocale();
-        final Map<String, RegionOption> result = new LinkedHashMap<>();
-        final Collection<RegionOption> nationalOptions = this.regionOptionSource
-                .getNationalRegionOptions(locale);
-        for (final RegionOption nationalOption : nationalOptions) {
+        final Map<String, Region> result = new LinkedHashMap<>();
+        final Collection<Region> nationalOptions = this.regionSource.getNationalRegions(locale);
+        for (final Region nationalOption : nationalOptions) {
             result.put(nationalOption.getCode(), nationalOption);
         }
         return result;
     }
 
-    @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = RegionOption.class, includes = {
+    @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = Region.class, includes = {
             "code", "caption", "subs", "includingGrandSub" })))
-    public Map<String, RegionOption> getLimits(final String[] limits) {
+    public Map<String, Region> getLimits(final String[] limits) {
         if (ArrayUtils.isEmpty(limits)) {
             return null;
         }
-        final List<RegionOption> limitRegions = new ArrayList<>();
+        final List<Region> limitRegions = new ArrayList<>();
         final Locale locale = SpringWebContext.getLocale();
         for (final String limit : limits) {
-            limitRegions.add(this.regionOptionSource.getRegionOption(limit, locale));
+            limitRegions.add(this.regionSource.getRegion(limit, locale));
         }
-        final Map<String, RegionOption> result = new HashMap<>();
-        for (final RegionOption regionOption : limitRegions) {
-            transLimitRegions(result, regionOption);
+        final Map<String, Region> result = new HashMap<>();
+        for (final Region region : limitRegions) {
+            transLimitRegions(result, region);
         }
         return result;
     }
 
-    private void transLimitRegions(final Map<String, RegionOption> limitRegions,
-            final RegionOption region) {
-        final List<RegionOption> link = region.getLinkFromTop();
-        RegionOption originalOption = link.get(0); // 至少有一个
-        RegionOption cloneOption = limitRegions.get(originalOption.getCode());
+    private void transLimitRegions(final Map<String, Region> limitRegions, final Region region) {
+        final List<Region> link = region.getLinkFromTop();
+        Region originalOption = link.get(0); // 至少有一个
+        Region cloneOption = limitRegions.get(originalOption.getCode());
         if (cloneOption == null) { // 没有顶级选项，则克隆一个加入
             cloneOption = originalOption.clone(false);
             limitRegions.put(cloneOption.getCode(), cloneOption);
         }
         for (int i = 1; i < link.size(); i++) {
             originalOption = link.get(i);
-            RegionOption sub = cloneOption.getSubByCode(originalOption.getCode());
+            Region sub = cloneOption.getSubByCode(originalOption.getCode());
             if (sub == null) {
                 sub = originalOption.clone(false);
                 cloneOption.addSub(sub);
@@ -80,11 +78,11 @@ public class RegionOptionController {
         }
     }
 
-    @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = RegionOption.class, includes = {
+    @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = Region.class, includes = {
             "code", "caption", "parentCode", "subs" })))
-    public RegionOption getNationalRegionOption(final String nation) {
+    public Region getNationalRegion(final String nation) {
         final Locale locale = SpringWebContext.getLocale();
-        return this.regionOptionSource.getNationalRegionOption(nation, locale);
+        return this.regionSource.getNationalRegion(nation, locale);
     }
 
     /**
@@ -98,9 +96,9 @@ public class RegionOptionController {
     public Iterable<String> getParentCodes(final String region) {
         final List<String> codes = new ArrayList<>();
         final Locale locale = SpringWebContext.getLocale();
-        final RegionOption option = this.regionOptionSource.getRegionOption(region, locale);
+        final Region option = this.regionSource.getRegion(region, locale);
         if (option != null) {
-            RegionOption parent = option.getParent();
+            Region parent = option.getParent();
             while (parent != null) {
                 codes.add(0, parent.getCode());
                 parent = parent.getParent();

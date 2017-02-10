@@ -6,18 +6,18 @@
 
     <context:component-scan base-package="org.truenewx.core" />
 
-    <bean id="regionOptionsParser" class="org.truenewx.core.region.StatsGovCnRegionOptionsParser">
-        <property name="excludedCaption" value="*市辖区,县,*行政区划,台湾,香港,澳门" />
+    <bean id="regionMapParser" class="org.truenewx.core.region.StatsGovCnRegionMapParser">
+        <property name="excludedCaption" value="*市辖区,县,*行政区划,台湾*,香港*,澳门*" />
     </bean>
 
-    <bean id="regionOptionSource" class="org.truenewx.core.region.RegionOptionSourceImpl">
-        <property name="nationalOptionSources">
+    <bean id="regionSource" class="org.truenewx.core.region.RegionSourceImpl">
+        <property name="nationalSources">
             <list>
-                <bean class="org.truenewx.core.region.NationalRegionOptionSourceImpl">
+                <bean class="org.truenewx.core.region.NationalRegionSourceImpl">
                     <property name="nation" value="CN" />
-                    <property name="parser" ref="regionOptionsParser" />
+                    <property name="parser" ref="regionMapParser" />
                 </bean>
-                <bean class="org.truenewx.core.region.NationalRegionOptionSourceImpl">
+                <bean class="org.truenewx.core.region.NationalRegionSourceImpl">
                     <property name="nation" value="OT" />
                 </bean>
             </list>
@@ -25,7 +25,7 @@
     </bean>
 
     <bean id="regionInetAddressSetMapParser" class="org.truenewx.core.region.address.Cz88RegionInetAddressSetMapParser">
-        <property name="regionOptionSource" ref="regionOptionSource" />
+        <property name="regionSource" ref="regionSource" />
         <property name="lineMapping">
             <map>
                 <entry key="台湾省.*" value="台湾省" />

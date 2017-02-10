@@ -13,12 +13,12 @@ import org.truenewx.core.spring.context.MessagesSource;
 import org.truenewx.core.spring.context.ReloadableResourceBundleMessagesSource;
 
 /**
- * 国家级区划选项解决器实现
+ * 国家级区划来源实现
  *
  * @author jianglei
  * @since JDK 1.8
  */
-public class NationalRegionOptionSourceImpl implements NationalRegionOptionSource {
+public class NationalRegionSourceImpl implements NationalRegionSource {
     /**
      * 资源文件目录
      */
@@ -34,30 +34,30 @@ public class NationalRegionOptionSourceImpl implements NationalRegionOptionSourc
     /**
      * 区域选项映射集解析器
      */
-    private RegionOptionsParser parser;
+    private RegionMapParser parser;
     /**
      * 显示区域-当前国家级选项的映射集
      */
-    private Map<Locale, RegionOption> localeNationalOptionMap = new HashMap<>();
+    private Map<Locale, Region> localeNationalOptionMap = new HashMap<>();
     /**
      * 显示区域-区划代号-区划选项的映射集
      */
-    private Map<Locale, Map<String, RegionOption>> localeCodeSubsMap = new HashMap<>();
+    private Map<Locale, Map<String, Region>> localeCodeSubsMap = new HashMap<>();
     /**
      * 显示区域-区划名称-区划选项的映射集
      */
-    private Map<Locale, Map<String, RegionOption>> localeCaptionSubsMap = new HashMap<>();
+    private Map<Locale, Map<String, Region>> localeCaptionSubsMap = new HashMap<>();
 
     public void setNation(final String nation) {
-        Assert.isTrue(nation.length() == RegionOptionSource.NATION_LENGTH,
-                "The length of nation must be " + RegionOptionSource.NATION_LENGTH);
+        Assert.isTrue(nation.length() == RegionSource.NATION_LENGTH,
+                "The length of nation must be " + RegionSource.NATION_LENGTH);
         this.nation = nation.toUpperCase();
         // 设置好国家代号后，即可初始化国际化消息来源
         this.messagesSource = new ReloadableResourceBundleMessagesSource(
                 StringUtils.join(RESOURCE_DIR, this.nation));
     }
 
-    public void setParser(final RegionOptionsParser parser) {
+    public void setParser(final RegionMapParser parser) {
         this.parser = parser;
     }
 
@@ -67,25 +67,24 @@ public class NationalRegionOptionSourceImpl implements NationalRegionOptionSourc
     }
 
     @Override
-    public RegionOption getNationalRegionOption(Locale locale) {
+    public Region getNationalRegion(Locale locale) {
         if (locale == null) {
             locale = Locale.getDefault();
         }
-        RegionOption regionOption = this.localeNationalOptionMap.get(locale);
-        if (regionOption == null) {
-            regionOption = buildNationalOption(locale);
+        Region region = this.localeNationalOptionMap.get(locale);
+        if (region == null) {
+            region = buildNationalOption(locale);
         }
-        return regionOption;
+        return region;
     }
 
     @Override
     @Nullable
-    public RegionOption getSubRegionOption(final String code, @Nullable
-    Locale locale) {
+    public Region getSubRegion(final String code, @Nullable Locale locale) {
         if (locale == null) {
             locale = Locale.getDefault();
         }
-        Map<String, RegionOption> codeSubsMap = this.localeCodeSubsMap.get(locale);
+        Map<String, Region> codeSubsMap = this.localeCodeSubsMap.get(locale);
         if (codeSubsMap == null) {
             buildNationalOption(locale);
             codeSubsMap = this.localeCodeSubsMap.get(locale);
@@ -97,12 +96,12 @@ public class NationalRegionOptionSourceImpl implements NationalRegionOptionSourc
     }
 
     @Override
-    public RegionOption getSubRegionOption(final String provinceCaption, final String cityCaption,
+    public Region getSubRegion(final String provinceCaption, final String cityCaption,
             final String countyCaption, Locale locale) {
         if (locale == null) {
             locale = Locale.getDefault();
         }
-        Map<String, RegionOption> captionSubsMap = this.localeCaptionSubsMap.get(locale);
+        Map<String, Region> captionSubsMap = this.localeCaptionSubsMap.get(locale);
         if (captionSubsMap == null) {
             buildNationalOption(locale);
             captionSubsMap = this.localeCaptionSubsMap.get(locale);
@@ -128,20 +127,20 @@ public class NationalRegionOptionSourceImpl implements NationalRegionOptionSourc
      * @return 当前国家区划选项
      */
     @Nullable
-    private RegionOption buildNationalOption(final Locale locale) {
+    private Region buildNationalOption(final Locale locale) {
         final Map<String, String> messages = this.messagesSource.getMessages(locale);
         final String nationCaption = messages.get(this.nation);
         if (nationCaption != null) { // 取得到国家显示名才构建国家级区域选项
-            final RegionOption nationalOption = new RegionOption(this.nation, nationCaption);
+            final Region nationalOption = new Region(this.nation, nationCaption);
             if (this.parser != null) {
-                final Iterable<RegionOption> subs = this.parser.parseAll(messages);
+                final Iterable<Region> subs = this.parser.parseAll(messages);
 
-                final Map<String, RegionOption> codeSubsMap = new HashMap<>();
-                final Map<String, RegionOption> captionSubsMap = new HashMap<>();
-                for (final RegionOption sub : subs) {
+                final Map<String, Region> codeSubsMap = new HashMap<>();
+                final Map<String, Region> captionSubsMap = new HashMap<>();
+                for (final Region sub : subs) {
                     codeSubsMap.put(sub.getCode(), sub);
                     final StringBuffer caption = new StringBuffer(sub.getCaption());
-                    RegionOption parent = sub.getParent();
+                    Region parent = sub.getParent();
                     if (parent == null) { // 所有子选项中未指定父选项的才作为下一级子选项加入国家级选项中
                         nationalOption.addSub(sub);
                     }

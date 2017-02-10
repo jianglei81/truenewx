@@ -1,0 +1,82 @@
+/* =========================================================
+ * bootstrap-treeview.css v1.2.0
+ * =========================================================
+ * Copyright 2013 Jonathan Miles 
+ * Project URL : http://www.jondmiles.com/bootstrap-treeview
+ *	
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ========================================================= */
+
+.treeview .list-group-item {
+	cursor: pointer;
+}
+
+.treeview span.indent {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.treeview span.icon {
+	width: 12px;
+	margin-right: 5px;
+}
+
+.treeview .node-disabled {
+	color: silver;
+	cursor: not-allowed;
+}
+
+/* ==
+ * 以下为扩展部分
+ * == */
+
+.treeview {
+    padding: 0px;
+}
+
+.treeview .list-group {
+    box-shadow: none;
+}
+
+.treeview .list-group-item {
+    padding: 10px;
+}
+
+.treeview .list-group:last-child {
+    margin-bottom: 0px;
+}
+
+.treeview .node-editing input {
+    color: #333;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    height: 20px;
+}
+
+.treeview .dragging span:first-child {
+    color: #000;
+    background-color: #ddd;
+    padding-left: 2px;
+    padding-right: 2px;
+    display: block;
+    float: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+}
+
+.treeview .dragging span:last-child {
+    margin-left: 3px;
+}
+

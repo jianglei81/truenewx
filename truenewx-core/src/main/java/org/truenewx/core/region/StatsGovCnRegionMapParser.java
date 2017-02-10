@@ -2,10 +2,8 @@ package org.truenewx.core.region;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -13,23 +11,16 @@ import org.truenewx.core.Strings;
 import org.truenewx.core.util.StringUtil;
 
 /**
- * 源于国家统计局数据的区划选项解析器
+ * 源于中国国家统计局数据的行政区划映射集解析器
  *
  * @author jianglei
  * @since JDK 1.8
  */
-public class StatsGovCnRegionOptionsParser implements RegionOptionsParser {
+public class StatsGovCnRegionMapParser implements RegionMapParser {
     /**
      * 要排除的显示名集合
      */
     private String[] excludedCaptions;
-
-    private Comparator<Entry<String, String>> comparator = new Comparator<Map.Entry<String, String>>() {
-        @Override
-        public int compare(final Entry<String, String> entry1, final Entry<String, String> entry2) {
-            return entry1.getKey().toString().compareTo(entry2.getKey().toString());
-        }
-    };
 
     public void setExcludedCaptions(final String[] excludedCaptions) {
         this.excludedCaptions = excludedCaptions;
@@ -40,18 +31,15 @@ public class StatsGovCnRegionOptionsParser implements RegionOptionsParser {
     }
 
     @Override
-    public Iterable<RegionOption> parseAll(final Map<String, String> codeCaptionMap) {
-        // 取得排好序的条目集
-        final Set<Entry<String, String>> entrySet = new TreeSet<>(this.comparator);
-        entrySet.addAll(codeCaptionMap.entrySet());
-
-        // 遍历排序后的条目集构建结果
-        final Collection<RegionOption> result = new ArrayList<>();
-        final Map<String, RegionOption> codeOptionMap = new HashMap<>();
-        for (final Entry<String, String> entry : entrySet) {
-            final String code = entry.getKey();
+    public Iterable<Region> parseAll(final Map<String, String> codeCaptionMap) {
+        // 取得排好序的代号集
+        final Set<String> codes = new TreeSet<>(codeCaptionMap.keySet());
+        // 遍历排序后的代号集构建结果
+        final Collection<Region> result = new ArrayList<>();
+        final Map<String, Region> codeOptionMap = new HashMap<>();
+        for (final String code : codes) {
             if (code.length() == 8) { // 代码一定是8位的
-                final String value = entry.getValue();
+                final String value = codeCaptionMap.get(code);
                 final String caption;
                 final String group;
                 final int index = value.indexOf(Strings.LEFT_BRACKET);
@@ -64,12 +52,12 @@ public class StatsGovCnRegionOptionsParser implements RegionOptionsParser {
                     group = null;
                 }
                 if (!StringUtil.wildcardMatchOneOf(caption, this.excludedCaptions)) { // 检查是否被排除
-                    final RegionOption option;
+                    final Region option;
                     if (code.endsWith("0000")) { // 0000结尾的为省级区划，省级区划不需要考虑父级选项，且所有省级区划均为有效
-                        option = new RegionOption(code, caption, group);
+                        option = new Region(code, caption, group);
                     } else { // 其它为市级或县级区划，需考虑父级选项
-                        option = new RegionOption(code, caption, group);
-                        final RegionOption parentOption = getParentOption(codeOptionMap, code);
+                        option = new Region(code, caption, group);
+                        final Region parentOption = getParentOption(codeOptionMap, code);
                         if (parentOption != null) {
                             parentOption.addSub(option);
                         }
@@ -91,13 +79,12 @@ public class StatsGovCnRegionOptionsParser implements RegionOptionsParser {
      *            代号
      * @return 父级选项
      */
-    private RegionOption getParentOption(final Map<String, RegionOption> codeOptionMap,
-            final String code) {
+    private Region getParentOption(final Map<String, Region> codeOptionMap, final String code) {
         if (code.length() <= 2) { // 代号长度小于等于2，则不可能有父级
             return null;
         }
         final String parentCode = getParentCode(code); // 父级代号
-        final RegionOption parentOption = codeOptionMap.get(parentCode);
+        final Region parentOption = codeOptionMap.get(parentCode);
         if (parentOption != null) {
             return parentOption;
         }

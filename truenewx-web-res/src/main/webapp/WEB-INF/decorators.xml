@@ -12,6 +12,10 @@
     <decorator name="ajax" page="dec/ajax.jsp">
         <pattern>*.ajax</pattern>
     </decorator>
+    <decorator name="tool" page="dec/tool.jsp">
+        <pattern>/tool</pattern>
+        <pattern>/tool/*</pattern>
+    </decorator>
     <decorator name="bs3" page="dec/bs3.jsp">
         <pattern>*/*-bs3</pattern>
         <pattern>*/bs3</pattern>

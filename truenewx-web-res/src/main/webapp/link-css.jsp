@@ -9,4 +9,4 @@
 <link href="${context}/vendor/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet" type="text/css" />
 <link href="${context}/vendor/bootstrap/3.3.5/css/bootstrap-theme.css" rel="stylesheet" type="text/css" />
 </c:if>
-<link href="${context}/assets/css/layout.css" rel="stylesheet" type="text/css" />
+<link href="${context}/assets/css/site.css" rel="stylesheet" type="text/css" />

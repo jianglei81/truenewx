@@ -1,6 +1,7 @@
 package org.truenewx.core.region;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,12 +12,12 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * 行政区划选项
+ * 行政区划
  *
  * @author jianglei
  * @since JDK 1.8
  */
-public class RegionOption {
+public class Region {
     /**
      * 代号
      */
@@ -32,11 +33,11 @@ public class RegionOption {
     /**
      * 父选项
      */
-    private RegionOption parent;
+    private Region parent;
     /**
      * 子选项集
      */
-    private Map<String, RegionOption> subs;
+    private Map<String, Region> subs;
 
     /**
      * @param code
@@ -44,7 +45,7 @@ public class RegionOption {
      * @param caption
      *            显示名
      */
-    public RegionOption(final String code, final String caption) {
+    public Region(final String code, final String caption) {
         this.code = code;
         this.caption = caption;
     }
@@ -57,24 +58,36 @@ public class RegionOption {
      * @param group
      *            所属分组
      */
-    public RegionOption(final String code, final String caption, final String group) {
+    public Region(final String code, final String caption, final String group) {
         this(code, caption);
         this.group = group;
+    }
+
+    protected void setCode(final String code) {
+        this.code = code;
     }
 
     public String getCode() {
         return this.code;
     }
 
+    protected void setCaption(final String caption) {
+        this.caption = caption;
+    }
+
     public String getCaption() {
         return this.caption;
+    }
+
+    protected void setGroup(final String group) {
+        this.group = group;
     }
 
     public String getGroup() {
         return this.group;
     }
 
-    public RegionOption getParent() {
+    public Region getParent() {
         return this.parent;
     }
 
@@ -82,14 +95,18 @@ public class RegionOption {
         return this.parent == null ? null : this.parent.getCode();
     }
 
-    public Map<String, RegionOption> getSubs() {
+    public Map<String, Region> getSubs() {
         return this.subs;
+    }
+
+    public Collection<Region> getSubCollection() {
+        return this.subs == null ? null : this.subs.values();
     }
 
     /**
      * @return 获取确保非null的子选项集
      */
-    private Map<String, RegionOption> getNonNullSubs() {
+    private Map<String, Region> getNonNullSubs() {
         if (this.subs == null) {
             this.subs = new LinkedHashMap<>();
         }
@@ -102,7 +119,7 @@ public class RegionOption {
      * @param sub
      *            子选项
      */
-    public void addSub(final RegionOption sub) {
+    public void addSub(final Region sub) {
         sub.parent = this;
         getNonNullSubs().put(sub.getCode(), sub);
     }
@@ -115,7 +132,7 @@ public class RegionOption {
      * @return 匹配的子选项，如果没找到则返回null
      */
     @Nullable
-    public RegionOption getSubByCode(@Nullable final String code) {
+    public Region getSubByCode(@Nullable final String code) {
         if (this.subs != null && StringUtils.isNotEmpty(code)) {
             return this.subs.get(code);
         }
@@ -130,9 +147,9 @@ public class RegionOption {
      * @return 匹配的子选项，如果没找到则返回null
      */
     @Nullable
-    public RegionOption getSubByCaption(final String caption) {
+    public Region getSubByCaption(final String caption) {
         if (this.subs != null) {
-            for (final RegionOption sub : this.subs.values()) {
+            for (final Region sub : this.subs.values()) {
                 if (StringUtils.equals(caption, sub.getCaption())) {
                     return sub;
                 }
@@ -161,7 +178,7 @@ public class RegionOption {
      */
     public boolean isIncludingGrandSub() {
         if (this.subs != null) {
-            for (final RegionOption sub : this.subs.values()) {
+            for (final Region sub : this.subs.values()) {
                 if (sub.isIncludingSub()) {
                     // 只要有一个子级项有子级项，则说明有孙级
                     return true;
@@ -178,7 +195,7 @@ public class RegionOption {
      */
     public int getLevel() {
         int level = 0;
-        RegionOption parent = getParent();
+        Region parent = getParent();
         while (parent != null) {
             level++;
             parent = parent.getParent();
@@ -186,8 +203,8 @@ public class RegionOption {
         return level;
     }
 
-    public RegionOption clone(final boolean subs) {
-        final RegionOption option = new RegionOption(this.code, this.caption, this.group);
+    public Region clone(final boolean subs) {
+        final Region option = new Region(this.code, this.caption, this.group);
         option.parent = this.parent;
         if (subs) {
             option.subs = new LinkedHashMap<>(this.subs);
@@ -200,9 +217,9 @@ public class RegionOption {
      *
      * @return 当前选项在所处选项树中从顶级选项到当前选项的选项路径
      */
-    public List<RegionOption> getLinkFromTop() {
-        final List<RegionOption> link = new ArrayList<>();
-        RegionOption option = this;
+    public List<Region> getLinkFromTop() {
+        final List<Region> link = new ArrayList<>();
+        Region option = this;
         link.add(option);
         while (option.getParent() != null) {
             option = option.getParent();
