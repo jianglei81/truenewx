@@ -33,37 +33,40 @@
         reSizeImage : function(maxWidth, maxHeight, imgObj) {
             var hRatio;
             var wRatio;
-            var Ratio = 1;
+            var ratio = 1;
             var w = imgObj.width();
             var h = imgObj.height();
             var oOptions = this.options;
             wRatio = maxWidth / w;
             hRatio = maxHeight / h;
             if (maxWidth == 0 && maxHeight == 0) {
-                Ratio = 1;
+                ratio = 1;
             } else if (maxWidth == 0) {//
                 if (hRatio < 1) {
-                    Ratio = hRatio;
+                    ratio = hRatio;
                 }
             } else if (maxHeight == 0) {
                 if (wRatio < 1) {
-                    Ratio = wRatio;
+                    ratio = wRatio;
                 }
             } else if (wRatio < 1 || hRatio < 1) {
-                Ratio = (wRatio <= hRatio ? wRatio : hRatio);
+                ratio = (wRatio <= hRatio ? wRatio : hRatio);
+
             }
-            if (Ratio < 1) {
-                w = parseInt(w * Ratio);
-                h = parseInt(h * Ratio);
+            ratio=ratio.toFixed(2);
+            if (ratio < 1) {
+                w = parseInt(w * ratio);
+                h = parseInt(h * ratio);
             }
-            if(w<oOptions.minWidth){
+            if(w<oOptions.minWidth&&oOptions.minWidth<maxWidth){
                 w=oOptions.minWidth;
             }
-            if(h<oOptions.minHeight){
+            if(h<oOptions.minHeight&&oOptions.minHeight<maxHeight){
                 h=oOptions.minHeight;
             }
             imgObj.height(h);
             imgObj.width(w);
+            return ratio;
         },
         showModalCrop : function(imageUrl) {
             var oOptions = this.options;
@@ -73,8 +76,19 @@
                 var _this = this;
                 var $image = $("<img/>");
                 $image.unbind("load");
+                var ratio=1;
+                var windowWidth=$(window).width()-50;
+                var windowHeight=$(window).height()-150;
+                var cropWidth=oOptions.crop.width;
+                var cropHeight=oOptions.crop.height;
+                if(windowWidth<oOptions.crop.width){
+                    cropWidth=windowWidth;
+                }
+                if(windowHeight<oOptions.crop.height){
+                    cropHeight=windowHeight;
+                }
                 $image.bind("load", function() {
-                    _this.reSizeImage(oOptions.crop.width, oOptions.crop.height, $image);
+                    ratio=_this.reSizeImage(cropWidth, cropHeight, $image);
                     $image.show();
                     var imageWidth = $image.width();
                     var imageHeight = $image.height();
@@ -96,7 +110,13 @@
                     minWidth = Math.min(minWidth, imageWidth);// 为了防止最小选择框宽度比图片宽度还大
                     var minHeight = Math.max(oOptions.minHeight, 0);// 最小的选择框高度
                     minHeight = Math.min(minHeight, imageHeight);
-                    // $image.imageView();
+                    if(windowWidth<oOptions.crop.width||windowHeight<oOptions.crop.height){
+                        minWidth=minWidth*ratio;
+                        minHeight=minHeight*ratio;
+                        maxWidth=maxWidth*ratio;
+                        maxHeight=maxHeight*ratio;
+                    }
+
                     $image.Jcrop({
                         keySupport : false,
                         aspectRatio : oOptions.crop.aspectRatio,
@@ -120,7 +140,7 @@
                     });
                 });
                 var content = "<div id='concent' style='display: flex; width: "
-                        + oOptions.crop.width + "px; height: " + oOptions.crop.height
+                        + cropWidth + "px; height: " + cropHeight
                         + "px;margin:auto'></div>";
                 $.tnx
                         .dialog(
@@ -139,7 +159,16 @@
                                                 var select = _this.jcrop.tellSelect();
                                                 var imageWidth = $image.width();
                                                 var imageHeight = $image.height();
-                                                var x = select.x, y = select.y, width = select.w, height = select.h;
+                                                var x = parseInt(select.x), y = parseInt(select.y), width =select.w, height =select.h;
+                                                if(windowWidth<oOptions.crop.width||windowHeight<oOptions.crop.height){
+                                                    imageWidth=0;
+                                                    imageHeight=0;
+                                                    x = parseInt(x/ratio);
+                                                    y = parseInt(y/ratio);
+                                                    width = parseInt(width/ratio);
+                                                    height =parseInt(height/ratio);
+                                                }
+
                                                 if (_this.unstructuredUpload) {
                                                     var filename = "";
                                                     if (!oOptions.originalFilename
@@ -185,8 +214,8 @@
                                                 this.close();
                                             }
                                         } ], {
-                                    width : oOptions.crop.width + 50,
-                                    height : oOptions.crop.height,
+                                    width : cropWidth + 50,
+                                    height : cropHeight,
                                     events : {
                                         shown : function() {
                                             $("#concent").append($image);
