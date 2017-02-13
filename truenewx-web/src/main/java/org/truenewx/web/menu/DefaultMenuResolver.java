@@ -85,8 +85,9 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
                 newOperations.add(operation);
             }
         }
-        if (!item.matchesAuth(authorities) && newSubs.isEmpty() && newOperations.isEmpty()) {
-            return; // 当前菜单权限不匹配，且不包含匹配的子菜单和操作，则忽略当前菜单项
+        if ((StringUtils.isBlank(item.getAuth()) || !item.matchesAuth(authorities))
+                && newSubs.isEmpty() && newOperations.isEmpty()) {
+            return; // 当前菜单无权限或权限不匹配，且不包含匹配的子菜单和操作，则忽略当前菜单项
         }
         final MenuItem newItem = new MenuItem(item.getAuth(), item.getCaption(), item.getHref(),
                 item.getTarget(), item.getIcon());
