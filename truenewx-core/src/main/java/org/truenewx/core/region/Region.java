@@ -35,9 +35,9 @@ public class Region {
      */
     private Region parent;
     /**
-     * 子选项集
+     * 子选项映射集
      */
-    private Map<String, Region> subs;
+    private Map<String, Region> subMap;
 
     /**
      * @param code
@@ -95,22 +95,12 @@ public class Region {
         return this.parent == null ? null : this.parent.getCode();
     }
 
-    public Map<String, Region> getSubs() {
-        return this.subs;
+    public Map<String, Region> getSubMap() {
+        return this.subMap;
     }
 
-    public Collection<Region> getSubCollection() {
-        return this.subs == null ? null : this.subs.values();
-    }
-
-    /**
-     * @return 获取确保非null的子选项集
-     */
-    private Map<String, Region> getNonNullSubs() {
-        if (this.subs == null) {
-            this.subs = new LinkedHashMap<>();
-        }
-        return this.subs;
+    public Collection<Region> getSubs() {
+        return this.subMap == null ? null : this.subMap.values();
     }
 
     /**
@@ -121,7 +111,10 @@ public class Region {
      */
     public void addSub(final Region sub) {
         sub.parent = this;
-        getNonNullSubs().put(sub.getCode(), sub);
+        if (this.subMap == null) {
+            this.subMap = new LinkedHashMap<>();
+        }
+        this.subMap.put(sub.getCode(), sub);
     }
 
     /**
@@ -133,8 +126,8 @@ public class Region {
      */
     @Nullable
     public Region getSubByCode(@Nullable final String code) {
-        if (this.subs != null && StringUtils.isNotEmpty(code)) {
-            return this.subs.get(code);
+        if (this.subMap != null && StringUtils.isNotEmpty(code)) {
+            return this.subMap.get(code);
         }
         return null;
     }
@@ -148,8 +141,8 @@ public class Region {
      */
     @Nullable
     public Region getSubByCaption(final String caption) {
-        if (this.subs != null) {
-            for (final Region sub : this.subs.values()) {
+        if (this.subMap != null) {
+            for (final Region sub : this.subMap.values()) {
                 if (StringUtils.equals(caption, sub.getCaption())) {
                     return sub;
                 }
@@ -166,7 +159,7 @@ public class Region {
      * @author jianglei
      */
     public boolean isIncludingSub() {
-        return this.subs != null && this.subs.size() > 0;
+        return this.subMap != null && this.subMap.size() > 0;
     }
 
     /**
@@ -177,8 +170,8 @@ public class Region {
      * @author jianglei
      */
     public boolean isIncludingGrandSub() {
-        if (this.subs != null) {
-            for (final Region sub : this.subs.values()) {
+        if (this.subMap != null) {
+            for (final Region sub : this.subMap.values()) {
                 if (sub.isIncludingSub()) {
                     // 只要有一个子级项有子级项，则说明有孙级
                     return true;
@@ -203,11 +196,11 @@ public class Region {
         return level;
     }
 
-    public Region clone(final boolean subs) {
+    public Region clone(final boolean includingSubs) {
         final Region option = new Region(this.code, this.caption, this.group);
         option.parent = this.parent;
-        if (subs) {
-            option.subs = new LinkedHashMap<>(this.subs);
+        if (includingSubs) {
+            option.subMap = new LinkedHashMap<>(this.subMap);
         }
         return option;
     }

@@ -64,7 +64,7 @@
             }
             if (opt.startLevel === 2) {
                 if (opt.defaultCountry) {
-                    this.initSelectElm(eval("this.data." + opt.defaultCountry + ".subs"),
+                    this.initSelectElm(eval("this.data." + opt.defaultCountry + ".subMap"),
                             opt.startLevel, false);
                     for (var i = 2; i <= len + 1; i++) {
                         if (this.codes && this.codes[i]) {
@@ -72,7 +72,7 @@
                             for (var j = 0; j < i; j++) {
                                 str.push(this.codes[j]);
                             }
-                            this.initSelectElm(eval("this.data." + str.join(".subs.") + ".subs"),
+                            this.initSelectElm(eval("this.data." + str.join(".subMap.") + ".subMap"),
                                     i + 1, false);
                         } else {
                             this.initSelectElm(null, i + 1, true);
@@ -91,7 +91,7 @@
                             for (var j = 0; j < i; j++) {
                                 str.push(this.codes[j]);
                             }
-                            this.initSelectElm(eval("this.data." + str.join(".subs.") + ".subs"),
+                            this.initSelectElm(eval("this.data." + str.join(".subMap.") + ".subMap"),
                                     i + 1, false);
                         } else {
                             this.initSelectElm(null, i + 1, true);
@@ -138,16 +138,16 @@
                     $(this).nextAll("select").html("").attr("disabled", true);
                     return;
                 }
-                var subs = eval("data." + val + ".subs"), showNext = true;
+                var subMap = eval("data." + val + ".subMap"), showNext = true;
                 if ($el.options.subHideByNotGroundSon) {
                     showNext = eval("data." + val + ".includingGrandSub");
                 }
                 if ($(this).data("level") >= $el.options.endLevel) {
                     showNext = false;
                 }
-                if (subs != undefined && showNext) {
+                if (subMap != undefined && showNext) {
                     $(this).nextAll("select").html("").attr("disabled", true);
-                    $el.createOption(this, subs, $(this).data("level"));
+                    $el.createOption(this, subMap, $(this).data("level"));
                 } else {
                     $(this).nextAll("select").html("").attr("disabled", true);
                 }
@@ -158,7 +158,7 @@
                     }
                 });
                 $("input[name=" + $el.options.regionName + "]").val(code);
-                $el.options.changeCallBack(subs != undefined);
+                $el.options.changeCallBack(subMap != undefined);
             }
         },
         /**
@@ -176,9 +176,9 @@
                                             .attr("data-level"), data = $.data(document, _id
                                             + "-level" + level);
                                     if (val !== "" && val !== null) {
-                                        var subs = eval("data." + val + ".subs");
-                                        if (subs != undefined) {
-                                            _this.createOption(optionObj, subs, level);
+                                        var subMap = eval("data." + val + ".subMap");
+                                        if (subMap != undefined) {
+                                            _this.createOption(optionObj, subMap, level);
                                         } else {
                                             $(this).nextAll("select").html("").attr("disabled",
                                                     true);

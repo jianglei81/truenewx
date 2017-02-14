@@ -39,18 +39,12 @@ public class RegionController {
     }
 
     @RpcMethod(result = @RpcResult(filter = @RpcResultFilter(type = Region.class, includes = {
-            "code", "caption", "level", "subCollection" })))
+            "code", "caption", "level", "subs" })))
     public Iterable<Region> analyze(final String nation, final String source) {
-        final Boolean validJsonSource = isJsonSource(source);
-        if (validJsonSource == null) { // 如果提交的原始数据格式不正确，则返回null
+        if (StringUtils.isBlank(source) || !source.startsWith("110000")) { // 如果提交的原始数据格式不正确，则返回null
             return null;
         }
-        Iterable<Region> regions;
-        if (validJsonSource) {
-            regions = parseJson(source);
-        } else {
-            regions = parseOriginal(nation, source);
-        }
+        final Iterable<Region> regions = parseOriginal(nation, source);
         final List<Region> result = new ArrayList<>();
         for (final Region region : regions) {
             if (region.getParent() == null) { // 只加入顶级节点
@@ -58,23 +52,6 @@ public class RegionController {
             }
         }
         return result;
-    }
-
-    private Boolean isJsonSource(String source) {
-        if (StringUtils.isNotBlank(source)) {
-            source = source.trim();
-            if (source.startsWith("[") && source.endsWith("]")) {
-                return true;
-            } else if (source.startsWith("110000")) {
-                return false;
-            }
-        }
-        return null;
-    }
-
-    private Iterable<Region> parseJson(final String source) {
-        final List<Region> options = new ArrayList<>();
-        return options;
     }
 
     private Iterable<Region> parseOriginal(final String nation, final String source) {

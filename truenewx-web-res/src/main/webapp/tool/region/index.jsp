@@ -60,9 +60,9 @@ function regionToNode(region) {
         selectable : false
     };
     node.tags = [node.id];
-    if (region.subCollection && region.subCollection.length) {
+    if (region.subs && region.subs.length) {
         node.nodes = [];
-        region.subCollection.each(function(subRegion) {
+        region.subs.each(function(subRegion) {
             node.nodes.push(regionToNode(subRegion));
         });
     }
@@ -303,10 +303,6 @@ function generate() {
     
     $("#form3").show();
 }
-
-function format() {
-    
-}
 </script>
 </head>
 <body>
@@ -321,7 +317,7 @@ function format() {
     <div class="form-group">
         <div class="col-md-10">
             <div class="alert alert-info bottom-block">请在下框中填入<span id="nationCaption"></span>国家统计局行政区划代码页原始数据 (
-            <a href="http://www.stats.gov.cn/tjsj/tjbz/xzqhdm/" target="_blank">点此查看</a> )，或上一次转换生成的JSON格式数据</div>
+            <a href="http://www.stats.gov.cn/tjsj/tjbz/xzqhdm/" target="_blank">点此查看</a> )</div>
         </div>
     </div>
     <div class="form-group">
@@ -3896,8 +3892,7 @@ function format() {
     </div>
     <div class="form-group">
         <div class="col-md-10">
-            <button type="button" class="btn btn-primary" onclick="format()">格式化</button>
-            <button type="button" class="btn btn-default" onclick="back()">返回</button>
+            <button type="button" class="btn btn-default" onclick="back()">完成</button>
         </div>
     </div>
 </form>

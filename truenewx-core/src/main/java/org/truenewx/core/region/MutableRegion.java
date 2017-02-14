@@ -29,8 +29,8 @@ public class MutableRegion extends Region {
         super.setGroup(group);
     }
 
-    public void setSubCollection(final Collection<Region> subCollection) {
-        for (final Region sub : subCollection) {
+    public void setSubs(final Collection<Region> subs) {
+        for (final Region sub : subs) {
             addSub(sub);
         }
     }
