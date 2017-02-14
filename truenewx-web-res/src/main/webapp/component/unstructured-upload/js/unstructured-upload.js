@@ -132,12 +132,17 @@
 			if (!token) {
 				throw "Request authorization failed";
 			}
-			var client = new OSS.Wrapper({
-				region: token.region,
-				accessKeyId: token.accessId,
-				accessKeySecret: token.accessSecret,
-				bucket: token.bucket
-			});
+			var ossParam={
+	                region: token.region,
+	                accessKeyId: token.accessId,
+	                accessKeySecret: token.accessSecret,
+	                bucket: token.bucket
+	            };
+			if(token.tempToken&&token.tempToken!=null){
+			    ossParam.stsToken=token.tempToken;
+			}
+			debugger;
+			var client = new OSS.Wrapper(ossParam);
 			var storeAs = token.path + filename;
 			client.multipartUpload(storeAs, file, defaultOptions.progress).then(function(res) {
 				var innerUrl = token.innerUrl + filename
