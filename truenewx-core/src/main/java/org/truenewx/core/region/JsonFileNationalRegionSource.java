@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
+import org.truenewx.core.Strings;
 import org.truenewx.core.util.IOUtil;
 import org.truenewx.core.util.JsonUtil;
 
@@ -21,6 +22,17 @@ import org.truenewx.core.util.JsonUtil;
  * @since JDK 1.8
  */
 public class JsonFileNationalRegionSource extends AbstractNationalRegionSource {
+
+    private String encoding = Strings.DEFAULT_ENCODING;
+
+    /**
+     * @param encoding
+     *            从配置文件中读取内容时使用的字符集
+     */
+    public void setEncoding(final String encoding) {
+        this.encoding = encoding;
+    }
+
     /**
      * 构建指定显示区域的当前国家行政区划
      *
@@ -35,7 +47,7 @@ public class JsonFileNationalRegionSource extends AbstractNationalRegionSource {
                 "json");
         if (resource != null) {
             try {
-                final String json = IOUtils.toString(resource.getInputStream());
+                final String json = IOUtils.toString(resource.getInputStream(), this.encoding);
                 if (StringUtils.isNotBlank(json)) {
                     final MutableRegion nationalRegion = JsonUtil.json2Bean(json,
                             MutableRegion.class);
