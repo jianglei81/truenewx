@@ -77,24 +77,24 @@ public class RegionViewTag extends TagSupport {
         this.endLevel = endLevel;
     }
 
-    public String getParentCaptions() {
+    private String appendCaptions() {
         final ApplicationContext context = SpringWebUtil.getApplicationContext(this.pageContext);
         final RegionSource regionSource = SpringUtil.getFirstBeanByClass(context,
                 RegionSource.class);
-        final Region option = regionSource.getRegion(this.value,
+        final Region region = regionSource.getRegion(this.value,
                 this.pageContext.getRequest().getLocale());
 
-        final List<String> options = new ArrayList<>();
+        final List<String> captions = new ArrayList<>();
         final StringBuffer caption = new StringBuffer();
-        if (option != null) {
-            Region parent = option.getParent();
-            options.add(option.getCaption());
+        if (region != null) {
+            Region parent = region.getParent();
+            captions.add(region.getCaption());
             while (parent != null) {
-                options.add(0, parent.getCaption());
+                captions.add(0, parent.getCaption());
                 parent = parent.getParent();
             }
-            for (int i = this.startLevel - 1; i < options.size(); i++) {
-                caption.append(options.get(i)).append(this.delimiter);
+            for (int i = this.startLevel - 1; i < captions.size(); i++) {
+                caption.append(captions.get(i)).append(this.delimiter);
                 if (i >= this.endLevel - 1) {
                     break;
                 }
@@ -110,7 +110,7 @@ public class RegionViewTag extends TagSupport {
     public int doEndTag() throws JspException {
         final JspWriter out = this.pageContext.getOut();
         try {
-            out.print(this.getParentCaptions());
+            out.print(appendCaptions());
         } catch (final IOException e) {
             throw new JspException(e);
         }

@@ -54,7 +54,7 @@ public class IOUtil {
      * 文件路径分隔符
      */
     public static final String FILE_SEPARATOR = System.getProperties()
-                    .getProperty("file.separator");
+            .getProperty("file.separator");
 
     /**
      * 将指定输入流中的数据全部写入指定输出流中。除读写操作，本方法不对输入流和输出流做任何其它操作。
@@ -75,7 +75,7 @@ public class IOUtil {
     }
 
     public static void coverToFile(final File file, final String data, final String encoding)
-                    throws IOException {
+            throws IOException {
         final File dir = file.getParentFile();
         if (!dir.exists()) {
             dir.mkdirs();
@@ -116,7 +116,7 @@ public class IOUtil {
      *             如果读取过程中出现错误
      */
     public static String readUnblocklyToString(final InputStream in, final String charsetName)
-                    throws IOException {
+            throws IOException {
         return readUnblocklyToString(new BufferedReader(new InputStreamReader(in, charsetName)));
     }
 
@@ -201,7 +201,7 @@ public class IOUtil {
      *            替换内容
      */
     public static void replaceFileContent(final String filePath, final String regex,
-                    final String replacement) {
+            final String replacement) {
         BufferedReader br = null;
         String line = "";
         final StringBuffer sb = new StringBuffer();
@@ -258,7 +258,7 @@ public class IOUtil {
      *             如果截取过程中出现IO错误
      */
     public static byte[] shootImage(final InputStream imageInput, final int x, final int y,
-                    final int width, final int height) throws IOException {
+            final int width, final int height) throws IOException {
         BufferedImage image = ImageIO.read(imageInput);
         image = image.getSubimage(x, y, width, height);
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -281,15 +281,14 @@ public class IOUtil {
      * @return 与指定区域匹配的国际化的资源，如果找不到则返回null
      */
     public static Resource findI18nResource(String basename, final Locale locale,
-                    final String extension) {
+            final String extension) {
         basename = basename.trim();
         Assert.hasText(basename, "Basename must not be empty");
         basename = basename.replace('\\', '/');
         // 把basename中classpath:替换为classpath*:后进行查找
         final StringBuffer searchBasename = new StringBuffer(
-                        basename.replace(ResourceUtils.CLASSPATH_URL_PREFIX,
-                                        ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX))
-                                                        .append(Strings.ASTERISK);
+                basename.replace(ResourceUtils.CLASSPATH_URL_PREFIX,
+                        ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX)).append(Strings.ASTERISK);
         if (!extension.startsWith(Strings.DOT)) {
             searchBasename.append(Strings.DOT);
         }
@@ -298,13 +297,13 @@ public class IOUtil {
         final ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
         try {
             final Resource[] resources = resourcePatternResolver
-                            .getResources(searchBasename.toString());
+                    .getResources(searchBasename.toString());
             Resource result = null;
             for (final Resource resource : resources) {
                 final String fileName = resource.getFilename();
                 final String[] fileNameArray = fileName.split(Strings.UNDERLINE);
                 if (StringUtils.indexOfIgnoreCase(fileName,
-                                locale.getLanguage() + "_" + locale.getCountry(), 0) >= 0) {
+                        locale.getLanguage() + "_" + locale.getCountry(), 0) >= 0) {
                     result = resource;
                     break;
                 } else if (StringUtils.indexOfIgnoreCase(fileName, locale.getLanguage(), 0) >= 0) {
@@ -326,16 +325,15 @@ public class IOUtil {
      * @param baseDir
      *            目录
      * @param basename
-     *            文件基本名称 aa(aa.txt)
+     *            文件基本名称 aa，不含扩展名
      * @param locale
      *            区域
      * @param extension
-     *            文件扩展名
-     * @return
-     * @throws IOException
+     *            文件扩展名，句点包含与否均可
+     * @return 找到的文件，如果没找到则返回null
      */
     public static File findI18nFileByDir(final String baseDir, final String basename,
-                    final String extension, final Locale locale) throws IOException {
+            final String extension, final Locale locale) {
         final StringBuffer searchFileName = new StringBuffer(basename).append(Strings.ASTERISK);
         if (!extension.startsWith(Strings.DOT)) {
             searchFileName.append(Strings.DOT);
@@ -350,11 +348,11 @@ public class IOUtil {
                 final String resultFileName = file.getName();
                 final String[] fileNameArray = resultFileName.split(Strings.UNDERLINE);
                 if (StringUtils.indexOfIgnoreCase(resultFileName,
-                                locale.getLanguage() + "_" + locale.getCountry(), 0) >= 0) {
+                        locale.getLanguage() + "_" + locale.getCountry(), 0) >= 0) {
                     returnFile = file;
                     break;
                 } else if (StringUtils.indexOfIgnoreCase(resultFileName, locale.getLanguage(),
-                                0) >= 0) {
+                        0) >= 0) {
                     returnFile = file;
                 } else if (returnFile == null && fileNameArray.length == 1) {
                     returnFile = file;
@@ -376,7 +374,7 @@ public class IOUtil {
      *            查找到的文件集合
      */
     public static void findFiles(final String baseDirName, final String targetFileName,
-                    final List<File> fileList) {
+            final List<File> fileList) {
 
         final File baseDir = new File(baseDirName); // 创建一个File对象
         if (baseDir.exists() && baseDir.isDirectory()) { // 判断目录是否存在
@@ -419,7 +417,7 @@ public class IOUtil {
                 // 通配符星号*表示可以匹配任意多个字符
                 while (strIndex < strLength) {
                     if (wildcardMatch(pattern.substring(patternIndex + 1),
-                                    str.substring(strIndex))) {
+                            str.substring(strIndex))) {
                         return true;
                     }
                     strIndex++;
@@ -494,7 +492,7 @@ public class IOUtil {
      *             缩放异常(原文件损坏或指定缩放大小错误)
      */
     public static BufferedImage zoomImage(final InputStream in, final int width)
-                    throws IOException {
+            throws IOException {
         try {
             final byte[] bytes = IOUtils.toByteArray(in);// 将文件流转换为Byte数组
             final Image originalImage = Toolkit.getDefaultToolkit().createImage(bytes);// 将Byte数组转换为图片
@@ -547,7 +545,7 @@ public class IOUtil {
         final Image newImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         checkImage(newImage);
         final BufferedImage bi = new BufferedImage(newImage.getWidth(null),
-                        newImage.getHeight(null), BufferedImage.TYPE_INT_RGB);
+                newImage.getHeight(null), BufferedImage.TYPE_INT_RGB);
         final Graphics2D graphics = bi.createGraphics();
         graphics.drawImage(newImage, 0, 0, null);
         return bi;
@@ -568,7 +566,7 @@ public class IOUtil {
      *             系统没有写入权限
      */
     public static void saveImage(final BufferedImage image, final String dir, final String fileName,
-                    final String extension) throws IOException {
+            final String extension) throws IOException {
         FileOutputStream output = null;
         try {
             final File file = new File(dir);
@@ -576,7 +574,7 @@ public class IOUtil {
                 file.mkdirs();
             }
             output = new FileOutputStream(
-                            dir + IOUtil.FILE_SEPARATOR + fileName + Strings.DOT + extension);
+                    dir + IOUtil.FILE_SEPARATOR + fileName + Strings.DOT + extension);
             ImageIO.write(image, extension, output);
             output.flush();
         } finally {
@@ -604,7 +602,7 @@ public class IOUtil {
      *             系统没有写入权限
      */
     public static void saveImage(final byte[] bytes, final String dirPath, final String fileName,
-                    final String extension) throws IOException {
+            final String extension) throws IOException {
         FileOutputStream output = null;
         try {
             final File file = new File(dirPath);
@@ -612,7 +610,7 @@ public class IOUtil {
                 file.mkdirs();
             }
             output = new FileOutputStream(
-                            dirPath + IOUtil.FILE_SEPARATOR + fileName + Strings.DOT + extension);
+                    dirPath + IOUtil.FILE_SEPARATOR + fileName + Strings.DOT + extension);
             FileCopyUtils.copy(bytes, output);
         } finally {
             try {
@@ -625,15 +623,14 @@ public class IOUtil {
     }
 
     public static byte[] imageToBytes(final BufferedImage image, final String formatName)
-                    throws IOException {
+            throws IOException {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageIO.write(image, formatName, os);
         return os.toByteArray();
     }
 
     public static BufferedImage cropImage(final BufferedImage image, final String formatName,
-                    final int x, final int y, final int width, final int height)
-                    throws IOException {
+            final int x, final int y, final int width, final int height) throws IOException {
         final Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName(formatName);
         if (!readers.hasNext()) {
             return null;

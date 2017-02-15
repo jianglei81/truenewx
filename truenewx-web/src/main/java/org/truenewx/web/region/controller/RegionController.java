@@ -61,17 +61,17 @@ public class RegionController {
 
     private void transLimitRegions(final Map<String, Region> limitRegions, final Region region) {
         final List<Region> link = region.getLinkFromTop();
-        Region originalOption = link.get(0); // 至少有一个
-        Region cloneOption = limitRegions.get(originalOption.getCode());
+        Region originalRegion = link.get(0); // 至少有一个
+        Region cloneOption = limitRegions.get(originalRegion.getCode());
         if (cloneOption == null) { // 没有顶级选项，则克隆一个加入
-            cloneOption = originalOption.clone(false);
+            cloneOption = originalRegion.clone(false);
             limitRegions.put(cloneOption.getCode(), cloneOption);
         }
         for (int i = 1; i < link.size(); i++) {
-            originalOption = link.get(i);
-            Region sub = cloneOption.getSubByCode(originalOption.getCode());
+            originalRegion = link.get(i);
+            Region sub = cloneOption.findSubByCode(originalRegion.getCode());
             if (sub == null) {
-                sub = originalOption.clone(false);
+                sub = originalRegion.clone(false);
                 cloneOption.addSub(sub);
             }
             cloneOption = sub;

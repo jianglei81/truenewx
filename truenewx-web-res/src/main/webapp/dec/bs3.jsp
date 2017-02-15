@@ -32,6 +32,7 @@ function selectMenu(index){
                 <a class="list-group-item" href="${context}/component/bs3/dialog">对话框类</a>
                 <a class="list-group-item" href="${context}/component/editable-selector/index-bs3">可编辑选择器</a>
                 <a class="list-group-item" href="${context}/component/level-menu/index-bs3">多级菜单</a>
+                <a class="list-group-item" href="${context}/component/region-selector/index-bs3">行政区划选择器</a>
             </div>
         </div>
     </div>

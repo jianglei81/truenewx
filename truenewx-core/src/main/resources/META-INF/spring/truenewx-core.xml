@@ -13,11 +13,10 @@
     <bean id="regionSource" class="org.truenewx.core.region.RegionSourceImpl">
         <property name="nationalSources">
             <list>
-                <bean class="org.truenewx.core.region.NationalRegionSourceImpl">
+                <bean class="org.truenewx.core.region.JsonFileNationalRegionSource">
                     <property name="nation" value="CN" />
-                    <property name="parser" ref="regionMapParser" />
                 </bean>
-                <bean class="org.truenewx.core.region.NationalRegionSourceImpl">
+                <bean class="org.truenewx.core.region.ResourceBundleNationalRegionSource">
                     <property name="nation" value="OT" />
                 </bean>
             </list>

@@ -44,7 +44,7 @@ public class RegionController {
         if (StringUtils.isBlank(source) || !source.startsWith("110000")) { // 如果提交的原始数据格式不正确，则返回null
             return null;
         }
-        final Iterable<Region> regions = parseOriginal(nation, source);
+        final Iterable<Region> regions = parse(nation, source);
         final List<Region> result = new ArrayList<>();
         for (final Region region : regions) {
             if (region.getParent() == null) { // 只加入顶级节点
@@ -54,7 +54,7 @@ public class RegionController {
         return result;
     }
 
-    private Iterable<Region> parseOriginal(final String nation, final String source) {
+    private Iterable<Region> parse(final String nation, final String source) {
         final Map<String, String> codeCaptionMap = new LinkedHashMap<>();
         try {
             final List<String> lines = IOUtils

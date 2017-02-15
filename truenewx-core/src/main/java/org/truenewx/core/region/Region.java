@@ -35,7 +35,7 @@ public class Region {
      */
     private Region parent;
     /**
-     * 子选项映射集
+     * 子行政区划映射集
      */
     private Map<String, Region> subMap;
 
@@ -118,30 +118,33 @@ public class Region {
     }
 
     /**
-     * 获取代号为指定代号的子选项
+     * 查找代号为指定代号的下级行政区划
      *
      * @param code
      *            代号
-     * @return 匹配的子选项，如果没找到则返回null
+     * @return 匹配的下级行政区划，如果没找到则返回null
      */
     @Nullable
-    public Region getSubByCode(@Nullable final String code) {
+    public Region findSubByCode(@Nullable final String code) {
         if (this.subMap != null && StringUtils.isNotEmpty(code)) {
-            return this.subMap.get(code);
+            final Region sub = this.subMap.get(code);
+            if (sub != null) {
+                return sub;
+            }
         }
         return null;
     }
 
     /**
-     * 获取显示名为指定显示名的子选项
+     * 获取显示名为指定显示名的下级行政区划
      *
      * @param caption
      *            显示名
-     * @return 匹配的子选项，如果没找到则返回null
+     * @return 匹配的下级行政区划，如果没找到则返回null
      */
     @Nullable
-    public Region getSubByCaption(final String caption) {
-        if (this.subMap != null) {
+    public Region findSubByCaption(final String caption) {
+        if (this.subMap != null && StringUtils.isNotEmpty(caption)) {
             for (final Region sub : this.subMap.values()) {
                 if (StringUtils.equals(caption, sub.getCaption())) {
                     return sub;

@@ -1,7 +1,5 @@
 package org.truenewx.core.region;
 
-import java.util.Collection;
-
 /**
  * 内容可变的行政区划
  *
@@ -29,7 +27,7 @@ public class MutableRegion extends Region {
         super.setGroup(group);
     }
 
-    public void setSubs(final Collection<Region> subs) {
+    public void setSubs(final MutableRegion[] subs) {
         for (final Region sub : subs) {
             addSub(sub);
         }
