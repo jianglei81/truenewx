@@ -96,11 +96,15 @@ function collapseAll() {
     $("#regionContainer").treeview("collapseAll");
 }
 
-function getNodeNum(nodes) {
+function getNodeNum(nodes, level) {
     var count = 0;
     if (nodes) {
-        nodes.each(function(node){
-            count += 1 + getNodeNum(node.nodes);
+        nodes.each(function(node) {
+            if (node.level == level) {
+                count++;
+            } else if (node.level < level) {
+                count += getNodeNum(node.nodes, level);
+            }
         });
     }
     return count;
@@ -108,8 +112,12 @@ function getNodeNum(nodes) {
 
 function showNodeNum() {
     var data = $("#regionContainer").treeview("getData");
-    var count = getNodeNum(data);
-    $("#regionNumContainer").text("各级行政区划共" + count + "个");
+    var provinceCount = getNodeNum(data, 0);
+    var cityCount = getNodeNum(data, 1);
+    var countyCount = getNodeNum(data, 2);
+    var total = provinceCount + cityCount + countyCount;
+    $("#regionNumContainer").text("包含省级" + provinceCount + "个，市级" + cityCount + "个，县级" 
+            + countyCount + "个，共" + total + "个");
 }
 
 function ensureLevel3(btnObj) {
