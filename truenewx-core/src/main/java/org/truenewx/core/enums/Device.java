@@ -4,12 +4,12 @@ import org.truenewx.core.annotation.Caption;
 import org.truenewx.core.enums.annotation.EnumValue;
 
 /**
- * 终端类型
+ * 设备类型
  *
  * @author jianglei
  * @since JDK 1.8
  */
-public enum Terminal {
+public enum Device {
 
     @Caption("电脑")
     @EnumValue("C")
