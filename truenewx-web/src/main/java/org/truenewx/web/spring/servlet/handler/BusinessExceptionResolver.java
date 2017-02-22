@@ -40,7 +40,7 @@ public class BusinessExceptionResolver extends SimpleMappingExceptionResolver {
     /**
      * 响应状态码：业务错误
      */
-    private static int SC_BUSINESS_ERROR = 600;
+    public static final int SC_BUSINESS_ERROR = HttpServletResponse.SC_CONFLICT; // 对当前资源状态，请求不能完成
 
     /**
      * 业务异常消息解析器

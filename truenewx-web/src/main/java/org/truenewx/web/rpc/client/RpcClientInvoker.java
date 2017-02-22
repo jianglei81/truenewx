@@ -5,11 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.truenewx.core.Strings;
 import org.truenewx.core.exception.AjaxException;
 import org.truenewx.core.tuple.Binate;
 import org.truenewx.core.util.ClientRequestSupport;
 import org.truenewx.web.rpc.serializer.RpcSerializer;
+import org.truenewx.web.spring.servlet.handler.BusinessExceptionResolver;
 
 /**
  * RPC客户端调用器
@@ -36,10 +39,10 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
     private String getInvokeUrl(final String beanId, final String methodName) {
         if (this.serverUrlRoot.endsWith(Strings.SLASH)) {
             this.serverUrlRoot = this.serverUrlRoot.substring(0,
-                            this.serverUrlRoot.length() - Strings.SLASH.length());
+                    this.serverUrlRoot.length() - Strings.SLASH.length());
         }
         final StringBuffer url = new StringBuffer(this.serverUrlRoot).append("/rpc/invoke/")
-                        .append(beanId).append("/").append(methodName);
+                .append(beanId).append("/").append(methodName);
         return url.toString();
     }
 
@@ -70,15 +73,15 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
      */
     @SuppressWarnings("unchecked")
     private String requestContent(final String url, final Map<String, Object> params)
-                    throws Exception {
+            throws Exception {
         final Binate<Integer, String> response = request(url, params);
         final int statusCode = response.getLeft();
         final String content = response.getRight();
         switch (statusCode) {
-        case 200: { // 正常
+        case HttpServletResponse.SC_OK: { // 正常
             return content;
         }
-        case 600: { // 业务异常
+        case BusinessExceptionResolver.SC_BUSINESS_ERROR: { // 业务异常
             throw new AjaxException(this.serializer.deserializeBean(content, Map.class));
         }
         default: { // 其他错误
@@ -89,7 +92,7 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
 
     @Override
     public <T> T invoke(final String beanId, final String methodName, final Object[] args,
-                    final Class<T> resultType) throws Exception {
+            final Class<T> resultType) throws Exception {
         final String url = getInvokeUrl(beanId, methodName);
         final Map<String, Object> params = getInvokeParams(args);
         final String response = requestContent(url, params);
@@ -98,7 +101,7 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
 
     @Override
     public <T> List<T> invoke4List(final String beanId, final String methodName,
-                    final Object[] args, final Class<T> resultElementType) throws Exception {
+            final Object[] args, final Class<T> resultElementType) throws Exception {
         final String url = getInvokeUrl(beanId, methodName);
         final Map<String, Object> params = getInvokeParams(args);
         final String response = requestContent(url, params);
@@ -115,7 +118,7 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
 
     @Override
     public <T> T invoke(final String beanId, final String methodName,
-                    final Map<String, Object> args, final Class<T> resultType) throws Exception {
+            final Map<String, Object> args, final Class<T> resultType) throws Exception {
         final String url = getInvokeUrl(beanId, methodName);
         final Map<String, Object> params = getInvokeParams(args);
         final String response = requestContent(url, params);
@@ -124,8 +127,7 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
 
     @Override
     public <T> List<T> invoke4List(final String beanId, final String methodName,
-                    final Map<String, Object> args, final Class<T> resultElementType)
-                    throws Exception {
+            final Map<String, Object> args, final Class<T> resultElementType) throws Exception {
         final String url = getInvokeUrl(beanId, methodName);
         final Map<String, Object> params = getInvokeParams(args);
         final String response = requestContent(url, params);
