@@ -141,7 +141,6 @@
 			if(token.tempToken&&token.tempToken!=null){
 			    ossParam.stsToken=token.tempToken;
 			}
-			debugger;
 			var client = new OSS.Wrapper(ossParam);
 			var storeAs = token.path + filename;
 			client.multipartUpload(storeAs, file, defaultOptions.progress).then(function(res) {

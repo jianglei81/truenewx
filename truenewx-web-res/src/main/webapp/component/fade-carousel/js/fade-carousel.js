@@ -110,7 +110,7 @@
         autoshow : function() {
             var _this = this,
                 $ele = $(_this.element),
-                size = $ele.find("div").size(),
+                size = $ele.find("div").length,
                 index = parseInt($ele.find("ol.dots").find(".active").text()) + 1;
             if(index <= size - 1){
                 _this.change(index);

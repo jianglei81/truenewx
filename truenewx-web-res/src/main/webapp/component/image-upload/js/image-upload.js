@@ -564,7 +564,7 @@
         originalFilename : false, // 是否使用原文件名
         newFilename : "", // 新的文件名
         crop : { // 裁剪设置
-            disabled : false, // 默认不禁用裁剪
+            disabled : true, // 默认不启用裁剪
             showModal : false, // 是否使用模态窗口的方式裁剪
             target : undefined, // 裁剪区定位selector
             aspectRatio : 0,
