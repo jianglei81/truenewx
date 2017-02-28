@@ -6,277 +6,176 @@
 
     var isIE = navigator.userAgent.indexOf('MSIE') != -1;
 
-    var Region = function(element, options) {
+    var RegionSelector = function(element, options) {
         this.init(element, options);
     };
 
-    Region.prototype = {
+    RegionSelector.prototype = {
+        element : undefined,
+        options : { // 默认参数
+            parentCode : "CN",// 上级行政区划的编码，可选项为该顶级行政区划的下级
+            maxLevel : 3,// 最大级别
+            showParent : function(code, caption) { // 显示上级行政区划的方法，返回要显示的内容，返回undefined则不显示
+                return undefined;
+            },
+            onChange : function(code) { // 选项被变更后调用，传入参数为变更后的当前选项
+            },
+            selectClass : "",
+            selectStyle : "",
+            data : undefined,
+            emptyText : null,
+            // 初始化数据
+            limits : []
+        },
         init : function(element, options) {
-            this.element = element;
+            this.rpc = $.tnx.rpc.imports("regionController");
+            this.element = $(element);
             this.setOptions(options);
         },
         setOptions : function(options) {
-            this.options = $.extend({
-                regionName : null, // 隐藏域name值，用作提交时取值
-                defaultCountry : "CN", // 默认国家代码
-                startLevel : 1, // 起始层级
-                endLevel : 4, // 结束层级
-                nullLevel : null, // 设置从第几级开始，允许为空；默认都不可为空
-                isAutoChange : true,
-                subHideByNotGroundSon : false, // 没有孙子级地区时，子级也不显示。
-                                                // 开关(false：不开启，true：开启)
-                changeCallBack : function(hasSub) {
-                },
-                intnull : false,
-                regionData : null,
-                limits : {}
-            }, options);
+            this.options = $.extend(this.options, options);
             this.initData();
         },
-        initData : function() { // 地区数据初始化
-            this.rpc = $.isf.rpc.imports("regionController");
-            if (!this.options.regionData) { // 判断没有初始化地区时，去服务器取数据
+        initData : function() { // 行政区划数据初始化
+            if (!this.options.data) { // 没有初始化行政区划数据时，从服务器取数据
                 if (this.options.limits.length > 0) {
-                    this.options.regionData = this.rpc.getLimits(this.options.limits);
+                    this.options.data = this.rpc.getLimits(this.options.limits);
                 } else {
-                    this.options.regionData = this.rpc.getAll();
+                    this.parentRegion = this.rpc.getRegion(this.options.parentCode);
+                    this.options.data = this.parentRegion.subs;
+                    this.parentRegion.subs = undefined;
                 }
             }
-            if (this.options.regionData) {
-                this.data = this.options.regionData;
+            if (this.options.data) {
+                this.data = this.options.data;
             } else {
-                return $.error("无法获取地区数据，请刷新后重试！");
+                return $.error("无法获取行政区划数据");
             }
-            this.codes = this.loadDefaultCodes($(this.element).val());
+            this.code = this.element.val();
+            if (this.code) {
+                this.codes = this.rpc.getParentCodes(this.code).add(this.code);
+            }
+            if (this.options.maxLevel > 3) {
+                this.options.maxLevel = 3;
+            }
             this.render();
         },
-        loadDefaultCodes : function(val) { // 获取默认值
-            if (val) {
-                return this.rpc.getParentCodes(val).add(val);
-            } else {
-                return null;
-            }
-        },
         render : function() { // 渲染页面效果
-            var opt = this.options, len = opt.endLevel - opt.startLevel;
-            if (opt.startLevel === 3 || opt.startLevel === 4) {
-                return;
-            }
-            if (opt.startLevel === 2) {
-                if (opt.defaultCountry) {
-                    this.initSelectElm(eval("this.data." + opt.defaultCountry + ".subMap"),
-                            opt.startLevel, false);
-                    for (var i = 2; i <= len + 1; i++) {
-                        if (this.codes && this.codes[i]) {
-                            var str = [];
-                            for (var j = 0; j < i; j++) {
-                                str.push(this.codes[j]);
-                            }
-                            this.initSelectElm(eval("this.data." + str.join(".subMap.") + ".subMap"),
-                                    i + 1, false);
-                        } else {
-                            this.initSelectElm(null, i + 1, true);
-                        }
-                    }
-                } else {
-                    return $.error("没有指定默认国家标识, defaultCountry does not exist!");
+            if (this.options.data) {
+                var ele = this.element, data = this.options.data, maxLevel = this.options.maxLevel, selectClass = this.options.selectClass, selectStyle = this.options.selectStyle, emptyText = this.options.emptyText;
+                var startLevel = 0;
+                var selectes = new Array();
+                // 解析数据,同时创建起始select
+                var _this = this;
+                var initCode = "";
+                var renderId = ele.attr("id");
+                var $select = $("<select render-id='" + renderId + "' class='" + selectClass
+                        + "' style='" + selectStyle + "'></select>");
+                if (emptyText) {
+                    $select.append("<option value=''>" + emptyText + "</option>");
                 }
-            } else {
-                for (var i = 0; i <= len; i++) {
+                for (var i = 0; i < data.length; i++) {
+                    var region = data[i];
                     if (i == 0) {
-                        this.initSelectElm(this.data, opt.startLevel, false);
-                    } else {
-                        if (this.codes && this.codes[i]) {
-                            var str = [];
-                            for (var j = 0; j < i; j++) {
-                                str.push(this.codes[j]);
-                            }
-                            this.initSelectElm(eval("this.data." + str.join(".subMap.") + ".subMap"),
-                                    i + 1, false);
-                        } else {
-                            this.initSelectElm(null, i + 1, true);
+                        initCode = region.code;
+                    }
+                    startLevel = region.level;
+                    $select.attr("region-level", startLevel);
+                    var $option = $("<option value='" + region.code + "'>" + region.caption
+                            + "</option>");
+                    $select.append($option);
+                    _this.initOptions(region);
+                }
+                $select.on("change", function() {
+                    _this.change($(this).attr("region-level") - 0);
+                });
+                $(ele).before($select);
+                // 继续生成后续的select且初始化数据
+
+                for (var i = (startLevel + 1); i <= maxLevel; i++) {
+                    var parentCode = $("select[render-id='" + renderId + "'][region-level='" + (i - 1) + "']").val();
+                    var options = $.data(document, parentCode);
+                    var $subSelect = $("<select render-id='" + renderId + "' class='" + selectClass
+                            + "' style='" + selectStyle + "' region-level='" + i + "'></select>");
+                    if (emptyText) {
+                        $subSelect.append("<option value=''>" + emptyText + "</option>");
+                    }
+                    if (options && options.length > 0) {
+                        for (var j = 0; j < options.length; j++) {
+                            $subSelect.append(options[j]);
                         }
                     }
+                    $subSelect.on("change", function() {
+                        _this.change($(this).attr("region-level") - 0);
+                    });
+                    ele.before($subSelect);
                 }
-            }
-            if (opt.isAutoChange) {
-                this.autoChange();
+                $(ele).val($("select[render-id='" + renderId + "'][region-level='" + maxLevel + "']").val());
             }
         },
-        initSelectElm : function(result, level, disable) { // 创建国家级下拉选择框
-            var _id = $(this.element).attr("id"), selectElm = $("<select>").attr("class",
-                    "input-small").attr("disabled", disable).attr("data-level", level).on("change",
-                    this.onChange);
-            if (result) {
-                $.data(document, _id + "-level" + level, result);
-                var optionElms = new Array();
-                // if (this.options.nullLevel && this.options.nullLevel <=
-                // level) {
-                // optionElms.push($("<option>"));
-                // }
-                // if (isIE) { // IE浏览器默认值兼容控制
-                // optionElms.push($("<option>"));
-                // }
-                optionElms.push($("<option>"));
-                $.map(result, function(val, key) {
-                    optionElms.push($("<option>").attr("value", key).text(val.caption));
-                });
-                selectElm.append(optionElms);
-            }
-            selectElm.val(disable ? "" : this.codes ? this.codes[level - 1] : "");
-            $(this.element).before(selectElm).before(" ");
-        },
-        /**
-         * 下拉框内容发生改变时事件处理
-         */
-        onChange : function() { // 地区联动事件(手动)
-            var _id = $(this).nextAll("input").attr("id"), $el = $.data(document, _id), val = $(
-                    this).val(), level = $(this).attr("data-level");
-            if ($el != undefined) {
-                var data = $.data(document, _id + "-level" + level);
-                if (val === "") {
-                    $(this).nextAll("select").html("").attr("disabled", true);
-                    return;
-                }
-                var subMap = eval("data." + val + ".subMap"), showNext = true;
-                if ($el.options.subHideByNotGroundSon) {
-                    showNext = eval("data." + val + ".includingGrandSub");
-                }
-                if ($(this).data("level") >= $el.options.endLevel) {
-                    showNext = false;
-                }
-                if (subMap != undefined && showNext) {
-                    $(this).nextAll("select").html("").attr("disabled", true);
-                    $el.createOption(this, subMap, $(this).data("level"));
-                } else {
-                    $(this).nextAll("select").html("").attr("disabled", true);
-                }
-                var code = "";
-                $(this).parent().find("select").each(function() {
-                    if ($(this).val()) {
-                        code = $(this).val();
+        initOptions : function(region) {// 将数据生成option并缓存到document中
+            var _this = this;
+            if (region.subs != null) {
+                var options = new Array();
+                $.each(region.subs, function(index, subRegion) {
+                    var option = "<option value='" + subRegion.code + "'>" + subRegion.caption
+                            + "</option>";
+                    options.push(option);
+                    if (subRegion.subs != null) {
+                        _this.initOptions(subRegion);
                     }
                 });
-                $("input[name=" + $el.options.regionName + "]").val(code);
-                $el.options.changeCallBack(subMap != undefined);
+                $.data(document, region.code, options);
             }
         },
-        /**
-         * 自动触发地区下拉框联动事件
-         */
-        autoChange : function() {
-            var _this = this, _id = $(this.element).attr("id");
-            $(this.element)
-                    .parent()
-                    .find("select")
-                    .each(
-                            function() {
-                                if ($(this).prop("disabled")) {
-                                    var optionObj = $(this).prev(), val = optionObj.val(), level = optionObj
-                                            .attr("data-level"), data = $.data(document, _id
-                                            + "-level" + level);
-                                    if (val !== "" && val !== null) {
-                                        var subMap = eval("data." + val + ".subMap");
-                                        if (subMap != undefined) {
-                                            _this.createOption(optionObj, subMap, level);
-                                        } else {
-                                            $(this).nextAll("select").html("").attr("disabled",
-                                                    true);
-                                        }
-                                        $("input[name=" + _this.options.regionName + "]").val(
-                                                _this.getValue());
-                                    }
-                                }
-                            });
-        },
-        /**
-         * 获取当前选择地区的最小单元code
-         */
-        getValue : function() {
-            var code = "";
-            $(this.element).parent().find("select").each(function() {
-                if ($(this).val()) {
-                    code = $(this).val();
-                }
-            });
-            return code;
-        },
-        createOption : function(dom, data, level) {
-            var selectElm = $(dom).next().html(""), _id = $(dom).nextAll("input").attr("id"), nextLelve = selectElm
-                    .attr("data-level"), opts = new Array();
-            if (this.options.nullLevel) {
-                if (this.options.nullLevel <= nextLelve) {
-                    opts.push($("<option></option>"));
+        change : function(level) {// 下拉连级变动
+            var maxLevel = this.options.maxLevel;
+            var renderId = this.element.attr("id");
+            for (var i = level; i < maxLevel; i++) {
+                var subLevel = i + 1;
+                var $subSelect = $("select[render-id='" + renderId + "'][region-level='" + subLevel
+                        + "']");
+                $subSelect.find("option[value!='']").remove();
+                var parentCode = $("select[render-id='" + renderId + "'][region-level='" + i + "']")
+                        .val();
+                if (parentCode != "" && parentCode != null) {
+                    var options = $.data(document, parentCode);
+                    $subSelect.append(options.join(''));
                 }
             }
-            $.map(data, function(val, key) {
-                opts.push($("<option></option>").attr("value", key).text(val.caption));
-            });
-            selectElm.append(opts);
-            $(selectElm).attr("disabled", false);
-            $.data(document, _id + "-level" + nextLelve, data);
-            if (nextLelve < this.options.endLevel) {
-                this.autoChange();
-            }
+            var code = $("select[render-id='" + renderId + "'][region-level='" + maxLevel + "']")
+                    .val();
+            this.element.val(code);
+            this.options.onChange(code);
         }
     };
 
     var methods = {
         init : function(option) {
             var args = arguments, result = null;
-            $(this)
-                    .each(
-                            function(index, item) {
-                                var data = $.data(document, $(item).attr("id")), options = (typeof option !== 'object') ? null
-                                        : option;
-                                if (!data) {
-                                    var domOptions = $(item).attr("options");
-                                    if (domOptions) { // 如果页面控件设置了options参数，合并参数值
-                                        options = $.extend(options, $.parseJSON(domOptions.replace(
-                                                /'/g, "\"")));
-                                    }
-                                    data = new Region(item, options);
-                                    $.data(document, $(item).attr("id"), data);
-                                    result = $.extend({
-                                        "element" : data.element
-                                    }, methods);
-                                    return false;
-                                }
-                                if (typeof option === 'string') {
-                                    if (data[option]) {
-                                        result = data[option].apply(data, Array.prototype.slice
-                                                .call(args, 1));
-                                    } else {
-                                        throw "Method " + option + " does not exist";
-                                    }
-                                } else {
-                                    result = data.setOptions(option);
-                                }
-                            });
-            return result;
-        },
-        change : function(codes) {
-            var el = !this.element ? $(this) : this.element;
-            var region = $.data(document, $(el).attr("id")), codeArry = region
-                    .loadDefaultCodes(codes), selects = $(el).siblings("select");
-            console.info(codeArry);
-            if (codeArry == null) {
-                $(selects[0]).val("");
-                $(el).val("");
-                for (var i = 1; i < selects.length; i++) {
-                    $(selects[i]).val("").attr("disabled", true);
-                    $.data(document,
-                            $(el).attr("id") + "-level" + $(selects[i]).attr("data-level"), "");
+            $(this).each(function(index, item) {
+                var options = (typeof option !== 'object') ? null : option;
+                var domOptions = $(item).attr("options");
+                if (domOptions) { // 如果页面控件设置了options参数，合并参数值
+                    options = $.extend(options, $.parseJSON(domOptions.replace(/'/g, "\"")));
                 }
-                return;
-            }
-            for (var i = region.options.startLevel - 1; i < codeArry.length; i++) {
-                if (region.options.startLevel == 2) {
-                    $(selects[i - 1]).val(codeArry[i]).trigger("change");
+                var data = new RegionSelector(item, options);
+                result = $.extend({
+                    "element" : data.element
+                }, methods);
+                return false;
+
+                if (typeof option === 'string') {
+                    if (data[option]) {
+                        result = data[option].apply(data, Array.prototype.slice.call(args, 1));
+                    } else {
+                        throw "Method " + option + " does not exist";
+                    }
                 } else {
-                    $(selects[i]).val(codeArry[i]).trigger("change");
+                    result = data.setOptions(option);
                 }
-            }
+            });
+            return result;
         }
     };
 

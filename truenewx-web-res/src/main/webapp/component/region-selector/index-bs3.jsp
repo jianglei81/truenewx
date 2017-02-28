@@ -10,11 +10,28 @@
 <script type="text/javascript" language="javascript">
 $(function() {
     selectMenu(3);
+    
+    $("#region").regionSelector({
+        selectClass:"form-control m-bot15",
+        emptyText:"请选择",
+        onChange:function(code){
+        }
+    });
 });
 </script>
 </head>
 
 <body>
-<tnx:region-view value="CN110101" delimiter=" "/>
+<div class="alert alert-info">
+    <tnx:region-view value="CN110101" delimiter=" "/>
+</div>
+<form class="form-horizontal" role="form" action="${context}/org/staff/add" method="post" validate="true">
+    <div class="form-group">
+        <label class="col-md-1 control-label" for="region">所在地</label>
+        <div class="col-md-5">
+            <input type="text" class="form-control" id="region" name="region" />
+        </div>
+    </div>
+</form>
 </body>
 </html>

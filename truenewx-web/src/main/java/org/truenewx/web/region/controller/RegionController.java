@@ -79,10 +79,10 @@ public class RegionController {
     }
 
     @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = Region.class, includes = {
-            "code", "caption", "parentCode", "subs" })))
-    public Region getNationalRegion(final String nation) {
+            "code", "caption", "level", "subs" })))
+    public Region getRegion(final String code) {
         final Locale locale = SpringWebContext.getLocale();
-        return this.regionSource.getNationalRegion(nation, locale);
+        return this.regionSource.getRegion(code, locale);
     }
 
     /**
