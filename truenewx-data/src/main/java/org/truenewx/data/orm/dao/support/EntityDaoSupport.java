@@ -17,7 +17,6 @@ import org.truenewx.data.query.Comparison;
 import org.truenewx.data.query.Paging;
 import org.truenewx.data.query.QueryParameter;
 import org.truenewx.data.query.QueryResult;
-import org.truenewx.data.query.QueryResultImpl;
 
 /**
  * 实体DAO支持
@@ -105,7 +104,7 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
         } else {
             dataList = new ArrayList<>();
         }
-        return new QueryResultImpl<>(dataList, pageSize, pageNo, total);
+        return new QueryResult<>(dataList, pageSize, pageNo, total);
     }
 
     protected int countAll(final String entityName) {
@@ -144,7 +143,7 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
             final Serializable dependedKey, final QueryParameter parameter) {
         final String keyProperty = getDependedKeyProperty(dependedClass);
         if (keyProperty == null) {
-            return new QueryResultImpl<>(new ArrayList<T>(), parameter.getPageSize(),
+            return new QueryResult<>(new ArrayList<T>(), parameter.getPageSize(),
                     parameter.getPageNo());
         }
         final StringBuffer hql = new StringBuffer("select count(*) from ").append(entityName)
