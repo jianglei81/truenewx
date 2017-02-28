@@ -44,7 +44,7 @@
             $ele.append("<ol class='dots'></ol>");
             var index = 0;
             $ele.find("div").each(function () {
-                $ele.find("ol.dots").append("<li class='dot'>" + index +"</li>");
+                $ele.find("ol.dots").append("<li class='dot' index='"+index+"'></li>");
                 index++;
             });
             $ele.find("div").css("opacity", 0);
@@ -58,20 +58,22 @@
                 index++;
             });
             $ele.find("ol.dots").find("li").eq(0).addClass("active");
+            var isStop=true;
             var interval = setInterval(function () {
-                _this.autoshow();
-            }, oOptions.delay);
-            $ele.mouseover(function() {
-                clearInterval(interval);
-            });
-            $ele.mouseout(function() {
-                interval = setInterval(function () {
+                if(!isStop){
                     _this.autoshow();
-                }, oOptions.delay);
+                }
+            }, oOptions.delay);
+
+            $ele.mouseout(function() {
+                isStop=false;
             });
-            
+            $ele.mouseover(function() {
+                isStop=true;
+            });
+
             $ele.find("li").click(function(){
-                var index = parseInt($(this).text());
+                var index = parseInt($(this).attr("index"));
                 _this.change(index);
             });
             $ele.data("fadeCarousel", this);
@@ -93,7 +95,7 @@
                     opacity : 0
                 }, oOptions.speed);
             }
-            
+
             //显示当前图像
             current.css("z-index", 2);
             current.animate({
@@ -102,7 +104,7 @@
             $ele.find("ol.dots").find("li").removeClass("active");
             $ele.find("ol.dots").find("li").each(function () {
                 var $li = $(this);
-                if ($li.text() == index) {
+                if ($li.attr("index") == index) {
                     $li.addClass("active");
                 }
             });
@@ -111,7 +113,7 @@
             var _this = this,
                 $ele = $(_this.element),
                 size = $ele.find("div").length,
-                index = parseInt($ele.find("ol.dots").find(".active").text()) + 1;
+                index = parseInt($ele.find("ol.dots").find(".active").attr("index")) + 1;
             if(index <= size - 1){
                 _this.change(index);
             }else{
@@ -125,10 +127,10 @@
             $dots.html("");
             $ele.find("div[index]").each(function () {
                 var $div = $(this);
-                $dots.append("<li class='dot'>" + $div.attr("index") +"</li>");
+                $dots.append("<li class='dot' index='"+$div.attr("index")+"'></li>");
             });
-            $dots.find("li").click(function(){   
-                var index = parseInt($(this).text());
+            $dots.find("li").click(function(){
+                var index = parseInt($(this).attr("index"));
                 _this.change(index);
             });
         }
