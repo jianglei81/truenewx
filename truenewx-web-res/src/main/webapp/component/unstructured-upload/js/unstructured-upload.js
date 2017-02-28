@@ -4,7 +4,7 @@
 		this.init(element, options);
 	};
 
-	var rpc = $.tnx.rpc.imports("unstructuredAuthorizeController");
+	var rpc = $.tnx.rpc.imports("unstructuredController");
 
 
 	var defaultOptions = {
