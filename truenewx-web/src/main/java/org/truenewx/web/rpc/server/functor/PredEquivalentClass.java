@@ -1,6 +1,5 @@
 package org.truenewx.web.rpc.server.functor;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +9,7 @@ import org.truenewx.core.functor.BinatePredicate;
 
 /**
  * 断言：等价的类型
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -56,18 +55,12 @@ public class PredEquivalentClass extends BinatePredicate<Class<?>, Class<?>> {
         // 当期望类型和实际类型中有一个为基本数据类型，而另一个不是基本数据类型时
         // 从等价类型集中获取匹配类型进行比较
         if (expected.isPrimitive() != actual.isPrimitive()
-                        && getEquivalentClass(expected) == actual) {
+                && getEquivalentClass(expected) == actual) {
             return true;
         }
-        // 如果期望类型为数组，则实际类型也必须为元素类型匹配的数组或集合
-        if (expected.isArray()) {
-            return (actual.isArray()
-                            && apply(expected.getComponentType(), actual.getComponentType()))
-                            || Collection.class.isAssignableFrom(actual);
-        }
-        // 如果期望类型为集合，则实际类可以是数组
-        if (Collection.class.isAssignableFrom(expected)) {
-            return actual.isArray();
+        // 如果期望类型为数组，则实际类型也必须为元素类型匹配的数组
+        if (expected.isArray() && actual.isArray()) {
+            return apply(expected.getComponentType(), actual.getComponentType());
         }
         return false;
     }

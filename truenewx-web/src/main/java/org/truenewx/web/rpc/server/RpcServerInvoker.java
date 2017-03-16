@@ -243,7 +243,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
                         && !componentType.isPrimitive()) { // 实际值为Map，期望值为复合对象
                     value = BeanUtil.toBean((Map<String, Object>) value, componentType);
                 }
-                Array.set(arg, j++, value);
+                Array.set(args[i], j++, value);
             }
         } else if (Map.class.isAssignableFrom(declaredArgType)
                 && Map.class.isAssignableFrom(actualArgType)) { // 声明和实际均为Map
