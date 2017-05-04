@@ -1,15 +1,10 @@
 package org.truenewx.test.spring;
 
-import java.util.List;
-
 import org.junit.Rule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
-import org.truenewx.core.util.CollectionUtil;
-import org.truenewx.test.init.DataInitFactory;
 import org.truenewx.test.junit.rules.ExpectedBusinessException;
 import org.truenewx.test.junit.rules.LogCaption;
 
@@ -27,28 +22,10 @@ public abstract class TransactionalJUnit4SpringContextTest
      * 日志
      */
     protected Logger logger = LoggerFactory.getLogger(getClass());
-    /**
-     * 数据初始化工厂
-     */
-    @Autowired
-    protected DataInitFactory dataInitFactory;
     @Rule
     public LogCaption logCaption = LogCaption.DEFAULT;
 
     @Rule
     public ExpectedBusinessException expectedBusinessException = new ExpectedBusinessException();
-
-    @SuppressWarnings("unchecked")
-    protected final <T, C extends T> C getData(final Class<T> modelClass, final int index) {
-        final List<T> list = this.dataInitFactory.getDataList(modelClass);
-        return (C) CollectionUtil.get(list, index);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected final <T, C extends T> C getData(final Class<T> modelClass, final int batch,
-            final int index) {
-        final List<T> list = this.dataInitFactory.getDataList(modelClass, batch);
-        return (C) CollectionUtil.get(list, index);
-    }
 
 }
