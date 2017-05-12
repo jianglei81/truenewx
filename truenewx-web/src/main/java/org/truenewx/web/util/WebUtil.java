@@ -498,8 +498,6 @@ public class WebUtil {
     /**
      * 创建Cookie对象
      *
-     * @param request
-     *            请求
      * @param name
      *            名称
      * @param value
@@ -508,19 +506,41 @@ public class WebUtil {
      *            有效时间，单位：秒
      * @param httpOnly
      *            是否禁止客户端javascript访问
+     * @param path
+     *            路径
      * @return Cookie对象
      */
-    public static Cookie createCookie(final HttpServletRequest request, final String name,
-            final String value, final int maxAge, final boolean httpOnly) {
+    public static Cookie createCookie(final String name, final String value, final int maxAge,
+            final boolean httpOnly, final String path) {
         final Cookie cookie = new Cookie(name, value);
         cookie.setMaxAge(maxAge);
+        cookie.setHttpOnly(httpOnly);
+        cookie.setPath(path);
+        return cookie;
+    }
+
+    /**
+     * 创建Cookie对象
+     *
+     * @param name
+     *            名称
+     * @param value
+     *            值
+     * @param maxAge
+     *            有效时间，单位：秒
+     * @param httpOnly
+     *            是否禁止客户端javascript访问
+     * @param request
+     *            请求
+     * @return Cookie对象
+     */
+    public static Cookie createCookie(final String name, final String value, final int maxAge,
+            final boolean httpOnly, final HttpServletRequest request) {
         String contextPath = request.getContextPath();
         if (StringUtils.isBlank(contextPath)) {
             contextPath = Strings.SLASH;
         }
-        cookie.setPath(contextPath);
-        cookie.setHttpOnly(httpOnly);
-        return cookie;
+        return createCookie(name, value, maxAge, httpOnly, contextPath);
     }
 
     /**
@@ -542,7 +562,7 @@ public class WebUtil {
     public static void addCookie(final HttpServletRequest request,
             final HttpServletResponse response, final String cookieName, final String cookieValue,
             final int maxAge) {
-        final Cookie cookie = createCookie(request, cookieName, cookieValue, maxAge, false);
+        final Cookie cookie = createCookie(cookieName, cookieValue, maxAge, false, request);
         response.addCookie(cookie);
     }
 
