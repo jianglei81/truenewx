@@ -82,7 +82,7 @@ public class WebUtil {
      * @return 指定request请求中的所有参数的map集合
      */
     public static Map<String, String> getRequestParameterMap(final ServletRequest request) {
-        final Map<String, String> map = new LinkedHashMap<String, String>();
+        final Map<String, String> map = new LinkedHashMap<>();
         final Enumeration<String> names = request.getParameterNames();
         while (names.hasMoreElements()) {
             final String name = names.nextElement();
@@ -485,7 +485,7 @@ public class WebUtil {
      * @return
      */
     public static Map<String, Cookie> getCookieMap(final HttpServletRequest request) {
-        final Map<String, Cookie> cookieMap = new HashMap<String, Cookie>();
+        final Map<String, Cookie> cookieMap = new HashMap<>();
         final Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (final Cookie cookie : cookies) {
@@ -493,6 +493,34 @@ public class WebUtil {
             }
         }
         return cookieMap;
+    }
+
+    /**
+     * 创建Cookie对象
+     *
+     * @param request
+     *            请求
+     * @param name
+     *            名称
+     * @param value
+     *            值
+     * @param maxAge
+     *            有效时间，单位：秒
+     * @param httpOnly
+     *            是否禁止客户端javascript访问
+     * @return Cookie对象
+     */
+    public static Cookie createCookie(final HttpServletRequest request, final String name,
+            final String value, final int maxAge, final boolean httpOnly) {
+        final Cookie cookie = new Cookie(name, value);
+        cookie.setMaxAge(maxAge);
+        String contextPath = request.getContextPath();
+        if (StringUtils.isBlank(contextPath)) {
+            contextPath = Strings.SLASH;
+        }
+        cookie.setPath(contextPath);
+        cookie.setHttpOnly(httpOnly);
+        return cookie;
     }
 
     /**
@@ -514,13 +542,7 @@ public class WebUtil {
     public static void addCookie(final HttpServletRequest request,
             final HttpServletResponse response, final String cookieName, final String cookieValue,
             final int maxAge) {
-        final Cookie cookie = new Cookie(cookieName, cookieValue);
-        cookie.setMaxAge(maxAge);
-        String contextPath = request.getContextPath();
-        if (StringUtils.isBlank(contextPath)) {
-            contextPath = Strings.SLASH;
-        }
-        cookie.setPath(contextPath);
+        final Cookie cookie = createCookie(request, cookieName, cookieValue, maxAge, false);
         response.addCookie(cookie);
     }
 
