@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.truenewx.core.Strings;
@@ -147,7 +148,7 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
 
     @Override
     public void validateRole(final Subject subject, final String role) throws BusinessException {
-        if (role != null && !hasRole(subject, role)) {
+        if (StringUtils.isNotEmpty(role) && !hasRole(subject, role)) {
             throw new BusinessException(SecurityExceptionCodes.NO_ROLE, role);
         }
     }
@@ -169,7 +170,7 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
     @Override
     public void validatePermission(final Subject subject, final String permission)
             throws BusinessException {
-        if (permission != null && !isPermitted(subject, permission)) {
+        if (StringUtils.isNotEmpty(permission) && !isPermitted(subject, permission)) {
             throw new BusinessException(SecurityExceptionCodes.NO_PERMISSION, permission);
         }
     }
