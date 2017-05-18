@@ -1,4 +1,4 @@
-package org.truenewx.web.login;
+package org.truenewx.web.spring.servlet.mvc;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,7 +11,7 @@ import org.truenewx.core.exception.HandleableException;
  * @author jianglei
  *
  */
-public interface Loginer extends LoginPredicate {
+public interface Loginer {
 
     /**
      * 执行登录

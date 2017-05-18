@@ -1,4 +1,4 @@
-package org.truenewx.web.login;
+package org.truenewx.web.util;
 
 import org.truenewx.core.util.StringUtil;
 

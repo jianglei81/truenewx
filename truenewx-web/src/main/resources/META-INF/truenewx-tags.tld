@@ -1236,5 +1236,30 @@
             <description>是否不能为null，true-至少输出一个html空格</description>
         </attribute>
     </tag>
+    
+    <tag>
+        <name>authorized</name>
+        <tag-class>org.truenewx.web.security.tag.AuthorizedTag</tag-class>
+        <body-content>JSP</body-content>
+        <description>判断当前用户是否具有指定授权</description>
+        <attribute>
+            <name>userClass</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>用户类型</description>
+        </attribute>
+        <attribute>
+            <name>role</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>要比较的角色</description>
+        </attribute>
+        <attribute>
+            <name>permission</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>要比较的权限</description>
+        </attribute>
+    </tag>
 
 </taglib>

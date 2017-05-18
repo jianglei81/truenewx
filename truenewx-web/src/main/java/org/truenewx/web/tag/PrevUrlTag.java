@@ -10,7 +10,7 @@ import javax.servlet.jsp.tagext.TagSupport;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.core.Strings;
 import org.truenewx.core.spring.util.SpringUtil;
-import org.truenewx.web.login.Loginer;
+import org.truenewx.web.spring.servlet.mvc.Loginer;
 import org.truenewx.web.spring.util.SpringWebUtil;
 import org.truenewx.web.util.WebUtil;
 

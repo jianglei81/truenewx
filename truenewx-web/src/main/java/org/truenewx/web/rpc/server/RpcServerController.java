@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.truenewx.core.annotation.Caption;
 import org.truenewx.core.enums.support.EnumDictResolver;
@@ -37,9 +35,7 @@ import org.truenewx.core.util.ClassUtil;
 import org.truenewx.core.util.NetUtil;
 import org.truenewx.core.util.PropertyMeta;
 import org.truenewx.data.rpc.annotation.RpcProperty;
-import org.truenewx.web.authority.validator.AuthorityValidator;
 import org.truenewx.web.exception.annotation.HandleableExceptionMessage;
-import org.truenewx.web.login.LoginPredicate;
 import org.truenewx.web.menu.MenuResolver;
 import org.truenewx.web.menu.model.Menu;
 import org.truenewx.web.rpc.serializer.RpcSerializer;
@@ -50,6 +46,8 @@ import org.truenewx.web.rpc.server.meta.RpcControllerMeta;
 import org.truenewx.web.rpc.server.meta.RpcTypeMeta;
 import org.truenewx.web.rpc.server.meta.RpcVariableMeta;
 import org.truenewx.web.rpc.util.RpcUtil;
+import org.truenewx.web.security.mgt.SubjectManager;
+import org.truenewx.web.security.subject.Subject;
 import org.truenewx.web.spring.context.SpringWebContext;
 import org.truenewx.web.util.WebUtil;
 
@@ -64,14 +62,12 @@ import org.truenewx.web.util.WebUtil;
 public class RpcServerController implements RpcServerInterceptor {
 
     private RpcServer server;
+
     @Autowired
     private RpcSerializer serializer;
-    @Autowired(required = false)
-    @Qualifier("loginPredicate")
-    private LoginPredicate loginPredicate;
 
     @Autowired(required = false)
-    private AuthorityValidator authorityValidator;
+    private SubjectManager subjectManager;
 
     @Autowired
     private ApplicationContext context;
@@ -116,24 +112,19 @@ public class RpcServerController implements RpcServerInterceptor {
             return;
         }
         // 检查登录限制
-        if (this.loginPredicate != null) {
-            if (!this.loginPredicate.isLogined(request, response) && rpcMethod.logined()) {
+        if (this.subjectManager != null && rpcMethod.logined()) {
+            final Subject subject = this.subjectManager.getSubject(request, response);
+            if (!subject.isLogined()) { // 登录校验失败，则返回错误码
                 response.sendError(HttpStatus.UNAUTHORIZED.value());
                 return;
             }
-            if (rpcMethod.logined() && this.authorityValidator != null) { // 登录校验RPC权限
-                final HandlerMethod handler = new HandlerMethod(this.context.getBean(beanId),
-                        method);
-                // 先校验@RpcAuth注解中限定的权限
-                String validatedAuthority = RpcUtil.getAuthority(rpcMethod);
-                this.authorityValidator.validate(request, response, handler, validatedAuthority);
-                // 再校验菜单配置中限定的权限
-                if (this.menu != null) {
-                    validatedAuthority = this.menu.getAuth(beanId, method.getName(),
-                            method.getParameterTypes().length);
-                    this.authorityValidator.validate(request, response, handler,
-                            validatedAuthority);
-                }
+            // 先校验@RpcAuth注解中限定的权限
+            subject.validatePermission(RpcUtil.getAuthority(rpcMethod));
+            // 再校验菜单配置中限定的权限
+            if (this.menu != null) {
+                final String permission = this.menu.getAuth(beanId, method.getName(),
+                        method.getParameterTypes().length);
+                subject.validatePermission(permission);
             }
         }
     }
@@ -146,8 +137,8 @@ public class RpcServerController implements RpcServerInterceptor {
         return this.serializer.serializeCollection(methodNames);
     }
 
-    @RequestMapping(value = "/invoke/{beanId}/{methodName}", method = { RequestMethod.POST,
-            RequestMethod.GET })
+    @RequestMapping(value = "/invoke/{beanId}/{methodName}",
+            method = { RequestMethod.POST, RequestMethod.GET })
     @HandleableExceptionMessage
     @ResponseBody
     public String invoke(@PathVariable("beanId") final String beanId,
