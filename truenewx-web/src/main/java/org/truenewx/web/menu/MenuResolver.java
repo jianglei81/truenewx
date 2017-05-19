@@ -1,8 +1,11 @@
 package org.truenewx.web.menu;
 
+import java.util.List;
 import java.util.Map;
 
 import org.truenewx.web.menu.model.Menu;
+import org.truenewx.web.security.authority.Authority;
+import org.truenewx.web.security.authority.Authorization;
 
 /**
  * 菜单解决器
@@ -20,19 +23,20 @@ public interface MenuResolver {
     public Menu getFullMenu();
 
     /**
-     * 获取仅包含指定权限集动作的菜单
+     * 获取仅包含指定授权集动作的菜单
      *
-     * @param authorities
-     *            权限集
-     * @return 仅包含指定权限集动作的菜单
+     * @param authorization
+     *            授权集
+     *
+     * @return 仅包含指定授权集动作的菜单
      */
-    public Menu getAuthorizedMenu(String[] authorities);
+    public Menu getAuthorizedMenu(Authorization authorization);
 
     /**
-     * 获取指定选项映射集限定的权限集
+     * 获取指定选项映射集限定的授权清单
      *
-     * @return 指定选项映射集限定的权限集
+     * @return 指定选项映射集限定的授权清单
      */
-    public String[] getAuthorities(Map<String, Object> options);
+    public List<Authority> getAuthorites(Map<String, Object> options);
 
 }

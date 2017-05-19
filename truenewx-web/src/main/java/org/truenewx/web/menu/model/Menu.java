@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.truenewx.core.tuple.Binary;
 import org.truenewx.core.tuple.Binate;
+import org.truenewx.web.security.authority.Authority;
 
 /**
  * 菜单类
@@ -100,15 +101,15 @@ public class Menu implements Serializable {
         this.operations.add(operation);
     }
 
-    public String getAuth(final String href, final HttpMethod method) {
+    public Authority getAuth(final String href, final HttpMethod method) {
         for (final MenuItem item : this.items) {
-            final String auth = item.getAuth(href, method);
+            final Authority auth = item.getAuth(href, method);
             if (auth != null) {
                 return auth;
             }
         }
         for (final MenuOperation operation : this.operations) {
-            final String auth = operation.getAuth(href, method);
+            final Authority auth = operation.getAuth(href, method);
             if (auth != null) {
                 return auth;
             }
@@ -116,15 +117,15 @@ public class Menu implements Serializable {
         return null;
     }
 
-    public String getAuth(final String beanId, final String methodName, final Integer argCount) {
+    public Authority getAuth(final String beanId, final String methodName, final Integer argCount) {
         for (final MenuItem item : this.items) {
-            final String auth = item.getAuth(beanId, methodName, argCount);
+            final Authority auth = item.getAuth(beanId, methodName, argCount);
             if (auth != null) {
                 return auth;
             }
         }
         for (final MenuOperation operation : this.operations) {
-            final String auth = operation.getAuth(beanId, methodName, argCount);
+            final Authority auth = operation.getAuth(beanId, methodName, argCount);
             if (auth != null) {
                 return auth;
             }
@@ -138,7 +139,7 @@ public class Menu implements Serializable {
             auths.addAll(item.getAllAuths());
         }
         for (final MenuOperation operation : this.operations) {
-            final String auth = operation.getAuth();
+            final String auth = operation.getPermission();
             if (auth != null) {
                 auths.add(auth);
             }

@@ -6,19 +6,7 @@ package org.truenewx.web.security.authority;
  * @author jianglei
  * @since JDK 1.8
  */
-public interface AuthorizationInfo {
-
-    /**
-     *
-     * @return 用户具有的角色集合
-     */
-    Iterable<String> getRoles();
-
-    /**
-     *
-     * @return 用户具有的权限集合
-     */
-    Iterable<String> getPermissions();
+public interface AuthorizationInfo extends Authorization {
 
     /**
      *

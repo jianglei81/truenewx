@@ -2,11 +2,9 @@ package org.truenewx.web.menu;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -15,6 +13,8 @@ import org.truenewx.web.menu.model.Menu;
 import org.truenewx.web.menu.model.MenuAction;
 import org.truenewx.web.menu.model.MenuItem;
 import org.truenewx.web.menu.model.MenuOperation;
+import org.truenewx.web.security.authority.Authority;
+import org.truenewx.web.security.authority.Authorization;
 
 /**
  * 默认菜单解决器
@@ -49,10 +49,10 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
     }
 
     @Override
-    public Menu getAuthorizedMenu(final String[] authorities) {
+    public Menu getAuthorizedMenu(final Authorization authorization) {
         final List<MenuItem> items = new ArrayList<>();
         for (final MenuItem item : this.menu.getItems()) {
-            copyMatchedItemTo(item, authorities, items);
+            copyMatchedItemTo(item, authorization, items);
         }
         return new Menu(this.menu.getName(), items);
     }
@@ -62,12 +62,12 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
      *
      * @param item
      *            菜单项
-     * @param authorities
-     *            权限集
+     * @param authorization
+     *            授权集
      * @param items
      *            目标菜单项集合
      */
-    private void copyMatchedItemTo(final MenuItem item, final String[] authorities,
+    private void copyMatchedItemTo(final MenuItem item, final Authorization authorization,
             final List<MenuItem> items) {
         // 如果profile不匹配，则直接忽略，也不再查找子菜单
         if (!item.matchesProfile()) {
@@ -77,15 +77,15 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
         // 否则当前菜单项权限匹配时，才加入目标集合中
         final List<MenuItem> newSubs = new ArrayList<>();
         for (final MenuItem sub : item.getSubs()) {
-            copyMatchedItemTo(sub, authorities, newSubs);
+            copyMatchedItemTo(sub, authorization, newSubs);
         }
         final List<MenuOperation> newOperations = new ArrayList<>();
         for (final MenuOperation operation : item.getOperations()) {
-            if (operation.matchesAuth(authorities)) {
+            if (operation.matchesAuth(authorization)) {
                 newOperations.add(operation);
             }
         }
-        if ((StringUtils.isBlank(item.getAuth()) || !item.matchesAuth(authorities))
+        if ((StringUtils.isBlank(item.getPermission()) || !item.matchesAuth(authorization))
                 && newSubs.isEmpty() && newOperations.isEmpty()) {
             return; // 当前菜单无权限或权限不匹配，且不包含匹配的子菜单和操作，则忽略当前菜单项
         }
@@ -101,42 +101,42 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
     }
 
     @Override
-    public String[] getAuthorities(final Map<String, Object> options) {
+    public List<Authority> getAuthorites(final Map<String, Object> options) {
         if (options == null) {
-            return null;
+            return new ArrayList<>();
         }
-        final Set<String> authorities = new LinkedHashSet<>();
+        final List<Authority> items = new ArrayList<>();
         for (final MenuItem item : this.menu.getItems()) {
-            addMatchedAuthority(item, options, authorities);
+            addMatchedAuthority(item, options, items);
         }
-        return authorities.toArray(new String[authorities.size()]);
+        return items;
     }
 
     /**
-     * 添加指定菜单动作中匹配指定选项集的权限到指定权限集中
+     * 添加指定菜单动作中匹配指定选项集的权限到指定授权集中
      *
      * @param action
      *            菜单动作
      * @param options
      *            选项集
-     * @param authorities
-     *            目标权限集
+     * @param authes
+     *            目标菜单项集
      */
     private void addMatchedAuthority(final MenuAction action, final Map<String, Object> options,
-            final Set<String> authorities) {
+            final List<Authority> authes) {
         if (isMatchedOptions(action, options)) {
-            final String auth = action.getAuth();
-            if (StringUtils.isNotBlank(auth)) {
-                authorities.add(auth);
+            final Authority auth = action.getAuth();
+            if (auth != null && auth.isNotEmpty()) {
+                authes.add(auth);
             }
         }
-        if (action instanceof MenuItem) { // 如果菜单动作是菜单项，则需进一步添加包含的菜单操作和子菜单项中的匹配权限
+        if (action instanceof MenuItem) { // 如果菜单动作是菜单项，则需进一步添加包含的菜单操作和子菜单项中的匹配授权
             final MenuItem item = (MenuItem) action;
             for (final MenuOperation operation : item.getOperations()) {
-                addMatchedAuthority(operation, options, authorities);
+                addMatchedAuthority(operation, options, authes);
             }
             for (final MenuItem sub : item.getSubs()) {
-                addMatchedAuthority(sub, options, authorities);
+                addMatchedAuthority(sub, options, authes);
             }
         }
     }

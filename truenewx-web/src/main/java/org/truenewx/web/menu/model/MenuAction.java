@@ -9,11 +9,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.truenewx.core.spring.core.env.functor.FuncProfile;
 import org.truenewx.web.http.HttpLink;
+import org.truenewx.web.security.authority.Authority;
+import org.truenewx.web.security.authority.Authorization;
 
 /**
  * 菜单动作
@@ -26,9 +27,9 @@ public abstract class MenuAction implements Serializable {
     private static final long serialVersionUID = -3489116426777799955L;
 
     /**
-     * 权限名称
+     * 所需授权
      */
-    private String auth;
+    private Authority auth;
     /**
      * 地域说明集合（菜单显示）
      */
@@ -49,11 +50,11 @@ public abstract class MenuAction implements Serializable {
     /**
      *
      * @param auth
-     *            权限名称
+     *            所需授权
      * @param caption
      *            菜单说明
      */
-    public MenuAction(final String auth, final String caption) {
+    public MenuAction(final Authority auth, final String caption) {
         this.auth = auth;
         if (caption != null) {
             this.captions.put(Locale.getDefault(), caption);
@@ -61,10 +62,29 @@ public abstract class MenuAction implements Serializable {
     }
 
     /**
-     * @return 权限名称
+     *
+     * @return 所需授权
      */
-    public String getAuth() {
+    public Authority getAuth() {
         return this.auth;
+    }
+
+    /**
+     * 相当于获取 auth.role
+     *
+     * @return 所需角色
+     */
+    public String getRole() {
+        return this.auth.getRole();
+    }
+
+    /**
+     * 相当于获取 auth.permission
+     * 
+     * @return 所需权限
+     */
+    public String getPermission() {
+        return this.auth.getPermission();
     }
 
     /**
@@ -120,7 +140,7 @@ public abstract class MenuAction implements Serializable {
         return false;
     }
 
-    public String getAuth(final String href, final HttpMethod method) {
+    public Authority getAuth(final String href, final HttpMethod method) {
         for (final HttpLink link : this.links) {
             if (link.isMatched(href, method)) {
                 return this.auth;
@@ -129,7 +149,7 @@ public abstract class MenuAction implements Serializable {
         return null;
     }
 
-    public abstract String getAuth(String beanId, String methodName, Integer argCount);
+    public abstract Authority getAuth(String beanId, String methodName, Integer argCount);
 
     public boolean matchesProfile() {
         final String profile = FuncProfile.INSTANCE.apply();
@@ -137,13 +157,9 @@ public abstract class MenuAction implements Serializable {
                 || this.profiles.contains(profile);
     }
 
-    public boolean matchesAuth(final String[] authorities) {
-        // 如果当前动作未指定权限，表示没有权限限制，视为匹配
-        if (StringUtils.isBlank(this.auth)) {
-            return true;
-        }
-        // 当前动作的权限在指定比较权限集中，视为匹配
-        return ArrayUtils.contains(authorities, this.auth);
+    public boolean matchesAuth(Authorization authorization) {
+        // 如果当前动作未指定授权，表示没有授权限制，视为匹配
+        return this.auth == null || this.auth.isContained(authorization);
     }
 
 }

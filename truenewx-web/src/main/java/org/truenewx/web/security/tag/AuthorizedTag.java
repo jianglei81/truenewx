@@ -6,9 +6,9 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.core.spring.util.SpringUtil;
+import org.truenewx.web.security.authority.Authority;
 import org.truenewx.web.security.mgt.SecurityManager;
 import org.truenewx.web.security.mgt.SubjectManager;
 import org.truenewx.web.security.subject.Subject;
@@ -50,13 +50,8 @@ public class AuthorizedTag extends TagSupport {
         final HttpServletRequest request = (HttpServletRequest) this.pageContext.getRequest();
         final HttpServletResponse response = (HttpServletResponse) this.pageContext.getResponse();
         final Subject subject = getSubjectManager().getSubject(request, response, this.userClass);
-        if (subject != null) { // 必须可取得当前subject
-            // 角色不为空则需比较角色，权限不为空则需比较权限
-            if ((StringUtils.isEmpty(this.role) || subject.hasRole(this.role))
-                    && (StringUtils.isEmpty(this.permission)
-                            || subject.isPermitted(this.permission))) {
-                return Tag.EVAL_BODY_INCLUDE;
-            }
+        if (subject != null && subject.isAuthorized(new Authority(this.role, this.permission))) {
+            return Tag.EVAL_BODY_INCLUDE;
         }
         return Tag.SKIP_BODY;
     }

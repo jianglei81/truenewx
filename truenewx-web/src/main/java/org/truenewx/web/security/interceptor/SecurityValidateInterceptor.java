@@ -13,6 +13,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
 import org.truenewx.web.menu.MenuResolver;
 import org.truenewx.web.menu.model.Menu;
+import org.truenewx.web.security.authority.Authority;
 import org.truenewx.web.security.mgt.SubjectManager;
 import org.truenewx.web.security.subject.Subject;
 import org.truenewx.web.util.UrlPatternMatchSupport;
@@ -107,8 +108,8 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
                 // 登录校验成功后，校验授权
                 if (this.menu != null) {
                     final HttpMethod method = HttpMethod.valueOf(request.getMethod());
-                    final String permission = this.menu.getAuth(url, method);
-                    subject.validatePermission(permission);
+                    final Authority auth = this.menu.getAuth(url, method);
+                    subject.validateAuthority(auth);
                 }
             }
         }

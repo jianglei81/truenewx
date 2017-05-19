@@ -21,7 +21,7 @@ public class RpcUtil {
             final Class<?> type = rpcMethod.authType();
             if (type != NullEnum.class) {
                 final Enum<?> enumConstant = Enum.valueOf((Class<Enum>) type, rpcMethod.auth());
-                return MenuUtil.getAuthority(enumConstant);
+                return MenuUtil.getPermission(enumConstant);
             } else {
                 return rpcMethod.auth();
             }

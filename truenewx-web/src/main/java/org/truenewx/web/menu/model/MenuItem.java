@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.truenewx.core.tuple.Binary;
 import org.truenewx.core.tuple.Binate;
 import org.truenewx.web.http.HttpLink;
+import org.truenewx.web.security.authority.Authority;
 
 /**
  * 菜单项类
@@ -45,8 +46,8 @@ public class MenuItem extends MenuAction {
      */
     private List<MenuOperation> operations = new ArrayList<>();
 
-    public MenuItem(final String auth, final String caption, final String href, final String target,
-            final String icon) {
+    public MenuItem(final Authority auth, final String caption, final String href,
+            final String target, final String icon) {
         super(auth, caption);
         this.link = new HttpLink(href);
         this.target = target;
@@ -100,12 +101,12 @@ public class MenuItem extends MenuAction {
      * @return 匹配的权限
      */
     @Override
-    public String getAuth(final String href, final HttpMethod method) {
+    public Authority getAuth(final String href, final HttpMethod method) {
         // 菜单项上的访问方法固定为GET方式
         if (this.link.isMatched(href, method)) {
             return getAuth();
         }
-        String auth = super.getAuth(href, method);
+        Authority auth = super.getAuth(href, method);
         if (auth != null) {
             return auth;
         }
@@ -125,15 +126,15 @@ public class MenuItem extends MenuAction {
     }
 
     @Override
-    public String getAuth(final String beanId, final String methodName, final Integer argCount) {
+    public Authority getAuth(final String beanId, final String methodName, final Integer argCount) {
         for (final MenuOperation operation : this.operations) {
-            final String auth = operation.getAuth(beanId, methodName, argCount);
+            final Authority auth = operation.getAuth(beanId, methodName, argCount);
             if (auth != null) {
                 return auth;
             }
         }
         for (final MenuItem sub : this.subs) {
-            final String auth = sub.getAuth(beanId, methodName, argCount);
+            final Authority auth = sub.getAuth(beanId, methodName, argCount);
             if (auth != null) {
                 return auth;
             }
@@ -143,12 +144,12 @@ public class MenuItem extends MenuAction {
 
     public Set<String> getAllAuths() {
         final Set<String> result = new HashSet<>();
-        String auth = getAuth();
+        String auth = getPermission();
         if (auth != null) {
             result.add(auth);
         }
         for (final MenuOperation operation : this.operations) {
-            auth = operation.getAuth();
+            auth = operation.getPermission();
             if (auth != null) {
                 result.add(auth);
             }
@@ -236,11 +237,11 @@ public class MenuItem extends MenuAction {
      */
     public List<MenuAction> getActions(final String auth) {
         final List<MenuAction> actions = new ArrayList<>();
-        if (getAuth().equals(auth)) { // 如果当前菜单项匹配
+        if (getPermission().equals(auth)) { // 如果当前菜单项匹配
             actions.add(this);
         }
         for (final MenuOperation operation : this.operations) {
-            if (operation.getAuth().equals(auth)) { // 如果包含的特性匹配
+            if (operation.getPermission().equals(auth)) { // 如果包含的特性匹配
                 actions.add(operation);
             }
         }

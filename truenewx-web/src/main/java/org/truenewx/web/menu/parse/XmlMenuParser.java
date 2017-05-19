@@ -28,6 +28,7 @@ import org.truenewx.web.menu.model.MenuItem;
 import org.truenewx.web.menu.model.MenuOperation;
 import org.truenewx.web.menu.util.MenuUtil;
 import org.truenewx.web.rpc.RpcPort;
+import org.truenewx.web.security.authority.Authority;
 
 /**
  * 获取XML菜单文件
@@ -81,10 +82,12 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
         final List<MenuItem> items = new ArrayList<>();
         for (final Object itemObj : element.elements("item")) {
             final Element itemElement = (Element) itemObj;
-            final String auth = getAuth(itemElement);
-            final MenuItem menuItem = new MenuItem(auth, itemElement.attributeValue("caption"),
-                    itemElement.attributeValue("href"), itemElement.attributeValue("target"),
-                    itemElement.attributeValue("icon"));
+            final Authority auth = getAuth(itemElement);
+            final String caption = itemElement.attributeValue("caption");
+            final String href = itemElement.attributeValue("href");
+            final String target = itemElement.attributeValue("target");
+            final String icon = itemElement.attributeValue("icon");
+            final MenuItem menuItem = new MenuItem(auth, caption, href, target, icon);
             menuItem.getLinks().addAll(getLinks(itemElement));
             menuItem.getProfiles().addAll(getProfiles(itemElement));
             menuItem.getOptions().putAll(getOptions(itemElement, parentOptions));
@@ -97,24 +100,25 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private String getAuth(final Element element) {
-        String auth = element.attributeValue("auth");
+    private Authority getAuth(final Element element) {
+        String permission = element.attributeValue("permission");
         final String className = element.attributeValue("type");
         if (StringUtils.isNotBlank(className)) {
             final Class<?> type = this.funcFindClass.apply(className);
             if (type != null) {
                 if (type.isEnum()) { // 如果为枚举类型，则取枚举的名称
-                    final Enum<?> enumConstant = Enum.valueOf((Class<Enum>) type, auth);
-                    auth = MenuUtil.getAuthority(enumConstant);
+                    final Enum<?> enumConstant = Enum.valueOf((Class<Enum>) type, permission);
+                    permission = MenuUtil.getPermission(enumConstant);
                 } else { // 否则取该类型的静态字符串属性值
-                    final Object value = ClassUtil.getPublicStaticPropertyValue(type, auth);
+                    final Object value = ClassUtil.getPublicStaticPropertyValue(type, permission);
                     if (value != null && value instanceof String) {
-                        auth = (String) value;
+                        permission = (String) value;
                     }
                 }
             }
         }
-        return auth;
+        final String role = element.attributeValue("role");
+        return new Authority(role, permission);
     }
 
     /**
@@ -151,9 +155,9 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
         final List<MenuOperation> operations = new ArrayList<>();
         for (final Object operationObj : element.elements("operation")) {
             final Element operationElement = (Element) operationObj;
-            final String auth = getAuth(operationElement);
-            final MenuOperation operation = new MenuOperation(auth,
-                    operationElement.attributeValue("caption"));
+            final Authority auth = getAuth(operationElement);
+            final String caption = operationElement.attributeValue("caption");
+            final MenuOperation operation = new MenuOperation(auth, caption);
             operation.getCaptions().putAll(getCaptions(operationElement));
             operation.getOptions().putAll(getOptions(operationElement, parentOptions));
             operation.getLinks().addAll(getLinks(operationElement));

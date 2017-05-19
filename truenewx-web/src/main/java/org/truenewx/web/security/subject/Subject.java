@@ -5,7 +5,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.truenewx.core.exception.BusinessException;
 import org.truenewx.core.exception.HandleableException;
-import org.truenewx.web.security.authority.AuthorizationInfo;
+import org.truenewx.web.security.authority.Authority;
+import org.truenewx.web.security.authority.Authorization;
 import org.truenewx.web.security.login.LoginToken;
 
 /**
@@ -30,15 +31,11 @@ public interface Subject {
 
     void login(LoginToken token) throws HandleableException;
 
-    <T extends AuthorizationInfo> T getAuthorizationInfo();
+    <T extends Authorization> T getAuthorization();
 
-    boolean hasRole(String role);
+    boolean isAuthorized(Authority authority);
 
-    void validateRole(String role) throws BusinessException;
-
-    boolean isPermitted(String permission);
-
-    void validatePermission(String permission) throws BusinessException;
+    void validateAuthority(Authority authority) throws BusinessException;
 
     void logout() throws BusinessException;
 

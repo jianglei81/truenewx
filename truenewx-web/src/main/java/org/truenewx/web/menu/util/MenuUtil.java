@@ -14,7 +14,7 @@ public class MenuUtil {
     private MenuUtil() {
     }
 
-    public static String getAuthority(final Enum<?> enumConstant) {
+    public static String getPermission(final Enum<?> enumConstant) {
         return StringUtils.join(enumConstant.getClass().getSimpleName(), Strings.DOT,
                         enumConstant.name());
     }

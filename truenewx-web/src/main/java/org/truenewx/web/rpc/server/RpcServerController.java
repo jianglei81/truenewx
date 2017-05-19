@@ -45,7 +45,7 @@ import org.truenewx.web.rpc.server.annotation.RpcResultFilter;
 import org.truenewx.web.rpc.server.meta.RpcControllerMeta;
 import org.truenewx.web.rpc.server.meta.RpcTypeMeta;
 import org.truenewx.web.rpc.server.meta.RpcVariableMeta;
-import org.truenewx.web.rpc.util.RpcUtil;
+import org.truenewx.web.security.authority.Authority;
 import org.truenewx.web.security.mgt.SubjectManager;
 import org.truenewx.web.security.subject.Subject;
 import org.truenewx.web.spring.context.SpringWebContext;
@@ -118,13 +118,11 @@ public class RpcServerController implements RpcServerInterceptor {
                 response.sendError(HttpStatus.UNAUTHORIZED.value());
                 return;
             }
-            // 先校验@RpcAuth注解中限定的权限
-            subject.validatePermission(RpcUtil.getAuthority(rpcMethod));
             // 再校验菜单配置中限定的权限
             if (this.menu != null) {
-                final String permission = this.menu.getAuth(beanId, method.getName(),
+                final Authority auth = this.menu.getAuth(beanId, method.getName(),
                         method.getParameterTypes().length);
-                subject.validatePermission(permission);
+                subject.validateAuthority(auth);
             }
         }
     }

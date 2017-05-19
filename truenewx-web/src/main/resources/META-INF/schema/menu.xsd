@@ -28,7 +28,8 @@
             <xs:attribute name="href" type="xs:string" use="optional" />
             <xs:attribute name="target" type="xs:string" use="optional" />
             <xs:attribute name="type" type="xs:string" use="optional" />
-            <xs:attribute name="auth" type="xs:string" use="optional" />
+            <xs:attribute name="role" type="xs:string" use="optional" />
+            <xs:attribute name="permission" type="xs:string" use="optional" />
             <xs:attribute name="profile" type="xs:string" use="optional" />
             <xs:attribute name="icon" type="xs:string" use="optional" />
         </xs:complexType>
@@ -73,7 +74,8 @@
             </xs:sequence>
             <xs:attribute name="caption" use="required" />
             <xs:attribute name="type" type="xs:string" use="optional" />
-            <xs:attribute name="auth" type="xs:string" use="required" />
+            <xs:attribute name="role" type="xs:string" use="required" />
+            <xs:attribute name="permission" type="xs:string" use="required" />
             <xs:attribute name="profile" type="xs:string" use="optional" />
         </xs:complexType>
     </xs:element>

@@ -5,7 +5,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.truenewx.core.exception.BusinessException;
 import org.truenewx.core.exception.HandleableException;
-import org.truenewx.web.security.authority.AuthorizationInfo;
+import org.truenewx.web.security.authority.Authority;
+import org.truenewx.web.security.authority.Authorization;
 import org.truenewx.web.security.login.LoginToken;
 import org.truenewx.web.security.mgt.SecurityManager;
 
@@ -66,28 +67,18 @@ public class DelegatingSubject implements Subject {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends AuthorizationInfo> T getAuthorizationInfo() {
-        return (T) this.securityManager.getAuthorizationInfo(this);
+    public <T extends Authorization> T getAuthorization() {
+        return (T) this.securityManager.getAuthorization(this);
     }
 
     @Override
-    public boolean hasRole(final String role) {
-        return this.securityManager.hasRole(this, role);
+    public boolean isAuthorized(final Authority authority) {
+        return this.securityManager.isAuthorized(this, authority);
     }
 
     @Override
-    public void validateRole(final String role) throws BusinessException {
-        this.securityManager.validateRole(this, role);
-    }
-
-    @Override
-    public boolean isPermitted(final String permission) {
-        return this.securityManager.isPermitted(this, permission);
-    }
-
-    @Override
-    public void validatePermission(final String permission) throws BusinessException {
-        this.securityManager.validatePermission(this, permission);
+    public void validateAuthority(final Authority authority) throws BusinessException {
+        this.securityManager.validateAuthority(this, authority);
     }
 
     @Override

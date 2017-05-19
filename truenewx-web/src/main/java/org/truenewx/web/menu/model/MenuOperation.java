@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.truenewx.web.rpc.RpcPort;
+import org.truenewx.web.security.authority.Authority;
 
 /**
  * 菜单操作
@@ -20,14 +21,7 @@ public class MenuOperation extends MenuAction {
      */
     private List<RpcPort> rpcs = new ArrayList<>();
 
-    /**
-     *
-     * @param auth
-     *            权限
-     * @param caption
-     *            菜单说明
-     */
-    public MenuOperation(final String auth, final String caption) {
+    public MenuOperation(final Authority auth, final String caption) {
         super(auth, caption);
     }
 
@@ -59,7 +53,7 @@ public class MenuOperation extends MenuAction {
     }
 
     @Override
-    public String getAuth(final String beanId, final String methodName, final Integer argCount) {
+    public Authority getAuth(final String beanId, final String methodName, final Integer argCount) {
         if (contains(beanId, methodName, argCount)) {
             return getAuth();
         }

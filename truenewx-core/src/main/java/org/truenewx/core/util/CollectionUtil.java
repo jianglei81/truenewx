@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -75,6 +76,24 @@ public class CollectionUtil {
             }
             return size;
         }
+    }
+
+    /**
+     * 判断指定集合是否包含指定元素
+     *
+     * @param iterable
+     *            集合
+     * @param element
+     *            元素
+     * @return 指定集合是否包含指定元素
+     */
+    public static <T> boolean contains(final Iterable<T> iterable, final T element) {
+        for (final T e : iterable) {
+            if (Objects.equals(e, element)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

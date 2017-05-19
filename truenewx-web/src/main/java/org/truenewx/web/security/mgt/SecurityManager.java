@@ -2,7 +2,8 @@ package org.truenewx.web.security.mgt;
 
 import org.truenewx.core.exception.BusinessException;
 import org.truenewx.core.exception.HandleableException;
-import org.truenewx.web.security.authority.AuthorizationInfo;
+import org.truenewx.web.security.authority.Authority;
+import org.truenewx.web.security.authority.Authorization;
 import org.truenewx.web.security.login.LoginToken;
 import org.truenewx.web.security.subject.Subject;
 
@@ -18,15 +19,11 @@ public interface SecurityManager extends SubjectManager {
 
     Object getUser(Subject subject);
 
-    AuthorizationInfo getAuthorizationInfo(Subject subject);
+    Authorization getAuthorization(Subject subject);
 
-    boolean hasRole(Subject subject, String role);
+    boolean isAuthorized(Subject subject, Authority authority);
 
-    void validateRole(Subject subject, String role) throws BusinessException;
-
-    boolean isPermitted(Subject subject, String permission);
-
-    void validatePermission(Subject subject, String permission) throws BusinessException;
+    void validateAuthority(Subject subject, Authority authority) throws BusinessException;
 
     void logout(Subject subject) throws BusinessException;
 

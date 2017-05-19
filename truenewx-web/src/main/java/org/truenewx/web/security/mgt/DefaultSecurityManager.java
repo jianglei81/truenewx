@@ -8,13 +8,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.truenewx.core.Strings;
 import org.truenewx.core.exception.BusinessException;
 import org.truenewx.core.exception.HandleableException;
 import org.truenewx.core.spring.beans.ContextInitializedBean;
+import org.truenewx.web.security.authority.Authority;
+import org.truenewx.web.security.authority.Authorization;
 import org.truenewx.web.security.authority.AuthorizationInfo;
 import org.truenewx.web.security.login.LoginInfo;
 import org.truenewx.web.security.login.LoginToken;
@@ -107,24 +108,24 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
         }
     }
 
-    protected String getAuthorizationInfoSessionName(final Realm<?> realm) {
-        return realm.getUserSessionName() + Strings.UNDERLINE + "Authorization";
+    protected String getAuthorizationSessionName(final Realm<?> realm) {
+        return realm.getUserSessionName() + Strings.UNDERLINE + Authorization.class.getSimpleName();
     }
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public AuthorizationInfo getAuthorizationInfo(final Subject subject) {
+    public Authorization getAuthorization(final Subject subject) {
         final Realm realm = getRealm(subject.getUserClass());
         if (realm != null) {
             final HttpSession session = subject.getServletRequest().getSession();
-            final String authorizationInfoSessionName = getAuthorizationInfoSessionName(realm);
+            final String authorizationSessionName = getAuthorizationSessionName(realm);
             AuthorizationInfo ai = (AuthorizationInfo) session
-                    .getAttribute(authorizationInfoSessionName);
+                    .getAttribute(authorizationSessionName);
             if (ai == null) {
                 final Object user = getUser(subject);
                 ai = realm.getAuthorizationInfo(user);
                 if (ai != null && ai.isCaching()) {
-                    session.setAttribute(authorizationInfoSessionName, ai);
+                    session.setAttribute(authorizationSessionName, ai);
                 }
             }
             return ai;
@@ -133,45 +134,16 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
     }
 
     @Override
-    public boolean hasRole(final Subject subject, final String role) {
-        final AuthorizationInfo ai = getAuthorizationInfo(subject);
-        if (ai != null) {
-            for (final String r : ai.getRoles()) {
-                // 星号*表示具有所有角色
-                if (Strings.ASTERISK.equals(r) || r.equals(role)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    public boolean isAuthorized(final Subject subject, final Authority authority) {
+        final Authorization authorization = getAuthorization(subject);
+        return authority == null || authority.isContained(authorization);
     }
 
     @Override
-    public void validateRole(final Subject subject, final String role) throws BusinessException {
-        if (StringUtils.isNotEmpty(role) && !hasRole(subject, role)) {
-            throw new BusinessException(SecurityExceptionCodes.NO_ROLE, role);
-        }
-    }
-
-    @Override
-    public boolean isPermitted(final Subject subject, final String permission) {
-        final AuthorizationInfo ai = getAuthorizationInfo(subject);
-        if (ai != null) {
-            for (final String p : ai.getPermissions()) {
-                // 星号*表示具有所有权限
-                if (Strings.ASTERISK.equals(p) || p.equals(permission)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public void validatePermission(final Subject subject, final String permission)
+    public void validateAuthority(final Subject subject, final Authority authority)
             throws BusinessException {
-        if (StringUtils.isNotEmpty(permission) && !isPermitted(subject, permission)) {
-            throw new BusinessException(SecurityExceptionCodes.NO_PERMISSION, permission);
+        if (!isAuthorized(subject, authority)) {
+            throw new NoAuthorityException(authority);
         }
     }
 
@@ -191,7 +163,7 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
                     // 移除会话中的用户
                     session.removeAttribute(realm.getUserSessionName());
                     // 移除会话中可能缓存的授权信息对象
-                    session.removeAttribute(getAuthorizationInfoSessionName(realm));
+                    session.removeAttribute(getAuthorizationSessionName(realm));
                 }
 
                 // 移除需要移除的cookie
