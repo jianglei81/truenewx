@@ -1,5 +1,6 @@
 package org.truenewx.web.security.mgt;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -96,12 +97,16 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
             final LoginInfo loginInfo = realm.getLoginInfo(token);
             if (loginInfo != null) {
                 final HttpServletRequest request = subject.getServletRequest();
-                final HttpSession session = request.getSession();
+                request.getSession().invalidate(); // 重置会话，以避免新登录用户取得原用户会话信息
+                final HttpSession session = request.getSession(true); // 重新创建会话对象
                 // 登录用户保存至会话
                 session.setAttribute(realm.getUserSessionName(), loginInfo.getUser());
                 // 保存cookie
                 for (final Cookie cookie : loginInfo.getCookies()) {
-                    cookie.setPath(request.getContextPath()); // 所有cookie的路径都设置为工程根目录
+                    final String contextPath = request.getContextPath();
+                    if (!Strings.SLASH.equals(contextPath)) {
+                        cookie.setPath(contextPath + cookie.getPath()); // cookie路径加上工程根目录
+                    }
                     subject.getServletResponse().addCookie(cookie);
                 }
             }
@@ -159,11 +164,8 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
                 final HttpSession session = request.getSession();
                 if (logoutInfo.isInvalidatingSession()) {
                     session.invalidate();
-                } else { // 不用无效化session则逐一移除session中需要移除的属性
-                    // 移除会话中的用户
-                    session.removeAttribute(realm.getUserSessionName());
-                    // 移除会话中可能缓存的授权信息对象
-                    session.removeAttribute(getAuthorizationSessionName(realm));
+                } else { // 不用无效化session则移除session中的属性
+                    removeSessionAttributesOnLogout(session);
                 }
 
                 // 移除需要移除的cookie
@@ -174,7 +176,21 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
                         WebUtil.removeCookie(request, response, cookieName);
                     }
                 }
+                realm.onLogouted(user);
             }
+        }
+    }
+
+    /**
+     * 用户登出时移除会话中的属性，默认移除所有属性，子类可覆写进行选择性的移除
+     *
+     * @param session
+     *            会话
+     */
+    protected void removeSessionAttributesOnLogout(final HttpSession session) {
+        final Enumeration<String> attributeNames = session.getAttributeNames();
+        while (attributeNames.hasMoreElements()) {
+            session.removeAttribute(attributeNames.nextElement());
         }
     }
 
