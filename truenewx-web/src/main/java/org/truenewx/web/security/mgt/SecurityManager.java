@@ -17,7 +17,7 @@ public interface SecurityManager extends SubjectManager {
 
     void login(Subject subject, LoginToken token) throws HandleableException;
 
-    Object getUser(Subject subject);
+    Object getUser(Subject subject, boolean auto);
 
     Authorization getAuthorization(Subject subject);
 

@@ -455,16 +455,16 @@ public class WebUtil {
      * 根据名字获取cookie
      *
      * @param request
-     * @param cookieName
-     *            cookie名字
+     * @param name
+     *            cookie名称
      * @return cookie对象
      */
-    public static Cookie getCookie(final HttpServletRequest request, final String cookieName) {
-        if (StringUtils.isNotBlank(cookieName)) {
+    public static Cookie getCookie(final HttpServletRequest request, final String name) {
+        if (StringUtils.isNotBlank(name)) {
             final Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (final Cookie cookie : cookies) {
-                    if (cookie.getName().equals(cookieName)) {
+                    if (cookie.getName().equals(name)) {
                         return cookie;
                     }
                 }
@@ -587,24 +587,20 @@ public class WebUtil {
     /**
      * 移除cookie
      *
-     * @param request
-     *            请求
      * @param response
      *            响应
-     * @param cookieName
+     * @param name
      *            cookie名称
+     * @param path
+     *            cookie路径
      *
      * @author jianglei
      */
-    public static void removeCookie(final HttpServletRequest request,
-            final HttpServletResponse response, final String cookieName) {
-        final Cookie cookie = new Cookie(cookieName, Strings.EMPTY);
+    public static void removeCookie(final HttpServletResponse response, final String name,
+            final String path) {
+        final Cookie cookie = new Cookie(name, Strings.EMPTY);
+        cookie.setPath(path);
         cookie.setMaxAge(0);
-        String contextPath = request.getContextPath();
-        if (StringUtils.isBlank(contextPath)) {
-            contextPath = Strings.SLASH;
-        }
-        cookie.setPath(contextPath);
         response.addCookie(cookie);
     }
 

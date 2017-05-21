@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.truenewx.core.Strings;
@@ -22,6 +23,7 @@ import org.truenewx.web.security.login.LoginInfo;
 import org.truenewx.web.security.login.LoginToken;
 import org.truenewx.web.security.login.LogoutInfo;
 import org.truenewx.web.security.realm.Realm;
+import org.truenewx.web.security.realm.RememberMeRealm;
 import org.truenewx.web.security.subject.DelegatingSubject;
 import org.truenewx.web.security.subject.Subject;
 import org.truenewx.web.util.WebUtil;
@@ -79,12 +81,25 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
     }
 
     @Override
-    public Object getUser(final Subject subject) {
+    public Object getUser(final Subject subject, final boolean auto) {
         final Realm<?> realm = getRealm(subject.getUserClass());
         if (realm != null) {
-            final HttpSession session = subject.getServletRequest().getSession(false);
+            final HttpServletRequest request = subject.getServletRequest();
+            final HttpSession session = request.getSession(false);
             if (session != null) {
-                return session.getAttribute(realm.getUserSessionName());
+                Object user = session.getAttribute(realm.getUserSessionName());
+                // 如果从会话中无法取得用户，则尝试自动登录验证
+                if (user == null && auto && realm instanceof RememberMeRealm) {
+                    final String host = WebUtil.getRemoteAddrIp(request);
+                    final Cookie[] cookies = request.getCookies();
+                    user = ((RememberMeRealm<?>) realm).getLoginUser(host, cookies);
+                    session.setAttribute(realm.getUserSessionName(), user);
+                    // cookie可能被修改，重新回写以生效
+                    for (final Cookie cookie : cookies) {
+                        subject.getServletResponse().addCookie(cookie);
+                    }
+                }
+                return user;
             }
         }
         return null;
@@ -103,9 +118,10 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
                 session.setAttribute(realm.getUserSessionName(), loginInfo.getUser());
                 // 保存cookie
                 for (final Cookie cookie : loginInfo.getCookies()) {
+                    // cookie路径加上工程根目录
                     final String contextPath = request.getContextPath();
-                    if (!Strings.SLASH.equals(contextPath)) {
-                        cookie.setPath(contextPath + cookie.getPath()); // cookie路径加上工程根目录
+                    if (StringUtils.isNotEmpty(contextPath)) {
+                        cookie.setPath(contextPath + cookie.getPath());
                     }
                     subject.getServletResponse().addCookie(cookie);
                 }
@@ -127,7 +143,7 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
             AuthorizationInfo ai = (AuthorizationInfo) session
                     .getAttribute(authorizationSessionName);
             if (ai == null) {
-                final Object user = getUser(subject);
+                final Object user = getUser(subject, false);
                 ai = realm.getAuthorizationInfo(user);
                 if (ai != null && ai.isCaching()) {
                     session.setAttribute(authorizationSessionName, ai);
@@ -157,7 +173,7 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
     public void logout(final Subject subject) throws BusinessException {
         final Realm realm = getRealm(subject.getUserClass());
         if (realm != null) {
-            final Object user = getUser(subject);
+            final Object user = getUser(subject, false);
             final LogoutInfo logoutInfo = realm.getLogoutInfo(user);
             if (logoutInfo != null) {
                 final HttpServletRequest request = subject.getServletRequest();
@@ -173,7 +189,12 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
                 if (cookieNames != null) {
                     final HttpServletResponse response = subject.getServletResponse();
                     for (final String cookieName : cookieNames) {
-                        WebUtil.removeCookie(request, response, cookieName);
+                        final Cookie cookie = WebUtil.getCookie(request, cookieName);
+                        if (cookie != null) {
+                            cookie.setMaxAge(0);
+                            cookie.setValue(Strings.EMPTY);
+                            response.addCookie(cookie);
+                        }
                     }
                 }
                 realm.onLogouted(user);

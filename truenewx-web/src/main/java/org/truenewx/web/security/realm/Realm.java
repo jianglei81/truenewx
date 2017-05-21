@@ -33,13 +33,13 @@ public interface Realm<T> {
     /**
      * 根据登录token获取登录用户信息，即完成登录校验
      *
-     * @param token
+     * @param loginToken
      *            登录token
      * @return 用户信息，返回null将被忽略，不应返回null
      * @throws HandleableException
      *             如果登录校验不通过
      */
-    LoginInfo getLoginInfo(LoginToken token) throws HandleableException;
+    LoginInfo getLoginInfo(LoginToken loginToken) throws HandleableException;
 
     /**
      * 获取指定用户的授权信息

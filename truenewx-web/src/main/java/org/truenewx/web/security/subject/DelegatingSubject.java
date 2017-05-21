@@ -52,12 +52,13 @@ public class DelegatingSubject implements Subject {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getUser() {
-        return (T) this.securityManager.getUser(this);
+        return (T) this.securityManager.getUser(this, false);
     }
 
     @Override
     public boolean isLogined() {
-        return getUser() != null;
+        // 仅在判断是否已登录时尝试自动登录，因为自动登录在一次请求中应该只被调用一次，而本方法只在请求拦截时被调用
+        return this.securityManager.getUser(this, true) != null;
     }
 
     @Override
