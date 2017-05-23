@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.truenewx.web.menu.model.Menu;
@@ -73,22 +72,23 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
         if (!item.matchesProfile()) {
             return;
         }
-        // 当前菜单项权限为空，则需要检查包含的子菜单项和操作中是否有匹配的，才决定是否加入目标集合中
-        // 否则当前菜单项权限匹配时，才加入目标集合中
+        // 当前菜单授权不匹配，则不再检查子菜单项和操作
+        if (!item.matchesAuth(authorization)) {
+            return;
+        }
+        // 检查子菜单项
         final List<MenuItem> newSubs = new ArrayList<>();
         for (final MenuItem sub : item.getSubs()) {
             copyMatchedItemTo(sub, authorization, newSubs);
         }
+        // 检查操作
         final List<MenuOperation> newOperations = new ArrayList<>();
         for (final MenuOperation operation : item.getOperations()) {
             if (operation.matchesAuth(authorization)) {
                 newOperations.add(operation);
             }
         }
-        if ((StringUtils.isBlank(item.getPermission()) || !item.matchesAuth(authorization))
-                && newSubs.isEmpty() && newOperations.isEmpty()) {
-            return; // 当前菜单无权限或权限不匹配，且不包含匹配的子菜单和操作，则忽略当前菜单项
-        }
+        // 构建新的菜单项对象，以免影响缓存的完整菜单对象的数据
         final MenuItem newItem = new MenuItem(item.getAuth(), item.getCaption(), item.getHref(),
                 item.getTarget(), item.getIcon());
         newItem.getLinks().addAll(item.getLinks());
