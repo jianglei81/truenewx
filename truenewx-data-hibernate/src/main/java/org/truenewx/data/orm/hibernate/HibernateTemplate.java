@@ -53,7 +53,7 @@ public final class HibernateTemplate extends DataAccessTemplate {
     @Override
     @SuppressWarnings("unchecked")
     public <T> List<T> list(final CharSequence ql, final String paramName, final Object paramValue,
-                    final int pageSize, final int pageNo) {
+            final int pageSize, final int pageNo) {
         final Query query = getSession().createQuery(ql.toString());
         applyParamToQuery(query, paramName, paramValue);
         applyPagingToQuery(query, pageSize, pageNo, false);
@@ -63,7 +63,17 @@ public final class HibernateTemplate extends DataAccessTemplate {
     @Override
     @SuppressWarnings("unchecked")
     public <T> List<T> list(final CharSequence ql, final Map<String, ?> params, final int pageSize,
-                    final int pageNo) {
+            final int pageNo) {
+        final Query query = getSession().createQuery(ql.toString());
+        applyParamsToQuery(query, params);
+        applyPagingToQuery(query, pageSize, pageNo, false);
+        return query.list();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> List<T> list(final CharSequence ql, final List<?> params, final int pageSize,
+            final int pageNo) {
         final Query query = getSession().createQuery(ql.toString());
         applyParamsToQuery(query, params);
         applyPagingToQuery(query, pageSize, pageNo, false);
@@ -73,7 +83,7 @@ public final class HibernateTemplate extends DataAccessTemplate {
     @Override
     @SuppressWarnings("unchecked")
     public <T> List<T> listWithOneMore(final CharSequence ql, final String paramName,
-                    final Object paramValue, final int pageSize, final int pageNo) {
+            final Object paramValue, final int pageSize, final int pageNo) {
         final Query query = getSession().createQuery(ql.toString());
         applyParamToQuery(query, paramName, paramValue);
         applyPagingToQuery(query, pageSize, pageNo, true);
@@ -82,8 +92,18 @@ public final class HibernateTemplate extends DataAccessTemplate {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> List<T> listWithOneMore(final CharSequence ql, final int pageSize, final int pageNo,
-                    final Map<String, ?> params) {
+    public <T> List<T> listWithOneMore(final CharSequence ql, final Map<String, ?> params,
+            final int pageSize, final int pageNo) {
+        final Query query = getSession().createQuery(ql.toString());
+        applyParamsToQuery(query, params);
+        applyPagingToQuery(query, pageSize, pageNo, true);
+        return query.list();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> List<T> listWithOneMore(final CharSequence ql, final List<?> params,
+            final int pageSize, final int pageNo) {
         final Query query = getSession().createQuery(ql.toString());
         applyParamsToQuery(query, params);
         applyPagingToQuery(query, pageSize, pageNo, true);
@@ -99,6 +119,13 @@ public final class HibernateTemplate extends DataAccessTemplate {
 
     @Override
     public int update(final CharSequence ul, final Map<String, ?> params) {
+        final Query query = getSession().createQuery(ul.toString());
+        applyParamsToQuery(query, params);
+        return query.executeUpdate();
+    }
+
+    @Override
+    public int update(final CharSequence ul, final List<?> params) {
         final Query query = getSession().createQuery(ul.toString());
         applyParamsToQuery(query, params);
         return query.executeUpdate();
@@ -130,7 +157,7 @@ public final class HibernateTemplate extends DataAccessTemplate {
         } else if (value != null) {
             final Class<? extends Object> clazz = value.getClass();
             if (clazz.isArray()) { // 基础数据数组
-                final Collection<Object> collection = new ArrayList<Object>();
+                final Collection<Object> collection = new ArrayList<>();
                 final int length = Array.getLength(value);
                 for (int i = 0; i < length; i++) {
                     collection.add(Array.get(value, i));
@@ -153,8 +180,37 @@ public final class HibernateTemplate extends DataAccessTemplate {
         }
     }
 
+    public void applyParamsToQuery(final Query query, final List<?> params) {
+        if (params != null) {
+            for (int i = 0; i < params.size(); i++) {
+                applyParamToQuery(query, i, params.get(i));
+            }
+        }
+    }
+
+    public void applyParamToQuery(final Query query, final int position, final Object value) {
+        if (value != null) {
+            final Class<? extends Object> clazz = value.getClass();
+            if (clazz.isEnum()) {
+                final Enum<?> enumConstant = (Enum<?>) value;
+                final Field field = Enums.getField(enumConstant);
+                final EnumValue ev = field.getAnnotation(EnumValue.class);
+                if (ev != null) { // 含有@EnumValue注解的枚举参数值，需通过自定义类型转换
+                    final Properties parameters = new Properties();
+                    parameters.put(EnumValueMapType.PARAMETER_CLASS, clazz.getName());
+                    query.setParameter(position, value,
+                            customType(EnumValueMapType.class, parameters));
+                }
+            } else {
+                query.setParameter(position, value);
+            }
+        } else {
+            query.setParameter(position, value);
+        }
+    }
+
     public void applyPagingToQuery(final Query query, final int pageSize, int pageNo,
-                    final boolean oneMore) {
+            final boolean oneMore) {
         if (pageSize > 0) { // 用页大小判断是否分页查询
             if (pageNo <= 0) { // 页码最小为1
                 pageNo = 1;

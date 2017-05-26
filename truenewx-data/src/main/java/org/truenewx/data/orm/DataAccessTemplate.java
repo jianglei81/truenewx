@@ -1,5 +1,6 @@
 package org.truenewx.data.orm;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,5 +14,7 @@ public abstract class DataAccessTemplate extends DataQueryTemplate {
     public abstract int update(CharSequence ul, String paramName, Object paramValue);
 
     public abstract int update(CharSequence ul, Map<String, ?> params);
+
+    public abstract int update(CharSequence ul, List<?> params);
 
 }

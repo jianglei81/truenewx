@@ -109,7 +109,7 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
 
     protected int countAll(final String entityName) {
         final String hql = "select count(*) from " + entityName;
-        return getDataAccessTemplate(entityName).count(hql, null);
+        return getDataAccessTemplate(entityName).count(hql, (Map<String, ?>) null);
     }
 
     // 以下是对DependentDao的支持
