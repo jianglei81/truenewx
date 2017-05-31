@@ -7,7 +7,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.truenewx.core.Strings;
-import org.truenewx.core.enums.NullEnum;
 
 /**
  * RPC方法
@@ -36,17 +35,6 @@ public @interface RpcMethod {
      * @return 是否登录后才能访问
      */
     boolean logined() default true;
-
-    /**
-     *
-     * @return 必须拥有的权限，为空时表示无权限限制
-     */
-    String auth() default Strings.EMPTY;
-
-    /**
-     * @return 权限枚举类型
-     */
-    Class<? extends Enum<?>> authType() default NullEnum.class;
 
     /**
      * @return 结果过滤器
