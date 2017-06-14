@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
 import org.truenewx.core.spring.context.MessagesSource;
-import org.truenewx.core.spring.context.ReloadableResourceBundleMessagesSource;
+import org.truenewx.core.spring.context.support.ReloadableResourceBundleMessageSource;
 
 /**
  * 基于资源绑定属性文件的国家级区划来源实现
@@ -35,7 +35,7 @@ public class ResourceBundleNationalRegionSource extends AbstractNationalRegionSo
     public void setNation(final String nation) {
         super.setNation(nation);
         // 设置好国家代号后，即可初始化国际化消息来源
-        this.messagesSource = new ReloadableResourceBundleMessagesSource(
+        this.messagesSource = new ReloadableResourceBundleMessageSource(
                 StringUtils.join(RESOURCE_DIR, nation));
     }
 
