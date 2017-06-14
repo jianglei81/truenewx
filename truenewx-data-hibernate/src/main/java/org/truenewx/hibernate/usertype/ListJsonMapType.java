@@ -11,7 +11,7 @@ import org.hibernate.engine.spi.SessionImplementor;
 import org.truenewx.core.util.JsonUtil;
 
 /**
- * 集合-JSON字符串映射类型
+ * List-JSON字符串映射类型
  *
  * @author jianglei
  * @since JDK 1.8
@@ -25,12 +25,12 @@ public class ListJsonMapType extends ObjectComponentMapType {
 
     @Override
     public Object nullSafeGet(final ResultSet rs, final String[] names,
-                    final SessionImplementor session, final Object owner)
-                    throws HibernateException, SQLException {
+            final SessionImplementor session, final Object owner)
+            throws HibernateException, SQLException {
         final String value = rs.getString(names[0]);
         if (StringUtils.isNotBlank(value)) {
             if ("[]".equals(value)) {
-                return new ArrayList<Object>();
+                return new ArrayList<>();
             }
             try {
                 if (this.componentType == null) {
