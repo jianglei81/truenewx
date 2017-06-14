@@ -6,10 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * 文本文件内容转换器
@@ -17,24 +16,24 @@ import org.springframework.core.io.Resource;
  * @author jianglei
  * @since JDK 1.8
  */
-public class TextFileContentConverter implements ApplicationContextAware, FileContentConverter {
+public class TextFileContentConverter implements FileContentConverter {
 
     private TextContentConverter textContentConverter;
-    private ApplicationContext context;
+    private ResourcePatternResolver resourcePatternResolver;
 
     public void setTextContentConverter(final TextContentConverter textContentConverter) {
         this.textContentConverter = textContentConverter;
     }
 
-    @Override
-    public void setApplicationContext(final ApplicationContext context) throws BeansException {
-        this.context = context;
+    @Autowired
+    public void setResourcePatternResolver(final ResourcePatternResolver resourcePatternResolver) {
+        this.resourcePatternResolver = resourcePatternResolver;
     }
 
     @Override
     public void convert(final String locationPattern, final String encoding) {
         try {
-            final Resource[] resources = this.context.getResources(locationPattern);
+            final Resource[] resources = this.resourcePatternResolver.getResources(locationPattern);
             for (final Resource resource : resources) {
                 final File file = resource.getFile();
                 final FileInputStream in = new FileInputStream(file);
