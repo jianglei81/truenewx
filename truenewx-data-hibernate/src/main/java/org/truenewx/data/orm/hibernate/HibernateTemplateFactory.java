@@ -32,7 +32,7 @@ public class HibernateTemplateFactory implements DataQueryTemplateFactory, Conte
 
     @Override
     public void afterInitialized(final ApplicationContext context) throws Exception {
-        this.templates = context.getBeansOfType(HibernateTemplate.class).values();
+        this.templates.addAll(context.getBeansOfType(HibernateTemplate.class).values());
     }
 
     @Override
