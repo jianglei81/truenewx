@@ -10,6 +10,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -38,7 +39,11 @@ public class SpringWebContext {
     }
 
     public static HttpServletResponse getResponse() {
-        return ((ServletWebRequest) RequestContextHolder.getRequestAttributes()).getResponse();
+        final RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletWebRequest) {
+            return ((ServletWebRequest) requestAttributes).getResponse();
+        }
+        return null;
     }
 
     public static HttpSession getSession() {
