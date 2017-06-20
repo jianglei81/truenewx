@@ -2,7 +2,9 @@ package org.truenewx.web.menu.view;
 
 import org.truenewx.core.util.StringUtil;
 import org.truenewx.core.util.TreeNode;
+import org.truenewx.web.menu.model.MenuAction;
 import org.truenewx.web.menu.model.MenuItem;
+import org.truenewx.web.menu.model.MenuOperation;
 
 /**
  * 菜单节点
@@ -18,11 +20,17 @@ public class MenuNode extends TreeNode<String> {
     private boolean selected;
     private boolean expanded;
 
-    public MenuNode(final MenuItem item) {
-        super(StringUtil.uuid32(), item.getCaption());
-        this.permission = item.getPermission();
-        for (final MenuItem subItem : item.getSubs()) {
-            addSub(new MenuNode(subItem));
+    public MenuNode(final MenuAction action) {
+        super(StringUtil.uuid32(), action.getCaption());
+        this.permission = action.getPermission();
+        if (action instanceof MenuItem) {
+            final MenuItem item = (MenuItem) action;
+            for (final MenuItem subItem : item.getSubs()) {
+                addSub(new MenuNode(subItem));
+            }
+            for (final MenuOperation operation : item.getOperations()) {
+                addSub(new MenuNode(operation));
+            }
         }
     }
 
