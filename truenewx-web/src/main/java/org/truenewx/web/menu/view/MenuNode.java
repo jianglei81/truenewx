@@ -17,8 +17,6 @@ public class MenuNode extends TreeNode<String> {
     private static final long serialVersionUID = -5439357426707882473L;
 
     private String permission;
-    private boolean selected;
-    private boolean expanded;
 
     public MenuNode(final MenuAction action) {
         super(StringUtil.uuid32(), action.getCaption());
@@ -36,22 +34,6 @@ public class MenuNode extends TreeNode<String> {
 
     public String getPermission() {
         return this.permission;
-    }
-
-    public boolean isSelected() {
-        return this.selected;
-    }
-
-    public void setSelected(final boolean selected) {
-        this.selected = selected;
-    }
-
-    public boolean isExpanded() {
-        return this.expanded;
-    }
-
-    public void setExpanded(final boolean expanded) {
-        this.expanded = expanded;
     }
 
 }
