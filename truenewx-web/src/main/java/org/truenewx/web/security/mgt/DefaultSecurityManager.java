@@ -144,9 +144,11 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
                     .getAttribute(authorizationSessionName);
             if (ai == null) {
                 final Object user = getUser(subject, false);
-                ai = realm.getAuthorizationInfo(user);
-                if (ai != null && ai.isCaching()) {
-                    session.setAttribute(authorizationSessionName, ai);
+                if (user != null) {
+                    ai = realm.getAuthorizationInfo(user);
+                    if (ai != null && ai.isCaching()) {
+                        session.setAttribute(authorizationSessionName, ai);
+                    }
                 }
             }
             return ai;
