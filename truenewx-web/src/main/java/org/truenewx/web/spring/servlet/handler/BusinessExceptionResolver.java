@@ -147,16 +147,20 @@ public class BusinessExceptionResolver extends SimpleMappingExceptionResolver {
     private ModelAndView handleExceptionToPage(final HttpServletRequest request,
             final HandlerMethod handlerMethod, final HandleableException he) {
         final ModelAndView mav = new ModelAndView(HandleableExceptionResult.DEFAULT_VIEW);
-        final HandleableExceptionResult ber = handlerMethod
+        final HandleableExceptionResult her = handlerMethod
                 .getMethodAnnotation(HandleableExceptionResult.class);
-        if (ber != null) {
-            String view = ber.value();
+        if (her != null) {
+            String view = her.value();
             if (HandleableExceptionResult.PREV_VIEW.equals(view)) {
                 view = WebUtil.getRelativePreviousUrl(request, false);
             }
-            mav.setViewName(view);
-            mav.addObject("back", ber.back());
-            if (ber.handler()) { // 自定义处理器
+            if (HandleableExceptionResult.DEFAULT_VIEW.equals(view)) { // 跳转到全局错误页面，则需设置返回按钮地址
+                mav.addObject("back", her.back());
+            } else { // 非跳转到全局错误页面，则复制参数到属性集中，以便于可能的回填
+                mav.setViewName(view);
+                WebUtil.copyParameters2Attributes(request);
+            }
+            if (her.handler()) { // 自定义处理器
                 final Object controller = handlerMethod.getBean();
                 if (controller instanceof HandleableExceptionHandler) {
                     final HandleableExceptionHandler exceptionHandler = (HandleableExceptionHandler) controller;
@@ -165,7 +169,7 @@ public class BusinessExceptionResolver extends SimpleMappingExceptionResolver {
                 }
             }
             // 不论默认处理方式还是自定义处理，均从@HandleableExceptionResult注解中获取异常处理完毕后要生成校验规则的模型类集合
-            this.handlerValidationGenerator.generate(request, ber.validate(), mav);
+            this.handlerValidationGenerator.generate(request, her.validate(), mav);
         }
         logException(he, request);
         request.setAttribute(ErrorTagSupport.EXCEPTION_KEY, he);

@@ -692,4 +692,19 @@ public class WebUtil {
     public static String standardizeHttpUrl(final String url) {
         return standardizeUrlProtocol(url, "http");
     }
+
+    /**
+     * 将request中的所有参数都复制到属性集中
+     *
+     * @param request
+     *            请求
+     */
+    public static void copyParameters2Attributes(final HttpServletRequest request) {
+        final Enumeration<String> names = request.getParameterNames();
+        while (names.hasMoreElements()) {
+            final String name = names.nextElement();
+            request.setAttribute(name, request.getParameter(name));
+        }
+    }
+
 }
