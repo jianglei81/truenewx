@@ -6,7 +6,7 @@ import org.truenewx.core.Strings;
 
 /**
  * 简单Controller
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -14,7 +14,7 @@ public abstract class SimpleController extends AbstractController {
 
     /**
      * 获取默认的视图名
-     * 
+     *
      * @return 默认的视图名
      */
     protected final String getDefaultViewName() {
@@ -41,13 +41,4 @@ public abstract class SimpleController extends AbstractController {
         return get();
     }
 
-    @RequestMapping(method = RequestMethod.PUT)
-    public String put() {
-        return get();
-    }
-
-    @RequestMapping(method = RequestMethod.DELETE)
-    public String delete() {
-        return get();
-    }
 }
