@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.truenewx.core.util.json.MultiPropertyPreFilter;
+import org.truenewx.core.util.json.TypeSerializeFilter;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -26,6 +27,89 @@ import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
  * @since JDK 1.8
  */
 public class JsonUtil {
+
+    /**
+     * 获取JSON过滤器实例
+     *
+     * @param clazz
+     *            需进行属性排除的类
+     * @param excludeProperties
+     *            需排除的属性
+     * @return JSON过滤器实例
+     */
+    private static PropertyPreFilter getFilterInstance(final Class<?> clazz,
+            final String... excludeProperties) {
+        final SimplePropertyPreFilter filter = new SimplePropertyPreFilter(clazz);
+        final Set<String> excludeList = filter.getExcludes();
+        for (final String exclude : excludeProperties) {
+            excludeList.add(exclude);
+        }
+        return filter;
+    }
+
+    /**
+     * 获取JSON过滤器实例
+     *
+     * @param filteredPropertiesMap
+     *            过滤属性映射集
+     * @return JSON过滤器实例
+     */
+    private static PropertyPreFilter getFilterInstance(
+            final Map<Class<?>, FilteredTokens> filteredPropertiesMap) {
+        final MultiPropertyPreFilter filter = new MultiPropertyPreFilter();
+        for (final Entry<Class<?>, FilteredTokens> entry : filteredPropertiesMap.entrySet()) {
+            final FilteredTokens value = entry.getValue();
+            filter.addFilteredProperties(entry.getKey(), value.getIncludes(), value.getExcludes());
+        }
+        return filter;
+    }
+
+    /**
+     * 将指定任意类型的对象转换为JSON标准格式的字符串
+     *
+     * @param obj
+     *            对象
+     * @param clazz
+     *            需进行属性排除的类
+     * @param excludeProperties
+     *            需排除的属性
+     * @return JSON格式的字符串
+     */
+    public static String toJson(final Object obj, final Class<?> clazz,
+            final String... excludeProperties) {
+        return JSON.toJSONString(obj, getFilterInstance(clazz, excludeProperties));
+    }
+
+    /**
+     * 将指定任意类型的对象转换为JSON标准格式的字符串
+     *
+     * @param obj
+     *            对象
+     * @param filteredPropertiesMap
+     *            过滤属性映射集
+     * @return JSON格式的字符串
+     */
+    public static String toJson(final Object obj,
+            final Map<Class<?>, FilteredTokens> filteredPropertiesMap) {
+        return JSON.toJSONString(obj, getFilterInstance(filteredPropertiesMap));
+    }
+
+    /**
+     * 将指定任意类型的对象转换为JSON标准格式的字符串
+     *
+     * @param obj
+     *            对象
+     * @param appendTypeClasses
+     *            需要附加类型字段的类型集
+     * @return JSON格式的字符串
+     */
+    public static String toJson(final Object obj, final Class<?>... appendTypeClasses) {
+        if (appendTypeClasses.length == 0) {
+            return JSON.toJSONString(obj);
+        } else {
+            return JSON.toJSONString(obj, new TypeSerializeFilter(appendTypeClasses));
+        }
+    }
 
     /**
      * 将JSON标准形式的字符串转换为对象
@@ -71,180 +155,6 @@ public class JsonUtil {
     }
 
     /**
-     * 将bean转换为JSON标准格式的字符串
-     *
-     * @param bean
-     *            需转换的bean
-     * @return JSON格式的字符串
-     */
-    public static String bean2Json(final Object bean) {
-        return JSON.toJSONString(bean);
-    }
-
-    /**
-     * 将bean转换为JSON标准格式的字符串
-     *
-     * @param bean
-     *            需转换的bean
-     * @param clazz
-     *            需进行排除的类
-     * @param excludeProperties
-     *            需排除的属性
-     * @return JSON格式的字符串
-     */
-    public static String bean2Json(final Object bean, final Class<?> clazz,
-                    final String... excludeProperties) {
-        return JSON.toJSONString(bean, getFilterInstance(clazz, excludeProperties));
-    }
-
-    /**
-     * 获取JSON过滤器实例
-     *
-     * @param clazz
-     *            需进行属性排除的类
-     * @param excludeProperties
-     *            需排除的属性
-     * @return JSON过滤器实例
-     */
-    private static PropertyPreFilter getFilterInstance(final Class<?> clazz,
-                    final String... excludeProperties) {
-        final SimplePropertyPreFilter filter = new SimplePropertyPreFilter(clazz);
-        final Set<String> excludeList = filter.getExcludes();
-        for (final String exclude : excludeProperties) {
-            excludeList.add(exclude);
-        }
-        return filter;
-    }
-
-    /**
-     * 将bean转换为JSON标准格式的字符串
-     *
-     * @param bean
-     *            需转换的bean
-     * @param filteredPropertiesMap
-     *            过滤属性映射集
-     * @return JSON格式的字符串
-     */
-    public static String bean2Json(final Object bean,
-                    final Map<Class<?>, FilteredTokens> filteredPropertiesMap) {
-        return JSON.toJSONString(bean, getFilterInstance(filteredPropertiesMap));
-    }
-
-    /**
-     * 获取JSON过滤器实例
-     *
-     * @param filteredPropertiesMap
-     *            过滤属性映射集
-     * @return JSON过滤器实例
-     */
-    private static PropertyPreFilter getFilterInstance(
-                    final Map<Class<?>, FilteredTokens> filteredPropertiesMap) {
-        final MultiPropertyPreFilter filter = new MultiPropertyPreFilter();
-        for (final Entry<Class<?>, FilteredTokens> entry : filteredPropertiesMap.entrySet()) {
-            final FilteredTokens value = entry.getValue();
-            filter.addFilteredProperties(entry.getKey(), value.getIncludes(), value.getExcludes());
-        }
-        return filter;
-    }
-
-    /**
-     * 将Map转换为JSON标准格式的字符串
-     *
-     * @param map
-     *            需转换的Map
-     * @return JSON格式的字符串
-     */
-    public static String map2Json(final Map<String, Object> map) {
-        final JSONObject jsonObj = new JSONObject(map);
-        return jsonObj.toJSONString();
-    }
-
-    /**
-     * 将Map转换为JSON标准格式的字符串
-     *
-     * @param map
-     *            需转换的Map
-     * @param clazz
-     *            需进行属性排除的类
-     * @param excludeProperties
-     *            需排除的属性
-     * @return JSON格式的字符串
-     */
-    public static String map2Json(final Map<String, Object> map, final Class<?> clazz,
-                    final String... excludeProperties) {
-        final JSONObject jsonObj = new JSONObject(map);
-        return JSON.toJSONString(jsonObj, getFilterInstance(clazz, excludeProperties));
-    }
-
-    /**
-     * 将Map转换为JSON标准格式的字符串
-     *
-     * @param map
-     *            需转换的Map
-     * @param filteredPropertiesMap
-     *            过滤属性映射集
-     * @return JSON格式的字符串
-     */
-    public static String map2Json(final Map<String, Object> map,
-                    final Map<Class<?>, FilteredTokens> filteredPropertiesMap) {
-        final JSONObject jsonObj = new JSONObject(map);
-        return JSON.toJSONString(jsonObj, getFilterInstance(filteredPropertiesMap));
-    }
-
-    /**
-     * 将指定任意类型的对象转换为JSON标准格式的字符串
-     *
-     * @param obj
-     *            对象
-     * @param clazz
-     *            需进行属性排除的类
-     * @param excludeProperties
-     *            需排除的属性
-     * @return JSON格式的字符串
-     */
-    @SuppressWarnings("unchecked")
-    public static String toJson(final Object obj, final Class<?> clazz,
-                    final String... excludeProperties) {
-        if (obj instanceof Map) {
-            return map2Json((Map<String, Object>) obj, clazz, excludeProperties);
-        }
-        return bean2Json(obj, clazz, excludeProperties);
-    }
-
-    /**
-     * 将指定任意类型的对象转换为JSON标准格式的字符串
-     *
-     * @param obj
-     *            对象
-     * @param filteredPropertiesMap
-     *            过滤属性映射集
-     * @return JSON格式的字符串
-     */
-    @SuppressWarnings("unchecked")
-    public static String toJson(final Object obj,
-                    final Map<Class<?>, FilteredTokens> filteredPropertiesMap) {
-        if (obj instanceof Map) {
-            return map2Json((Map<String, Object>) obj, filteredPropertiesMap);
-        }
-        return bean2Json(obj, filteredPropertiesMap);
-    }
-
-    /**
-     * 将指定任意类型的对象转换为JSON标准格式的字符串
-     *
-     * @param obj
-     *            对象
-     * @return JSON格式的字符串
-     */
-    @SuppressWarnings("unchecked")
-    public static String toJson(final Object obj) {
-        if (obj instanceof Map) {
-            return map2Json((Map<String, Object>) obj);
-        }
-        return bean2Json(obj);
-    }
-
-    /**
      * 将JSON标准形式的字符串转换为具体类型不确定的List
      *
      * @param json
@@ -282,7 +192,7 @@ public class JsonUtil {
 
     @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> json2Map(final String json, final Class<K> keyClass,
-                    final Class<V> valueClass) {
+            final Class<V> valueClass) {
         final Map<K, V> result = new HashMap<>();
         final Map<String, Object> map = JSON.parseObject(json);
         for (final Entry<String, Object> entry : map.entrySet()) {

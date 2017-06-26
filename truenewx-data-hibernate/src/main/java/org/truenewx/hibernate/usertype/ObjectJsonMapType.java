@@ -30,8 +30,8 @@ public class ObjectJsonMapType extends AbstractUserType {
 
     @Override
     public Object nullSafeGet(final ResultSet rs, final String[] names,
-                    final SessionImplementor session, final Object owner)
-                    throws HibernateException, SQLException {
+            final SessionImplementor session, final Object owner)
+            throws HibernateException, SQLException {
         final String value = rs.getString(names[0]);
         if (StringUtils.isNotBlank(value)) {
             try {
@@ -45,9 +45,9 @@ public class ObjectJsonMapType extends AbstractUserType {
 
     @Override
     public void nullSafeSet(final PreparedStatement st, final Object value, final int index,
-                    final SessionImplementor session) throws HibernateException, SQLException {
+            final SessionImplementor session) throws HibernateException, SQLException {
         if (value != null) {
-            st.setString(index, JsonUtil.bean2Json(value));
+            st.setString(index, JsonUtil.toJson(value));
         } else {
             st.setString(index, null);
         }

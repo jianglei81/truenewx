@@ -30,7 +30,7 @@ public class ValidationGeneratorImpl implements ValidationGenerator, ContextInit
         final Map<String, Object> map = new LinkedHashMap<>(); // 保留顺序
         for (final ValidationRule rule : rules) {
             final ValidationMapGenerator<ValidationRule> ruleGenerator = this.ruleGenerators
-                            .get(rule.getClass());
+                    .get(rule.getClass());
             if (ruleGenerator != null) {
                 final Map<String, Object> ruleMap = ruleGenerator.generate(rule, locale);
                 if (ruleMap != null) {
@@ -38,17 +38,17 @@ public class ValidationGeneratorImpl implements ValidationGenerator, ContextInit
                 }
             }
         }
-        return JsonUtil.map2Json(map).replace('"', '\'');
+        return JsonUtil.toJson(map).replace('"', '\'');
     }
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void afterInitialized(final ApplicationContext context) throws Exception {
         final Map<String, ValidationMapGenerator> beans = context
-                        .getBeansOfType(ValidationMapGenerator.class);
+                .getBeansOfType(ValidationMapGenerator.class);
         for (final ValidationMapGenerator<ValidationRule> ruleGenerator : beans.values()) {
             final Class<?> ruleClass = ClassUtil.getActualGenericType(ruleGenerator.getClass(),
-                            ValidationMapGenerator.class, 0);
+                    ValidationMapGenerator.class, 0);
             this.ruleGenerators.put(ruleClass, ruleGenerator);
         }
     }

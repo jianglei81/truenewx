@@ -10,7 +10,7 @@ import org.truenewx.core.util.JsonUtil;
 
 /**
  * 动态模型（含有动态属性）
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -21,11 +21,11 @@ public class DynamicModel implements PropertyDynamic {
     private Map<String, Object> properties;
 
     public DynamicModel() {
-        this.properties = new HashMap<String, Object>();
+        this.properties = new HashMap<>();
     }
 
     public DynamicModel(final Map<String, ?> properties) {
-        this.properties = new HashMap<String, Object>(properties);
+        this.properties = new HashMap<>(properties);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class DynamicModel implements PropertyDynamic {
     /**
      * 获取在{@link DynamicModel#getAll()}方法中要排除的属性名清单<br/>
      * 由子类覆写提供
-     * 
+     *
      * @return 在asMap()方法中要排除的属性名清单
      */
     protected String[] getExcludedProperties() {
@@ -90,7 +90,7 @@ public class DynamicModel implements PropertyDynamic {
 
     @Override
     public final synchronized void shift(final String oldName, final String newName,
-                    final boolean retain) {
+            final boolean retain) {
         if (!oldName.equals(newName)) {
             set(newName, get(oldName));
             if (!retain) {
@@ -101,7 +101,7 @@ public class DynamicModel implements PropertyDynamic {
 
     @Override
     public String toString() {
-        return JsonUtil.map2Json(getAll());
+        return JsonUtil.toJson(getAll());
     }
 
 }

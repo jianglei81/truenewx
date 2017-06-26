@@ -54,7 +54,7 @@ public class ToJsonTag extends SimpleDynamicAttributeTagSupport {
     @Override
     public void doTag() throws JspException, IOException {
         if ((this.defaultValues == null || this.defaultValues.isEmpty())
-                        && (this.extendValues == null || this.extendValues.isEmpty())) { // 无默认值和扩展值，则仅序列化取值
+                && (this.extendValues == null || this.extendValues.isEmpty())) { // 无默认值和扩展值，则仅序列化取值
             if (this.value != null) {
                 try {
                     String json = JsonUtil.toJson(this.value);
@@ -83,7 +83,7 @@ public class ToJsonTag extends SimpleDynamicAttributeTagSupport {
                 map.putAll(this.extendValues);
             }
             try {
-                String json = JsonUtil.map2Json(map);
+                String json = JsonUtil.toJson(map);
                 if (this.toSingleQuote) {
                     // 转换双引号为单引号，使在页面字符串中不与双引号冲突
                     json = json.replace('\"', '\'');

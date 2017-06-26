@@ -121,7 +121,7 @@ public class BusinessExceptionResolver extends SimpleMappingExceptionResolver {
             try {
                 final Map<String, Object> map = new HashMap<>();
                 map.put("errors", errors);
-                response.getWriter().print(JsonUtil.map2Json(map));
+                response.getWriter().print(JsonUtil.toJson(map));
                 response.setStatus(SC_BUSINESS_ERROR);
                 return new ModelAndView();
             } catch (final IOException ex) {

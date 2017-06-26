@@ -52,13 +52,13 @@ public abstract class ObjectComponentMapType extends AbstractUserType implements
 
     @Override
     public void nullSafeSet(final PreparedStatement st, final Object value, final int index,
-                    final SessionImplementor session) throws HibernateException, SQLException {
+            final SessionImplementor session) throws HibernateException, SQLException {
         String json = null;
         if (value != null) {
             if (this.componentType != null && ArrayUtils.isNotEmpty(this.excludeProperties)) {
-                json = JsonUtil.bean2Json(value, this.componentType, this.excludeProperties);
+                json = JsonUtil.toJson(value, this.componentType, this.excludeProperties);
             } else {
-                json = JsonUtil.bean2Json(value);
+                json = JsonUtil.toJson(value);
             }
         }
         st.setString(index, json);

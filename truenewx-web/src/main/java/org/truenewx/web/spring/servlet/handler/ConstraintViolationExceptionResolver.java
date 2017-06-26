@@ -33,7 +33,7 @@ import org.truenewx.web.util.WebUtil;
  * @since JDK 1.8
  */
 public class ConstraintViolationExceptionResolver extends AbstractHandlerExceptionResolver
-                implements MessageSourceAware {
+        implements MessageSourceAware {
 
     private String errorPage = "error-validate";
 
@@ -60,7 +60,7 @@ public class ConstraintViolationExceptionResolver extends AbstractHandlerExcepti
 
     @Override
     protected ModelAndView doResolveException(final HttpServletRequest request,
-                    final HttpServletResponse response, final Object handler, final Exception ex) {
+            final HttpServletResponse response, final Object handler, final Exception ex) {
         if (ex instanceof ConstraintViolationException) {
             final ConstraintViolationException e = (ConstraintViolationException) ex;
             final Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
@@ -71,13 +71,13 @@ public class ConstraintViolationExceptionResolver extends AbstractHandlerExcepti
                         final ConstraintViolation<?> violation = AlgoFirst.visit(violations, null);
                         final FormatException fe = buildFormatException(violation, request);
                         final String message = this.messageResolver.resolveMessage(fe,
-                                        request.getLocale());
+                                request.getLocale());
                         errors.add(new BusinessError(fe.getBeanClass().getName(), message));
                     } else {
                         for (final ConstraintViolation<?> violation : violations) {
                             final FormatException fe = buildFormatException(violation, request);
                             final String message = this.messageResolver.resolveMessage(fe,
-                                            request.getLocale());
+                                    request.getLocale());
                             errors.add(new BusinessError(fe.getBeanClass().getName(), message));
                         }
                     }
@@ -85,7 +85,7 @@ public class ConstraintViolationExceptionResolver extends AbstractHandlerExcepti
                         try {
                             final Map<String, Object> map = new HashMap<>();
                             map.put("errors", errors);
-                            response.getWriter().print(JsonUtil.map2Json(map));
+                            response.getWriter().print(JsonUtil.toJson(map));
                             response.setStatus(500);
                             return new ModelAndView();
                         } catch (final IOException iex) {
@@ -112,11 +112,11 @@ public class ConstraintViolationExceptionResolver extends AbstractHandlerExcepti
     }
 
     private FormatException buildFormatException(final ConstraintViolation<?> violation,
-                    final HttpServletRequest request) {
+            final HttpServletRequest request) {
         final String property = violation.getPropertyPath().toString();
         final String message = this.messageSource.getMessage(
-                        violation.getMessage().replace("{", "").replace("}", ""), null,
-                        violation.getMessage(), request.getLocale());
+                violation.getMessage().replace("{", "").replace("}", ""), null,
+                violation.getMessage(), request.getLocale());
         return new FormatException(violation.getRootBeanClass(), property, message);
     }
 
