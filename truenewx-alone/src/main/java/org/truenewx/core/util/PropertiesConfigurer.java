@@ -8,7 +8,7 @@ import java.util.Map;
  * @author jianglei
  * @since JDK 1.8
  */
-public class PropertiesConfigurator implements PropertiesProvider {
+public class PropertiesConfigurer implements PropertiesProvider {
 
     private Map<String, String> properties;
 
