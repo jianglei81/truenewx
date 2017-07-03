@@ -12,6 +12,7 @@
         <spring.version>4.0.5.RELEASE</spring.version>
     </properties>
     <modules>
+        <module>truenewx-alone</module>
         <module>truenewx-core</module>
         <module>truenewx-data</module>
         <module>truenewx-data-hibernate</module>
