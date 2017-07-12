@@ -2,6 +2,7 @@ package org.truenewx.core.io;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -34,6 +35,9 @@ public class TextFileContentConverter implements FileContentConverter {
     public void convert(final String locationPattern, final String encoding) {
         try {
             final Resource[] resources = this.resourcePatternResolver.getResources(locationPattern);
+            if (resources.length == 0) {
+                throw new FileNotFoundException(locationPattern);
+            }
             for (final Resource resource : resources) {
                 final File file = resource.getFile();
                 final FileInputStream in = new FileInputStream(file);
