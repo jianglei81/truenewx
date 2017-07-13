@@ -50,9 +50,7 @@ public abstract class AbstractRelationService<T extends Relation<L, R>, L extend
     @Override
     public T load(final L leftId, final R rightId) throws BusinessException {
         final T relation = find(leftId, rightId);
-        if (relation == null) {
-            throw new BusinessException(getNonexistentErorrCode());
-        }
+        assertNotNull(relation);
         return relation;
     }
 
@@ -68,7 +66,7 @@ public abstract class AbstractRelationService<T extends Relation<L, R>, L extend
 
     /**
      * 在添加关系前调用，由子类覆写
-     * 
+     *
      * @param leftId
      *            左标识
      * @param rightId
@@ -94,7 +92,7 @@ public abstract class AbstractRelationService<T extends Relation<L, R>, L extend
     public T add(final L leftId, final R rightId, final SubmitModel<T> model)
             throws HandleableException {
         T relation = beforeAdd(leftId, rightId, model);
-        relation = ensureNonnull(relation);
+        relation = ensureNotNull(relation);
         if (relation != null) {
             transform(model, relation);
 

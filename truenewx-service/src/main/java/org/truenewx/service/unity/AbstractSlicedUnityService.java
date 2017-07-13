@@ -28,8 +28,8 @@ import org.truenewx.service.transform.SlicedModelTransformer;
  *            切分者类型
  */
 public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K extends Serializable, S extends Serializable>
-                extends AbstractService<T> implements SimpleSlicedUnityService<T, K, S>,
-                ModelSlicedUnityService<T, K, S>, SlicedModelTransformer<SubmitModel<T>, T, S> {
+        extends AbstractService<T> implements SimpleSlicedUnityService<T, K, S>,
+        ModelSlicedUnityService<T, K, S>, SlicedModelTransformer<SubmitModel<T>, T, S> {
 
     @Override
     public T find(final S slicer, final K id) {
@@ -44,9 +44,7 @@ public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K 
     @Override
     public T load(final S slicer, final K id) throws BusinessException {
         final T unity = find(slicer, id);
-        if (unity == null) {
-            throw new BusinessException(getNonexistentErorrCode(), id);
-        }
+        assertNotNull(unity);
         return unity;
     }
 
@@ -138,7 +136,7 @@ public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K 
 
     @Override
     public T update(final S slicer, final K id, final SubmitModel<T> submitModel)
-                    throws HandleableException {
+            throws HandleableException {
         if (id == null) {
             return null;
         }
@@ -166,11 +164,11 @@ public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K 
      *             如果数据验证失败
      */
     protected T beforeSave(final S slicer, final K id, final SubmitModel<T> submitModel)
-                    throws HandleableException {
+            throws HandleableException {
         T unity;
         if (id == null) {
             unity = beforeAdd(slicer, submitModel);
-            unity = ensureNonnull(unity);
+            unity = ensureNotNull(unity);
         } else {
             unity = beforeUpdate(slicer, id, submitModel);
             if (unity == null) {
@@ -185,7 +183,8 @@ public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K 
 
     /**
      * 在添加单体前调用，由子类覆写<br/>
-     * {@link #transform(Serializable, SubmitModel, SlicedUnity)} 方法会被上层调用，子类覆写本方法时可不调用该方法
+     * {@link #transform(Serializable, SubmitModel, SlicedUnity)}
+     * 方法会被上层调用，子类覆写本方法时可不调用该方法
      *
      * @param slicer
      *            切分者
@@ -202,7 +201,8 @@ public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K 
 
     /**
      * 在修改单体前调用，由子类覆写<br/>
-     * {@link #transform(Serializable, SubmitModel, SlicedUnity)} 方法会被上层调用，子类覆写本方法时可不调用该方法
+     * {@link #transform(Serializable, SubmitModel, SlicedUnity)}
+     * 方法会被上层调用，子类覆写本方法时可不调用该方法
      *
      * @param slicer
      *            切分者
@@ -216,13 +216,13 @@ public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K 
      */
     @Nullable
     protected T beforeUpdate(final S slicer, final K id, final SubmitModel<T> model)
-                    throws HandleableException {
+            throws HandleableException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void transform(final S slicer, final SubmitModel<T> model, final T unity)
-                    throws HandleableException {
+            throws HandleableException {
     }
 
     @Override

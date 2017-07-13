@@ -157,7 +157,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
         T unity;
         if (id == null) {
             unity = beforeAdd(owner, submitModel);
-            unity = ensureNonnull(unity);
+            unity = ensureNotNull(unity);
         } else {
             unity = beforeUpdate(owner, id, submitModel);
             if (unity == null) {

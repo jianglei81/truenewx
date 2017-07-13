@@ -26,8 +26,8 @@ import org.truenewx.service.transform.SubmitModelTransformer;
  *            单体标识类型
  */
 public abstract class AbstractUnityService<T extends Unity<K>, K extends Serializable>
-                extends AbstractService<T> implements SimpleUnityService<T, K>,
-                ModelUnityService<T, K>, SubmitModelTransformer<SubmitModel<T>, T> {
+        extends AbstractService<T> implements SimpleUnityService<T, K>, ModelUnityService<T, K>,
+        SubmitModelTransformer<SubmitModel<T>, T> {
 
     @Override
     public T find(final K id) {
@@ -42,9 +42,7 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
     @Override
     public T load(final K id) throws BusinessException {
         final T unity = find(id);
-        if (unity == null) {
-            throw new BusinessException(getNonexistentErorrCode(), id);
-        }
+        assertNotNull(unity);
         return unity;
     }
 
@@ -152,11 +150,11 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
      *             如果数据验证失败
      */
     protected T beforeSave(final K id, final SubmitModel<T> submitModel)
-                    throws HandleableException {
+            throws HandleableException {
         T unity;
         if (id == null) {
             unity = beforeAdd(submitModel);
-            unity = ensureNonnull(unity);
+            unity = ensureNotNull(unity);
         } else {
             unity = beforeUpdate(id, submitModel);
             if (unity == null) {
@@ -197,13 +195,13 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
      */
     @Nullable
     protected T beforeUpdate(final K id, final SubmitModel<T> submitModel)
-                    throws HandleableException {
+            throws HandleableException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void transform(final SubmitModel<T> submitModel, final T entity)
-                    throws HandleableException {
+            throws HandleableException {
     }
 
     /**

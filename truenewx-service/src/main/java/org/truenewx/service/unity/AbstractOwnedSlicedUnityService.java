@@ -167,7 +167,7 @@ public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity
         T unity;
         if (id == null) {
             unity = beforeAdd(slicer, owner, submitModel);
-            unity = ensureNonnull(unity);
+            unity = ensureNotNull(unity);
         } else {
             unity = beforeUpdate(slicer, owner, id, submitModel);
             if (unity == null) {
