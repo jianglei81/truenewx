@@ -620,7 +620,7 @@ $.tnx.Validator = Class.extend({
     appendRequiredTag : function(fieldObj, requriedTag, requiredClass) {
         if (requriedTag) {
             var appendObj = $("<" + requriedTag + "></" + requriedTag + ">")
-                    .addClass(requiredClass).html(" * ");
+                    .addClass(requiredClass);
             var requiredAppend = fieldObj.attr("required-append");
             if (requiredAppend == undefined) { // 字段上无附加函数，则从所属表单上获取
                 var formObj = $(fieldObj.from);
