@@ -71,7 +71,9 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
             final HttpServletResponse response) {
         if (this.userClass == null) {
             final Subject subject = this.subjectManager.getSubject(request, response);
-            this.userClass = subject.getUserClass();
+            if (subject != null) {
+                this.userClass = subject.getUserClass();
+            }
         }
         return this.userClass;
     }
