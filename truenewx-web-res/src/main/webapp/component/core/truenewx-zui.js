@@ -91,7 +91,6 @@ $.extend($.tnx, {
                 dialogObj.find(".modal-dialog").center();
             });
             dialogObj.on("hidden.zui.modal", function() { // hidden事件特殊处理
-                alert("this");
                 if (events && typeof events.hidden == "function") {
                     events.hidden.apply(dialogObj);
                 }
