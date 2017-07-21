@@ -2,6 +2,7 @@ package org.truenewx.web.security.realm;
 
 import org.truenewx.core.exception.BusinessException;
 import org.truenewx.core.exception.HandleableException;
+import org.truenewx.core.util.ClassUtil;
 import org.truenewx.web.security.authority.AuthorizationInfo;
 import org.truenewx.web.security.login.LoginInfo;
 import org.truenewx.web.security.login.LoginToken;
@@ -22,13 +23,17 @@ public interface Realm<T> {
      *
      * @return 用户类型
      */
-    Class<T> getUserClass();
+    default Class<T> getUserClass() {
+        return ClassUtil.getActualGenericType(getClass(), 0);
+    }
 
     /**
      *
      * @return 用户信息保存到会话中的属性名称
      */
-    String getUserSessionName();
+    default String getUserSessionName() {
+        return "_SESSION_" + getUserClass().getSimpleName().toUpperCase();
+    }
 
     /**
      * 根据登录token获取登录用户信息，即完成登录校验
@@ -64,10 +69,11 @@ public interface Realm<T> {
 
     /**
      * 在指定用户登出后调用，用于进行登出后的处理
-     * 
+     *
      * @param user
      *            登出用户
      */
-    void onLogouted(T user);
+    default void onLogouted(final T user) {
+    }
 
 }
