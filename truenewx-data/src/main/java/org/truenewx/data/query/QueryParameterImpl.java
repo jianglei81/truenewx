@@ -28,6 +28,14 @@ public class QueryParameterImpl extends MultiQueryOrder implements QueryParamete
      */
     private boolean listable = true;
 
+    public QueryParameterImpl() {
+    }
+
+    public QueryParameterImpl(final int pageSize, final int pageNo) {
+        this.pageSize = pageSize;
+        this.pageNo = pageNo;
+    }
+
     @Override
     public int getPageSize() {
         return this.pageSize;
