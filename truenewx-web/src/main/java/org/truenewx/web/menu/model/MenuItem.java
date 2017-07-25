@@ -46,9 +46,9 @@ public class MenuItem extends MenuAction {
      */
     private List<MenuOperation> operations = new ArrayList<>();
 
-    public MenuItem(final Authority auth, final String caption, final String href,
+    public MenuItem(final Authority authority, final String caption, final String href,
             final String target, final String icon) {
-        super(auth, caption);
+        super(authority, caption);
         this.link = new HttpLink(href);
         this.target = target;
         this.icon = icon;
@@ -101,23 +101,23 @@ public class MenuItem extends MenuAction {
      * @return 匹配的权限
      */
     @Override
-    public Authority getAuth(final String href, final HttpMethod method) {
+    public Authority getAuthority(final String href, final HttpMethod method) {
         // 菜单项上的访问方法固定为GET方式
         if (this.link.isMatched(href, method)) {
-            return getAuth();
+            return getAuthority();
         }
-        Authority auth = super.getAuth(href, method);
+        Authority auth = super.getAuthority(href, method);
         if (auth != null) {
             return auth;
         }
         for (final MenuOperation operation : this.operations) {
-            auth = operation.getAuth(href, method);
+            auth = operation.getAuthority(href, method);
             if (auth != null) {
                 return auth;
             }
         }
         for (final MenuItem sub : this.subs) {
-            auth = sub.getAuth(href, method);
+            auth = sub.getAuthority(href, method);
             if (auth != null) {
                 return auth;
             }
@@ -126,15 +126,15 @@ public class MenuItem extends MenuAction {
     }
 
     @Override
-    public Authority getAuth(final String beanId, final String methodName, final Integer argCount) {
+    public Authority getAuthority(final String beanId, final String methodName, final Integer argCount) {
         for (final MenuOperation operation : this.operations) {
-            final Authority auth = operation.getAuth(beanId, methodName, argCount);
+            final Authority auth = operation.getAuthority(beanId, methodName, argCount);
             if (auth != null) {
                 return auth;
             }
         }
         for (final MenuItem sub : this.subs) {
-            final Authority auth = sub.getAuth(beanId, methodName, argCount);
+            final Authority auth = sub.getAuthority(beanId, methodName, argCount);
             if (auth != null) {
                 return auth;
             }
@@ -142,7 +142,7 @@ public class MenuItem extends MenuAction {
         return null;
     }
 
-    public Set<String> getAllAuths() {
+    public Set<String> getAllAuthorities() {
         final Set<String> result = new HashSet<>();
         String auth = getPermission();
         if (auth != null) {
@@ -155,7 +155,7 @@ public class MenuItem extends MenuAction {
             }
         }
         for (final MenuItem sub : this.subs) {
-            result.addAll(sub.getAllAuths());
+            result.addAll(sub.getAllAuthorities());
         }
         return result;
     }

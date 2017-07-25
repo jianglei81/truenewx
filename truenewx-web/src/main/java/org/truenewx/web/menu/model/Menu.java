@@ -103,13 +103,13 @@ public class Menu implements Serializable {
 
     public Authority getAuth(final String href, final HttpMethod method) {
         for (final MenuItem item : this.items) {
-            final Authority auth = item.getAuth(href, method);
+            final Authority auth = item.getAuthority(href, method);
             if (auth != null) {
                 return auth;
             }
         }
         for (final MenuOperation operation : this.operations) {
-            final Authority auth = operation.getAuth(href, method);
+            final Authority auth = operation.getAuthority(href, method);
             if (auth != null) {
                 return auth;
             }
@@ -119,13 +119,13 @@ public class Menu implements Serializable {
 
     public Authority getAuth(final String beanId, final String methodName, final Integer argCount) {
         for (final MenuItem item : this.items) {
-            final Authority auth = item.getAuth(beanId, methodName, argCount);
+            final Authority auth = item.getAuthority(beanId, methodName, argCount);
             if (auth != null) {
                 return auth;
             }
         }
         for (final MenuOperation operation : this.operations) {
-            final Authority auth = operation.getAuth(beanId, methodName, argCount);
+            final Authority auth = operation.getAuthority(beanId, methodName, argCount);
             if (auth != null) {
                 return auth;
             }
@@ -133,10 +133,10 @@ public class Menu implements Serializable {
         return null;
     }
 
-    public String[] getAllAuths() {
+    public String[] getAllAuthorities() {
         final Set<String> auths = new HashSet<>();
         for (final MenuItem item : this.items) {
-            auths.addAll(item.getAllAuths());
+            auths.addAll(item.getAllAuthorities());
         }
         for (final MenuOperation operation : this.operations) {
             final String auth = operation.getPermission();

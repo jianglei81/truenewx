@@ -29,7 +29,7 @@ public abstract class MenuAction implements Serializable {
     /**
      * 所需授权
      */
-    private Authority auth;
+    private Authority authority;
     /**
      * 地域说明集合（菜单显示）
      */
@@ -49,13 +49,13 @@ public abstract class MenuAction implements Serializable {
 
     /**
      *
-     * @param auth
+     * @param authority
      *            所需授权
      * @param caption
      *            菜单说明
      */
-    public MenuAction(final Authority auth, final String caption) {
-        this.auth = auth;
+    public MenuAction(final Authority authority, final String caption) {
+        this.authority = authority;
         if (caption != null) {
             this.captions.put(Locale.getDefault(), caption);
         }
@@ -65,8 +65,8 @@ public abstract class MenuAction implements Serializable {
      *
      * @return 所需授权
      */
-    public Authority getAuth() {
-        return this.auth;
+    public Authority getAuthority() {
+        return this.authority;
     }
 
     /**
@@ -75,7 +75,7 @@ public abstract class MenuAction implements Serializable {
      * @return 所需角色
      */
     public String getRole() {
-        return this.auth.getRole();
+        return this.authority.getRole();
     }
 
     /**
@@ -84,7 +84,7 @@ public abstract class MenuAction implements Serializable {
      * @return 所需权限
      */
     public String getPermission() {
-        return this.auth.getPermission();
+        return this.authority.getPermission();
     }
 
     /**
@@ -140,16 +140,16 @@ public abstract class MenuAction implements Serializable {
         return false;
     }
 
-    public Authority getAuth(final String href, final HttpMethod method) {
+    public Authority getAuthority(final String href, final HttpMethod method) {
         for (final HttpLink link : this.links) {
             if (link.isMatched(href, method)) {
-                return this.auth;
+                return this.authority;
             }
         }
         return null;
     }
 
-    public abstract Authority getAuth(String beanId, String methodName, Integer argCount);
+    public abstract Authority getAuthority(String beanId, String methodName, Integer argCount);
 
     public boolean matchesProfile() {
         final String profile = FuncProfile.INSTANCE.apply();
@@ -159,7 +159,7 @@ public abstract class MenuAction implements Serializable {
 
     public boolean matchesAuth(Authorization authorization) {
         // 如果当前动作未指定授权，表示没有授权限制，视为匹配
-        return this.auth == null || this.auth.isContained(authorization);
+        return this.authority == null || this.authority.isContained(authorization);
     }
 
 }

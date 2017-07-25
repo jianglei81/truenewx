@@ -82,7 +82,7 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
         final List<MenuItem> items = new ArrayList<>();
         for (final Object itemObj : element.elements("item")) {
             final Element itemElement = (Element) itemObj;
-            final Authority auth = getAuth(itemElement);
+            final Authority auth = getAuthority(itemElement);
             final String caption = itemElement.attributeValue("caption");
             final String href = itemElement.attributeValue("href");
             final String target = itemElement.attributeValue("target");
@@ -100,7 +100,7 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Authority getAuth(final Element element) {
+    private Authority getAuthority(final Element element) {
         String permission = element.attributeValue("permission");
         final String className = element.attributeValue("type");
         if (StringUtils.isNotBlank(className)) {
@@ -155,7 +155,7 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
         final List<MenuOperation> operations = new ArrayList<>();
         for (final Object operationObj : element.elements("operation")) {
             final Element operationElement = (Element) operationObj;
-            final Authority auth = getAuth(operationElement);
+            final Authority auth = getAuthority(operationElement);
             final String caption = operationElement.attributeValue("caption");
             final MenuOperation operation = new MenuOperation(auth, caption);
             operation.getCaptions().putAll(getCaptions(operationElement));

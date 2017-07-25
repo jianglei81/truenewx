@@ -21,8 +21,8 @@ public class MenuOperation extends MenuAction {
      */
     private List<RpcPort> rpcs = new ArrayList<>();
 
-    public MenuOperation(final Authority auth, final String caption) {
-        super(auth, caption);
+    public MenuOperation(final Authority authority, final String caption) {
+        super(authority, caption);
     }
 
     /**
@@ -53,9 +53,9 @@ public class MenuOperation extends MenuAction {
     }
 
     @Override
-    public Authority getAuth(final String beanId, final String methodName, final Integer argCount) {
+    public Authority getAuthority(final String beanId, final String methodName, final Integer argCount) {
         if (contains(beanId, methodName, argCount)) {
-            return getAuth();
+            return getAuthority();
         }
         return null;
     }

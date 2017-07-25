@@ -89,7 +89,7 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
             }
         }
         // 构建新的菜单项对象，以免影响缓存的完整菜单对象的数据
-        final MenuItem newItem = new MenuItem(item.getAuth(), item.getCaption(), item.getHref(),
+        final MenuItem newItem = new MenuItem(item.getAuthority(), item.getCaption(), item.getHref(),
                 item.getTarget(), item.getIcon());
         newItem.getLinks().addAll(item.getLinks());
         newItem.getOptions().putAll(item.getOptions());
@@ -125,7 +125,7 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
     private void addMatchedAuthority(final MenuAction action, final Map<String, Object> options,
             final List<Authority> authes) {
         if (isMatchedOptions(action, options)) {
-            final Authority auth = action.getAuth();
+            final Authority auth = action.getAuthority();
             if (auth != null && auth.isNotEmpty()) {
                 authes.add(auth);
             }
