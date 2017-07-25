@@ -2,7 +2,6 @@ package org.truenewx.web.security.realm;
 
 import org.truenewx.core.exception.BusinessException;
 import org.truenewx.core.exception.HandleableException;
-import org.truenewx.core.util.ClassUtil;
 import org.truenewx.web.security.authority.AuthorizationInfo;
 import org.truenewx.web.security.login.LoginInfo;
 import org.truenewx.web.security.login.LoginToken;
@@ -23,9 +22,7 @@ public interface Realm<T> {
      *
      * @return 用户类型
      */
-    default Class<T> getUserClass() {
-        return ClassUtil.getActualGenericType(getClass(), 0);
-    }
+    Class<T> getUserClass(); // 默认实现下无法取得实现类的泛型类型
 
     /**
      *
