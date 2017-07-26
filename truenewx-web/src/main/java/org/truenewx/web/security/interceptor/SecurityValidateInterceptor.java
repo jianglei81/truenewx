@@ -119,6 +119,12 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
     }
 
     @Override
+    protected boolean matches(final String url) {
+        // 始终排除RPC访问
+        return !url.startsWith("/rpc/") && super.matches(url);
+    }
+
+    @Override
     public void postHandle(final HttpServletRequest request, final HttpServletResponse response,
             final Object handler, final ModelAndView modelAndView) throws Exception {
     }
@@ -126,7 +132,6 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
     @Override
     public void afterCompletion(final HttpServletRequest request,
             final HttpServletResponse response, final Object handler, final Exception ex) {
-
     }
 
 }
