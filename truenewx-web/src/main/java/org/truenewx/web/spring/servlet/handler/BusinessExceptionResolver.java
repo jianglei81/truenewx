@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
+import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.truenewx.core.Strings;
 import org.truenewx.core.exception.BusinessException;
 import org.truenewx.core.exception.HandleableException;
@@ -36,7 +36,7 @@ import org.truenewx.web.validation.generate.annotation.ValidationGeneratable;
  * @author jianglei
  * @since JDK 1.8
  */
-public class BusinessExceptionResolver extends SimpleMappingExceptionResolver {
+public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver {
     /**
      * 响应状态码：业务错误
      */
@@ -78,9 +78,6 @@ public class BusinessExceptionResolver extends SimpleMappingExceptionResolver {
             if (vg != null) {
                 this.handlerValidationGenerator.generate(request, vg.value(), mav);
             }
-        }
-        if (mav == null) {
-            mav = super.doResolveException(request, response, handler, e);
         }
         return mav;
     }
