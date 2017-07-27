@@ -88,7 +88,6 @@ $.extend($.tnx, {
                 }
                 dialogObj.off("shown.zui.modal");
                 dialogObj.resetWidth();
-                dialogObj.find(".modal-dialog").center();
             });
             dialogObj.on("hidden.zui.modal", function() { // hidden事件特殊处理
                 if (events && typeof events.hidden == "function") {
@@ -132,7 +131,6 @@ $.extend($.tnx, {
                         : options.backdrop,
                 keyboard : true
             });
-            dialogObj.find(".modal-dialog").center();
             dialogObj.css("zIndex", zIndex);
             dialogObj.next(".modal-backdrop").css("zIndex", zIndex - 10);
         }
