@@ -92,6 +92,23 @@ public class WebUtil {
     }
 
     /**
+     * 获取指定URL去掉web项目根路径之后的相对路径URL
+     * 
+     * @param request
+     *            请求
+     * @param url
+     *            URL
+     * @return 相对于web项目的URL
+     */
+    public static String getRelativeUrl(final HttpServletRequest request, String url) {
+        final String root = request.getContextPath();
+        if (!root.equals(Strings.SLASH) && url.startsWith(root)) {
+            url = url.substring(root.length());
+        }
+        return url;
+    }
+
+    /**
      * 获取相对于web项目的请求URL，不包含请求参数串
      *
      * @param request
@@ -99,13 +116,7 @@ public class WebUtil {
      * @return 相对于web项目的请求URL
      */
     public static String getRelativeRequestUrl(final HttpServletRequest request) {
-        final String root = request.getContextPath();
-        String url = request.getRequestURI();
-
-        if (!root.equals(Strings.SLASH) && url.startsWith(root)) {
-            url = url.substring(root.length());
-        }
-        return url;
+        return getRelativeUrl(request, request.getRequestURI());
     }
 
     /**
