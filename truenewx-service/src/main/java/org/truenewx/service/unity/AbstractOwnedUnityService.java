@@ -25,8 +25,8 @@ import org.truenewx.service.transform.OwnedModelTransformer;
  *            所属者类型
  */
 public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K extends Serializable, O extends Serializable>
-                extends AbstractUnityService<T, K> implements OwnedSimpleUnityService<T, K, O>,
-                OwnedModelUnityService<T, K, O>, OwnedModelTransformer<SubmitModel<T>, T, O> {
+        extends AbstractUnityService<T, K> implements OwnedSimpleUnityService<T, K, O>,
+        OwnedModelUnityService<T, K, O>, OwnedModelTransformer<SubmitModel<T>, T, O> {
 
     @Override
     public T find(final O owner, final K id) {
@@ -36,9 +36,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
     @Override
     public T load(final O owner, final K id) throws BusinessException {
         final T unity = find(owner, id);
-        if (unity == null) {
-            throw new BusinessException(getNonexistentErorrCode(owner), id);
-        }
+        assertNotNull(unity);
         return unity;
     }
 
@@ -125,7 +123,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
 
     @Override
     public T update(final O owner, final K id, final SubmitModel<T> submitModel)
-                    throws HandleableException {
+            throws HandleableException {
         if (owner == null || id == null) {
             return null;
         }
@@ -153,7 +151,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
      *             如果数据验证失败
      */
     protected T beforeSave(final O owner, final K id, final SubmitModel<T> submitModel)
-                    throws HandleableException {
+            throws HandleableException {
         T unity;
         if (id == null) {
             unity = beforeAdd(owner, submitModel);
@@ -172,7 +170,8 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
 
     /**
      * 在添加具有所属者的单体前调用，由子类覆写<br/>
-     * {@link #transform(Serializable, SubmitModel, OwnedUnity)} 方法会被上层调用，子类覆写本方法时可不调用该方法
+     * {@link #transform(Serializable, SubmitModel, OwnedUnity)}
+     * 方法会被上层调用，子类覆写本方法时可不调用该方法
      *
      * @param owner
      *            所属者
@@ -184,13 +183,14 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
      */
     @Nullable
     protected T beforeAdd(final O owner, final SubmitModel<T> submitModel)
-                    throws HandleableException {
+            throws HandleableException {
         throw new UnsupportedOperationException();
     }
 
     /**
      * 在修改具有所属者的单体前调用，由子类覆写<br/>
-     * {@link #transform(Serializable, SubmitModel, OwnedUnity)} 方法会被上层调用，子类覆写本方法时可不调用该方法<br/>
+     * {@link #transform(Serializable, SubmitModel, OwnedUnity)}
+     * 方法会被上层调用，子类覆写本方法时可不调用该方法<br/>
      * 注意：子类不应在此修改单体的所属者
      *
      * @param owner
@@ -205,13 +205,13 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
      */
     @Nullable
     protected T beforeUpdate(final O owner, final K id, final SubmitModel<T> submitModel)
-                    throws HandleableException {
+            throws HandleableException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void transform(final O owner, final SubmitModel<T> submitModel, final T unity)
-                    throws HandleableException {
+            throws HandleableException {
         transform(submitModel, unity);
     }
 
@@ -240,15 +240,6 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
      */
     protected T beforeDelete(final O owner, final K id) throws HandleableException {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected String getNonexistentErorrCode() {
-        return getNonexistentErorrCode(null);
-    }
-
-    protected String getNonexistentErorrCode(final O owner) {
-        throw new NullPointerException();
     }
 
     @Override
