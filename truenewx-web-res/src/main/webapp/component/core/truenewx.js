@@ -1,6 +1,6 @@
 /**
  * truenewx.js v1.1.0
- *
+ * 
  * Depends on: sugar.js, jquery.js, jquery.json.js, bootstrap.js
  */
 
@@ -64,7 +64,7 @@ $.bootstrap = {
 
 /**
  * 等待指定断言为真后执行指定函数
- *
+ * 
  * @param predicate
  *            断言
  * @param func
@@ -87,7 +87,7 @@ $.wait = function(predicate, func, interval) {
 
 /**
  * 使当前DOM元素在指定容器中水平和垂直居中
- *
+ * 
  * @param container
  *            容器，不指定时为window
  */
@@ -134,7 +134,7 @@ $.fn.center = function(container) {
 
 /**
  * 闪现当前DOM元素
- *
+ * 
  * @param inDuration
  *            淡入耗时
  * @param stayDuration
@@ -233,7 +233,7 @@ $.Object = {
 $.String = {
     /**
      * 获取指定URL的上一级URL
-     *
+     * 
      * @param url
      *            URL
      */
@@ -243,7 +243,7 @@ $.String = {
     },
     /**
      * 获取相对于指定js文件的相对路径的绝对路径
-     *
+     * 
      * @param jsFileName
      *            js文件名
      * @param relativePath
@@ -280,14 +280,14 @@ $.String = {
     },
     /**
      * 对文本超长进行处理
-     *
+     * 
      * @param str
      *            需处理的文本
      * @param maxLen
      *            最大长度
      * @param replaceStr
      *            超长替换符
-     *
+     * 
      * @returns 处理后的文本
      */
     cut : function(str, maxLen, replaceStr) {
@@ -404,7 +404,7 @@ $.tnx = {
     },
     /**
      * 加载模板
-     *
+     * 
      * @param relativeUrl
      *            模板文件相对URL
      * @param baseFile
@@ -494,6 +494,7 @@ $.tnx = {
                 this.close();
             }
         } ], {
+            maxWidth : options.maxWidth,
             events : {
                 close : function() {
                     callback.call(this, false);
@@ -503,7 +504,7 @@ $.tnx = {
     },
     /**
      * 用模态窗体打开指定URL
-     *
+     * 
      * @param url
      *            URL
      * @param params
@@ -597,7 +598,7 @@ $.tnx = {
     },
     /**
      * 闪现对话框
-     *
+     * 
      * @param content
      *            内容
      * @param timeout
@@ -642,7 +643,7 @@ $.tnx.pager = {
     contextPath : "",
     /**
      * 获取指定相对URL的绝对URL
-     *
+     * 
      * @param url
      *            相对URL
      * @returns {String} 绝对URL
@@ -655,7 +656,7 @@ $.tnx.pager = {
     },
     /**
      * 指定每页显示大小
-     *
+     * 
      * @param pageSize
      *            页大小
      */
@@ -681,7 +682,7 @@ $.tnx.pager = {
     },
     /**
      * 跳转至指定页
-     *
+     * 
      * @param pageNo
      *            指定页
      */
@@ -732,7 +733,7 @@ $.tnx.pager = {
     },
     /**
      * rpc调用分页
-     *
+     * 
      * @param paging
      *            分页对象
      * @param args
@@ -827,7 +828,7 @@ $.tnx.rpc = {
     },
     /**
      * 处理响应中的错误
-     *
+     * 
      * @param response
      *            响应
      * @param error

@@ -7,7 +7,7 @@ $
         .extend(
                 $.tnx,
                 {
-                    dialogHtml : "<div class=\"dialog modal hide fade\" tabindex=\"-1\" style=\"min-width: 300px; max-width: 600px;\">"
+                    dialogHtml : "<div class=\"dialog modal hide fade\" tabindex=\"-1\" style=\"min-width: 300px;\">"
                             + "<div class=\"modal-header\">"
                             + "<button type=\"button\" class=\"close\" data-dismiss=\"modal\" "
                             + "aria-hidden=\"true\">&times;</button>"
@@ -152,7 +152,9 @@ $.extend($.tnx, {
                 var width = dialogBodyObj.outerWidth();
                 dialogObj.css("width", width + "px");
             };
-            var events = options ? options.events : undefined;
+
+            options = options || {};
+            var events = options.events;
             // 注册事件
             dialogObj.on("shown", function() { // shown事件特殊处理
                 if (focusBtnObj) {
@@ -190,10 +192,13 @@ $.extend($.tnx, {
                 }
             }
 
-            if (options && options.width) {
+            if (options.width) {
                 dialogObj.css("width", options.width);
             } else {
                 dialogObj.css("width", "auto");
+            }
+            if (options.maxWidth) {
+                dialogObj.css("max-width", options.maxWidth);
             }
             // 更改内容框最大高度
             var headerHeight = dialogObj.find(".modal-header").height();
@@ -205,8 +210,7 @@ $.extend($.tnx, {
 
             dialogObj.center();
 
-            var backdrop = (!options || options.backdrop == undefined) ? "static"
-                    : options.backdrop;
+            var backdrop = options.backdrop == undefined ? "static" : options.backdrop;
             dialogObj.modal({
                 backdrop : backdrop,
                 keyboard : true

@@ -8,7 +8,7 @@ $
                 $.tnx,
                 {
                     dialogHtml : "<div class=\"modal fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"_modal_title\" aria-hidden=\"true\">"
-                            + "<div class=\"modal-dialog\" style=\"min-width: 300px; max-width: 600px;\">"
+                            + "<div class=\"modal-dialog\" style=\"min-width: 300px;\">"
                             + "<div class=\"modal-content\">"
                             + "<div class=\"modal-header\" style=\"padding: 7px 15px;\">"
                             + "<button type=\"button\" class=\"close\" style=\"margin-top: 4px;\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>"
@@ -77,7 +77,9 @@ $.extend($.tnx, {
                 var width = dialogBodyObj.outerWidth();
                 dialogObj.find(".modal-dialog").css("width", width + "px");
             };
-            var events = options ? options.events : undefined;
+
+            options = options || {};
+            var events = options.events;
             // 注册事件
             dialogObj.on("shown.zui.modal", function() { // shown事件特殊处理
                 if (focusBtnObj) {
@@ -113,10 +115,13 @@ $.extend($.tnx, {
                 }
             }
 
-            if (options && options.width) {
+            if (options.width) {
                 dialogObj.find(".modal-dialog").css("width", options.width);
             } else {
                 dialogObj.find(".modal-dialog").css("width", "auto");
+            }
+            if (options.maxWidth) {
+                dialogObj.find(".modal-dialog").css("max-width", options.maxWidth);
             }
             // 更改内容框最大高度
             var headerHeight = dialogObj.find(".modal-header").height();
@@ -127,8 +132,7 @@ $.extend($.tnx, {
             dialogBodyObj.css("overflowY", "visible");
 
             dialogObj.modal({
-                backdrop : (!options || options.backdrop == undefined) ? "static"
-                        : options.backdrop,
+                backdrop : options.backdrop == undefined ? "static" : options.backdrop,
                 keyboard : true
             });
             dialogObj.css("zIndex", zIndex);
