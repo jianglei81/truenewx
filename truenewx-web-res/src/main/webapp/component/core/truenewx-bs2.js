@@ -7,7 +7,7 @@ $
         .extend(
                 $.tnx,
                 {
-                    dialogHtml : "<div class=\"dialog modal hide fade\" tabindex=\"-1\" style=\"min-width: 300px;\">"
+                    dialogHtml : "<div class=\"dialog modal hide fade\" tabindex=\"-1\" style=\"min-width: 300px; max-width: 600px;\">"
                             + "<div class=\"modal-header\">"
                             + "<button type=\"button\" class=\"close\" data-dismiss=\"modal\" "
                             + "aria-hidden=\"true\">&times;</button>"

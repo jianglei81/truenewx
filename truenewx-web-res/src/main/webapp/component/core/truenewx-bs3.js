@@ -8,7 +8,7 @@ $
                 $.tnx,
                 {
                     dialogHtml : "<div class=\"modal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"_modal_title\" aria-hidden=\"true\">"
-                            + "<div class=\"modal-dialog\" style=\"min-width: 300px;\">"
+                            + "<div class=\"modal-dialog\" style=\"min-width: 300px; max-width: 600px;\">"
                             + "<div class=\"modal-content\">"
                             + "<div class=\"modal-header\" style=\"padding: 7px 15px;\">"
                             + "<button type=\"button\" class=\"close\" style=\"margin-top: 4px;\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>"
