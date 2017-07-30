@@ -10,6 +10,7 @@ import javax.servlet.jsp.tagext.TagSupport;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.core.Strings;
 import org.truenewx.core.spring.util.SpringUtil;
+import org.truenewx.web.spring.context.SpringWebContext;
 import org.truenewx.web.spring.servlet.mvc.Loginer;
 import org.truenewx.web.spring.util.SpringWebUtil;
 import org.truenewx.web.util.WebUtil;
@@ -32,7 +33,8 @@ public class PrevUrlTag extends TagSupport {
 
     @Override
     public int doEndTag() throws JspException {
-        final HttpServletRequest request = (HttpServletRequest) this.pageContext.getRequest();
+        // 使用pageContext中的request会得到jsp页面的访问路径，这可能导致错误
+        final HttpServletRequest request = SpringWebContext.getRequest();
         final String currentAction = WebUtil.getRelativeRequestAction(request);
         String prevUrl = WebUtil.getRelativePreviousUrl(request, true);
         if (prevUrl != null) {
