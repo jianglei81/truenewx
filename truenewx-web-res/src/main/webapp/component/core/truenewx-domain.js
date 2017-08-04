@@ -193,6 +193,9 @@ $.tnx.domain = {
                     } else {
                         scripts[i] = script;
                     }
+                    if ($.tnx.domain.site.version) { // 脚本路径附加版本信息，以更新客户端缓存
+                        scripts[i] += "?v=" + $.tnx.domain.site.version;
+                    }
                 } else { // 无效的脚本文件置空
                     scripts[i] = undefined;
                 }
@@ -323,6 +326,10 @@ $.tnx.domain.site = {
             return $.tnx.domain.site.path.assets + "/" + extension + "/" + url;
         },
         jsUrl2Namespace : function(url) {
+            var index = url.indexOf("?");
+            if (index >= 0) { // 去掉可能的参数部分
+                url = url.substr(0, index);
+            }
             url = this.absUrl(url);
             var prefix = $.tnx.domain.site.path.js + "/";
             var extension = ".js";

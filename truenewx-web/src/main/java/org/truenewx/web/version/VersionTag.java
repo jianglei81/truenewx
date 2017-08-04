@@ -2,6 +2,7 @@ package org.truenewx.web.version;
 
 import java.io.IOException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspException;
 
 import org.truenewx.core.version.VersionReader;
@@ -19,9 +20,11 @@ public class VersionTag extends DynamicAttributeTagSupport {
 
     private static final String TYPE_BUILD = "build";
     private static final String TYPE_RELEASE = "release";
+    private static final String PROJECT_BUILD = "project.build";
 
     private String type = TYPE_RELEASE;
     private String prefix;
+    private boolean cacheBuild = true;
 
     public void setType(final String type) {
         this.type = type;
@@ -29,6 +32,10 @@ public class VersionTag extends DynamicAttributeTagSupport {
 
     public void setPrefix(final String prefix) {
         this.prefix = prefix;
+    }
+
+    public void setCacheBuild(final boolean cacheBuild) {
+        this.cacheBuild = cacheBuild;
     }
 
     @Override
@@ -39,6 +46,9 @@ public class VersionTag extends DynamicAttributeTagSupport {
             switch (this.type) {
             case TYPE_BUILD:
                 version = versionReader.getBuildVersion();
+                if (version.endsWith(".0")) { // 构建版本以.0结尾，说明没有配置构建号
+                    version = version.substring(0, version.length() - 1) + getBuild();
+                }
                 break;
             case TYPE_RELEASE:
                 version = versionReader.getReleaseVersion();
@@ -52,6 +62,20 @@ public class VersionTag extends DynamicAttributeTagSupport {
                 }
                 print(version);
             }
+        }
+    }
+
+    private String getBuild() {
+        if (this.cacheBuild) {
+            final ServletContext servletContext = this.pageContext.getServletContext();
+            String build = (String) servletContext.getAttribute(PROJECT_BUILD);
+            if (build == null) {
+                build = String.valueOf(System.currentTimeMillis());
+                servletContext.setAttribute(PROJECT_BUILD, build);
+            }
+            return build;
+        } else {
+            return String.valueOf(System.currentTimeMillis());
         }
     }
 
