@@ -1101,22 +1101,16 @@
         <body-content>empty</body-content>
         <description>输出版本号</description>
         <attribute>
-            <name>type</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-            <description>类型，可选值: release(默认) | build</description>
-        </attribute>
-        <attribute>
             <name>prefix</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
             <description>前缀</description>
         </attribute>
         <attribute>
-            <name>cacheBuild</name>
+            <name>build</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>是否缓存构建号，在版本号中没有构建号时有效，设置生成的构建号是否缓存至Application范围中</description>
+            <description>是否输出构建号，true-输出，false-不输出，only-仅输出构建号</description>
         </attribute>
     </tag>
 

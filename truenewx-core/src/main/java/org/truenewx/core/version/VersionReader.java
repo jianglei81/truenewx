@@ -10,14 +10,16 @@ public interface VersionReader {
 
     /**
      *
-     * @return 内部构建版本号
+     * @param withBuild
+     *            是否带构建号
+     * @return 版本号
      */
-    String getBuildVersion();
+    String getVersion(boolean withBuild);
 
     /**
      *
-     * @return 对外发布版本号
+     * @return 构建号
      */
-    String getReleaseVersion();
+    String getBuild();
 
 }

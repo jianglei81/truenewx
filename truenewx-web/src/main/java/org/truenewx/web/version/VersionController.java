@@ -23,7 +23,7 @@ public class VersionController {
     @ResponseBody
     public String build() {
         if (this.versionReader != null) {
-            return this.versionReader.getBuildVersion();
+            return this.versionReader.getVersion(true);
         }
         return Strings.EMPTY;
     }
@@ -32,7 +32,7 @@ public class VersionController {
     @ResponseBody
     public String release() {
         if (this.versionReader != null) {
-            return this.versionReader.getReleaseVersion();
+            return this.versionReader.getVersion(false);
         }
         return Strings.EMPTY;
     }
