@@ -14,6 +14,8 @@
         <constructor-arg value="classpath:META-INF/log4j.xml" />
     </bean>
 
+    <bean class="org.truenewx.core.version.PlaceholderVersionReader" />
+
     <bean id="webResourceConsolidator" class="org.truenewx.web.util.WebResourceConsolidator" />
 
 </beans>

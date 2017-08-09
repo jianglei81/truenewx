@@ -63,6 +63,9 @@ public abstract class AbstractVersionReader implements VersionReader, ContextIni
 
     @Override
     public String getVersion(final boolean withBuild) {
+        if (this.base == null) {
+            return null;
+        }
         if (withBuild) {
             return this.base + Strings.DOT + this.build;
         } else {
