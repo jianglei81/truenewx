@@ -126,7 +126,8 @@ public class MenuItem extends MenuAction {
     }
 
     @Override
-    public Authority getAuthority(final String beanId, final String methodName, final Integer argCount) {
+    public Authority getAuthority(final String beanId, final String methodName,
+            final Integer argCount) {
         for (final MenuOperation operation : this.operations) {
             final Authority auth = operation.getAuthority(beanId, methodName, argCount);
             if (auth != null) {
@@ -209,7 +210,15 @@ public class MenuItem extends MenuAction {
                 return indexes;
             }
         }
-        return new ArrayList<>();
+        // 没有下级则在包含的操作中查找
+        final List<Binate<Integer, MenuAction>> indexes = new ArrayList<>();
+        for (int i = 0; i < this.operations.size(); i++) {
+            final MenuOperation operation = this.operations.get(i);
+            if (operation.contains(href, method)) {
+                indexes.add(new Binary<Integer, MenuAction>(i, operation));
+            }
+        }
+        return indexes;
     }
 
     @Override
@@ -219,11 +228,6 @@ public class MenuItem extends MenuAction {
         }
         if (super.contains(href, method)) {
             return true;
-        }
-        for (final MenuOperation operation : this.operations) {
-            if (operation.contains(href, method)) {
-                return true;
-            }
         }
         return false;
     }
