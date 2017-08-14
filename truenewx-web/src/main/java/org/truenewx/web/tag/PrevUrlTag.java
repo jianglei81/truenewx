@@ -26,9 +26,14 @@ public class PrevUrlTag extends TagSupport {
     private static final long serialVersionUID = 8123676932054182255L;
 
     private String defaultHref = "javascript:history.back(-1)";
+    private boolean withContext = true;
 
     public void setDefault(final String defaultHref) {
         this.defaultHref = defaultHref;
+    }
+
+    public void setContext(final boolean context) {
+        this.withContext = context;
     }
 
     @Override
@@ -51,9 +56,11 @@ public class PrevUrlTag extends TagSupport {
         final JspWriter out = this.pageContext.getOut();
         try {
             if (prevUrl != null) {
-                final String contextPath = request.getContextPath();
-                if (!contextPath.equals(Strings.SLASH)) {
-                    out.print(contextPath);
+                if (this.withContext) {
+                    final String contextPath = request.getContextPath();
+                    if (!contextPath.equals(Strings.SLASH)) {
+                        out.print(contextPath);
+                    }
                 }
                 out.print(prevUrl);
             } else {

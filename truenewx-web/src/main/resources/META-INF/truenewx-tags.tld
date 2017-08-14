@@ -1219,6 +1219,12 @@
             <rtexprvalue>true</rtexprvalue>
             <description>默认值</description>
         </attribute>
+        <attribute>
+            <name>context</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>是否包含站点上下文根路径，默认为true</description>
+        </attribute>
     </tag>
     
     <tag>
