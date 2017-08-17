@@ -1,6 +1,6 @@
 /**
  * 基于bootstrap v2的扩展 truenewx-bs2.js v1.0.0
- * 
+ *
  * Depends on: bootstrap-2.*.*.js, truenewx.js
  */
 $
@@ -76,7 +76,7 @@ $.extend($.tnx, {
     },
     /**
      * 弹出模态对话框显示指定内容
-     * 
+     *
      * @param title
      *            标题
      * @param content
@@ -196,10 +196,15 @@ $.extend($.tnx, {
                 dialogObj.css("width", options.width);
             } else {
                 dialogObj.css("width", "auto");
+                // 未指定宽度时才需要设置最大宽度
+                if (options.maxWidth) {
+                    dialogObj.css("max-width", options.maxWidth);
+                } else { // 设置默认的最大宽度为最小宽度的2倍
+                    var minWidth = parseInt(dialogObj.find(".modal-dialog").css("min-width"));
+                    dialogObj.css("max-width", minWidth * 2 + "px");
+                }
             }
-            if (options.maxWidth) {
-                dialogObj.css("max-width", options.maxWidth);
-            }
+
             // 更改内容框最大高度
             var headerHeight = dialogObj.find(".modal-header").height();
             var footerHeight = dialogObj.find(".modal-footer").height();

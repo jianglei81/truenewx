@@ -1,6 +1,6 @@
 /**
  * 基于bootstrap v3的扩展 truenewx-bs3.js v1.0.0
- * 
+ *
  * Depends on: bootstrap-3.*.*.js, truenewx.js
  */
 $
@@ -119,9 +119,13 @@ $.extend($.tnx, {
                 dialogObj.find(".modal-dialog").css("width", options.width);
             } else {
                 dialogObj.find(".modal-dialog").css("width", "auto");
-            }
-            if (options.maxWidth) {
-                dialogObj.find(".modal-dialog").css("max-width", options.maxWidth);
+                // 未指定宽度时才需要设置最大宽度
+                if (options.maxWidth) {
+                    dialogObj.find(".modal-dialog").css("max-width", options.maxWidth);
+                } else { // 设置默认的最大宽度为最小宽度的2倍
+                    var minWidth = parseInt(dialogObj.find(".modal-dialog").css("min-width"));
+                    dialogObj.find(".modal-dialog").css("max-width", minWidth * 2 + "px");
+                }
             }
             // 更改内容框最大高度
             var headerHeight = dialogObj.find(".modal-header").height();
