@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
 import org.truenewx.data.query.Comparison;
-import org.truenewx.data.query.QueryOrder;
 
 /**
  * 对象查询语言(OQL)工具类
@@ -21,29 +20,26 @@ public class OqlUtil {
     }
 
     /**
-     * 根据指定可查询排序对象构建order by子句<br/>
+     * 根据指定查询排序序列构建order by子句<br/>
      * 如果无排序设置，则返回""，否则返回以空格开头的形如：" order by ..."的order by子句
      *
-     * @param order
-     *            查询排序
+     * @param orders
+     *            查询排序序列
      * @return order by子句
      */
-    public static String buildOrderString(final QueryOrder order) {
+    public static String buildOrderString(final Iterable<Entry<String, Boolean>> orders) {
         final StringBuffer orderBy = new StringBuffer();
-        if (order != null) {
-            final Iterable<Entry<String, Boolean>> orders = order.getOrders();
-            if (orders != null) {
-                for (final Entry<String, Boolean> entry : orders) {
-                    orderBy.append(Strings.COMMA).append(entry.getKey());
-                    if (entry.getValue() == Boolean.TRUE) {
-                        orderBy.append(" desc");
-                    }
+        if (orders != null) {
+            for (final Entry<String, Boolean> entry : orders) {
+                orderBy.append(Strings.COMMA).append(entry.getKey());
+                if (entry.getValue() == Boolean.TRUE) {
+                    orderBy.append(" desc");
                 }
             }
-            if (orderBy.length() > 0) {
-                orderBy.replace(0, Strings.COMMA.length(), Strings.SPACE); // 用空格替代第一个逗号
-                orderBy.insert(0, " order by"); // 前面加order by
-            }
+        }
+        if (orderBy.length() > 0) {
+            orderBy.replace(0, Strings.COMMA.length(), Strings.SPACE); // 用空格替代第一个逗号
+            orderBy.insert(0, " order by"); // 前面加order by
         }
         return orderBy.toString();
     }

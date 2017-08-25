@@ -15,6 +15,7 @@ import org.truenewx.data.orm.DataAccessTemplate;
 import org.truenewx.data.orm.dao.EntityDao;
 import org.truenewx.data.query.Comparison;
 import org.truenewx.data.query.Paging;
+import org.truenewx.data.query.QueryOrder;
 import org.truenewx.data.query.QueryParameter;
 import org.truenewx.data.query.QueryResult;
 
@@ -74,10 +75,10 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
         return getDataAccessTemplate(entityName).list(hql, qp);
     }
 
-    protected QueryResult<T> pagingQuery(final String entityName, CharSequence ql,
-            final Map<String, Object> params, final QueryParameter parameter) {
-        final int pageSize = parameter == null ? 0 : parameter.getPageSize();
-        final boolean totalable = parameter == null ? true : parameter.isTotalable();
+    private QueryResult<T> query(final String entityName, CharSequence ql,
+            final Map<String, Object> params, final int pageSize, final int pageNo,
+            final boolean totalable, final boolean listable,
+            final Iterable<Entry<String, Boolean>> orders) {
         int total;
         if (pageSize > 0 && totalable) { // 分页查询时需要获取总数才获取总数
             total = getDataAccessTemplate(entityName).count("select count(*) " + ql, params);
@@ -85,11 +86,9 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
             total = Paging.UNKNOWN_TOTAL;
         }
 
-        final int pageNo = parameter == null ? 0 : parameter.getPageNo();
-        final boolean listable = parameter == null ? true : parameter.isListable();
         List<T> dataList;
         if (total != 0 && listable) { // 已知总数为0或无需查询记录清单，则不查询记录清单
-            final String orderString = OqlUtil.buildOrderString(parameter);
+            final String orderString = OqlUtil.buildOrderString(orders);
             if (StringUtils.isNotBlank(orderString)) {
                 if (ql instanceof StringBuffer) {
                     ((StringBuffer) ql).append(orderString);
@@ -105,6 +104,19 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
             dataList = new ArrayList<>();
         }
         return new QueryResult<>(dataList, pageSize, pageNo, total);
+    }
+
+    protected QueryResult<T> query(final String entityName, final CharSequence ql,
+            final Map<String, Object> params, final QueryParameter parameter) {
+        return query(entityName, ql, params, parameter.getPageSize(), parameter.getPageNo(),
+                parameter.isTotalable(), parameter.isListable(), parameter.getOrders());
+    }
+
+    protected QueryResult<T> query(final String entityName, final CharSequence ql,
+            final Map<String, Object> params, final int pageSize, final int pageNo,
+            final QueryOrder order) {
+        return query(entityName, ql, params, pageSize, pageNo, true, true,
+                order == null ? null : order.getOrders());
     }
 
     protected int countAll(final String entityName) {
@@ -151,7 +163,7 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
         final Map<String, Object> params = new HashMap<>();
         params.put("dependedKey", dependedKey);
 
-        return pagingQuery(entityName, hql, params, parameter);
+        return query(entityName, hql, params, parameter);
     }
 
     protected int delete(final String entityName, final Class<?> dependedClass,

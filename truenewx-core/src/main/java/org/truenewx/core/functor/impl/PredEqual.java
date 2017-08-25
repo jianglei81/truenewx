@@ -2,13 +2,15 @@ package org.truenewx.core.functor.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.truenewx.core.functor.BinatePredicate;
 
 /**
  * 断言：对象相等
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -33,10 +35,13 @@ public class PredEqual extends BinatePredicate<Object, Object> {
         if ((left == null && right != null) || (left != null && right == null)) {
             return false;
         }
-        if (left instanceof Collection) {
+        if (left instanceof Collection && right instanceof Collection) {
             return CollectionUtils.isEqualCollection((Collection) left, (Collection) right);
         }
-        if (left.getClass().isArray()) {
+        if (left instanceof Map && right instanceof Map) {
+            return testAsMap((Map<?, ?>) left, (Map<?, ?>) right);
+        }
+        if (left.getClass().isArray() && right.getClass().isArray()) {
             return testAsArray(left, right);
         }
         if (left.getClass() != right.getClass()) {
@@ -65,6 +70,19 @@ public class PredEqual extends BinatePredicate<Object, Object> {
         } else {
             return Arrays.equals((Object[]) left, (Object[]) right);
         }
+    }
+
+    private boolean testAsMap(final Map<?, ?> left, final Map<?, ?> right) {
+        if (left.size() != right.size()) {
+            return false;
+        }
+        for (final Entry<?, ?> entry : left.entrySet()) {
+            final Object key = entry.getKey();
+            if (!apply(entry.getValue(), right.get(key))) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

@@ -110,7 +110,7 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
                 // 登录校验成功后，校验授权
                 if (this.menu != null) {
                     final HttpMethod method = HttpMethod.valueOf(request.getMethod());
-                    final Authority auth = this.menu.getAuth(url, method);
+                    final Authority auth = this.menu.getAuthority(url, method);
                     subject.validateAuthority(auth);
                 }
             }

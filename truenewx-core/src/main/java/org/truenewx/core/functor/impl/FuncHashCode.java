@@ -1,6 +1,7 @@
 package org.truenewx.core.functor.impl;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.common.base.Function;
 
@@ -58,6 +59,10 @@ public class FuncHashCode implements Function<Object, Integer> {
         }
         if (obj instanceof Object[]) {
             return evaluateArray((Object[]) obj);
+        }
+        if (obj instanceof Entry<?, ?>) {
+            final Entry<?, ?> entry = (Entry<?, ?>) obj;
+            return apply(entry.getKey()) + PRIME * apply(entry.getValue());
         }
         return obj.hashCode();
     }

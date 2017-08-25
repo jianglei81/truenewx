@@ -4,14 +4,14 @@
     <parent>
         <groupId>org.truenewx</groupId>
         <artifactId>truenewx</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.0</version>
     </parent>
     <artifactId>truenewx-web</artifactId>
     <dependencies>
         <dependency>
             <groupId>org.truenewx</groupId>
             <artifactId>truenewx-service</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

@@ -106,20 +106,20 @@ public class MenuItem extends MenuAction {
         if (this.link.isMatched(href, method)) {
             return getAuthority();
         }
-        Authority auth = super.getAuthority(href, method);
-        if (auth != null) {
-            return auth;
+        Authority authority = super.getAuthority(href, method);
+        if (authority != null) {
+            return authority;
         }
         for (final MenuOperation operation : this.operations) {
-            auth = operation.getAuthority(href, method);
-            if (auth != null) {
-                return auth;
+            authority = operation.getAuthority(href, method);
+            if (authority != null) {
+                return authority;
             }
         }
         for (final MenuItem sub : this.subs) {
-            auth = sub.getAuthority(href, method);
-            if (auth != null) {
-                return auth;
+            authority = sub.getAuthority(href, method);
+            if (authority != null) {
+                return authority;
             }
         }
         return null;
@@ -129,30 +129,30 @@ public class MenuItem extends MenuAction {
     public Authority getAuthority(final String beanId, final String methodName,
             final Integer argCount) {
         for (final MenuOperation operation : this.operations) {
-            final Authority auth = operation.getAuthority(beanId, methodName, argCount);
-            if (auth != null) {
-                return auth;
+            final Authority authority = operation.getAuthority(beanId, methodName, argCount);
+            if (authority != null) {
+                return authority;
             }
         }
         for (final MenuItem sub : this.subs) {
-            final Authority auth = sub.getAuthority(beanId, methodName, argCount);
-            if (auth != null) {
-                return auth;
+            final Authority authority = sub.getAuthority(beanId, methodName, argCount);
+            if (authority != null) {
+                return authority;
             }
         }
         return null;
     }
 
-    public Set<String> getAllAuthorities() {
-        final Set<String> result = new HashSet<>();
-        String auth = getPermission();
-        if (auth != null) {
-            result.add(auth);
+    public Set<Authority> getAllAuthorities() {
+        final Set<Authority> result = new HashSet<>();
+        Authority authority = getAuthority();
+        if (authority != null) {
+            result.add(authority);
         }
         for (final MenuOperation operation : this.operations) {
-            auth = operation.getPermission();
-            if (auth != null) {
-                result.add(auth);
+            authority = operation.getAuthority();
+            if (authority != null) {
+                result.add(authority);
             }
         }
         for (final MenuItem sub : this.subs) {
@@ -221,6 +221,29 @@ public class MenuItem extends MenuAction {
         return indexes;
     }
 
+    public List<Binate<Integer, MenuAction>> indexesOf(final String beanId, final String methodName,
+            final Integer argCount) {
+        for (int i = 0; i < this.subs.size(); i++) {
+            final MenuItem sub = this.subs.get(i);
+            final List<Binate<Integer, MenuAction>> indexes = sub.indexesOf(beanId, methodName,
+                    argCount);
+            // 先在更下级中找
+            if (indexes.size() > 0) { // 在更下级中找到
+                indexes.add(0, new Binary<Integer, MenuAction>(i, sub)); // 加上对应的下级索引
+                return indexes;
+            }
+        }
+        // 没有下级则在包含的操作中查找
+        final List<Binate<Integer, MenuAction>> indexes = new ArrayList<>();
+        for (int i = 0; i < this.operations.size(); i++) {
+            final MenuOperation operation = this.operations.get(i);
+            if (operation.contains(beanId, methodName, argCount)) {
+                indexes.add(new Binary<Integer, MenuAction>(i, operation));
+            }
+        }
+        return indexes;
+    }
+
     @Override
     public boolean contains(final String href, final HttpMethod method) {
         if (this.link.isMatched(href, method)) {
@@ -235,22 +258,22 @@ public class MenuItem extends MenuAction {
     /**
      * 获取指定权限的菜单动作集合
      *
-     * @param auth
+     * @param authority
      *            权限名称
      * @return 指定权限的菜单动作集合
      */
-    public List<MenuAction> getActions(final String auth) {
+    public List<MenuAction> getActions(final String authority) {
         final List<MenuAction> actions = new ArrayList<>();
-        if (getPermission().equals(auth)) { // 如果当前菜单项匹配
+        if (getPermission().equals(authority)) { // 如果当前菜单项匹配
             actions.add(this);
         }
         for (final MenuOperation operation : this.operations) {
-            if (operation.getPermission().equals(auth)) { // 如果包含的特性匹配
+            if (operation.getPermission().equals(authority)) { // 如果包含的特性匹配
                 actions.add(operation);
             }
         }
         for (final MenuItem sub : this.subs) { // 加入所有子菜单项中的匹配动作
-            actions.addAll(sub.getActions(auth));
+            actions.addAll(sub.getActions(authority));
         }
         return actions;
     }

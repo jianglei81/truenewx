@@ -4,10 +4,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.usertype.ParameterizedType;
 import org.truenewx.core.util.JsonUtil;
 
 /**
@@ -16,7 +18,14 @@ import org.truenewx.core.util.JsonUtil;
  * @author jianglei
  * @since JDK 1.8
  */
-public class ObjectJsonMapType extends AbstractUserType {
+public class ObjectJsonMapType extends AbstractUserType implements ParameterizedType {
+
+    private boolean appendType;
+
+    @Override
+    public void setParameterValues(final Properties parameters) {
+        this.appendType = Boolean.valueOf(parameters.getProperty("appendType"));
+    }
 
     @Override
     public int[] sqlTypes() {
@@ -47,7 +56,11 @@ public class ObjectJsonMapType extends AbstractUserType {
     public void nullSafeSet(final PreparedStatement st, final Object value, final int index,
             final SessionImplementor session) throws HibernateException, SQLException {
         if (value != null) {
-            st.setString(index, JsonUtil.toJson(value));
+            Class<?>[] classes = {};
+            if (this.appendType) {
+                classes = new Class<?>[] { value.getClass() };
+            }
+            st.setString(index, JsonUtil.toJson(value, classes));
         } else {
             st.setString(index, null);
         }

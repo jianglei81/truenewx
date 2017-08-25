@@ -2,6 +2,8 @@ package org.truenewx.web.rpc;
 
 import java.io.Serializable;
 
+import org.truenewx.core.util.StringUtil;
+
 /**
  * RPC端口
  *
@@ -86,13 +88,9 @@ public class RpcPort implements Serializable {
      * @return 指定RPC是否匹配当前PRC端口
      */
     public boolean isMatched(final String beanId, final String methodName, final Integer argCount) {
-        if (this.beanId.equals(beanId) && this.methodName.equals(methodName)) {
-            if (this.argCount == null || argCount == null) {
-                return true; // 任意一个参数个数为null，均不再进行参数个数的比较匹配
-            }
-            return this.argCount.equals(argCount);
-        }
-        return false;
+        return StringUtil.wildcardMatch(this.beanId, beanId)
+                && StringUtil.wildcardMatch(this.methodName, methodName)
+                && (this.argCount == null || argCount == null || this.argCount.equals(argCount));
     }
 
 }

@@ -101,50 +101,51 @@ public class Menu implements Serializable {
         this.operations.add(operation);
     }
 
-    public Authority getAuth(final String href, final HttpMethod method) {
+    public Authority getAuthority(final String href, final HttpMethod method) {
         for (final MenuItem item : this.items) {
-            final Authority auth = item.getAuthority(href, method);
-            if (auth != null) {
-                return auth;
+            final Authority authority = item.getAuthority(href, method);
+            if (authority != null) {
+                return authority;
             }
         }
         for (final MenuOperation operation : this.operations) {
-            final Authority auth = operation.getAuthority(href, method);
-            if (auth != null) {
-                return auth;
+            final Authority authority = operation.getAuthority(href, method);
+            if (authority != null) {
+                return authority;
             }
         }
         return null;
     }
 
-    public Authority getAuth(final String beanId, final String methodName, final Integer argCount) {
+    public Authority getAuthority(final String beanId, final String methodName,
+            final Integer argCount) {
         for (final MenuItem item : this.items) {
-            final Authority auth = item.getAuthority(beanId, methodName, argCount);
-            if (auth != null) {
-                return auth;
+            final Authority authority = item.getAuthority(beanId, methodName, argCount);
+            if (authority != null) {
+                return authority;
             }
         }
         for (final MenuOperation operation : this.operations) {
-            final Authority auth = operation.getAuthority(beanId, methodName, argCount);
-            if (auth != null) {
-                return auth;
+            final Authority authority = operation.getAuthority(beanId, methodName, argCount);
+            if (authority != null) {
+                return authority;
             }
         }
         return null;
     }
 
-    public String[] getAllAuthorities() {
-        final Set<String> auths = new HashSet<>();
+    public Authority[] getAllAuthorities() {
+        final Set<Authority> authorities = new HashSet<>();
         for (final MenuItem item : this.items) {
-            auths.addAll(item.getAllAuthorities());
+            authorities.addAll(item.getAllAuthorities());
         }
         for (final MenuOperation operation : this.operations) {
-            final String auth = operation.getPermission();
-            if (auth != null) {
-                auths.add(auth);
+            final Authority authority = operation.getAuthority();
+            if (authority != null) {
+                authorities.add(authority);
             }
         }
-        return auths.toArray(new String[auths.size()]);
+        return authorities.toArray(new Authority[authorities.size()]);
     }
 
     /**
@@ -175,6 +176,29 @@ public class Menu implements Serializable {
             }
         }
         return new ArrayList<>();
+    }
+
+    public List<Binate<Integer, MenuAction>> indexesOf(final String beanId, final String methodName,
+            final Integer argCount) {
+        for (int i = 0; i < this.items.size(); i++) {
+            final MenuItem item = this.items.get(i);
+            // 先在更下级中找
+            final List<Binate<Integer, MenuAction>> indexes = item.indexesOf(beanId, methodName,
+                    argCount);
+            if (indexes.size() > 0) { // 在下级中找到
+                indexes.add(0, new Binary<Integer, MenuAction>(i, item)); // 加上对应的下级索引
+                return indexes;
+            }
+        }
+        // 没有下级则在不可见操作中查找
+        final List<Binate<Integer, MenuAction>> indexes = new ArrayList<>();
+        for (int i = 0; i < this.operations.size(); i++) {
+            final MenuOperation operation = this.operations.get(i);
+            if (operation.contains(beanId, methodName, argCount)) {
+                indexes.add(new Binary<Integer, MenuAction>(i, operation));
+            }
+        }
+        return indexes;
     }
 
     /**
@@ -208,14 +232,14 @@ public class Menu implements Serializable {
     /**
      * 获取指定权限的菜单动作集合
      *
-     * @param auth
+     * @param authority
      *            权限名称
      * @return 指定权限的菜单动作集合
      */
-    public List<MenuAction> getActions(final String auth) {
-        if (StringUtils.isNotEmpty(auth)) {
+    public List<MenuAction> getActions(final String authority) {
+        if (StringUtils.isNotEmpty(authority)) {
             for (final MenuItem item : this.items) {
-                final List<MenuAction> list = item.getActions(auth);
+                final List<MenuAction> list = item.getActions(authority);
                 if (list.size() > 0) {
                     list.add(0, item);
                     return list;

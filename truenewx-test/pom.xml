@@ -4,23 +4,18 @@
     <parent>
         <groupId>org.truenewx</groupId>
         <artifactId>truenewx</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.0</version>
     </parent>
     <artifactId>truenewx-test</artifactId>
     <dependencies>
         <dependency>
             <groupId>org.truenewx</groupId>
             <artifactId>truenewx-data</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
             <version>${spring.version}</version>
         </dependency>
         <dependency>

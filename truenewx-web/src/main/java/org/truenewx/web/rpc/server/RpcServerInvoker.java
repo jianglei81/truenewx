@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -21,10 +23,14 @@ import org.springframework.util.CollectionUtils;
 import org.truenewx.core.Strings;
 import org.truenewx.core.exception.HandleableException;
 import org.truenewx.core.serializer.StringSerializer;
+import org.truenewx.core.spring.util.SpringUtil;
 import org.truenewx.core.util.ArrayUtil;
 import org.truenewx.core.util.BeanUtil;
 import org.truenewx.core.util.ClassUtil;
 import org.truenewx.core.util.CollectionUtil;
+import org.truenewx.core.util.NetUtil;
+import org.truenewx.web.menu.MenuResolver;
+import org.truenewx.web.menu.model.Menu;
 import org.truenewx.web.rpc.server.annotation.RpcArg;
 import org.truenewx.web.rpc.server.annotation.RpcController;
 import org.truenewx.web.rpc.server.annotation.RpcEnum;
@@ -35,8 +41,12 @@ import org.truenewx.web.rpc.server.functor.PredEquivalentClass;
 import org.truenewx.web.rpc.server.meta.RpcControllerMeta;
 import org.truenewx.web.rpc.server.meta.RpcMethodMeta;
 import org.truenewx.web.rpc.server.meta.RpcVariableMeta;
+import org.truenewx.web.security.authority.Authority;
+import org.truenewx.web.security.mgt.SubjectManager;
+import org.truenewx.web.security.subject.Subject;
 import org.truenewx.web.spring.context.SpringWebContext;
 import org.truenewx.web.spring.util.SpringWebUtil;
+import org.truenewx.web.util.WebUtil;
 
 import com.google.common.base.Defaults;
 
@@ -49,9 +59,15 @@ import com.google.common.base.Defaults;
 @Component
 public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
     private ApplicationContext context;
-    private RpcServerInterceptor interceptor;
+    @Autowired
     private StringSerializer serializer;
     private Map<String, RpcControllerMeta> metaMap = new HashMap<>();
+    private Menu menu;
+    @Autowired(required = false)
+    private SubjectManager subjectManager;
+    @Autowired(required = false)
+    private RpcInvokeInterceptor interceptor;
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public void setApplicationContext(final ApplicationContext context) throws BeansException {
@@ -71,13 +87,17 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
         return this.context;
     }
 
-    public void setInterceptor(final RpcServerInterceptor interceptor) {
-        this.interceptor = interceptor;
+    @Autowired(required = false)
+    public void setMenuResolver(final MenuResolver menuResolver) {
+        this.menu = menuResolver.getFullMenu();
     }
 
-    @Autowired
-    public void setSerializer(final StringSerializer serializer) {
-        this.serializer = serializer;
+    private RpcInvokeInterceptor getInterceptor() {
+        if (this.interceptor == null) {
+            this.interceptor = SpringUtil.getFirstBeanByClass(this.context,
+                    RpcInvokeInterceptor.class);
+        }
+        return this.interceptor;
     }
 
     private RpcControllerMeta getMeta(final String beanId) {
@@ -101,11 +121,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
 
     @Override
     public Collection<String> methods(final String beanId) throws Exception {
-        final RpcControllerMeta meta = getMeta(beanId);
-        if (this.interceptor != null) {
-            this.interceptor.beforeMethods(meta.getController());
-        }
-        return meta.getMethodNames();
+        return getMeta(beanId).getMethodNames();
     }
 
     /**
@@ -125,6 +141,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
     public RpcInvokeResult invoke(final String beanId, final String methodName,
             final String argString, final HttpServletRequest request,
             final HttpServletResponse response) throws Throwable {
+        // 参数转换
         final RpcControllerMeta meta = getMeta(beanId);
         Method method;
         Object[] args;
@@ -180,14 +197,17 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
 
         // 执行调用
         try {
-            // 调用拦截器
-            if (this.interceptor != null) {
-                this.interceptor.beforeInvoke(beanId, method, request, response);
-                if (response.getStatus() != HttpStatus.OK.value()) {
-                    return new RpcInvokeResult(Strings.EMPTY);
-                }
+            // 权限校验
+            if (!validateAuthority(beanId, method, request, response)) {
+                return new RpcInvokeResult(Strings.EMPTY);
+            }
+            if (getInterceptor() != null) {
+                this.interceptor.beforeInvoke(beanId, method, args);
             }
             final Object result = method.invoke(meta.getController(), args);
+            if (this.interceptor != null) {
+                this.interceptor.afterInvoke(beanId, method, args, result);
+            }
             final RpcResult rpcResult = method.getAnnotation(RpcMethod.class).result();
             final RpcResultFilter[] resultFilters = rpcResult.filter();
             return new RpcInvokeResult(result, resultFilters);
@@ -201,6 +221,33 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
             }
             throw e;
         }
+    }
+
+    private boolean validateAuthority(final String beanId, final Method method,
+            final HttpServletRequest request, final HttpServletResponse response) throws Exception {
+        final RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
+        // 检查局域网限制
+        final String ip = WebUtil.getRemoteAddrIp(request);
+        if (rpcMethod.lan() && !NetUtil.isLanIp(ip)) {
+            this.logger.warn("Forbidden rpc request {}.{} from {}", beanId, method.getName(), ip);
+            response.sendError(HttpStatus.FORBIDDEN.value()); // 禁止非局域网访问
+            return false;
+        }
+        // 检查登录限制
+        if (this.subjectManager != null && rpcMethod.logined()) {
+            final Subject subject = this.subjectManager.getSubject(request, response);
+            if (!subject.isLogined()) { // 登录校验失败，则返回错误码
+                response.sendError(HttpStatus.UNAUTHORIZED.value());
+                return false;
+            }
+            // 再校验菜单配置中限定的权限
+            if (this.menu != null) {
+                final Authority auth = this.menu.getAuthority(beanId, method.getName(),
+                        method.getParameterTypes().length);
+                subject.validateAuthority(auth);
+            }
+        }
+        return true;
     }
 
     @SuppressWarnings("unchecked")

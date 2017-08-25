@@ -1,13 +1,8 @@
 package org.truenewx.test.util;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
 /**
  * 单元测试工具类
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -21,9 +16,9 @@ public class TestUtil {
     }
 
     /**
-     * 
+     *
      * @return 是否单元测试环境中
-     * 
+     *
      * @author jianglei
      */
     public static boolean isTesting() {
@@ -41,13 +36,4 @@ public class TestUtil {
         return TESTING;
     }
 
-    /**
-     * 用指定HTTP请求模拟Spring的HTTP请求
-     * 
-     * @param request
-     *            HTTP请求
-     */
-    public static void mockSpringRequest(final HttpServletRequest request) {
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-    }
 }

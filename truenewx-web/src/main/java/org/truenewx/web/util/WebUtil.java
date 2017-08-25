@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -79,21 +80,31 @@ public class WebUtil {
      *
      * @param request
      *            请求
+     * @param excludedParameterNames
+     *            排除的参数名
      * @return 指定request请求中的所有参数的map集合
      */
-    public static Map<String, String> getRequestParameterMap(final ServletRequest request) {
-        final Map<String, String> map = new LinkedHashMap<>();
+    public static Map<String, Object> getRequestParameterMap(final ServletRequest request,
+            final String... excludedParameterNames) {
+        final Map<String, Object> map = new LinkedHashMap<>();
         final Enumeration<String> names = request.getParameterNames();
         while (names.hasMoreElements()) {
             final String name = names.nextElement();
-            map.put(name, request.getParameter(name));
+            if (!ArrayUtils.contains(excludedParameterNames, name)) {
+                final String[] values = request.getParameterValues(name);
+                if (values.length == 1) {
+                    map.put(name, values[0]);
+                } else {
+                    map.put(name, values);
+                }
+            }
         }
         return map;
     }
 
     /**
      * 获取指定URL去掉web项目根路径之后的相对路径URL
-     * 
+     *
      * @param request
      *            请求
      * @param url

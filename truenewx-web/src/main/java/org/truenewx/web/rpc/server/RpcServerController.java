@@ -2,7 +2,6 @@ package org.truenewx.web.rpc.server;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,8 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -36,18 +33,12 @@ import org.truenewx.core.util.NetUtil;
 import org.truenewx.core.util.PropertyMeta;
 import org.truenewx.data.rpc.annotation.RpcProperty;
 import org.truenewx.web.exception.annotation.HandleableExceptionMessage;
-import org.truenewx.web.menu.MenuResolver;
-import org.truenewx.web.menu.model.Menu;
 import org.truenewx.web.rpc.serializer.RpcSerializer;
 import org.truenewx.web.rpc.server.annotation.RpcController;
-import org.truenewx.web.rpc.server.annotation.RpcMethod;
 import org.truenewx.web.rpc.server.annotation.RpcResultFilter;
 import org.truenewx.web.rpc.server.meta.RpcControllerMeta;
 import org.truenewx.web.rpc.server.meta.RpcTypeMeta;
 import org.truenewx.web.rpc.server.meta.RpcVariableMeta;
-import org.truenewx.web.security.authority.Authority;
-import org.truenewx.web.security.mgt.SubjectManager;
-import org.truenewx.web.security.subject.Subject;
 import org.truenewx.web.spring.context.SpringWebContext;
 import org.truenewx.web.util.WebUtil;
 
@@ -59,73 +50,16 @@ import org.truenewx.web.util.WebUtil;
  */
 @Controller("rpcServerController")
 @RequestMapping("/rpc")
-public class RpcServerController implements RpcServerInterceptor {
+public class RpcServerController {
 
+    @Autowired
     private RpcServer server;
-
     @Autowired
     private RpcSerializer serializer;
-
-    @Autowired(required = false)
-    private SubjectManager subjectManager;
-
     @Autowired
     private ApplicationContext context;
-
-    /**
-     * 注入菜单解析器
-     */
-    private Menu menu;
     @Autowired
     private EnumDictResolver enumDictResolver;
-
-    private Logger logger = LoggerFactory.getLogger(getClass());
-
-    /**
-     * @param menuResolver
-     *            菜单解析器
-     */
-    @Autowired(required = false)
-    public void setMenuResolver(final MenuResolver menuResolver) {
-        this.menu = menuResolver.getFullMenu();
-    }
-
-    @Autowired
-    public void setInvoker(final RpcServerInvoker invoker) {
-        invoker.setInterceptor(this);
-        this.server = invoker;
-    }
-
-    @Override
-    public void beforeMethods(final Object bean) throws Exception {
-    }
-
-    @Override
-    public void beforeInvoke(final String beanId, final Method method,
-            final HttpServletRequest request, final HttpServletResponse response) throws Exception {
-        final RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
-        // 检查局域网限制
-        final String ip = WebUtil.getRemoteAddrIp(request);
-        if (rpcMethod.lan() && !NetUtil.isLanIp(ip)) {
-            this.logger.warn("Forbidden rpc request {}.{} from {}", beanId, method.getName(), ip);
-            response.sendError(HttpStatus.FORBIDDEN.value()); // 禁止非局域网访问
-            return;
-        }
-        // 检查登录限制
-        if (this.subjectManager != null && rpcMethod.logined()) {
-            final Subject subject = this.subjectManager.getSubject(request, response);
-            if (!subject.isLogined()) { // 登录校验失败，则返回错误码
-                response.sendError(HttpStatus.UNAUTHORIZED.value());
-                return;
-            }
-            // 再校验菜单配置中限定的权限
-            if (this.menu != null) {
-                final Authority auth = this.menu.getAuth(beanId, method.getName(),
-                        method.getParameterTypes().length);
-                subject.validateAuthority(auth);
-            }
-        }
-    }
 
     @RequestMapping(value = "/methods/{beanId}", method = RequestMethod.GET)
     @HandleableExceptionMessage
