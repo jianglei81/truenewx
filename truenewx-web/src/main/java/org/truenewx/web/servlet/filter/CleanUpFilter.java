@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -33,13 +34,11 @@ import org.truenewx.web.util.WebUtil;
  */
 public class CleanUpFilter implements Filter {
 
-    private static final String HTTP_PREFIX = "http://";
-    private static final String HTTPS_PREFIX = "https://";
+    private Logger logger = LoggerFactory.getLogger(getClass());
     /**
      * 根路径属性名
      */
     private String contextPathAttributeName = "context";
-    private String httpContextPathAttributeName = "httpContext";
     private String profile;
     private Map<String, String> attributes = new HashMap<>();
     /**
@@ -50,15 +49,9 @@ public class CleanUpFilter implements Filter {
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         final String contextPathAttributeName = filterConfig
-                        .getInitParameter("contextPathAttributeName");
+                .getInitParameter("contextPathAttributeName");
         if (StringUtils.isNotBlank(contextPathAttributeName)) {
             this.contextPathAttributeName = contextPathAttributeName;
-        }
-
-        final String httpContextPathAttributeName = filterConfig
-                        .getInitParameter("httpContextPathAttributeName");
-        if (StringUtils.isNotBlank(httpContextPathAttributeName)) {
-            this.httpContextPathAttributeName = httpContextPathAttributeName;
         }
 
         this.profile = filterConfig.getServletContext().getInitParameter("spring.profiles.active");
@@ -86,7 +79,7 @@ public class CleanUpFilter implements Filter {
 
     private PlaceholderResolver getPlaceholderResolver(final FilterConfig filterConfig) {
         final ApplicationContext context = WebApplicationContextUtils
-                        .getWebApplicationContext(filterConfig.getServletContext());
+                .getWebApplicationContext(filterConfig.getServletContext());
         if (context != null) {
             try {
                 return context.getBean(PlaceholderResolver.class);
@@ -98,7 +91,7 @@ public class CleanUpFilter implements Filter {
 
     @Override
     public void doFilter(final ServletRequest req, final ServletResponse resp,
-                    final FilterChain chain) throws IOException, ServletException {
+            final FilterChain chain) throws IOException, ServletException {
         // 预处理request和response
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) resp;
@@ -110,31 +103,22 @@ public class CleanUpFilter implements Filter {
         // 生成简单的相对访问根路径属性
         final String contextPath = request.getContextPath();
         request.setAttribute(this.contextPathAttributeName, contextPath);
-        // 生成http绝对访问根路径属性
-        final String host = WebUtil.getProtocolAndHost(request);
-        final boolean https = host.startsWith(HTTPS_PREFIX);
-        if (https) { // 当前访问是https
-            request.setAttribute(this.httpContextPathAttributeName, host);
-        } else {
-            request.setAttribute(this.httpContextPathAttributeName, contextPath);
-        }
+        // 生成环境属性
         if (this.profile != null) {
             request.setAttribute("profile", this.profile);
         }
         // 生成配置的属性
         for (final Entry<String, String> entry : this.attributes.entrySet()) {
-            String value = entry.getValue();
-            if (https) { // 如果配置属性值中包含http协议路径，则在https访问时替换成https协议路径
-                value = value.replace(HTTP_PREFIX, HTTPS_PREFIX);
-            }
-            request.setAttribute(entry.getKey(), value);
+            request.setAttribute(entry.getKey(), entry.getValue());
         }
 
         try {
             chain.doFilter(request, response);
         } catch (final Throwable e) {
-            final String url = WebUtil.getRelativeRequestUrlWithQueryString(request, false);
-            LoggerFactory.getLogger(getClass()).error("An exception happended on {}:", url);
+            if (this.logger.isErrorEnabled()) {
+                final String url = WebUtil.getRelativeRequestUrlWithQueryString(request, false);
+                this.logger.error("An exception happended on {}", url);
+            }
             throw e;
         }
     }

@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -72,6 +74,11 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
                 mav = handleExceptionToMessage(e, request.getLocale(), response);
             } else if (e instanceof HandleableException) {
                 mav = handleExceptionToPage(request, handlerMethod, (HandleableException) e);
+            } else {
+                final Logger handlerLogger = LoggerFactory.getLogger(handlerMethod.getBeanType());
+                if (handlerLogger.isErrorEnabled()) {
+                    handlerLogger.error(e.getMessage(), e);
+                }
             }
             final ValidationGeneratable vg = handlerMethod
                     .getMethodAnnotation(ValidationGeneratable.class);
@@ -192,18 +199,18 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
     /**
      * 打印业务异常
      *
-     * @param be
+     * @param e
      *            业务异常
      */
-    private void logException(final BusinessException be) {
+    private void logException(final BusinessException e) {
         if (this.logger.isErrorEnabled()) {
-            final StringBuffer message = new StringBuffer(be.getCode());
-            final String args = StringUtils.join(be.getArgs(), Strings.COMMA);
+            final StringBuffer message = new StringBuffer(e.getCode());
+            final String args = StringUtils.join(e.getArgs(), Strings.COMMA);
             if (args.length() > 0) {
                 message.append(Strings.COLON).append(args);
             }
-            if (be.isBoundProperty()) {
-                message.append(Strings.LEFT_BRACKET).append(be.getProperty())
+            if (e.isBoundProperty()) {
+                message.append(Strings.LEFT_BRACKET).append(e.getProperty())
                         .append(Strings.RIGHT_BRACKET);
             }
             this.logger.error(message);
