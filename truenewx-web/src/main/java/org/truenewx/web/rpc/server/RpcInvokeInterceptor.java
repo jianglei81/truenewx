@@ -34,8 +34,6 @@ public interface RpcInvokeInterceptor {
      *            调用参数集
      * @param result
      *            调用结果
-     * @throws Exception
-     *             如果调用过程中出现错误
      */
-    void afterInvoke(String beanId, Method method, Object[] args, Object result) throws Exception;
+    void afterInvoke(String beanId, Method method, Object[] args, Object result);
 }
