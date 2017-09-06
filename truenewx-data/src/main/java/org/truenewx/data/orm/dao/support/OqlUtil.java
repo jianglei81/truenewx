@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
 import org.truenewx.data.query.Comparison;
+import org.truenewx.data.query.QueryOrder;
 
 /**
  * 对象查询语言(OQL)工具类
@@ -42,6 +43,10 @@ public class OqlUtil {
             orderBy.insert(0, " order by"); // 前面加order by
         }
         return orderBy.toString();
+    }
+
+    public static String buildOrderString(final QueryOrder order) {
+        return buildOrderString(order.getOrders());
     }
 
     /**
