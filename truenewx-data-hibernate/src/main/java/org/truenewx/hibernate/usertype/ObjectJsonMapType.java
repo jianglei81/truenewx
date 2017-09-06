@@ -20,10 +20,12 @@ import org.truenewx.core.util.JsonUtil;
  */
 public class ObjectJsonMapType extends AbstractUserType implements ParameterizedType {
 
+    private Class<?> returnedClass;
     private boolean appendType;
 
     @Override
     public void setParameterValues(final Properties parameters) {
+        this.returnedClass = classForName(parameters.getProperty("class"));
         this.appendType = Boolean.valueOf(parameters.getProperty("appendType"));
     }
 
@@ -34,7 +36,7 @@ public class ObjectJsonMapType extends AbstractUserType implements Parameterized
 
     @Override
     public Class<?> returnedClass() {
-        return Object[].class;
+        return this.returnedClass;
     }
 
     @Override
