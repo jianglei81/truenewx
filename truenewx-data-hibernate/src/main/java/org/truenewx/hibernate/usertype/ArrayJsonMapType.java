@@ -24,8 +24,8 @@ public class ArrayJsonMapType extends ObjectComponentMapType {
 
     @Override
     public Object nullSafeGet(final ResultSet rs, final String[] names,
-                    final SessionImplementor session, final Object owner)
-                    throws HibernateException, SQLException {
+            final SessionImplementor session, final Object owner)
+            throws HibernateException, SQLException {
         final String value = rs.getString(names[0]);
         if (StringUtils.isNotBlank(value)) {
             if ("[]".equals(value)) {
@@ -42,7 +42,7 @@ public class ArrayJsonMapType extends ObjectComponentMapType {
                     return JsonUtil.json2Array(value, this.componentType);
                 }
             } catch (final Exception e) {
-                e.printStackTrace();
+                this.logger.error(e.getMessage(), e);
             }
         }
         return null;

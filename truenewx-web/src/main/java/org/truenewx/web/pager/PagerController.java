@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -19,7 +20,7 @@ public class PagerController extends SimpleController {
 
     @RequestMapping(value = "/pager")
     public ModelAndView index(final HttpServletRequest request,
-                    final HttpServletResponse response) {
+            final HttpServletResponse response) {
         try {
             final Map<String, Object> params = new HashMap<>();
             final Enumeration<String> names = request.getParameterNames();
@@ -30,7 +31,7 @@ public class PagerController extends SimpleController {
             AlgoPagerOutput.visit(request, response.getWriter(), params);
             return null;
         } catch (final IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
         }
         return null;
     }

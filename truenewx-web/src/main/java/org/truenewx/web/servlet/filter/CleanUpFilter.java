@@ -115,10 +115,8 @@ public class CleanUpFilter implements Filter {
         try {
             chain.doFilter(request, response);
         } catch (final Throwable e) {
-            if (this.logger.isErrorEnabled()) {
-                final String url = WebUtil.getRelativeRequestUrlWithQueryString(request, false);
-                this.logger.error("An exception happended on {}", url);
-            }
+            final String url = WebUtil.getRelativeRequestUrlWithQueryString(request, false);
+            this.logger.error("An exception happended on {}", url);
             throw e;
         }
     }

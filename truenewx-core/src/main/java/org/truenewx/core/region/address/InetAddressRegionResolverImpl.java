@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.slf4j.LoggerFactory;
 import org.truenewx.core.net.InetAddressSet;
 import org.truenewx.core.util.IOUtil;
 
@@ -52,7 +53,7 @@ public class InetAddressRegionResolverImpl implements InetAddressRegionResolver 
             try {
                 this.cache.load(new FileInputStream(this.cacheFile));
             } catch (final IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
             }
         }
     }
@@ -62,7 +63,7 @@ public class InetAddressRegionResolverImpl implements InetAddressRegionResolver 
             try {
                 this.cache.store(new FileOutputStream(this.cacheFile), null);
             } catch (final IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
             }
         }
     }

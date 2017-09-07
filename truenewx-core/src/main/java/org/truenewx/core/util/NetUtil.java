@@ -2,7 +2,6 @@ package org.truenewx.core.util;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +11,6 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
@@ -27,6 +25,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 import org.truenewx.core.Strings;
 
 /**
@@ -85,7 +84,7 @@ public class NetUtil {
                 }
             }
         } catch (final SocketException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(NetUtil.class).error(e.getMessage(), e);
         }
         return "127.0.0.1";
     }
@@ -297,10 +296,8 @@ public class NetUtil {
             in.close();
             out.flush();
             out.close();
-        } catch (final MalformedURLException e) {
-            e.printStackTrace();
         } catch (final IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(NetUtil.class).error(e.getMessage(), e);
         } finally {
             try {
                 if (in != null) {
@@ -310,7 +307,7 @@ public class NetUtil {
                     out.close();
                 }
             } catch (final IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(NetUtil.class).error(e.getMessage(), e);
             }
         }
     }
@@ -336,18 +333,14 @@ public class NetUtil {
             final URL urlObj = new URL(url);
             in = urlObj.openStream();
             result = IOUtils.toString(in);
-        } catch (final MalformedURLException e) {
-            e.printStackTrace();
-        } catch (final FileNotFoundException e) {
-            // e.printStackTrace();
         } catch (final IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(IOUtil.class).error(e.getMessage(), e);
         } finally {
             if (in != null) {
                 try {
                     in.close();
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(IOUtil.class).error(e.getMessage(), e);
                 }
             }
         }
@@ -374,18 +367,14 @@ public class NetUtil {
             final byte[] b = new byte[in.available()];
             in.read(b);
             response = new String(b, encoding);
-        } catch (final MalformedURLException e) {
-            e.printStackTrace();
-        } catch (final FileNotFoundException e) {
-            // e.printStackTrace();
         } catch (final IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(NetUtil.class).error(e.getMessage(), e);
         } finally {
             if (in != null) {
                 try {
                     in.close();
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(NetUtil.class).error(e.getMessage(), e);
                 }
                 in = null;
             }

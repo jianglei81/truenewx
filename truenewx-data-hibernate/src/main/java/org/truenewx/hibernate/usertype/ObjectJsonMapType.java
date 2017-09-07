@@ -48,7 +48,7 @@ public class ObjectJsonMapType extends AbstractUserType implements Parameterized
             try {
                 return JsonUtil.json2Bean(value);
             } catch (final Exception e) {
-                e.printStackTrace();
+                this.logger.error(e.getMessage(), e);
             }
         }
         return null;

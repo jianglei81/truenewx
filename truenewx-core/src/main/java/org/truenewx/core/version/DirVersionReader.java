@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
@@ -110,7 +111,7 @@ public class DirVersionReader extends AbstractVersionReader {
             }
             return StringUtils.join(array, Strings.DOT);
         } catch (final IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
         }
         return null;
     }

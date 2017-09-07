@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 import org.truenewx.core.Strings;
 import org.truenewx.core.util.NetUtil;
 import org.truenewx.web.tagext.SimpleDynamicAttributeTagSupport;
@@ -68,7 +69,7 @@ public class IncludeTag extends SimpleDynamicAttributeTagSupport {
                 if (includeCached != null) {
                     casheMap = (Map<String, String>) includeCached;
                 } else {
-                    casheMap = new HashMap<String, String>();
+                    casheMap = new HashMap<>();
                 }
                 String result = casheMap.get(this.url);
                 if (StringUtils.isEmpty(result)) {
@@ -82,7 +83,7 @@ public class IncludeTag extends SimpleDynamicAttributeTagSupport {
             }
         } catch (final Throwable e) {
             // 任何异常均只打印堆栈日志，以避免影响页面整体显示
-            e.printStackTrace();
+            LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
         }
     }
 }

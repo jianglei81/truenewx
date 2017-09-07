@@ -8,12 +8,13 @@ import java.io.Reader;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.LoggerFactory;
 
 /**
  * MD5加密器
- * 
+ *
  * @author jianglei
- * 
+ *
  */
 public final class Md5Encrypter implements Encrypter {
 
@@ -32,7 +33,7 @@ public final class Md5Encrypter implements Encrypter {
                 data = source.toString().getBytes();
             }
         } catch (final IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(Md5Encrypter.class).error(e.getMessage(), e);
             return null;
         }
         return DigestUtils.md5Hex(data);

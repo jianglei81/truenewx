@@ -22,14 +22,14 @@ import org.truenewx.data.orm.hibernate.HibernateTemplate;
  *            所属者类型
  */
 public abstract class HibernateOwnedUnityDaoSupport<T extends OwnedUnity<K, O>, K extends Serializable, O extends Serializable>
-                extends HibernateUnityDaoSupport<T, K> implements OwnedUnityDao<T, K, O> {
+        extends HibernateUnityDaoSupport<T, K> implements OwnedUnityDao<T, K, O> {
     @Override
     public T find(final O owner, final K id) {
         final String entityName = getEntityName();
         final HibernateTemplate hibernateTemplate = getHibernateTemplate();
         final String ownerProperty = getOwnerProperty();
         return HibernateOwnedUnityDaoUtil.find(hibernateTemplate, entityName, ownerProperty, owner,
-                        id);
+                id);
     }
 
     @Override
@@ -38,16 +38,16 @@ public abstract class HibernateOwnedUnityDaoSupport<T extends OwnedUnity<K, O>, 
         final String entityName = getEntityName();
         final String ownerProperty = getOwnerProperty();
         return HibernateOwnedUnityDaoUtil.count(hibernateTemplate, entityName, ownerProperty,
-                        owner);
+                owner);
     }
 
     @Override
     public T increaseNumber(final O owner, final K id, final String propertyName,
-                    final Number step) {
+            final Number step) {
         if (step.doubleValue() != 0) { // 增量为0时不处理
             final StringBuffer hql = new StringBuffer("update ").append(getEntityName())
-                            .append(" set ").append(propertyName).append(Strings.EQUAL)
-                            .append(propertyName).append(Strings.PLUS).append(":step where id=:id");
+                    .append(" set ").append(propertyName).append(Strings.EQUAL).append(propertyName)
+                    .append(Strings.PLUS).append(":step where id=:id");
             final Map<String, Object> params = new HashMap<>();
             params.put("id", id);
             params.put("step", step);
@@ -62,7 +62,7 @@ public abstract class HibernateOwnedUnityDaoSupport<T extends OwnedUnity<K, O>, 
                 try {
                     refresh(unity);
                 } catch (final Exception e) { // 忽略刷新失败
-                    e.printStackTrace();
+                    this.logger.error(e.getMessage(), e);
                 }
                 ensurePropertyMinNumber(unity, propertyName, step);
                 return unity;

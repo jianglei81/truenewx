@@ -56,7 +56,7 @@ public class JsonFileNationalRegionSource extends AbstractNationalRegionSource {
                     return nationalRegion;
                 }
             } catch (final IOException e) {
-                e.printStackTrace();
+                this.logger.error(e.getMessage(), e);
             }
         }
         return null;

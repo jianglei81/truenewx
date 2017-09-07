@@ -46,7 +46,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     private static final String CONFIG_FILE_EXTENSION = "xml";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    private Map<Locale, EnumDict> dicts = new Hashtable<Locale, EnumDict>();
+    private Map<Locale, EnumDict> dicts = new Hashtable<>();
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
     @Override
@@ -80,7 +80,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
 
     @Override
     public String getText(final String type, final String subtype, final String key,
-                    final Locale locale, final String... keys) {
+            final Locale locale, final String... keys) {
         final EnumType enumType = getEnumType(type, subtype, locale);
         if (enumType != null) { // 尝试构建不成功时item可能为null
             final EnumItem item = enumType.getItem(key, keys);
@@ -93,7 +93,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
 
     @Override
     public String getText(final String type, final String key, final Locale locale,
-                    final String... keys) {
+            final String... keys) {
         return getText(type, null, key, locale, keys);
     }
 
@@ -162,15 +162,14 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
      * @return 枚举类型
      */
     private EnumType readEnumType(final SAXReader reader, final Class<Enum<?>> enumClass,
-                    final String subtype, final Locale locale) {
-        String basename = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
-                        + ClassUtils.addResourcePathToPackagePath(enumClass,
-                                        EnumDictFactory.CONFIG_FILE_BASE_NAME);
+            final String subtype, final Locale locale) {
+        String basename = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + ClassUtils
+                .addResourcePathToPackagePath(enumClass, EnumDictFactory.CONFIG_FILE_BASE_NAME);
         Resource resource = IOUtil.findI18nResource(basename, locale, CONFIG_FILE_EXTENSION);
         EnumType result = readEnumType(reader, resource, enumClass.getSimpleName(), subtype);
         if (result == null) {// 与枚举类相关的配置文件不存在，或其中找不到匹配的枚举类型，则尝试从全局配置文件中读取
             basename = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "META-INF/"
-                            + EnumDictFactory.CONFIG_FILE_BASE_NAME;
+                    + EnumDictFactory.CONFIG_FILE_BASE_NAME;
             resource = IOUtil.findI18nResource(basename, locale, CONFIG_FILE_EXTENSION);
             result = readEnumType(reader, resource, enumClass.getName(), subtype);
         }
@@ -195,7 +194,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
      * @return 枚举类型
      */
     private EnumType readEnumType(final SAXReader reader, final Resource resource,
-                    final String type, final String subtype) {
+            final String type, final String subtype) {
         if (resource != null) {
             try {
                 final Document doc = reader.read(resource.getInputStream());
@@ -212,7 +211,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
                     }
                 }
             } catch (final DocumentException | IOException e) {
-                e.printStackTrace();
+                this.logger.error(e.getMessage(), e);
             }
         }
         return null;
@@ -272,7 +271,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
                         @SuppressWarnings("unchecked")
                         final List<Element> typeElements = doc.getRootElement().elements("type");
                         final String resourceName = FilenameUtils
-                                        .getBaseName(resource.getFilename());
+                                .getBaseName(resource.getFilename());
                         final Locale locale = getLocale(resourceName);
                         final EnumDict dict = getEnumDict(locale);
                         for (final Element typeElement : typeElements) {
@@ -280,12 +279,12 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
                             final String typeSubname = typeElement.attributeValue("subname");
                             final String typeCaption = typeElement.attributeValue("caption");
                             final EnumType enumType = new EnumType(typeName, typeSubname,
-                                            typeCaption);
+                                    typeCaption);
                             addEnumItemsToEnumType(enumType, typeElement);
                             dict.addType(enumType);
                         }
                     } catch (final DocumentException | IOException e) {
-                        e.printStackTrace();
+                        this.logger.error(e.getMessage(), e);
                     } // 单个配置文件异常不影响对其它配置文件的读取
                 }
             }

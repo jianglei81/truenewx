@@ -21,7 +21,7 @@ import org.truenewx.data.orm.dao.SlicedUnityDao;
  *            切分者类型
  */
 public abstract class HibernateSlicedUnityDaoSupport<T extends SlicedUnity<K, S>, K extends Serializable, S extends Serializable>
-                extends HibernateSlicedDaoSupoort<T, S> implements SlicedUnityDao<T, K, S> {
+        extends HibernateSlicedDaoSupoort<T, S> implements SlicedUnityDao<T, K, S> {
 
     @Override
     @SuppressWarnings("unchecked")
@@ -35,12 +35,12 @@ public abstract class HibernateSlicedUnityDaoSupport<T extends SlicedUnity<K, S>
 
     @Override
     public T increaseNumber(final S slicer, final K id, final String propertyName,
-                    final Number step) {
+            final Number step) {
         if (step.doubleValue() != 0) { // 增量为0时不处理
             final String entityName = getEntityName(slicer);
             final StringBuffer hql = new StringBuffer("update ").append(entityName).append(" set ")
-                            .append(propertyName).append(Strings.EQUAL).append(propertyName)
-                            .append(Strings.PLUS).append(":step where id=:id");
+                    .append(propertyName).append(Strings.EQUAL).append(propertyName)
+                    .append(Strings.PLUS).append(":step where id=:id");
             final Map<String, Object> params = new HashMap<>();
             params.put("id", id);
             params.put("step", step);
@@ -50,7 +50,7 @@ public abstract class HibernateSlicedUnityDaoSupport<T extends SlicedUnity<K, S>
                 try {
                     refresh(unity);
                 } catch (final Exception e) { // 忽略刷新失败
-                    e.printStackTrace();
+                    this.logger.error(e.getMessage(), e);
                 }
                 ensurePropertyMinNumber(unity, propertyName, step);
                 return unity;

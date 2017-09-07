@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,8 +39,8 @@ public class RegionController {
         return "/tool/region/index";
     }
 
-    @RpcMethod(result = @RpcResult(filter = @RpcResultFilter(type = Region.class, includes = {
-            "code", "caption", "level", "subs" })))
+    @RpcMethod(result = @RpcResult(filter = @RpcResultFilter(type = Region.class,
+            includes = { "code", "caption", "level", "subs" })))
     public Iterable<Region> analyze(final String nation, final String source) {
         if (StringUtils.isBlank(source) || !source.startsWith("110000")) { // 如果提交的原始数据格式不正确，则返回null
             return null;
@@ -66,7 +67,7 @@ public class RegionController {
                 codeCaptionMap.put(code, caption);
             }
         } catch (final IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
         }
         return this.parser.parseAll(codeCaptionMap);
     }

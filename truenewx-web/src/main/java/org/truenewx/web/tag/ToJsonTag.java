@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.servlet.jsp.JspException;
 
+import org.slf4j.LoggerFactory;
 import org.truenewx.core.util.BeanUtil;
 import org.truenewx.core.util.ClassUtil;
 import org.truenewx.core.util.JsonUtil;
@@ -64,7 +65,7 @@ public class ToJsonTag extends SimpleDynamicAttributeTagSupport {
                     }
                     print(json);
                 } catch (final Exception e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
                     // 出现异常不打印任何字符
                 }
             }
@@ -90,8 +91,7 @@ public class ToJsonTag extends SimpleDynamicAttributeTagSupport {
                 }
                 print(json);
             } catch (final Exception e) {
-                e.printStackTrace();
-                // 出现异常不打印任何字符
+                LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
             }
         }
     }

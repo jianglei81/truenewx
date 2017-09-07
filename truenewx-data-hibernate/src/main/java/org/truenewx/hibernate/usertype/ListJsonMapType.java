@@ -39,7 +39,7 @@ public class ListJsonMapType extends ObjectComponentMapType {
                     return JsonUtil.json2List(value, this.componentType);
                 }
             } catch (final Exception e) {
-                e.printStackTrace();
+                this.logger.error(e.getMessage(), e);
             }
         }
         return null;

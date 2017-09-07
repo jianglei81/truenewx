@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.truenewx.core.Strings;
@@ -55,20 +56,20 @@ public class StringUtil {
      * 表示IPv6地址的正则表达式
      */
     public static final String IPv6_PATTERN = "\\s*((([0-9A-Fa-f]{1,4}:){7}(([0-9A-Fa-f]{1,4})|:))|"
-                    + "(([0-9A-Fa-f]{1,4}:){6}(:|((25[0-5]|2[0-4]\\d|[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|"
-                    + "[01]?\\d{1,2})){3})|(:[0-9A-Fa-f]{1,4})))|(([0-9A-Fa-f]{1,4}:){5}((:((25[0-5]|2[0-4]\\d|"
-                    + "[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|"
-                    + "(([0-9A-Fa-f]{1,4}:){4}(:[0-9A-Fa-f]{1,4}){0,1}((:((25[0-5]|2[0-4]\\d|"
-                    + "[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|"
-                    + "(([0-9A-Fa-f]{1,4}:){3}(:[0-9A-Fa-f]{1,4}){0,2}((:((25[0-5]|2[0-4]\\d|"
-                    + "[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|"
-                    + "(([0-9A-Fa-f]{1,4}:){2}(:[0-9A-Fa-f]{1,4}){0,3}((:((25[0-5]|2[0-4]\\d|"
-                    + "[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|"
-                    + "(([0-9A-Fa-f]{1,4}:)(:[0-9A-Fa-f]{1,4}){0,4}((:((25[0-5]|2[0-4]\\d|"
-                    + "[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|"
-                    + "(:(:[0-9A-Fa-f]{1,4}){0,5}((:((25[0-5]|2[0-4]\\d|[01]?\\d{1,2})(\\.(25[0-5]|"
-                    + "2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(((25[0-5]|2[0-4]\\d|"
-                    + "[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})))(%.+)?\\s*";
+            + "(([0-9A-Fa-f]{1,4}:){6}(:|((25[0-5]|2[0-4]\\d|[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|"
+            + "[01]?\\d{1,2})){3})|(:[0-9A-Fa-f]{1,4})))|(([0-9A-Fa-f]{1,4}:){5}((:((25[0-5]|2[0-4]\\d|"
+            + "[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|"
+            + "(([0-9A-Fa-f]{1,4}:){4}(:[0-9A-Fa-f]{1,4}){0,1}((:((25[0-5]|2[0-4]\\d|"
+            + "[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|"
+            + "(([0-9A-Fa-f]{1,4}:){3}(:[0-9A-Fa-f]{1,4}){0,2}((:((25[0-5]|2[0-4]\\d|"
+            + "[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|"
+            + "(([0-9A-Fa-f]{1,4}:){2}(:[0-9A-Fa-f]{1,4}){0,3}((:((25[0-5]|2[0-4]\\d|"
+            + "[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|"
+            + "(([0-9A-Fa-f]{1,4}:)(:[0-9A-Fa-f]{1,4}){0,4}((:((25[0-5]|2[0-4]\\d|"
+            + "[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|"
+            + "(:(:[0-9A-Fa-f]{1,4}){0,5}((:((25[0-5]|2[0-4]\\d|[01]?\\d{1,2})(\\.(25[0-5]|"
+            + "2[0-4]\\d|[01]?\\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(((25[0-5]|2[0-4]\\d|"
+            + "[01]?\\d{1,2})(\\.(25[0-5]|2[0-4]\\d|[01]?\\d{1,2})){3})))(%.+)?\\s*";
 
     /**
      * 表示IP地址的正则表达式，包含IPv4和IPv6
@@ -86,7 +87,7 @@ public class StringUtil {
 
     private static final PathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
-    private static Map<String, ResourceBundle> resourceBundleCache = new Hashtable<String, ResourceBundle>();
+    private static Map<String, ResourceBundle> resourceBundleCache = new Hashtable<>();
 
     private StringUtil() {
     }
@@ -109,7 +110,8 @@ public class StringUtil {
     }
 
     /**
-     * 生成随机字符串。其中type指定随机字符串类型，取值范围: RANDOM_TYPE_NUMBER, RANDOM_TYPE_LETTER, RANDOM_TYPE_MIXED
+     * 生成随机字符串。其中type指定随机字符串类型，取值范围: RANDOM_TYPE_NUMBER, RANDOM_TYPE_LETTER,
+     * RANDOM_TYPE_MIXED
      *
      * @param type
      *            随机字符串类型
@@ -316,7 +318,7 @@ public class StringUtil {
      * @return true if 指定字符串匹配指定多个通配符表达式中的一个, otherwise false
      */
     public static boolean wildcardMatchOneOf(final String s,
-                    @Nullable final Iterable<String> patterns) {
+            @Nullable final Iterable<String> patterns) {
         if (patterns != null) {
             for (final String pattern : patterns) {
                 if (wildcardMatch(s, pattern)) {
@@ -391,8 +393,8 @@ public class StringUtil {
      * @return 子字符串集合
      */
     public static String[] substringsBetweens(final String s, final String begin,
-                    final String end) {
-        final List<String> list = new ArrayList<String>();
+            final String end) {
+        final List<String> list = new ArrayList<>();
         if (begin.equals(end) && s.indexOf(begin) >= 0) {
             list.add(begin);
         }
@@ -483,7 +485,7 @@ public class StringUtil {
     public static boolean isPunctuationChar(final char c) {
         final byte b = (byte) c;
         return 33 <= b && b <= 47 || 58 <= b && b <= 64 || 91 <= b && b <= 96
-                        || 123 <= b && b <= 126;
+                || 123 <= b && b <= 126;
     }
 
     /**
@@ -525,7 +527,7 @@ public class StringUtil {
         if (s == null || length < 1) {
             return new String[0];
         }
-        final List<String> list = new ArrayList<String>();
+        final List<String> list = new ArrayList<>();
         while (s.length() > length) {
             list.add(s.substring(0, length));
             s = s.substring(length);
@@ -567,7 +569,7 @@ public class StringUtil {
      *             如果指定字符集编码不被支持
      */
     public static boolean validateCharset(final String s, final String charsetName)
-                    throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         final String s1 = new String(s.getBytes(), charsetName);
         return s1.equals(s);
     }
@@ -583,8 +585,8 @@ public class StringUtil {
      *
      */
     public static Map<String, String> toMapByStandard(final String s,
-                    final boolean convertStaticPropertyValue) {
-        final Map<String, String> map = new HashMap<String, String>();
+            final boolean convertStaticPropertyValue) {
+        final Map<String, String> map = new HashMap<>();
         if (StringUtils.isNotEmpty(s)) {
             final String[] pairs = s.split(",");
             for (final String pair : pairs) {
@@ -617,7 +619,7 @@ public class StringUtil {
      *                如果未找到指定基本名称的资源文件
      */
     public static String getPropertiesText(final String baseName, Locale locale, final String key,
-                    final String... args) {
+            final String... args) {
         if (StringUtils.isEmpty(key)) {
             return key;
         }
@@ -636,7 +638,7 @@ public class StringUtil {
         } catch (final MissingResourceException e) {
             return key;
         } catch (final RuntimeException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(StringUtil.class).error(e.getMessage(), e);
         }
         return null;
     }
@@ -658,7 +660,7 @@ public class StringUtil {
                 locale = Locale.getDefault();
             }
             text = new MessageFormat(text, locale).format(args, new StringBuffer(), null)
-                            .toString();
+                    .toString();
         }
         return text;
     }
@@ -671,8 +673,8 @@ public class StringUtil {
      * @return true if 指定字符串是IP地址, otherwise false
      */
     public static boolean isIp(final String s) {
-        return s != null && (s.matches(StringUtil.IPv4_PATTERN)
-                        || s.matches(StringUtil.IPv6_PATTERN));
+        return s != null
+                && (s.matches(StringUtil.IPv4_PATTERN) || s.matches(StringUtil.IPv6_PATTERN));
     }
 
     /**

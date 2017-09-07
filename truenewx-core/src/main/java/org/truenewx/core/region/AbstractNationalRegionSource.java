@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.truenewx.core.Strings;
 
@@ -37,6 +39,8 @@ public abstract class AbstractNationalRegionSource implements NationalRegionSour
      */
     protected Map<Locale, Map<String, Region>> localeCaptionSubsMap = new HashMap<>();
 
+    protected Logger logger = LoggerFactory.getLogger(getClass());
+
     public void setNation(final String nation) {
         Assert.isTrue(nation.length() == RegionSource.NATION_LENGTH,
                 "The length of nation must be " + RegionSource.NATION_LENGTH);
@@ -62,7 +66,8 @@ public abstract class AbstractNationalRegionSource implements NationalRegionSour
 
     @Override
     @Nullable
-    public Region getSubRegion(final String code, @Nullable Locale locale) {
+    public Region getSubRegion(final String code, @Nullable
+    Locale locale) {
         if (locale == null) {
             locale = Locale.getDefault();
         }

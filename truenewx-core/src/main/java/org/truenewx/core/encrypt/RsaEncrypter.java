@@ -10,18 +10,19 @@ import javax.crypto.Cipher;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.LoggerFactory;
 
 /**
  * RSA加密器
- * 
+ *
  * @author jianglei
- * 
+ *
  */
 public final class RsaEncrypter {
 
     /**
      * 加密
-     * 
+     *
      * @param source
      *            源数据
      * @param publicKey
@@ -31,7 +32,8 @@ public final class RsaEncrypter {
      *
      * @author jianglei
      */
-    public static String encrypt(final byte[] source, final InputStream publicKey) throws Exception {
+    public static String encrypt(final byte[] source, final InputStream publicKey)
+            throws Exception {
         /** 将文件中的公钥对象读出 */
         final ObjectInputStream ois = new ObjectInputStream(publicKey);
         final Key key = (Key) ois.readObject();
@@ -46,7 +48,7 @@ public final class RsaEncrypter {
 
     /**
      * 解密
-     * 
+     *
      * @param cryptograph
      *            密文
      * @param privateKey
@@ -70,7 +72,7 @@ public final class RsaEncrypter {
 
     /**
      * 加密
-     * 
+     *
      * @param source
      *            源数据
      * @param publicKey
@@ -96,7 +98,7 @@ public final class RsaEncrypter {
             }
             encrypt(data, publicKey);
         } catch (final Exception e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(RsaEncrypter.class).error(e.getMessage(), e);
             return null;
         }
         return null;

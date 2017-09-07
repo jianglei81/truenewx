@@ -3,6 +3,7 @@ package org.truenewx.core.spring.context;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -24,8 +25,8 @@ public class ContextInitializedBeanListener implements ApplicationListener<Conte
     public void onApplicationEvent(final ContextRefreshedEvent event) {
         final ApplicationContext context = event.getApplicationContext();
         final Map<String, ContextInitializedBean> beans = context
-                        .getBeansOfType(ContextInitializedBean.class);
-        final Map<ContextInitializedBean, ContextInitializedBean> map = new HashMap<ContextInitializedBean, ContextInitializedBean>();
+                .getBeansOfType(ContextInitializedBean.class);
+        final Map<ContextInitializedBean, ContextInitializedBean> map = new HashMap<>();
         for (final ContextInitializedBean bean : beans.values()) {
             if (bean instanceof ContextInitializedBeanProxy) {
                 final ContextInitializedBeanProxy proxy = (ContextInitializedBeanProxy) bean;
@@ -44,7 +45,7 @@ public class ContextInitializedBeanListener implements ApplicationListener<Conte
             try {
                 bean.afterInitialized(context);
             } catch (final Exception e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
             }
         }
     }

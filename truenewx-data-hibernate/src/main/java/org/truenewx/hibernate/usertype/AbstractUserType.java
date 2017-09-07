@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.hibernate.HibernateException;
 import org.hibernate.annotations.common.util.ReflectHelper;
 import org.hibernate.usertype.UserType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.truenewx.core.functor.impl.PredEqual;
 
 /**
@@ -14,6 +16,8 @@ import org.truenewx.core.functor.impl.PredEqual;
  * @since JDK 1.8
  */
 public abstract class AbstractUserType implements UserType {
+
+    protected Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public boolean equals(final Object x, final Object y) throws HibernateException {
@@ -42,13 +46,13 @@ public abstract class AbstractUserType implements UserType {
 
     @Override
     public Object assemble(final Serializable cached, final Object owner)
-                    throws HibernateException {
+            throws HibernateException {
         return cached;
     }
 
     @Override
     public Object replace(final Object original, final Object target, final Object owner)
-                    throws HibernateException {
+            throws HibernateException {
         return original;
     }
 

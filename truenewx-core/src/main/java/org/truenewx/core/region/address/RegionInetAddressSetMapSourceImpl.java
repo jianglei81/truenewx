@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Locale;
 import java.util.Map;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.truenewx.core.Strings;
@@ -60,7 +61,7 @@ public class RegionInetAddressSetMapSourceImpl
                 this.map = this.parser.parse(in, this.locale, this.encoding);
                 in.close();
             } catch (final Exception e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
             }
         }
     }

@@ -60,7 +60,7 @@ public class ReloadableResourceBundleMessageSource
                         list.add(path);
                     }
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                    this.logger.error(e.getMessage(), e);
                 }
             } else {
                 list.add(basename);

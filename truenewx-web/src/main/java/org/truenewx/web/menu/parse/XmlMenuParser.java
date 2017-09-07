@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpMethod;
@@ -62,7 +63,7 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
             }
             return menu;
         } catch (final Exception e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
         }
         return null;
     }

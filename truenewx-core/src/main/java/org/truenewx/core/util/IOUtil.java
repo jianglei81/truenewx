@@ -32,6 +32,7 @@ import javax.imageio.stream.ImageInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -152,10 +153,8 @@ public class IOUtil {
             final Process process = Runtime.getRuntime().exec(command);
             process.waitFor();
             result = IOUtils.toString(process.getInputStream());
-        } catch (final IOException e) {
-            e.printStackTrace();
-        } catch (final InterruptedException e) {
-            e.printStackTrace();
+        } catch (final IOException | InterruptedException e) {
+            LoggerFactory.getLogger(IOUtil.class).error(e.getMessage(), e);
         }
         return result;
     }
@@ -212,7 +211,7 @@ public class IOUtil {
                 sb.append("\r\n");
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(IOUtil.class).error(e.getMessage(), e);
         } finally {
             if (br != null) {
                 try {
@@ -228,7 +227,7 @@ public class IOUtil {
             bw = new BufferedWriter(new FileWriter(filePath));
             bw.write(s);
         } catch (final Exception e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(IOUtil.class).error(e.getMessage(), e);
         } finally {
             if (bw != null) {
                 try {
@@ -314,7 +313,7 @@ public class IOUtil {
             }
             return result;
         } catch (final IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(IOUtil.class).error(e.getMessage(), e);
         }
         return null;
     }
@@ -476,7 +475,7 @@ public class IOUtil {
             tracker.waitForID(0);
             tracker.removeImage(image, 0);
         } catch (final InterruptedException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(IOUtil.class).error(e.getMessage(), e);
         }
     }
 

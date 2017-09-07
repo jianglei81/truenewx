@@ -89,7 +89,7 @@ public class ConstraintViolationExceptionResolver extends AbstractHandlerExcepti
                             response.setStatus(500);
                             return new ModelAndView();
                         } catch (final IOException iex) {
-                            iex.printStackTrace();
+                            this.logger.error(iex.getMessage(), iex);
                         }
                     }
                 } else {

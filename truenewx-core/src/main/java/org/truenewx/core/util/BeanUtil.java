@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -284,7 +285,7 @@ public class BeanUtil {
      * @return Map结果对象
      */
     public static Map<String, Object> toMap(final Object bean, final String... excludedProperties) {
-        final Map<String, Object> map = new HashMap<String, Object>();
+        final Map<String, Object> map = new HashMap<>();
         fromBean(map, bean, excludedProperties);
         return map;
     }
@@ -418,7 +419,7 @@ public class BeanUtil {
                     }
                 }
             } catch (final Exception e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(BeanUtil.class).error(e.getMessage(), e);
             }
         }
     }

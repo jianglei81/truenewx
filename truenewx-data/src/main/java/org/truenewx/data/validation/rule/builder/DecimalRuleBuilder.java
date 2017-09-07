@@ -10,22 +10,26 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 import org.hibernate.validator.constraints.Range;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.truenewx.data.validation.rule.DecimalRule;
 
 /**
  * 数值规则的构建器
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
 @Component
 public class DecimalRuleBuilder implements ValidationRuleBuilder<DecimalRule> {
 
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
     @Override
     public Class<?>[] getConstraintTypes() {
         return new Class<?>[] { Range.class, Digits.class, Min.class, Max.class, DecimalMin.class,
-                        DecimalMax.class };
+                DecimalMax.class };
     }
 
     @Override
@@ -53,7 +57,7 @@ public class DecimalRuleBuilder implements ValidationRuleBuilder<DecimalRule> {
                 rule.setMax(max);
             }
         } catch (final NumberFormatException e) {
-            e.printStackTrace();
+            this.logger.error(e.getMessage(), e);
         }
     }
 
@@ -64,7 +68,7 @@ public class DecimalRuleBuilder implements ValidationRuleBuilder<DecimalRule> {
                 rule.setMin(min);
             }
         } catch (final NumberFormatException e) {
-            e.printStackTrace();
+            this.logger.error(e.getMessage(), e);
         }
     }
 
@@ -133,7 +137,7 @@ public class DecimalRuleBuilder implements ValidationRuleBuilder<DecimalRule> {
             }
             return rule;
         } catch (final NumberFormatException e) {
-            e.printStackTrace();
+            this.logger.error(e.getMessage(), e);
         }
         return null;
     }
@@ -147,7 +151,7 @@ public class DecimalRuleBuilder implements ValidationRuleBuilder<DecimalRule> {
             }
             return rule;
         } catch (final NumberFormatException e) {
-            e.printStackTrace();
+            this.logger.error(e.getMessage(), e);
         }
         return null;
     }

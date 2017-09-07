@@ -8,12 +8,13 @@ import java.io.Reader;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.LoggerFactory;
 
 /**
  * BASE64可逆算法加密器
- * 
+ *
  * @author jianglei
- * 
+ *
  */
 public class Base64Encrypter implements Encrypter {
     public final static Base64Encrypter INSTANCE = new Base64Encrypter();
@@ -37,7 +38,7 @@ public class Base64Encrypter implements Encrypter {
                 data = source.toString().getBytes();
             }
         } catch (final IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
             return null;
         }
         return Base64.encodeBase64String(data).replaceAll("\n", "");

@@ -40,7 +40,7 @@ public class MapJsonMapType extends AbstractUserType {
             try {
                 return JsonUtil.json2Map(value);
             } catch (final Exception e) {
-                e.printStackTrace();
+                this.logger.error(e.getMessage(), e);
             }
         }
         return null;

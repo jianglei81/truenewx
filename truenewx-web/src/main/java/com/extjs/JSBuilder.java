@@ -29,7 +29,7 @@ public class JSBuilder {
 
     private static Logger logger = LoggerFactory.getLogger(JSBuilder.class);
 
-    private static ArrayList<File> outputFiles = new ArrayList<File>();
+    private static ArrayList<File> outputFiles = new ArrayList<>();
 
     private static String homeDir;
     private static String projectFile;
@@ -48,10 +48,12 @@ public class JSBuilder {
         homeDir = homeDir2;
         projectFile = projectFile2;
         if (homeDir == "") {
-            logger.error("The --homeDir or -d argument is required and was not included in the commandline arguments.");
+            logger.error(
+                    "The --homeDir or -d argument is required and was not included in the commandline arguments.");
         }
         if (projectFile == "") {
-            logger.error("The --projectFile or -p argument is required and was not included in the commandline arguments.");
+            logger.error(
+                    "The --projectFile or -p argument is required and was not included in the commandline arguments.");
         }
         if (homeDir == "" || projectFile == "") {
             return;
@@ -122,8 +124,8 @@ public class JSBuilder {
                     }
 
                     /* create file and write out header */
-                    final File targetFile = new File(deployDir.getCanonicalPath()
-                            + File.separatorChar + targFileName);
+                    final File targetFile = new File(
+                            deployDir.getCanonicalPath() + File.separatorChar + targFileName);
                     outputFiles.add(targetFile);
                     targetFile.getParentFile().mkdirs();
                     FileHelper.writeStringToFile("", targetFile, false);
@@ -137,7 +139,9 @@ public class JSBuilder {
 
                     /* loop over file includes */
                     for (int j = 0; j < fileIncludesLen; j++) {
-                        /* open each file, read into string and append to target */
+                        /*
+                         * open each file, read into string and append to target
+                         */
                         final JSONObject fileCfg = fileIncludes.getJSONObject(j);
 
                         final String subFileName = projectHome + File.separatorChar
@@ -179,8 +183,8 @@ public class JSBuilder {
                     }
 
                     /* create file and write out header */
-                    final File targetFile = new File(deployDir.getCanonicalPath()
-                            + File.separatorChar + targFileName);
+                    final File targetFile = new File(
+                            deployDir.getCanonicalPath() + File.separatorChar + targFileName);
                     outputFiles.add(targetFile);
                     targetFile.getParentFile().mkdirs();
                     FileHelper.writeStringToFile("", targetFile, false);
@@ -194,7 +198,9 @@ public class JSBuilder {
 
                     /* loop over file includes */
                     for (int j = 0; j < pkgDepsLen; j++) {
-                        /* open each file, read into string and append to target */
+                        /*
+                         * open each file, read into string and append to target
+                         */
                         final String pkgDep = pkgDeps.getString(j);
                         if (verbose) {
                             logger.debug("- - %s%n", pkgDep);
@@ -205,8 +211,8 @@ public class JSBuilder {
                                     debugSuffix);
                         }
 
-                        final String subFileName = deployDir.getCanonicalPath()
-                                + File.separatorChar + nameWithorWithoutSuffix;
+                        final String subFileName = deployDir.getCanonicalPath() + File.separatorChar
+                                + nameWithorWithoutSuffix;
                         final File subFile = new File(subFileName);
                         final String tempString = FileHelper.readFileToString(subFile);
                         FileHelper.writeStringToFile(tempString, targetFile, true);
@@ -214,8 +220,7 @@ public class JSBuilder {
                 }
             }
         } catch (final Exception e) {
-            e.printStackTrace();
-            logger.error("Failed to create target with package dependencies.");
+            logger.error("Failed to create target with package dependencies.", e);
         }
     }
 
@@ -273,8 +278,9 @@ public class JSBuilder {
                     in.close();
                     in = null;
 
-                    out = new OutputStreamWriter(new FileOutputStream(f.getAbsolutePath().replace(
-                            debugSuffix, "")), "UTF-8");
+                    out = new OutputStreamWriter(
+                            new FileOutputStream(f.getAbsolutePath().replace(debugSuffix, "")),
+                            "UTF-8");
 
                     final boolean munge = true;
                     final boolean preserveAllSemiColons = false;
@@ -286,14 +292,14 @@ public class JSBuilder {
                 }
             } catch (final EvaluatorException e) {
 
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
                 // Return a special error code used specifically by the web
                 // front-end.
                 System.exit(2);
 
             } catch (final IOException e) {
 
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
                 System.exit(1);
 
             } finally {
@@ -302,7 +308,7 @@ public class JSBuilder {
                     try {
                         in.close();
                     } catch (final IOException e) {
-                        e.printStackTrace();
+                        logger.error(e.getMessage(), e);
                     }
                 }
 
@@ -310,7 +316,7 @@ public class JSBuilder {
                     try {
                         out.close();
                     } catch (final IOException e) {
-                        e.printStackTrace();
+                        logger.error(e.getMessage(), e);
                     }
                 }
             }
@@ -326,14 +332,14 @@ public class JSBuilder {
             for (int z = 0; z < resourceLen; z++) {
                 final JSONObject resourceCfg = resources.getJSONObject(z);
                 final String filters = resourceCfg.getString("filters");
-                final File srcDir = new File(projectHome + File.separatorChar
-                        + resourceCfg.getString("src"));
+                final File srcDir = new File(
+                        projectHome + File.separatorChar + resourceCfg.getString("src"));
                 final File destDir = new File(deployDir.getCanonicalPath() + File.separatorChar
                         + resourceCfg.getString("dest"));
                 FileHelper.copyDirectory(srcDir, destDir, filters);
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
     }
 }

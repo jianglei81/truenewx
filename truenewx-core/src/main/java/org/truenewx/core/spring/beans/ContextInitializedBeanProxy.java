@@ -2,6 +2,7 @@ package org.truenewx.core.spring.beans;
 
 import java.util.concurrent.Executor;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
@@ -43,7 +44,7 @@ public class ContextInitializedBeanProxy implements Runnable, ContextInitialized
             try {
                 Thread.sleep(this.runDelay * 1000);
             } catch (final InterruptedException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
             }
         }
         try {
@@ -52,7 +53,7 @@ public class ContextInitializedBeanProxy implements Runnable, ContextInitialized
             }
             this.target.afterInitialized(this.context);
         } catch (final Exception e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
         }
     }
 

@@ -42,7 +42,7 @@ public class SetJsonMapType extends ObjectComponentMapType {
                 }
                 return new HashSet<>(list);
             } catch (final Exception e) {
-                e.printStackTrace();
+                this.logger.error(e.getMessage(), e);
             }
         }
         return null;

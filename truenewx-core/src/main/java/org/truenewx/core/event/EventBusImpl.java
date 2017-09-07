@@ -5,6 +5,7 @@ import java.util.concurrent.Executor;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
@@ -24,7 +25,7 @@ import com.google.common.eventbus.SubscriberBasedDispatcher;
  * @since JDK 1.8
  */
 public class EventBusImpl extends com.google.common.eventbus.EventBus
-                implements EventBus, ContextInitializedBean {
+        implements EventBus, ContextInitializedBean {
 
     private SubscriberExceptionCollector exceptionCollector;
 
@@ -52,12 +53,12 @@ public class EventBusImpl extends com.google.common.eventbus.EventBus
     public void post(final Event event) throws HandleableException {
         super.post(event);
         final SubscriberExceptionCollection exceptionCollection = this.exceptionCollector
-                        .pull(event);
+                .pull(event);
         if (exceptionCollection != null) {
             // 如果有底层异常，先抛出底层异常，因为底层异常一般是由代码缺陷导致的，应优先解决
             final Throwable t = AlgoFirst.visit(exceptionCollection.getThrowables(), null);
             if (t != null) {
-                t.printStackTrace();
+                LoggerFactory.getLogger(getClass()).error(t.getMessage(), t);
                 throw new RuntimeException(t);
             }
             // 如果没有底层异常但有可处理异常，则抛出可处理异常
@@ -79,7 +80,7 @@ public class EventBusImpl extends com.google.common.eventbus.EventBus
             try {
                 object = ((Advised) object).getTargetSource().getTarget();
             } catch (final Exception e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
             }
         }
         return object;

@@ -137,7 +137,7 @@ public abstract class HibernateRelationDaoSupport<T extends Relation<L, R>, L ex
             try {
                 refresh(realtion);
             } catch (final Exception e) { // 忽略刷新失败
-                e.printStackTrace();
+                this.logger.error(e.getMessage(), e);
             }
             ensurePropertyMinNumber(realtion, propertyName, step);
             return realtion;

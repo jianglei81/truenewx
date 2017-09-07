@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.truenewx.core.Strings;
 import org.truenewx.core.util.ClassUtil;
 import org.truenewx.data.orm.DataAccessTemplate;
@@ -26,6 +28,8 @@ import org.truenewx.data.query.QueryResult;
  * @since JDK 1.8
  */
 public abstract class EntityDaoSupport<T> implements EntityDao<T> {
+
+    protected Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * 获取实体类型<br/>

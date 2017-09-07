@@ -22,6 +22,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.ServletContextResource;
@@ -168,7 +169,7 @@ public class WebUtil {
                                 value = URLEncoder.encode(value, encoding);
                                 params[i] = params[i].substring(0, index + 1) + value;
                             } catch (final UnsupportedEncodingException e) {
-                                e.printStackTrace();
+                                LoggerFactory.getLogger(WebUtil.class).error(e.getMessage(), e);
                             }
                         }
                     }
@@ -196,7 +197,7 @@ public class WebUtil {
                 try {
                     tail = URLEncoder.encode(tail, encoding);
                 } catch (final UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(WebUtil.class).error(e.getMessage(), e);
                 }
                 url = url.substring(0, index1 + 1) + tail + url.substring(index2);
             }
@@ -393,7 +394,7 @@ public class WebUtil {
         try {
             return response.getOutputStream();
         } catch (final Exception e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(WebUtil.class).error(e.getMessage(), e);
         }
         return null;
     }
@@ -436,7 +437,7 @@ public class WebUtil {
                     standardizeRelativeUrl(relativePath));
             return FileUtils.readFileToByteArray(resource.getFile());
         } catch (final IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(WebUtil.class).error(e.getMessage(), e);
             return new byte[0];
         }
     }
@@ -467,7 +468,7 @@ public class WebUtil {
             try {
                 return URLDecoder.decode(param, encoding);
             } catch (final UnsupportedEncodingException e) {
-                e.printStackTrace(); // 编码已确保有效，不应该出现该异常
+                LoggerFactory.getLogger(WebUtil.class).error(e.getMessage(), e); // 编码已确保有效，不应该出现该异常
             }
         }
         return param;

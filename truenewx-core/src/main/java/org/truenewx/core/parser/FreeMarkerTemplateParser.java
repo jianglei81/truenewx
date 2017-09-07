@@ -8,6 +8,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.truenewx.core.parser.util.FreeMarkerUtil;
 
 import freemarker.cache.StringTemplateLoader;
@@ -24,6 +26,8 @@ import freemarker.template.TemplateException;
 public class FreeMarkerTemplateParser implements TemplateParser {
 
     private Configuration config = FreeMarkerUtil.getDefaultConfiguration();
+
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * @see freemarker.core.Configurable#setNumberFormat(java.lang.String)
@@ -76,9 +80,9 @@ public class FreeMarkerTemplateParser implements TemplateParser {
             t.process(params, out);
             return out.toString();
         } catch (final IOException e) {
-            e.printStackTrace();
+            this.logger.error(e.getMessage(), e);
         } catch (final TemplateException e) {
-            e.printStackTrace();
+            this.logger.error(e.getMessage(), e);
             // 模板格式错误，返回模板本身
             return templateContent;
         }
@@ -99,7 +103,7 @@ public class FreeMarkerTemplateParser implements TemplateParser {
             t.process(params, out);
             return out.toString();
         } catch (final TemplateException e) {
-            e.printStackTrace();
+            this.logger.error(e.getMessage(), e);
             // 模板格式错误，返回模板内容
             return IOUtils.toString(new FileInputStream(templateFile));
         }

@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
@@ -75,10 +74,7 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
             } else if (e instanceof HandleableException) {
                 mav = handleExceptionToPage(request, handlerMethod, (HandleableException) e);
             } else {
-                final Logger handlerLogger = LoggerFactory.getLogger(handlerMethod.getBeanType());
-                if (handlerLogger.isErrorEnabled()) {
-                    handlerLogger.error(e.getMessage(), e);
-                }
+                LoggerFactory.getLogger(handlerMethod.getBeanType()).error(e.getMessage(), e);
             }
             final ValidationGeneratable vg = handlerMethod
                     .getMethodAnnotation(ValidationGeneratable.class);
@@ -129,7 +125,7 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
                 response.setStatus(SC_BUSINESS_ERROR);
                 return new ModelAndView();
             } catch (final IOException ex) {
-                ex.printStackTrace();
+                this.logger.error(e.getMessage(), e);
             }
         }
         return null;

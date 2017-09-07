@@ -216,9 +216,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
         } catch (final Exception e) {
             final Throwable cause = e.getCause();
             if (cause != null) {
-                if (this.logger.isErrorEnabled()) {
-                    this.logger.error(cause.getMessage(), cause);
-                }
+                this.logger.error(cause.getMessage(), cause);
                 throw cause;
             }
             throw e;

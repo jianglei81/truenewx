@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.servlet.jsp.JspException;
 
+import org.slf4j.LoggerFactory;
 import org.truenewx.core.Strings;
 import org.truenewx.core.parser.util.FreeMarkerUtil;
 import org.truenewx.core.util.IOUtil;
@@ -57,7 +58,7 @@ public class FtlTag extends SimpleDynamicAttributeTagSupport {
         try {
             this.template.process(params, getJspContext().getOut());
         } catch (final TemplateException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
         }
     }
 }
