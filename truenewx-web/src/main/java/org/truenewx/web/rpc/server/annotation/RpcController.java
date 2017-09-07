@@ -21,8 +21,8 @@ import org.truenewx.core.Strings;
 @Controller
 public @interface RpcController {
     /**
-     * The value may indicate a suggestion for a logical component name, to be turned into a Spring
-     * bean in case of an autodetected component.
+     * The value may indicate a suggestion for a logical component name, to be
+     * turned into a Spring bean in case of an autodetected component.
      *
      * @return the suggested component name, if any
      */
@@ -36,8 +36,8 @@ public @interface RpcController {
     String caption() default Strings.EMPTY;
 
     /**
-     * 指定所属业务模块，便于生成更好的生成API文档
-     * 
+     * 指定所属业务模块，便于生成更好的API文档
+     *
      * @return 所属业务模块
      */
     String module() default Strings.EMPTY;
