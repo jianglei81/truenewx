@@ -893,19 +893,25 @@ $.tnx.rpc = {
         $.tnx.alert(message, "错误");
     },
     imports : function(beanId, contextUrl, callback) {
+        if (typeof (contextUrl) == "function") {
+            callback = contextUrl;
+            contextUrl = undefined;
+        }
+
         var rpcObjects = $.tnx.cache(this._cacheKey);
         if (!rpcObjects) {
             rpcObjects = {};
             $.tnx.cache(this._cacheKey, rpcObjects);
         }
         if (rpcObjects[beanId]) {
-            return rpcObjects[beanId];
+            if (callback) {
+                callback.call(this, rpcObjects[beanId]);
+                return;
+            } else {
+                return rpcObjects[beanId];
+            }
         }
 
-        if (typeof (contextUrl) == "function") {
-            callback = contextUrl;
-            contextUrl = undefined;
-        }
         var url = undefined;
         if (contextUrl) {
             url = contextUrl + "/rpc/methods/" + beanId + ".json";
