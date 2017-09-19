@@ -892,7 +892,7 @@ $.tnx.rpc = {
     showErrorMessage : function(message) {
         $.tnx.alert(message, "错误");
     },
-    imports : function(beanId, contextUrl) {
+    imports : function(beanId, contextUrl, callback) {
         var rpcObjects = $.tnx.cache(this._cacheKey);
         if (!rpcObjects) {
             rpcObjects = {};
@@ -901,46 +901,70 @@ $.tnx.rpc = {
         if (rpcObjects[beanId]) {
             return rpcObjects[beanId];
         }
+
+        if (typeof (contextUrl) == "function") {
+            callback = contextUrl;
+            contextUrl = undefined;
+        }
         var url = undefined;
         if (contextUrl) {
             url = contextUrl + "/rpc/methods/" + beanId + ".json";
         } else {
             url = $.tnx.pager.getUrl("/rpc/methods/" + beanId + ".json");
         }
-        var resp = $.ajax(url, {
+        var options = {
             cache : false,
             async : false,
             dataType : "json",
             contentType : "application/x-www-form-urlencoded; charset=" + $.tnx.encoding // 不能更改
-        });
-        if (this._handleErrors(resp)) {
-            var rpcObject = {};
+        };
+        if (callback) {
             var _this = this;
-            var methodNames = $.parseJSON(resp.responseText);
-            $.each(methodNames, function(index, methodName) {
-                rpcObject[methodName] = function() {
-                    var success = undefined;
-                    var error = undefined;
-                    var length = arguments.length;
-                    var paramLength = length;
-                    if (length > 0 && typeof arguments[length - 1] == "function") { // 最后一个参数为函数
-                        success = arguments[length - 1];
-                        paramLength = length - 1;
-                    }
-                    if (length > 1 && typeof arguments[length - 2] == "function") { // 倒数第二个参数为函数
-                        error = success;
-                        success = arguments[length - 2];
-                        paramLength = length - 2;
-                    }
-                    var args = new Array();
-                    for (var i = 0; i < paramLength; i++) {
-                        args.push(arguments[i]);
-                    }
-                    return _this.invoke(beanId, methodName, args, success, error, contextUrl);
-                };
-            });
-            rpcObjects[beanId] = rpcObject;
-            return rpcObject;
+            options.async = true;
+            options.success = function(methodNames) {
+                var rpcObject = _this._buildRpcObject(beanId, methodNames, contextUrl);
+                rpcObjects[beanId] = rpcObject;
+                callback.call(_this, rpcObject);
+            }
+            options.error = function(resp) {
+                _this._handleErrors(resp);
+            }
+            $.ajax(url, options);
+        } else {
+            var resp = $.ajax(url, options);
+            if (this._handleErrors(resp)) {
+                var methodNames = $.parseJSON(resp.responseText);
+                var rpcObject = this._buildRpcObject(beanId, methodNames, contextUrl);
+                rpcObjects[beanId] = rpcObject;
+                return rpcObject;
+            }
         }
+    },
+    _buildRpcObject : function(beanId, methodNames, contextUrl) {
+        var _this = this;
+        var rpcObject = {};
+        $.each(methodNames, function(index, methodName) {
+            rpcObject[methodName] = function() {
+                var success = undefined;
+                var error = undefined;
+                var length = arguments.length;
+                var paramLength = length;
+                if (length > 0 && typeof arguments[length - 1] == "function") { // 最后一个参数为函数
+                    success = arguments[length - 1];
+                    paramLength = length - 1;
+                }
+                if (length > 1 && typeof arguments[length - 2] == "function") { // 倒数第二个参数为函数
+                    error = success;
+                    success = arguments[length - 2];
+                    paramLength = length - 2;
+                }
+                var args = new Array();
+                for (var i = 0; i < paramLength; i++) {
+                    args.push(arguments[i]);
+                }
+                return _this.invoke(beanId, methodName, args, success, error, contextUrl);
+            };
+        });
+        return rpcObject;
     }
 };
