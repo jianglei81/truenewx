@@ -105,8 +105,10 @@ public class CollectionUtil {
      *            数组
      */
     public static <T> void addAll(final Collection<T> collection, final T[] array) {
-        for (final T e : array) {
-            collection.add(e);
+        if (array != null) {
+            for (final T e : array) {
+                collection.add(e);
+            }
         }
     }
 
