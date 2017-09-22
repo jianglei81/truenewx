@@ -32,4 +32,25 @@ public class UnityUtil {
         return ids;
     }
 
+    /**
+     * 判断指定单体集合中是否包含指定id的单体
+     *
+     * @param unities
+     *            单体集合
+     * @param id
+     *            单体id
+     * @return 指定单体集合中是否包含指定id的单体
+     */
+    public static <T extends Unity<K>, K extends Serializable> boolean containsId(
+            final Collection<T> unities, final K id) {
+        if (unities != null) {
+            for (final Unity<K> unity : unities) {
+                if (unity.getId().equals(id)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }
