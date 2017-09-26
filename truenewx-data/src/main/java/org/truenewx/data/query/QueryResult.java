@@ -21,36 +21,36 @@ public class QueryResult<R> {
      */
     private Paging paging;
 
-    private QueryResult(final List<R> dataList) {
-        if (dataList == null) {
+    private QueryResult(final List<R> records) {
+        if (records == null) {
             this.records = Collections.emptyList();
         } else {
-            this.records = dataList;
+            this.records = records;
         }
     }
 
-    public QueryResult(final List<R> dataList, final Paging paging) {
-        this(dataList);
+    public QueryResult(final List<R> records, final Paging paging) {
+        this(records);
         this.paging = paging;
     }
 
-    public QueryResult(final List<R> dataList, final int pageSize, final int pageNo,
+    public QueryResult(final List<R> records, final int pageSize, final int pageNo,
             final int total) {
-        this(dataList, new Paging(pageSize, pageNo, total));
+        this(records, new Paging(pageSize, pageNo, total));
     }
 
     /**
      * 构建未知总数的查询结果
      *
-     * @param dataList
+     * @param records
      *            结果记录清单
      * @param pageSize
      *            页大小
      * @param pageNo
      *            页码
      */
-    public QueryResult(final List<R> dataList, int pageSize, int pageNo) {
-        this(dataList);
+    public QueryResult(final List<R> records, int pageSize, int pageNo) {
+        this(records);
         if (pageSize <= 0) {
             pageSize = this.records.size();
             pageNo = 1;

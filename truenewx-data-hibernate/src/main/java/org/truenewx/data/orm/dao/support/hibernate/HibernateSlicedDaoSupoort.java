@@ -22,7 +22,7 @@ import org.truenewx.data.query.QueryResult;
  *            切分者类型
  */
 public abstract class HibernateSlicedDaoSupoort<T extends SlicedEntity<S>, S extends Serializable>
-                extends HibernateEntityDaoSupport<T> implements SlicedDao<T, S> {
+        extends HibernateEntityDaoSupport<T> implements SlicedDao<T, S> {
 
     protected final HibernateTemplate getHibernateTemplate(final S slicer) {
         final String entityName = getEntityName(slicer);
@@ -118,8 +118,13 @@ public abstract class HibernateSlicedDaoSupoort<T extends SlicedEntity<S>, S ext
         return (S) dependedKey;
     }
 
+    @Override
+    public T first(final S slicer) {
+        return first(getEntityName(slicer));
+    }
+
     public QueryResult<T> find(final Class<?> dependedClass, final Serializable dependedKey,
-                    final QueryParameter parameter) {
+            final QueryParameter parameter) {
         final String entityName = getEntityName(getSlicer(dependedClass, dependedKey));
         return find(entityName, dependedClass, dependedKey, parameter);
     }

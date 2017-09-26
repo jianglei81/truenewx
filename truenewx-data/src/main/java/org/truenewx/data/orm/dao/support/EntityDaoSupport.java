@@ -79,6 +79,11 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
         return getDataAccessTemplate(entityName).list(hql, qp);
     }
 
+    protected T first(final String entityName) {
+        final StringBuffer hql = new StringBuffer("from ").append(entityName);
+        return getDataAccessTemplate(entityName).first(hql, (Map<String, Object>) null);
+    }
+
     private QueryResult<T> query(final String entityName, CharSequence ql,
             final Map<String, Object> params, final int pageSize, final int pageNo,
             final boolean totalable, final boolean listable,

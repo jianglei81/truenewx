@@ -88,6 +88,11 @@ public abstract class HibernateDaoSupport<T extends Entity> extends HibernateEnt
     }
 
     @Override
+    public T first() {
+        return first(getEntityName());
+    }
+
+    @Override
     public List<T> find(final Map<String, ?> params, final String... fuzzyNames) {
         return find(getEntityName(), params, fuzzyNames);
     }

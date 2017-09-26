@@ -11,6 +11,14 @@ import org.truenewx.core.model.Sliced;
  * @since JDK 1.8
  */
 public interface SlicedDao<T extends Sliced<S>, S extends Serializable> extends EntityDao<T> {
+
+    /**
+     * 获取已有数据中指定切分者下的第一条，常用于单元测试，谨慎用于它处
+     *
+     * @return 指定切分者下的第一条数据记录
+     */
+    T first(S slicer);
+
     /**
      * 强制将缓存中的指定切分者下的数据同步至数据库
      *
