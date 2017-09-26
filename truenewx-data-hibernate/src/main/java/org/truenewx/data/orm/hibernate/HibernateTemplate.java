@@ -32,10 +32,18 @@ import com.google.common.base.Enums;
 public final class HibernateTemplate extends DataAccessTemplate {
 
     private SessionFactory sessionFactory;
+    private boolean sqlMode;
 
     @Autowired(required = false)
     public void setSessionFactory(final SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
+    }
+
+    public HibernateTemplate toSqlMode() {
+        final HibernateTemplate ht = new HibernateTemplate();
+        ht.sessionFactory = this.sessionFactory;
+        ht.sqlMode = true;
+        return ht;
     }
 
     public SessionFactory getSessionFactory() {
@@ -50,11 +58,19 @@ public final class HibernateTemplate extends DataAccessTemplate {
         return ((SessionFactoryImplementor) getSessionFactory()).getDialect();
     }
 
+    private Query createQuery(final CharSequence ql) {
+        final Session session = getSession();
+        if (this.sqlMode) {
+            return session.createSQLQuery(ql.toString());
+        }
+        return session.createQuery(ql.toString());
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <T> List<T> list(final CharSequence ql, final String paramName, final Object paramValue,
             final int pageSize, final int pageNo) {
-        final Query query = getSession().createQuery(ql.toString());
+        final Query query = createQuery(ql);
         applyParamToQuery(query, paramName, paramValue);
         applyPagingToQuery(query, pageSize, pageNo, false);
         return query.list();
@@ -64,7 +80,7 @@ public final class HibernateTemplate extends DataAccessTemplate {
     @SuppressWarnings("unchecked")
     public <T> List<T> list(final CharSequence ql, final Map<String, ?> params, final int pageSize,
             final int pageNo) {
-        final Query query = getSession().createQuery(ql.toString());
+        final Query query = createQuery(ql);
         applyParamsToQuery(query, params);
         applyPagingToQuery(query, pageSize, pageNo, false);
         return query.list();
@@ -74,7 +90,7 @@ public final class HibernateTemplate extends DataAccessTemplate {
     @SuppressWarnings("unchecked")
     public <T> List<T> list(final CharSequence ql, final List<?> params, final int pageSize,
             final int pageNo) {
-        final Query query = getSession().createQuery(ql.toString());
+        final Query query = createQuery(ql);
         applyParamsToQuery(query, params);
         applyPagingToQuery(query, pageSize, pageNo, false);
         return query.list();
@@ -84,7 +100,7 @@ public final class HibernateTemplate extends DataAccessTemplate {
     @SuppressWarnings("unchecked")
     public <T> List<T> listWithOneMore(final CharSequence ql, final String paramName,
             final Object paramValue, final int pageSize, final int pageNo) {
-        final Query query = getSession().createQuery(ql.toString());
+        final Query query = createQuery(ql);
         applyParamToQuery(query, paramName, paramValue);
         applyPagingToQuery(query, pageSize, pageNo, true);
         return query.list();
@@ -94,7 +110,7 @@ public final class HibernateTemplate extends DataAccessTemplate {
     @SuppressWarnings("unchecked")
     public <T> List<T> listWithOneMore(final CharSequence ql, final Map<String, ?> params,
             final int pageSize, final int pageNo) {
-        final Query query = getSession().createQuery(ql.toString());
+        final Query query = createQuery(ql);
         applyParamsToQuery(query, params);
         applyPagingToQuery(query, pageSize, pageNo, true);
         return query.list();
@@ -104,7 +120,7 @@ public final class HibernateTemplate extends DataAccessTemplate {
     @SuppressWarnings("unchecked")
     public <T> List<T> listWithOneMore(final CharSequence ql, final List<?> params,
             final int pageSize, final int pageNo) {
-        final Query query = getSession().createQuery(ql.toString());
+        final Query query = createQuery(ql);
         applyParamsToQuery(query, params);
         applyPagingToQuery(query, pageSize, pageNo, true);
         return query.list();
@@ -112,21 +128,21 @@ public final class HibernateTemplate extends DataAccessTemplate {
 
     @Override
     public int update(final CharSequence ul, final String paramName, final Object paramValue) {
-        final Query query = getSession().createQuery(ul.toString());
+        final Query query = createQuery(ul);
         applyParamToQuery(query, paramName, paramValue);
         return query.executeUpdate();
     }
 
     @Override
     public int update(final CharSequence ul, final Map<String, ?> params) {
-        final Query query = getSession().createQuery(ul.toString());
+        final Query query = createQuery(ul);
         applyParamsToQuery(query, params);
         return query.executeUpdate();
     }
 
     @Override
     public int update(final CharSequence ul, final List<?> params) {
-        final Query query = getSession().createQuery(ul.toString());
+        final Query query = createQuery(ul);
         applyParamsToQuery(query, params);
         return query.executeUpdate();
     }
