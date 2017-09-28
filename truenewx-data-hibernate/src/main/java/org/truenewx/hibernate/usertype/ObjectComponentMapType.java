@@ -8,7 +8,7 @@ import java.util.Properties;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.ParameterizedType;
 import org.truenewx.core.Strings;
 import org.truenewx.core.util.ArrayUtil;
@@ -52,7 +52,8 @@ public abstract class ObjectComponentMapType extends AbstractUserType implements
 
     @Override
     public void nullSafeSet(final PreparedStatement st, final Object value, final int index,
-            final SessionImplementor session) throws HibernateException, SQLException {
+            final SharedSessionContractImplementor session)
+            throws HibernateException, SQLException {
         String json = null;
         if (value != null) {
             if (this.componentType != null && ArrayUtils.isNotEmpty(this.excludeProperties)) {

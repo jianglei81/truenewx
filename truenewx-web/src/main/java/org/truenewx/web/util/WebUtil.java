@@ -88,18 +88,16 @@ public class WebUtil {
     public static Map<String, Object> getRequestParameterMap(final ServletRequest request,
             final String... excludedParameterNames) {
         final Map<String, Object> map = new LinkedHashMap<>();
-        final Enumeration<String> names = request.getParameterNames();
-        while (names.hasMoreElements()) {
-            final String name = names.nextElement();
-            if (!ArrayUtils.contains(excludedParameterNames, name)) {
-                final String[] values = request.getParameterValues(name);
+        final Map<String, String[]> params = request.getParameterMap();
+        params.forEach((name, values) -> {
+            if (values != null && !ArrayUtils.contains(excludedParameterNames, name)) {
                 if (values.length == 1) {
                     map.put(name, values[0]);
                 } else {
                     map.put(name, values);
                 }
             }
-        }
+        });
         return map;
     }
 

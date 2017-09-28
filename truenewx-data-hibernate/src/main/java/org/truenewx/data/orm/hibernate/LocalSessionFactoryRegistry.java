@@ -9,8 +9,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.Metadata;
 import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.cfg.Configuration;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.PersistentClass;
@@ -30,7 +30,7 @@ public class LocalSessionFactoryRegistry implements DataSourceLookup {
     /**
      * 模式-配置的映射集
      */
-    private Map<String, Configuration> configurationMapping = new HashMap<>();
+    private Map<String, Metadata> metadataMapping = new HashMap<>();
     /**
      * 模式-会话工厂的映射集
      */
@@ -49,28 +49,28 @@ public class LocalSessionFactoryRegistry implements DataSourceLookup {
      *
      * @param schema
      *            模式名
-     * @param configuration
+     * @param metadata
      *            配置
      * @param sessionFactory
      *            会话工厂
      */
-    void register(String schema, final Configuration configuration,
-            final SessionFactory sessionFactory) {
+    void register(String schema, final Metadata metadata, final SessionFactory sessionFactory) {
         if (StringUtils.isBlank(schema)) {
             schema = OrmConstants.DEFAULT_SCHEMA_NAME;
         }
         // 不能存在重复的模式
-        Assert.isTrue(!this.configurationMapping.containsKey(schema));
-        this.configurationMapping.put(schema, configuration);
-        Assert.isTrue(!this.sessionFactoryMapping.containsKey(schema));
+        Assert.isTrue(!this.metadataMapping.containsKey(schema), "Duplicate schema: " + schema);
+        this.metadataMapping.put(schema, metadata);
+        Assert.isTrue(!this.sessionFactoryMapping.containsKey(schema),
+                "Duplicate schema: " + schema);
         this.sessionFactoryMapping.put(schema, sessionFactory);
     }
 
     public String getSchema(final String entityName) {
         String schema = this.entitySchemaMapping.get(entityName);
         if (schema == null) { // 实体所属模式未知，则依次在各模式配置中查找
-            for (final Entry<String, Configuration> entry : this.configurationMapping.entrySet()) {
-                if (entry.getValue().getClassMapping(entityName) != null) { // 在某个配置中找到，则缓存实体名称-模式的映射，并返回结果
+            for (final Entry<String, Metadata> entry : this.metadataMapping.entrySet()) {
+                if (entry.getValue().getEntityBinding(entityName) != null) { // 在某个配置中找到，则缓存实体名称-模式的映射，并返回结果
                     schema = entry.getKey();
                     this.entitySchemaMapping.put(entityName, schema);
                     break;
@@ -105,13 +105,10 @@ public class LocalSessionFactoryRegistry implements DataSourceLookup {
     }
 
     private PersistentClass getClassMapping(final Class<?> entityClass) {
-        PersistentClass persistentClass = this.persistentClassMapping.get(entityClass);
-        if (persistentClass == null) { // 如果缓存中没有，则依次遍历配置查找
-            for (final Entry<String, Configuration> entry : this.configurationMapping.entrySet()) {
-                final Configuration configuration = entry.getValue();
-                final Iterator<PersistentClass> iterator = configuration.getClassMappings();
-                while (iterator.hasNext()) {
-                    persistentClass = iterator.next();
+        if (this.persistentClassMapping.get(entityClass) == null) { // 如果缓存中没有，则依次遍历配置查找
+            for (final Entry<String, Metadata> entry : this.metadataMapping.entrySet()) {
+                final Metadata metadata = entry.getValue();
+                for (final PersistentClass persistentClass : metadata.getEntityBindings()) {
                     if (persistentClass.getMappedClass() == entityClass) {
                         // 匹配，则缓存并返回
                         this.persistentClassMapping.put(entityClass, persistentClass);
@@ -126,9 +123,9 @@ public class LocalSessionFactoryRegistry implements DataSourceLookup {
     private PersistentClass getClassMapping(final String entityName) {
         final String schema = getSchema(entityName);
         if (schema != null) {
-            final Configuration configuration = this.configurationMapping.get(schema);
-            if (configuration != null) {
-                return configuration.getClassMapping(entityName);
+            final Metadata metadata = this.metadataMapping.get(schema);
+            if (metadata != null) {
+                return metadata.getEntityBinding(entityName);
             }
         }
         return null;

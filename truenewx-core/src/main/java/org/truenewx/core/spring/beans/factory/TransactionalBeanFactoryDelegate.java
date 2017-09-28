@@ -6,6 +6,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component;
  * @since JDK 1.8
  */
 @Component
-public class TransactionalBeanFactoryImpl implements TransactionalBeanFactory, BeanFactoryAware {
+public class TransactionalBeanFactoryDelegate implements TransactionalBeanFactory, BeanFactoryAware {
 
     private BeanFactory beanFactory;
 
@@ -51,7 +52,8 @@ public class TransactionalBeanFactoryImpl implements TransactionalBeanFactory, B
     }
 
     @Override
-    public <T> T getBean(final String name, final Class<T> requiredType, final boolean transactional) {
+    public <T> T getBean(final String name, final Class<T> requiredType,
+            final boolean transactional) {
         try {
             final T bean = this.beanFactory.getBean(name, requiredType);
             return getTarget(bean, transactional);
@@ -96,6 +98,11 @@ public class TransactionalBeanFactoryImpl implements TransactionalBeanFactory, B
     }
 
     @Override
+    public <T> T getBean(final Class<T> requiredType, final Object... args) throws BeansException {
+        return this.beanFactory.getBean(requiredType, args);
+    }
+
+    @Override
     public boolean containsBean(final String name) {
         return this.beanFactory.containsBean(name);
     }
@@ -114,6 +121,12 @@ public class TransactionalBeanFactoryImpl implements TransactionalBeanFactory, B
     public boolean isTypeMatch(final String name, final Class<?> targetType)
             throws NoSuchBeanDefinitionException {
         return this.beanFactory.isTypeMatch(name, targetType);
+    }
+
+    @Override
+    public boolean isTypeMatch(final String name, final ResolvableType typeToMatch)
+            throws NoSuchBeanDefinitionException {
+        return this.isTypeMatch(name, typeToMatch);
     }
 
     @Override

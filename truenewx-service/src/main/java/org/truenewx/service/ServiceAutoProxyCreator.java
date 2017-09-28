@@ -9,7 +9,6 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.truenewx.service.transaction.TransactionalAutoProxyCreator;
 
@@ -19,7 +18,6 @@ import org.truenewx.service.transaction.TransactionalAutoProxyCreator;
  * @author jianglei
  * @since JDK 1.8
  */
-@Component
 public class ServiceAutoProxyCreator extends TransactionalAutoProxyCreator
         implements InitializingBean {
 

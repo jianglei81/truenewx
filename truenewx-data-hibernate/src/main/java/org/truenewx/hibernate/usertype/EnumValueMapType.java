@@ -9,7 +9,7 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.ParameterizedType;
 import org.truenewx.core.enums.support.IllegalEnumValueException;
 import org.truenewx.core.enums.support.functor.AlgoEnumValueOf;
@@ -46,7 +46,7 @@ public class EnumValueMapType extends AbstractUserType implements ParameterizedT
         if (this.enumClass == null) {
             this.propertyName = parameters.getProperty("property");
             Preconditions.checkNotNull(this.propertyName,
-                            "Parameter class or property must be specified");
+                    "Parameter class or property must be specified");
         }
     }
 
@@ -72,7 +72,7 @@ public class EnumValueMapType extends AbstractUserType implements ParameterizedT
             final Field field = ClassUtil.findField(ownerClass, this.propertyName);
             if (field == null) {
                 throw new IllegalArgumentException(
-                                ownerClass.getName() + " has not property: " + this.propertyName);
+                        ownerClass.getName() + " has not property: " + this.propertyName);
             }
             Class<?> fieldClass = field.getType();
             if (fieldClass.isArray()) {
@@ -80,7 +80,7 @@ public class EnumValueMapType extends AbstractUserType implements ParameterizedT
             }
             if (!fieldClass.isEnum()) {
                 throw new IllegalArgumentException("the class of " + ownerClass.getName() + "."
-                                + this.propertyName + "(" + fieldClass.getName() + ") is not enum");
+                        + this.propertyName + "(" + fieldClass.getName() + ") is not enum");
             }
             this.enumClass = (Class<Enum<?>>) fieldClass;
         }
@@ -89,8 +89,8 @@ public class EnumValueMapType extends AbstractUserType implements ParameterizedT
 
     @Override
     public Object nullSafeGet(final ResultSet rs, final String[] names,
-                    final SessionImplementor session, final Object owner)
-                    throws HibernateException, SQLException {
+            final SharedSessionContractImplementor session, final Object owner)
+            throws HibernateException, SQLException {
         final String value = rs.getString(names[0]);
         if (value != null) {
             final Class<Enum<?>> enumClass = getEnumClass(owner);
@@ -105,7 +105,8 @@ public class EnumValueMapType extends AbstractUserType implements ParameterizedT
 
     @Override
     public void nullSafeSet(final PreparedStatement st, final Object value, final int index,
-                    final SessionImplementor session) throws HibernateException, SQLException {
+            final SharedSessionContractImplementor session)
+            throws HibernateException, SQLException {
         if (value != null) {
             final Enum<?> enumConstant = (Enum<?>) value;
             final String enumValue = FuncEnumValue.INSTANCE.apply(enumConstant);
