@@ -8,7 +8,7 @@ import org.truenewx.core.spring.beans.ContextInitializedBean;
 
 /**
  * Bean属性值配置器
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -84,7 +84,8 @@ public class BeanPropertyValueConfigurer implements InitializingBean, ContextIni
     @Override
     public void afterInitialized(final ApplicationContext context) throws Exception {
         if (this.bean == null) {
-            Assert.isTrue(this.beanName != null || this.beanClass != null); // Bean名称或类型至少一个不为null
+            Assert.isTrue(this.beanName != null || this.beanClass != null,
+                    "beanName or beanClass must be not null"); // Bean名称或类型至少一个不为null
             if (this.beanName != null && this.beanClass != null) {
                 this.bean = context.getBean(this.beanName, this.beanClass);
             } else if (this.beanName != null) {

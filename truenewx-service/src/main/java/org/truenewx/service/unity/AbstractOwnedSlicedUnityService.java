@@ -28,9 +28,9 @@ import org.truenewx.service.transform.OwnedSlicedModelTransformer;
  *            所属者类型
  */
 public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity<K, S, O>, K extends Serializable, S extends Serializable, O extends Serializable>
-                extends AbstractSlicedUnityService<T, K, S> implements
-                OwnedSimpleSlicedUnityService<T, K, S, O>, OwnedModelSlicedUnityService<T, K, S, O>,
-                OwnedSlicedModelTransformer<SubmitModel<T>, T, S, O> {
+        extends AbstractSlicedUnityService<T, K, S> implements
+        OwnedSimpleSlicedUnityService<T, K, S, O>, OwnedModelSlicedUnityService<T, K, S, O>,
+        OwnedSlicedModelTransformer<SubmitModel<T>, T, S, O> {
 
     @Override
     public T find(final S slicer, final O owner, final K id) {
@@ -53,7 +53,8 @@ public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity
         }
         unity = beforeSave(slicer, owner, null, unity);
         if (unity != null) {
-            Assert.isTrue(slicer.equals(unity.getSlicer()) && owner.equals(unity.getOwner()));
+            Assert.isTrue(slicer.equals(unity.getSlicer()) && owner.equals(unity.getOwner()),
+                    "slicer must equal unity's slicer, and owner must equal unity's owner");
             getDao().save(unity);
             afterSave(unity);
         }
@@ -70,8 +71,10 @@ public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity
         }
         unity = beforeSave(slicer, owner, id, unity);
         if (unity != null) {
-            Assert.isTrue(slicer.equals(unity.getSlicer()) && owner.equals(unity.getOwner())
-                            && id.equals(unity.getId()));
+            Assert.isTrue(
+                    slicer.equals(unity.getSlicer()) && owner.equals(unity.getOwner())
+                            && id.equals(unity.getId()),
+                    "slicer must equal unity's slicer, and owner must equal unity's owner, and id must equal unity's id");
             getDao().save(unity);
             afterSave(unity);
         }
@@ -95,7 +98,7 @@ public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity
      *             如果数据验证失败
      */
     protected T beforeSave(final S slicer, final O owner, final K id, final T unity)
-                    throws HandleableException {
+            throws HandleableException {
         if (id != null) { // 如果子类不覆写update()方法，则不支持修改
             throw new UnsupportedOperationException();
         }
@@ -116,16 +119,17 @@ public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity
      *             如果校验不通过
      */
     protected void beforeAdd(final S slicer, final O owner, final T unity)
-                    throws HandleableException {
+            throws HandleableException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public T add(final S slicer, final O owner, final SubmitModel<T> submitModel)
-                    throws HandleableException {
+            throws HandleableException {
         final T unity = beforeSave(slicer, owner, null, submitModel);
         if (unity != null) {
-            Assert.isTrue(slicer.equals(unity.getSlicer()) && owner.equals(unity.getOwner()));
+            Assert.isTrue(slicer.equals(unity.getSlicer()) && owner.equals(unity.getOwner()),
+                    "slicer must equal unity's slicer, and owner must equal unity's owner");
             getDao().save(unity);
             afterSave(unity);
         }
@@ -134,14 +138,16 @@ public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity
 
     @Override
     public T update(final S slicer, final O owner, final K id, final SubmitModel<T> submitModel)
-                    throws HandleableException {
+            throws HandleableException {
         if (id == null) {
             return null;
         }
         final T unity = beforeSave(slicer, owner, id, submitModel);
         if (unity != null) {
-            Assert.isTrue(slicer.equals(unity.getSlicer()) && owner.equals(unity.getOwner())
-                            && id.equals(unity.getId()));
+            Assert.isTrue(
+                    slicer.equals(unity.getSlicer()) && owner.equals(unity.getOwner())
+                            && id.equals(unity.getId()),
+                    "slicer must equal unity's slicer, and owner must equal unity's owner, and id must equal unity's id");
             getDao().save(unity);
             afterSave(unity);
         }
@@ -163,7 +169,7 @@ public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity
      *             如果数据验证失败
      */
     protected T beforeSave(final S slicer, final O owner, final K id,
-                    final SubmitModel<T> submitModel) throws HandleableException {
+            final SubmitModel<T> submitModel) throws HandleableException {
         T unity;
         if (id == null) {
             unity = beforeAdd(slicer, owner, submitModel);
@@ -197,7 +203,7 @@ public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity
      */
     @Nullable
     protected T beforeAdd(final S slicer, final O owner, final TransportModel<T> model)
-                    throws HandleableException {
+            throws HandleableException {
         throw new UnsupportedOperationException();
     }
 
@@ -221,13 +227,13 @@ public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity
      */
     @Nullable
     protected T beforeUpdate(final S slicer, final O owner, final K id,
-                    final TransportModel<T> model) throws HandleableException {
+            final TransportModel<T> model) throws HandleableException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void transform(final S slicer, final O owner, final SubmitModel<T> model, final T unity)
-                    throws HandleableException {
+            throws HandleableException {
         transform(slicer, model, unity);
     }
 

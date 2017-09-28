@@ -19,10 +19,10 @@ public class FormatException extends SingleException {
     private String violationMessage;
 
     public FormatException(final Class<?> beanClass, final String property,
-                    final String violationMessage) {
+            final String violationMessage) {
         super(violationMessage);
         this.beanClass = beanClass;
-        Assert.notNull(property);
+        Assert.notNull(property, "property must be not null");
         this.property = property;
     }
 
@@ -66,8 +66,8 @@ public class FormatException extends SingleException {
             return property == null;
         } else { // 已绑定属性，则*、属性、简单路径、完全路径匹配一个即可
             return Strings.ASTERISK.equals(property) || this.property.equals(property)
-                            || getSimplePropertyPath().equals(property)
-                            || getFullPropertyPath().equals(property);
+                    || getSimplePropertyPath().equals(property)
+                    || getFullPropertyPath().equals(property);
         }
     }
 }

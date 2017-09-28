@@ -55,7 +55,7 @@ public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K 
         }
         unity = beforeSave(slicer, null, unity);
         if (unity != null) {
-            Assert.isTrue(slicer.equals(unity.getSlicer()));
+            Assert.isTrue(slicer.equals(unity.getSlicer()), "slicer must equal unity's slicer");
             getDao().save(unity);
             afterSave(unity);
         }
@@ -69,7 +69,8 @@ public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K 
         }
         unity = beforeSave(slicer, id, unity);
         if (unity != null) {
-            Assert.isTrue(slicer.equals(unity.getSlicer()) && id.equals(unity.getId()));
+            Assert.isTrue(slicer.equals(unity.getSlicer()) && id.equals(unity.getId()),
+                    "slicer must equal unity's slicer, and id must equal unity's id");
             getDao().save(unity);
             afterSave(unity);
         }
@@ -127,7 +128,7 @@ public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K 
     public T add(final S slicer, final SubmitModel<T> submitModel) throws HandleableException {
         final T unity = beforeSave(slicer, null, submitModel);
         if (unity != null) {
-            Assert.isTrue(slicer.equals(unity.getSlicer()));
+            Assert.isTrue(slicer.equals(unity.getSlicer()), "slicer must equal unity's slicer");
             getDao().save(unity);
             afterSave(unity);
         }
@@ -142,7 +143,8 @@ public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K 
         }
         final T unity = beforeSave(slicer, id, submitModel);
         if (unity != null) {
-            Assert.isTrue(slicer.equals(unity.getSlicer()) && id.equals(unity.getId()));
+            Assert.isTrue(slicer.equals(unity.getSlicer()) && id.equals(unity.getId()),
+                    "slicer must equal unity's slicer, and id must equal unity's id");
             getDao().save(unity);
             afterSave(unity);
         }

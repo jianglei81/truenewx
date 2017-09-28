@@ -45,7 +45,8 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
         for (final Realm<?> realm : beans.values()) {
             final Class<?> userClass = realm.getUserClass();
             // 一个用户类型只能有一个Realm
-            Assert.isNull(this.realms.put(userClass, realm));
+            Assert.isNull(this.realms.put(userClass, realm),
+                    "one userClass can only have one realm");
         }
     }
 

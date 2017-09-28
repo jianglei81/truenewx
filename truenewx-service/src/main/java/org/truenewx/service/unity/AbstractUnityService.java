@@ -63,7 +63,7 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
         }
         unity = beforeSave(id, unity);
         if (unity != null) {
-            Assert.isTrue(id.equals(unity.getId()));
+            Assert.isTrue(id.equals(unity.getId()), " id must equal unity's id");
             getDao().save(unity);
             afterSave(unity);
         }
@@ -130,7 +130,7 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
         }
         final T unity = beforeSave(id, submitModel);
         if (unity != null) {
-            Assert.isTrue(id.equals(unity.getId()));
+            Assert.isTrue(id.equals(unity.getId()), "id must equal unity's id");
             getDao().save(unity);
             afterSave(unity);
         }

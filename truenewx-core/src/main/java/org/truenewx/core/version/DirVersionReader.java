@@ -57,7 +57,7 @@ public class DirVersionReader extends AbstractVersionReader {
      *            版本目录所在的根目录路径
      */
     public DirVersionReader(final String root) {
-        Assert.notNull(root);
+        Assert.notNull(root, "root must be not null");
         this.root = root;
     }
 

@@ -138,7 +138,8 @@ public abstract class AbstractRelationService<T extends Relation<L, R>, L extend
             transform(model, relation);
 
             Assert.isTrue(
-                    relation.getLeftId().equals(leftId) && relation.getRightId().equals(rightId));
+                    relation.getLeftId().equals(leftId) && relation.getRightId().equals(rightId),
+                    "leftId must equal relation's leftId, and rightId must equal relation's rightId");
             getDao().save(relation);
         }
         return relation;

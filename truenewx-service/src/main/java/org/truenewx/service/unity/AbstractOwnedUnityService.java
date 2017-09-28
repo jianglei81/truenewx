@@ -47,7 +47,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
         }
         unity = beforeSave(owner, null, unity);
         if (unity != null) {
-            Assert.isTrue(owner.equals(unity.getOwner()));
+            Assert.isTrue(owner.equals(unity.getOwner()), "owner must equal unity's owner");
             getDao().save(unity);
             afterSave(unity);
         }
@@ -64,7 +64,8 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
         }
         unity = beforeSave(owner, id, unity);
         if (unity != null) {
-            Assert.isTrue(owner.equals(unity.getOwner()) && id.equals(unity.getId()));
+            Assert.isTrue(owner.equals(unity.getOwner()) && id.equals(unity.getId()),
+                    "owner must equal unity's owner, and id must equal unity's id");
             getDao().save(unity);
             afterSave(unity);
         }
@@ -114,7 +115,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
         }
         final T unity = beforeSave(owner, null, submitModel);
         if (unity != null) {
-            Assert.isTrue(owner.equals(unity.getOwner()));
+            Assert.isTrue(owner.equals(unity.getOwner()), "owner must equal unity's owner");
             getDao().save(unity);
             afterSave(unity);
         }
@@ -129,7 +130,8 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
         }
         final T unity = beforeSave(owner, id, submitModel);
         if (unity != null) {
-            Assert.isTrue(owner.equals(unity.getOwner()) && id.equals(unity.getId()));
+            Assert.isTrue(owner.equals(unity.getOwner()) && id.equals(unity.getId()),
+                    "owner must equal unity's owner, and id must equal unity's id");
             getDao().save(unity);
             afterSave(unity);
         }

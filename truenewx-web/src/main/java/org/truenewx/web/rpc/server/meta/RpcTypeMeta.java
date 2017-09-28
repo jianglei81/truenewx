@@ -29,7 +29,7 @@ public class RpcTypeMeta {
     private RpcTypeMeta componentType;
 
     public RpcTypeMeta(final Class<?> type) {
-        Assert.notNull(type);
+        Assert.notNull(type, "type must be not null");
         if (Date.class.isAssignableFrom(type)) {
             this.type = Long.class;
         } else {

@@ -20,7 +20,7 @@ public class SingleQueryOrder implements QueryOrder {
     private boolean desc;
 
     public SingleQueryOrder(final String fieldName, final boolean desc) {
-        Assert.isTrue(StringUtils.isNotBlank(fieldName));
+        Assert.isTrue(StringUtils.isNotBlank(fieldName), "fieldName must be not blank");
         this.fieldName = fieldName;
         this.desc = desc;
     }

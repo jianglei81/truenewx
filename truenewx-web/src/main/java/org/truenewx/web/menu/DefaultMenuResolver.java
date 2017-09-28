@@ -36,7 +36,7 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(this.menu);
+        Assert.notNull(this.menu, "menu must be not null");
         if (this.defaultOptions == null) {
             this.defaultOptions = new HashMap<>();
         }
@@ -89,8 +89,8 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
             }
         }
         // 构建新的菜单项对象，以免影响缓存的完整菜单对象的数据
-        final MenuItem newItem = new MenuItem(item.getAuthority(), item.getCaption(), item.getHref(),
-                item.getTarget(), item.getIcon());
+        final MenuItem newItem = new MenuItem(item.getAuthority(), item.getCaption(),
+                item.getHref(), item.getTarget(), item.getIcon());
         newItem.getLinks().addAll(item.getLinks());
         newItem.getOptions().putAll(item.getOptions());
         newItem.getCaptions().putAll(item.getCaptions());

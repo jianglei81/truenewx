@@ -17,13 +17,13 @@ public class InetAddressRange<T extends InetAddress> {
     private T end;
 
     public InetAddressRange(final T address) {
-        Assert.notNull(address);
+        Assert.notNull(address, "address must be not null");
         this.begin = address;
         this.end = address;
     }
 
     public InetAddressRange(final T begin, final T end) {
-        Assert.isTrue(begin.getClass() == end.getClass()); // 必须同时都为IPv4，或同时都为IPv6
+        Assert.isTrue(begin.getClass() == end.getClass(), "begin and end must be the same class"); // 必须同时都为IPv4，或同时都为IPv6
         // 确保起始地址小于等于结束地址
         if (NetUtil.intValueOf(begin) <= NetUtil.intValueOf(end)) {
             this.begin = begin;

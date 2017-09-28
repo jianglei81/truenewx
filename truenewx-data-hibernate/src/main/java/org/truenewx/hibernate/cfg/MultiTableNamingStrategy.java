@@ -23,9 +23,9 @@ public class MultiTableNamingStrategy extends PhysicalNamingStrategyStandardImpl
 
     public MultiTableNamingStrategy(final DataSource dataSource,
             final TableExistsPredicate predicate) {
-        Assert.notNull(dataSource);
+        Assert.notNull(dataSource, "dataSource must be not null");
         this.dataSource = dataSource;
-        Assert.notNull(predicate);
+        Assert.notNull(predicate, "predicate must be not null");
         this.predicate = predicate;
     }
 

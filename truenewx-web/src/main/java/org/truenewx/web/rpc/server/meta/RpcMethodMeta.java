@@ -22,7 +22,7 @@ public class RpcMethodMeta implements Comparable<RpcMethodMeta> {
     private List<RpcVariableMeta> argMetas;
 
     public RpcMethodMeta(final Method method) {
-        Assert.notNull(method);
+        Assert.notNull(method, "method must be not null");
         this.method = method;
     }
 
