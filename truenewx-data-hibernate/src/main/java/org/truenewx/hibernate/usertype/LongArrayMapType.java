@@ -5,7 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.truenewx.core.Strings;
 import org.truenewx.core.util.MathUtil;
 import org.truenewx.core.util.StringUtil;
@@ -25,7 +25,7 @@ public class LongArrayMapType extends ArrayMapType {
 
     @Override
     public Object nullSafeGet(final ResultSet rs, final String[] names,
-                    final SessionImplementor session, final Object owner)
+                    final SharedSessionContractImplementor session, final Object owner)
                     throws HibernateException, SQLException {
         final String value = rs.getString(names[0]);
         if (value != null) {
@@ -41,7 +41,7 @@ public class LongArrayMapType extends ArrayMapType {
 
     @Override
     public void nullSafeSet(final PreparedStatement st, final Object value, final int index,
-                    final SessionImplementor session) throws HibernateException, SQLException {
+                    final SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value != null) {
             final long[] array = (long[]) value;
             if (this.size > 0 && array.length > this.size) {

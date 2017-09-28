@@ -3,7 +3,7 @@ package org.truenewx.hibernate.usertype;
 import java.io.Serializable;
 
 import org.hibernate.HibernateException;
-import org.hibernate.annotations.common.util.ReflectHelper;
+import org.hibernate.annotations.common.util.StandardClassLoaderDelegateImpl;
 import org.hibernate.usertype.UserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,11 +57,7 @@ public abstract class AbstractUserType implements UserType {
     }
 
     protected Class<?> classForName(final String className) {
-        try {
-            return ReflectHelper.classForName(className);
-        } catch (final ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        return StandardClassLoaderDelegateImpl.INSTANCE.classForName(className);
     }
 
 }

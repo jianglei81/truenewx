@@ -2,7 +2,9 @@ package org.truenewx.hibernate.cfg;
 
 import javax.sql.DataSource;
 
-import org.hibernate.cfg.EJB3NamingStrategy;
+import org.hibernate.boot.model.naming.Identifier;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
+import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 import org.springframework.util.Assert;
 import org.truenewx.core.Strings;
 import org.truenewx.hibernate.functor.TableExistsPredicate;
@@ -13,14 +15,14 @@ import org.truenewx.hibernate.functor.TableExistsPredicate;
  * @author jianglei
  * @since JDK 1.8
  */
-public class MultiTableNamingStrategy extends EJB3NamingStrategy {
+public class MultiTableNamingStrategy extends PhysicalNamingStrategyStandardImpl {
 
     private static final long serialVersionUID = -5851271869133476909L;
     private DataSource dataSource;
     private TableExistsPredicate predicate;
 
     public MultiTableNamingStrategy(final DataSource dataSource,
-                    final TableExistsPredicate predicate) {
+            final TableExistsPredicate predicate) {
         Assert.notNull(dataSource);
         this.dataSource = dataSource;
         Assert.notNull(predicate);
@@ -28,16 +30,16 @@ public class MultiTableNamingStrategy extends EJB3NamingStrategy {
     }
 
     @Override
-    public String tableName(final String tableName) {
-        final String[] names = tableName.split(Strings.COMMA);
+    public Identifier toPhysicalTableName(final Identifier name, final JdbcEnvironment context) {
+        final String[] names = name.getText().split(Strings.COMMA);
         if (names.length > 1) {
-            for (String name : names) {
-                name = name.trim();
-                if (this.predicate.exists(this.dataSource, name)) {
-                    return name;
+            for (String n : names) {
+                n = n.trim();
+                if (this.predicate.exists(this.dataSource, n)) {
+                    return new Identifier(n, name.isQuoted());
                 }
             }
         }
-        return super.tableName(tableName);
+        return super.toPhysicalTableName(name, context);
     }
 }

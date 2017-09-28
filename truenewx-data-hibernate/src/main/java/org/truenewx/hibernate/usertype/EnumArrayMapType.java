@@ -8,7 +8,7 @@ import java.sql.Types;
 import java.util.Properties;
 
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.truenewx.core.Strings;
 import org.truenewx.core.enums.support.functor.AlgoEnumValueOf;
 import org.truenewx.core.enums.support.functor.FuncEnumValue;
@@ -18,7 +18,7 @@ import org.truenewx.core.util.MathUtil;
 
 /**
  * 枚举数组映射类
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -65,8 +65,8 @@ public class EnumArrayMapType extends EnumValueMapType {
 
     @Override
     public Object nullSafeGet(final ResultSet rs, final String[] names,
-                    final SessionImplementor session, final Object owner)
-                    throws HibernateException, SQLException {
+            final SharedSessionContractImplementor session, final Object owner)
+            throws HibernateException, SQLException {
         final String value = rs.getString(names[0]);
         if (value != null) {
             final String[] array = value.split(Strings.COMMA);
@@ -85,7 +85,8 @@ public class EnumArrayMapType extends EnumValueMapType {
 
     @Override
     public void nullSafeSet(final PreparedStatement st, final Object value, final int index,
-                    final SessionImplementor session) throws HibernateException, SQLException {
+            final SharedSessionContractImplementor session)
+            throws HibernateException, SQLException {
         if (value != null) {
             final Enum<?>[] array = (Enum<?>[]) value;
             if (this.size > 0 && array.length > this.size) {

@@ -6,27 +6,31 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
+import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.service.ServiceRegistry;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.orm.hibernate4.LocalSessionFactoryBuilder;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBuilder;
 import org.truenewx.data.orm.OrmConstants;
 import org.truenewx.hibernate.cfg.MultiTableNamingStrategy;
 import org.truenewx.hibernate.functor.TableExistsPredicate;
 
 /**
- * 对 {@link org.springframework.orm.hibernate4.LocalSessionFactoryBean} 的扩展
+ * 对 {@link org.springframework.orm.hibernate5.LocalSessionFactoryBean} 的扩展
  *
  * @author jianglei
  * @since JDK 1.8
  */
 public class LocalSessionFactoryBean
-                extends org.springframework.orm.hibernate4.LocalSessionFactoryBean
-                implements ApplicationContextAware {
+        extends org.springframework.orm.hibernate5.LocalSessionFactoryBean
+        implements ApplicationContextAware {
     /**
      * 模式
      */
@@ -45,7 +49,7 @@ public class LocalSessionFactoryBean
 
     @Autowired
     public void setSessionFactoryRegistry(
-                    final LocalSessionFactoryRegistry sessionFactoryRegistry) {
+            final LocalSessionFactoryRegistry sessionFactoryRegistry) {
         this.sessionFactoryRegistry = sessionFactoryRegistry;
     }
 
@@ -55,26 +59,27 @@ public class LocalSessionFactoryBean
     }
 
     @Override
-    public void setNamingStrategy(final NamingStrategy namingStrategy) {
-        super.setNamingStrategy(namingStrategy);
-        this.defaultNamingStrategy = false; // 标记未使用默认的命名策略
+    public void setPhysicalNamingStrategy(final PhysicalNamingStrategy physicalNamingStrategy) {
+        super.setPhysicalNamingStrategy(physicalNamingStrategy);
+        this.defaultNamingStrategy = false;
     }
 
     @Override
     protected SessionFactory buildSessionFactory(final LocalSessionFactoryBuilder sfb) {
-        if (this.defaultNamingStrategy) { // 如果使用的是默认的命名策略，则添加多表名支持的命名策略
+        if (this.defaultNamingStrategy) { // 默认添加多表名映射命名策略
             final Properties properties = sfb.getProperties();
             final Dialect dialect = Dialect.getDialect(properties);
             final TableExistsPredicate predicate = getTableExistsPredicate(dialect);
             final DataSource dataSource = (DataSource) properties.get(AvailableSettings.DATASOURCE);
-            sfb.setNamingStrategy(new MultiTableNamingStrategy(dataSource, predicate));
+            sfb.setPhysicalNamingStrategy(new MultiTableNamingStrategy(dataSource, predicate));
         }
+
         return super.buildSessionFactory(sfb);
     }
 
     private TableExistsPredicate getTableExistsPredicate(final Dialect dialect) {
         final Map<String, TableExistsPredicate> predicates = this.context
-                        .getBeansOfType(TableExistsPredicate.class);
+                .getBeansOfType(TableExistsPredicate.class);
         for (final TableExistsPredicate predicate : predicates.values()) {
             if (predicate.getDialectClass().isAssignableFrom(dialect.getClass())) {
                 return predicate;
@@ -87,7 +92,11 @@ public class LocalSessionFactoryBean
     public SessionFactory getObject() {
         final SessionFactory sessionFactory = super.getObject();
         if (sessionFactory != null) {
-            this.sessionFactoryRegistry.register(this.schema, getConfiguration(), sessionFactory);
+            final ServiceRegistry sr = ((SessionFactoryImplementor) sessionFactory)
+                    .getServiceRegistry();
+            final StandardServiceRegistry ssr = new StandardServiceRegistryAdapter(sr);
+            final Metadata metadata = getMetadataSources().getMetadataBuilder(ssr).build();
+            this.sessionFactoryRegistry.register(this.schema, metadata, sessionFactory);
         }
         return sessionFactory;
     }

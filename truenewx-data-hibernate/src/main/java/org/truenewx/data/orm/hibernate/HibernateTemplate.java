@@ -9,12 +9,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.TypeHelper;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.query.Query;
 import org.hibernate.type.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.core.enums.annotation.EnumValue;
@@ -55,13 +55,13 @@ public final class HibernateTemplate extends DataAccessTemplate {
     }
 
     public Dialect getDialect() {
-        return ((SessionFactoryImplementor) getSessionFactory()).getDialect();
+        return ((SessionFactoryImplementor) getSessionFactory()).getJdbcServices().getDialect();
     }
 
     private Query createQuery(final CharSequence ql) {
         final Session session = getSession();
         if (this.sqlMode) {
-            return session.createSQLQuery(ql.toString());
+            return session.createNativeQuery(ql.toString());
         }
         return session.createQuery(ql.toString());
     }

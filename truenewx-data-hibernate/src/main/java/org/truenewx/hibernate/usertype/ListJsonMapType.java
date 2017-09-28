@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.truenewx.core.util.JsonUtil;
 
 /**
@@ -25,7 +25,7 @@ public class ListJsonMapType extends ObjectComponentMapType {
 
     @Override
     public Object nullSafeGet(final ResultSet rs, final String[] names,
-            final SessionImplementor session, final Object owner)
+            final SharedSessionContractImplementor session, final Object owner)
             throws HibernateException, SQLException {
         final String value = rs.getString(names[0]);
         if (StringUtils.isNotBlank(value)) {
