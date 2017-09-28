@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.truenewx</groupId>
         <artifactId>truenewx</artifactId>
-        <version>1.2.0</version>
+        <version>2.0.0</version>
     </parent>
     <artifactId>truenewx-core</artifactId>
     <dependencies>
