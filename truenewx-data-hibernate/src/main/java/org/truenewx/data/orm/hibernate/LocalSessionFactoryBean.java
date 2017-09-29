@@ -96,7 +96,9 @@ public class LocalSessionFactoryBean
                     .getServiceRegistry();
             final StandardServiceRegistry ssr = new StandardServiceRegistryAdapter(sr);
             final Metadata metadata = getMetadataSources().getMetadataBuilder(ssr).build();
-            this.sessionFactoryRegistry.register(this.schema, metadata, sessionFactory);
+            final LocalSessionFactory lsf = new LocalSessionFactory(this.schema, metadata,
+                    sessionFactory);
+            this.sessionFactoryRegistry.register(lsf);
         }
         return sessionFactory;
     }
