@@ -26,7 +26,6 @@ import org.truenewx.core.util.CollectionUtil;
 import org.truenewx.web.http.HttpLink;
 import org.truenewx.web.menu.model.Menu;
 import org.truenewx.web.menu.model.MenuItem;
-import org.truenewx.web.menu.model.MenuOperation;
 import org.truenewx.web.menu.util.MenuUtil;
 import org.truenewx.web.rpc.RpcPort;
 import org.truenewx.web.security.authority.Authority;
@@ -57,10 +56,6 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
             for (final MenuItem menuItem : item) {
                 menu.addItem(menuItem);
             }
-            final List<MenuOperation> operations = getOperations(menuElement, null);
-            for (final MenuOperation operation : operations) {
-                menu.addOperation(operation);
-            }
             return menu;
         } catch (final Exception e) {
             LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
@@ -83,17 +78,18 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
         final List<MenuItem> items = new ArrayList<>();
         for (final Object itemObj : element.elements("item")) {
             final Element itemElement = (Element) itemObj;
-            final Authority auth = getAuthority(itemElement);
+            final Authority authority = getAuthority(itemElement);
             final String caption = itemElement.attributeValue("caption");
             final String href = itemElement.attributeValue("href");
-            final String target = itemElement.attributeValue("target");
             final String icon = itemElement.attributeValue("icon");
-            final MenuItem menuItem = new MenuItem(auth, caption, href, target, icon);
+            final boolean hidden = Boolean.valueOf(itemElement.attributeValue("hidden"));
+            final MenuItem menuItem = new MenuItem(authority, caption, new HttpLink(href), icon,
+                    hidden);
             menuItem.getLinks().addAll(getLinks(itemElement));
+            menuItem.getRpcs().addAll(getRpcs(itemElement));
             menuItem.getProfiles().addAll(getProfiles(itemElement));
             menuItem.getOptions().putAll(getOptions(itemElement, parentOptions));
             menuItem.getCaptions().putAll(getCaptions(itemElement));
-            menuItem.getOperations().addAll(getOperations(itemElement, menuItem.getOptions()));
             menuItem.getSubs().addAll(getItems(itemElement, menuItem.getOptions()));
             items.add(menuItem);
         }
@@ -139,34 +135,6 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
                     captionElement.getTextTrim());
         }
         return captions;
-    }
-
-    /**
-     * 获取菜单操作集合
-     *
-     * @param element
-     *            元素
-     * @param parentOptions
-     * @return operations 菜单功能项集合
-     *
-     * @author jianglei
-     */
-    private List<MenuOperation> getOperations(final Element element,
-            final Map<String, Object> parentOptions) {
-        final List<MenuOperation> operations = new ArrayList<>();
-        for (final Object operationObj : element.elements("operation")) {
-            final Element operationElement = (Element) operationObj;
-            final Authority auth = getAuthority(operationElement);
-            final String caption = operationElement.attributeValue("caption");
-            final MenuOperation operation = new MenuOperation(auth, caption);
-            operation.getCaptions().putAll(getCaptions(operationElement));
-            operation.getOptions().putAll(getOptions(operationElement, parentOptions));
-            operation.getLinks().addAll(getLinks(operationElement));
-            operation.getProfiles().addAll(getProfiles(operationElement));
-            operation.getRpcs().addAll(getRpcs(operationElement));
-            operations.add(operation);
-        }
-        return operations;
     }
 
     /**

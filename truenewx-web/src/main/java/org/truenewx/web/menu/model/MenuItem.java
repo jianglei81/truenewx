@@ -1,15 +1,20 @@
 package org.truenewx.web.menu.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
+import org.truenewx.core.spring.core.env.functor.FuncProfile;
 import org.truenewx.core.tuple.Binary;
 import org.truenewx.core.tuple.Binate;
 import org.truenewx.web.http.HttpLink;
 import org.truenewx.web.security.authority.Authority;
+import org.truenewx.web.security.authority.Authorization;
 
 /**
  * 菜单项类
@@ -17,82 +22,57 @@ import org.truenewx.web.security.authority.Authority;
  * @author jianglei
  * @since JDK 1.8
  */
-public class MenuItem extends MenuAction {
+public class MenuItem extends AbstractMenuItem implements Serializable, Comparable<MenuItem> {
 
     private static final long serialVersionUID = -6145127565332857618L;
 
-    /**
-     * 链接地址
-     */
-    private HttpLink link;
+    public MenuItem(final Authority authority, final String caption, final HttpLink link,
+            final String icon, final boolean hidden) {
+        super(authority, caption, link, icon, hidden);
+    }
 
-    /**
-     * 链接目标
-     */
-    private String target;
-
-    /**
-     * 图标
-     */
-    private String icon;
-
-    /**
-     * 子项集合
-     */
-    private List<MenuItem> subs = new ArrayList<>();
-
-    /**
-     * 菜单操作集合
-     */
-    private List<MenuOperation> operations = new ArrayList<>();
-
-    public MenuItem(final Authority authority, final String caption, final String href,
-            final String target, final String icon) {
-        super(authority, caption);
-        this.link = new HttpLink(href);
-        this.target = target;
-        this.icon = icon;
+    public boolean isProfileFitted() {
+        final String profile = FuncProfile.INSTANCE.apply();
+        return StringUtils.isBlank(profile) || getProfiles().isEmpty()
+                || getProfiles().contains(profile);
     }
 
     /**
-     * @return 菜单操作集合
-     */
-    public List<MenuOperation> getOperations() {
-        return this.operations;
-    }
-
-    /**
-     * @return 子项集合
-     */
-    public List<MenuItem> getSubs() {
-        return this.subs;
-    }
-
-    /**
+     * 相当于获取 auth.role
      *
-     * @return 链接地址
+     * @return 所需角色
      */
-    public String getHref() {
-        return this.link.getHref();
+    public String getRole() {
+        return getAuthority().getRole();
     }
 
     /**
+     * 相当于获取 auth.permission
      *
-     * @return 链接类型
+     * @return 所需权限
      */
-    public String getTarget() {
-        return this.target;
+    public String getPermission() {
+        return getAuthority().getPermission();
+    }
+
+    public String getCaption() {
+        return getCaptions().get(Locale.getDefault());
+    }
+
+    public HttpLink getLink() {
+        return getLinks().stream().findFirst().orElse(null); // 第一个链接为默认链接
+    }
+
+    public boolean contains(final String href, final HttpMethod method) {
+        return getLinks().stream().anyMatch(link -> link.matches(href, method));
+    }
+
+    public boolean contains(final String beanId, final String methodName, final Integer argCount) {
+        return getRpcs().stream().anyMatch(rpc -> rpc.matches(beanId, methodName, argCount));
     }
 
     /**
-     * 图标
-     */
-    public String getIcon() {
-        return this.icon;
-    }
-
-    /**
-     * 获取指定链接地址和链接方法匹配的权限
+     * 查找指定链接地址和链接方法匹配的权限
      *
      * @param href
      *            链接地址
@@ -100,42 +80,23 @@ public class MenuItem extends MenuAction {
      *            链接方法
      * @return 匹配的权限
      */
-    @Override
-    public Authority getAuthority(final String href, final HttpMethod method) {
-        // 菜单项上的访问方法固定为GET方式
-        if (this.link.isMatched(href, method)) {
+    public Authority findAuthority(final String href, final HttpMethod method) {
+        if (contains(href, method)) {
             return getAuthority();
         }
-        Authority authority = super.getAuthority(href, method);
-        if (authority != null) {
-            return authority;
-        }
-        for (final MenuOperation operation : this.operations) {
-            authority = operation.getAuthority(href, method);
-            if (authority != null) {
-                return authority;
-            }
-        }
-        for (final MenuItem sub : this.subs) {
-            authority = sub.getAuthority(href, method);
-            if (authority != null) {
+        for (final MenuItem sub : getSubs()) {
+            final Authority authority = sub.findAuthority(href, method);
+            if (authority != null) { // 找到一个即返回，后续即使匹配也无视
                 return authority;
             }
         }
         return null;
     }
 
-    @Override
-    public Authority getAuthority(final String beanId, final String methodName,
+    public Authority findAuthority(final String beanId, final String methodName,
             final Integer argCount) {
-        for (final MenuOperation operation : this.operations) {
-            final Authority authority = operation.getAuthority(beanId, methodName, argCount);
-            if (authority != null) {
-                return authority;
-            }
-        }
-        for (final MenuItem sub : this.subs) {
-            final Authority authority = sub.getAuthority(beanId, methodName, argCount);
+        for (final MenuItem sub : getSubs()) {
+            final Authority authority = sub.findAuthority(beanId, methodName, argCount);
             if (authority != null) {
                 return authority;
             }
@@ -145,45 +106,19 @@ public class MenuItem extends MenuAction {
 
     public Set<Authority> getAllAuthorities() {
         final Set<Authority> result = new HashSet<>();
-        Authority authority = getAuthority();
+        final Authority authority = getAuthority();
         if (authority != null) {
             result.add(authority);
         }
-        for (final MenuOperation operation : this.operations) {
-            authority = operation.getAuthority();
-            if (authority != null) {
-                result.add(authority);
-            }
-        }
-        for (final MenuItem sub : this.subs) {
+        for (final MenuItem sub : getSubs()) {
             result.addAll(sub.getAllAuthorities());
         }
         return result;
     }
 
-    /**
-     * 获取匹配指定RPC的菜单操作集合，包括各级子菜单中的菜单操作
-     *
-     * @param beanId
-     *            Bean Id
-     * @param methodName
-     *            方法名
-     * @param argCount
-     *            参数个数，为null时忽略参数个数比较
-     * @return 匹配指定RPC的菜单操作集合
-     */
-    public List<MenuOperation> getOperations(final String beanId, final String methodName,
-            final Integer argCount) {
-        final List<MenuOperation> operations = new ArrayList<>();
-        for (final MenuOperation operation : this.operations) {
-            if (operation.contains(beanId, methodName, argCount)) {
-                operations.add(operation);
-            }
-        }
-        for (final MenuItem sub : this.subs) {
-            operations.addAll(sub.getOperations(beanId, methodName, argCount));
-        }
-        return operations;
+    public boolean isContained(final Authorization authorization) {
+        // 如果当前动作未指定授权，表示没有授权限制，视为匹配
+        return getAuthority() == null || getAuthority().isContained(authorization);
     }
 
     /**
@@ -195,86 +130,48 @@ public class MenuItem extends MenuAction {
      *            链接方法
      * @return 匹配指定链接地址和链接方法的菜单动作下标和对象集合
      */
-    public List<Binate<Integer, MenuAction>> indexesOf(final String href, final HttpMethod method) {
-        for (int i = 0; i < this.subs.size(); i++) {
-            final MenuItem sub = this.subs.get(i);
-            final List<Binate<Integer, MenuAction>> indexes = sub.indexesOf(href, method);
+    public List<Binate<Integer, MenuItem>> indexesOf(final String href, final HttpMethod method) {
+        final List<MenuItem> subs = getSubs();
+        for (int i = 0; i < subs.size(); i++) {
+            final MenuItem sub = subs.get(i);
+            final List<Binate<Integer, MenuItem>> indexes = sub.indexesOf(href, method);
             // 先在更下级中找
             if (indexes.size() > 0) { // 在更下级中找到
-                indexes.add(0, new Binary<Integer, MenuAction>(i, sub)); // 加上对应的下级索引
+                indexes.add(0, new Binary<>(i, sub)); // 加上对应的下级索引
                 return indexes;
             }
             // 更下级中没找到再到直接下级找，以免更下级中包含有与直接下级一样的链接
             if (sub.contains(href, method)) { // 直接下级中找到
-                indexes.add(new Binary<Integer, MenuAction>(i, sub));
+                indexes.add(new Binary<>(i, sub));
                 return indexes;
             }
         }
-        // 没有下级则在包含的操作中查找
-        final List<Binate<Integer, MenuAction>> indexes = new ArrayList<>();
-        for (int i = 0; i < this.operations.size(); i++) {
-            final MenuOperation operation = this.operations.get(i);
-            if (operation.contains(href, method)) {
-                indexes.add(new Binary<Integer, MenuAction>(i, operation));
-            }
-        }
-        return indexes;
+        return new ArrayList<>();
     }
 
-    public List<Binate<Integer, MenuAction>> indexesOf(final String beanId, final String methodName,
+    public List<Binate<Integer, MenuItem>> indexesOf(final String beanId, final String methodName,
             final Integer argCount) {
-        for (int i = 0; i < this.subs.size(); i++) {
-            final MenuItem sub = this.subs.get(i);
-            final List<Binate<Integer, MenuAction>> indexes = sub.indexesOf(beanId, methodName,
+        final List<MenuItem> subs = getSubs();
+        for (int i = 0; i < subs.size(); i++) {
+            final MenuItem sub = subs.get(i);
+            final List<Binate<Integer, MenuItem>> indexes = sub.indexesOf(beanId, methodName,
                     argCount);
             // 先在更下级中找
             if (indexes.size() > 0) { // 在更下级中找到
-                indexes.add(0, new Binary<Integer, MenuAction>(i, sub)); // 加上对应的下级索引
+                indexes.add(0, new Binary<>(i, sub)); // 加上对应的下级索引
+                return indexes;
+            }
+            // 更下级中没找到再到直接下级找，以免更下级中包含有与直接下级一样的链接
+            if (sub.contains(beanId, methodName, argCount)) { // 直接下级中找到
+                indexes.add(new Binary<>(i, sub));
                 return indexes;
             }
         }
-        // 没有下级则在包含的操作中查找
-        final List<Binate<Integer, MenuAction>> indexes = new ArrayList<>();
-        for (int i = 0; i < this.operations.size(); i++) {
-            final MenuOperation operation = this.operations.get(i);
-            if (operation.contains(beanId, methodName, argCount)) {
-                indexes.add(new Binary<Integer, MenuAction>(i, operation));
-            }
-        }
-        return indexes;
+        return new ArrayList<>();
     }
 
     @Override
-    public boolean contains(final String href, final HttpMethod method) {
-        if (this.link.isMatched(href, method)) {
-            return true;
-        }
-        if (super.contains(href, method)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * 获取指定权限的菜单动作集合
-     *
-     * @param authority
-     *            权限名称
-     * @return 指定权限的菜单动作集合
-     */
-    public List<MenuAction> getActions(final String authority) {
-        final List<MenuAction> actions = new ArrayList<>();
-        if (getPermission().equals(authority)) { // 如果当前菜单项匹配
-            actions.add(this);
-        }
-        for (final MenuOperation operation : this.operations) {
-            if (operation.getPermission().equals(authority)) { // 如果包含的特性匹配
-                actions.add(operation);
-            }
-        }
-        for (final MenuItem sub : this.subs) { // 加入所有子菜单项中的匹配动作
-            actions.addAll(sub.getActions(authority));
-        }
-        return actions;
+    public int compareTo(final MenuItem other) {
+        return Boolean.valueOf(other.isHidden()).compareTo(isHidden()); // 非隐藏的排前面
     }
 }

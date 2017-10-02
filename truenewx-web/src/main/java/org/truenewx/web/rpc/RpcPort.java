@@ -87,7 +87,7 @@ public class RpcPort implements Serializable {
      *            参数个数，为null时忽略参数个数的比较
      * @return 指定RPC是否匹配当前PRC端口
      */
-    public boolean isMatched(final String beanId, final String methodName, final Integer argCount) {
+    public boolean matches(final String beanId, final String methodName, final Integer argCount) {
         return StringUtil.wildcardMatch(this.beanId, beanId)
                 && StringUtil.wildcardMatch(this.methodName, methodName)
                 && (this.argCount == null || argCount == null || this.argCount.equals(argCount));

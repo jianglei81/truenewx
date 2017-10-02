@@ -84,7 +84,7 @@ public class HttpLink implements Serializable {
      *            方法类型
      * @return 是否匹配指定方法类型
      */
-    public boolean isMatched(final HttpMethod method) {
+    public boolean matches(final HttpMethod method) {
         return this.method == null || this.method == method;
     }
 
@@ -97,7 +97,7 @@ public class HttpLink implements Serializable {
      *            方法类型
      * @return 是否匹配指定链接地址和方法类型
      */
-    public boolean isMatched(final String href, final HttpMethod method) {
-        return this.href != null && StringUtil.antPathMatch(href, this.href) && isMatched(method);
+    public boolean matches(final String href, final HttpMethod method) {
+        return this.href != null && StringUtil.antPathMatch(href, this.href) && matches(method);
     }
 }

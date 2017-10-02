@@ -5,7 +5,6 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="item" minOccurs="1" maxOccurs="unbounded" />
-                <xs:element ref="operation" minOccurs="0" maxOccurs="unbounded" />
             </xs:sequence>
             <xs:attribute name="name" type="xs:string" use="required" />
         </xs:complexType>
@@ -13,20 +12,28 @@
     <xs:element name="item">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="link" minOccurs="0" maxOccurs="unbounded">
-                    <xs:complexType>
-                        <xs:attribute name="href" type="xs:string" use="required" />
-                        <xs:attribute name="method" type="HttpMethod" use="optional" />
-                    </xs:complexType>
-                </xs:element>
+                <xs:choice maxOccurs="unbounded">
+                    <xs:element name="link" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:attribute name="href" type="xs:string" use="required" />
+                            <xs:attribute name="method" type="HttpMethod" use="optional" />
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="rpc" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:attribute name="id" type="xs:string" use="required" />
+                            <xs:attribute name="method" type="xs:string" use="required" />
+                            <xs:attribute name="args" type="xs:nonNegativeInteger" use="optional" />
+                        </xs:complexType>
+                    </xs:element>
+                </xs:choice>
                 <xs:element ref="caption" minOccurs="0" maxOccurs="unbounded" />
                 <xs:element ref="options" minOccurs="0" />
                 <xs:element ref="item" minOccurs="0" maxOccurs="unbounded" />
-                <xs:element ref="operation" minOccurs="0" maxOccurs="unbounded" />
             </xs:sequence>
             <xs:attribute name="caption" type="xs:string" use="required" />
             <xs:attribute name="href" type="xs:string" use="optional" />
-            <xs:attribute name="target" type="xs:string" use="optional" />
+            <xs:attribute name="hidden" type="xs:boolean" use="optional" />
             <xs:attribute name="type" type="xs:string" use="optional" />
             <xs:attribute name="role" type="xs:string" use="optional" />
             <xs:attribute name="permission" type="xs:string" use="optional" />
@@ -49,34 +56,6 @@
                 </xs:element>
             </xs:sequence>
             <xs:attribute name="inherit" type="xs:boolean" use="optional" default="true" />
-        </xs:complexType>
-    </xs:element>
-    <xs:element name="operation">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="caption" minOccurs="0" maxOccurs="unbounded" />
-                <xs:choice maxOccurs="unbounded">
-                    <xs:element name="link">
-                        <xs:complexType>
-                            <xs:attribute name="href" type="xs:string" use="required" />
-                            <xs:attribute name="method" type="HttpMethod" use="optional" />
-                        </xs:complexType>
-                    </xs:element>
-                    <xs:element name="rpc">
-                        <xs:complexType>
-                            <xs:attribute name="id" type="xs:string" use="required" />
-                            <xs:attribute name="method" type="xs:string" use="required" />
-                            <xs:attribute name="args" type="xs:nonNegativeInteger" use="optional" />
-                        </xs:complexType>
-                    </xs:element>
-                </xs:choice>
-                <xs:element ref="options" minOccurs="0" />
-            </xs:sequence>
-            <xs:attribute name="caption" use="required" />
-            <xs:attribute name="type" type="xs:string" use="optional" />
-            <xs:attribute name="role" type="xs:string" use="optional" />
-            <xs:attribute name="permission" type="xs:string" use="optional" />
-            <xs:attribute name="profile" type="xs:string" use="optional" />
         </xs:complexType>
     </xs:element>
     <xs:element name="caption">

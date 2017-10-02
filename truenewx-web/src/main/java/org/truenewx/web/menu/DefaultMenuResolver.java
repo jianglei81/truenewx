@@ -9,9 +9,7 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.truenewx.web.menu.model.Menu;
-import org.truenewx.web.menu.model.MenuAction;
 import org.truenewx.web.menu.model.MenuItem;
-import org.truenewx.web.menu.model.MenuOperation;
 import org.truenewx.web.security.authority.Authority;
 import org.truenewx.web.security.authority.Authorization;
 
@@ -69,11 +67,11 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
     private void copyMatchedItemTo(final MenuItem item, final Authorization authorization,
             final List<MenuItem> items) {
         // 如果profile不匹配，则直接忽略，也不再查找子菜单
-        if (!item.matchesProfile()) {
+        if (!item.isProfileFitted()) {
             return;
         }
         // 当前菜单授权不匹配，则不再检查子菜单项和操作
-        if (!item.matchesAuth(authorization)) {
+        if (!item.isContained(authorization)) {
             return;
         }
         // 检查子菜单项
@@ -81,21 +79,13 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
         for (final MenuItem sub : item.getSubs()) {
             copyMatchedItemTo(sub, authorization, newSubs);
         }
-        // 检查操作
-        final List<MenuOperation> newOperations = new ArrayList<>();
-        for (final MenuOperation operation : item.getOperations()) {
-            if (operation.matchesAuth(authorization)) {
-                newOperations.add(operation);
-            }
-        }
         // 构建新的菜单项对象，以免影响缓存的完整菜单对象的数据
         final MenuItem newItem = new MenuItem(item.getAuthority(), item.getCaption(),
-                item.getHref(), item.getTarget(), item.getIcon());
+                item.getLink(), item.getIcon(), item.isHidden());
         newItem.getLinks().addAll(item.getLinks());
         newItem.getOptions().putAll(item.getOptions());
         newItem.getCaptions().putAll(item.getCaptions());
         newItem.getSubs().addAll(newSubs);
-        newItem.getOperations().addAll(newOperations);
 
         items.add(newItem);
     }
@@ -122,7 +112,7 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
      * @param authes
      *            目标菜单项集
      */
-    private void addMatchedAuthority(final MenuAction action, final Map<String, Object> options,
+    private void addMatchedAuthority(final MenuItem action, final Map<String, Object> options,
             final List<Authority> authes) {
         if (isMatchedOptions(action, options)) {
             final Authority auth = action.getAuthority();
@@ -131,10 +121,7 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
             }
         }
         if (action instanceof MenuItem) { // 如果菜单动作是菜单项，则需进一步添加包含的菜单操作和子菜单项中的匹配授权
-            final MenuItem item = (MenuItem) action;
-            for (final MenuOperation operation : item.getOperations()) {
-                addMatchedAuthority(operation, options, authes);
-            }
+            final MenuItem item = action;
             for (final MenuItem sub : item.getSubs()) {
                 addMatchedAuthority(sub, options, authes);
             }
@@ -150,7 +137,7 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
      *            选项映射集
      * @return 指定选项映射集是否与指定菜单动作匹配
      */
-    private boolean isMatchedOptions(final MenuAction action, final Map<String, Object> options) {
+    private boolean isMatchedOptions(final MenuItem action, final Map<String, Object> options) {
         // 菜单动作中的选项集必须包含指定选项集中的所有选项，且选项值要相等
         // 遍历选项集中的每一个选项，只要有一个选项不匹配，则匹配失败
         for (final Entry<String, Object> entry : options.entrySet()) {
