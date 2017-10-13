@@ -31,7 +31,7 @@ public interface Subject {
 
     void login(LoginToken token) throws HandleableException;
 
-    <T extends Authorization> T getAuthorization();
+    <T extends Authorization> T getAuthorization(boolean reset);
 
     boolean isAuthorized(Authority authority);
 

@@ -68,8 +68,8 @@ public class DelegatingSubject implements Subject {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Authorization> T getAuthorization() {
-        return (T) this.securityManager.getAuthorization(this);
+    public <T extends Authorization> T getAuthorization(final boolean reset) {
+        return (T) this.securityManager.getAuthorization(this, reset);
     }
 
     @Override

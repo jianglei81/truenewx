@@ -19,7 +19,7 @@ public interface SecurityManager extends SubjectManager {
 
     Object getUser(Subject subject, boolean auto);
 
-    Authorization getAuthorization(Subject subject);
+    Authorization getAuthorization(Subject subject, boolean reset);
 
     boolean isAuthorized(Subject subject, Authority authority);
 

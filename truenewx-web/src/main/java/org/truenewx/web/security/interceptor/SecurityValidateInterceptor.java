@@ -1,7 +1,9 @@
 package org.truenewx.web.security.interceptor;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -11,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
+import org.truenewx.core.exception.BusinessException;
 import org.truenewx.web.menu.MenuResolver;
 import org.truenewx.web.menu.model.Menu;
 import org.truenewx.web.security.authority.Authority;
@@ -91,29 +94,45 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
             final Subject subject = this.subjectManager.getSubject(request, response, userClass);
             if (subject != null) { // 能取得subject才进行校验
                 // 登录校验
-                if (!subject.isLogined()) {
-                    if (WebUtil.isAjaxRequest(request)) { // AJAX请求未登录时，返回错误状态
-                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                    } else { // 普通请求未登录时，跳转至登录页面
-                        final String originalUrl = WebUtil
-                                .getRelativeRequestUrlWithQueryString(request, true);
-                        String loginUrl = MessageFormat.format(this.loginUrl, originalUrl);
-                        if (loginUrl.startsWith(FORWARD_PREFIX)) { // 请求转发
-                            loginUrl = loginUrl.substring(FORWARD_PREFIX.length());
-                            WebUtil.forward(request, response, loginUrl);
-                        } else { // 直接重定向
-                            WebUtil.redirect(request, response, loginUrl);
-                        }
-                        return false; // 阻止后续拦截器
-                    }
+                if (!validateLogin(subject, request, response)) {
+                    return false;
                 }
                 // 登录校验成功后，校验授权
-                if (this.menu != null) {
-                    final HttpMethod method = HttpMethod.valueOf(request.getMethod());
-                    final Authority auth = this.menu.getAuthority(url, method);
-                    subject.validateAuthority(auth);
+                if (!validateAuthority(url, subject, request)) {
+                    return false;
                 }
             }
+        }
+        return true;
+    }
+
+    protected boolean validateLogin(final Subject subject, final HttpServletRequest request,
+            final HttpServletResponse response) throws ServletException, IOException {
+        if (!subject.isLogined()) {
+            if (WebUtil.isAjaxRequest(request)) { // AJAX请求未登录时，返回错误状态
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            } else { // 普通请求未登录时，跳转至登录页面
+                final String originalUrl = WebUtil.getRelativeRequestUrlWithQueryString(request,
+                        true);
+                String loginUrl = MessageFormat.format(this.loginUrl, originalUrl);
+                if (loginUrl.startsWith(FORWARD_PREFIX)) { // 请求转发
+                    loginUrl = loginUrl.substring(FORWARD_PREFIX.length());
+                    WebUtil.forward(request, response, loginUrl);
+                } else { // 直接重定向
+                    WebUtil.redirect(request, response, loginUrl);
+                }
+                return false; // 阻止后续拦截器
+            }
+        }
+        return true;
+    }
+
+    protected boolean validateAuthority(final String url, final Subject subject,
+            final HttpServletRequest request) throws BusinessException {
+        if (this.menu != null) {
+            final HttpMethod method = HttpMethod.valueOf(request.getMethod());
+            final Authority auth = this.menu.getAuthority(url, method);
+            subject.validateAuthority(auth);
         }
         return true;
     }

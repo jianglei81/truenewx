@@ -136,11 +136,14 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Authorization getAuthorization(final Subject subject) {
+    public Authorization getAuthorization(final Subject subject, final boolean reset) {
         final Realm realm = getRealm(subject.getUserClass());
         if (realm != null) {
             final HttpSession session = subject.getServletRequest().getSession();
             final String authorizationSessionName = getAuthorizationSessionName(realm);
+            if (reset) {
+                session.removeAttribute(authorizationSessionName);
+            }
             AuthorizationInfo ai = (AuthorizationInfo) session
                     .getAttribute(authorizationSessionName);
             if (ai == null) {
@@ -159,7 +162,7 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
 
     @Override
     public boolean isAuthorized(final Subject subject, final Authority authority) {
-        final Authorization authorization = getAuthorization(subject);
+        final Authorization authorization = getAuthorization(subject, false);
         return authority == null || authority.isContained(authorization);
     }
 
