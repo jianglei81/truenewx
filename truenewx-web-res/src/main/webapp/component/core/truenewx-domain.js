@@ -1,6 +1,6 @@
 /**
  * truenewx-domain.js v1.1.0
- *
+ * 
  * Depends on: truenewx.js
  */
 $.tnx.domain = {
@@ -202,13 +202,15 @@ $.tnx.domain = {
             });
             $.tnx.imports(scripts, function() {
                 // 加载完所有js之后，依次执行其中的Controller.onLoad()
+                controllers = []; // 使用全局的controlls保存所有Controller实例
                 scripts.each(function(script) {
                     var namespace = $.tnx.domain.site.util.jsUrl2Namespace(script);
                     var className = namespace + ".Controller";
-                    var controller;
                     try {
                         eval(namespace + ".controller = new " + className + "()");
+                        // 使用全局的controller保存最后一个Controller实例
                         eval("controller = " + namespace + ".controller");
+                        controllers.push(controller);
                     } catch (e) {
                         $.console.error(e);
                         return;
@@ -353,7 +355,7 @@ $.tnx.domain.site = {
     },
     /**
      * 用模态窗体打开指定URL
-     *
+     * 
      * @param url
      *            URL
      * @param params
