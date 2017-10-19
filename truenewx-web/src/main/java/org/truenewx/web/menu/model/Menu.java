@@ -2,9 +2,11 @@ package org.truenewx.web.menu.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
@@ -70,6 +72,16 @@ public class Menu implements Serializable {
     }
 
     /**
+     *
+     * @return 可见菜单项集合
+     */
+    public Iterable<MenuItem> getVisibleItems() {
+        return this.items.stream().filter(item -> {
+            return !item.isHidden();
+        }).collect(Collectors.toList());
+    }
+
+    /**
      * 获取指定菜单项
      *
      * @param index
@@ -82,6 +94,10 @@ public class Menu implements Serializable {
 
     public void addItem(final MenuItem item) {
         this.items.add(item);
+    }
+
+    public void sortItems() {
+        Collections.sort(this.items);
     }
 
     public Authority getAuthority(final String href, final HttpMethod method) {
@@ -131,12 +147,12 @@ public class Menu implements Serializable {
             // 先在更下级中找
             final List<Binate<Integer, MenuItem>> indexes = item.indexesOf(href, method);
             if (indexes.size() > 0) { // 在下级中找到
-                indexes.add(0, new Binary<Integer, MenuItem>(i, item)); // 加上对应的下级索引
+                indexes.add(0, new Binary<>(i, item)); // 加上对应的下级索引
                 return indexes;
             }
             // 更下级中没找到再到直接下级找，以免更下级中包含有与直接下级一样的链接
             if (item.contains(href, method)) { // 在当前级别找到
-                indexes.add(new Binary<Integer, MenuItem>(i, item));
+                indexes.add(new Binary<>(i, item));
                 return indexes;
             }
         }
@@ -151,7 +167,12 @@ public class Menu implements Serializable {
             final List<Binate<Integer, MenuItem>> indexes = item.indexesOf(beanId, methodName,
                     argCount);
             if (indexes.size() > 0) { // 在下级中找到
-                indexes.add(0, new Binary<Integer, MenuItem>(i, item)); // 加上对应的下级索引
+                indexes.add(0, new Binary<>(i, item)); // 加上对应的下级索引
+                return indexes;
+            }
+            // 更下级中没找到再到直接下级找，以免更下级中包含有与直接下级一样的RPC
+            if (item.contains(beanId, methodName, argCount)) { // 在当前级别找到
+                indexes.add(new Binary<>(i, item));
                 return indexes;
             }
         }

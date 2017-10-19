@@ -95,6 +95,9 @@ public class MenuItem extends AbstractMenuItem implements Serializable, Comparab
 
     public Authority findAuthority(final String beanId, final String methodName,
             final Integer argCount) {
+        if (contains(beanId, methodName, argCount)) {
+            return getAuthority();
+        }
         for (final MenuItem sub : getSubs()) {
             final Authority authority = sub.findAuthority(beanId, methodName, argCount);
             if (authority != null) {
@@ -154,9 +157,9 @@ public class MenuItem extends AbstractMenuItem implements Serializable, Comparab
         final List<MenuItem> subs = getSubs();
         for (int i = 0; i < subs.size(); i++) {
             final MenuItem sub = subs.get(i);
+            // 先在更下级中找
             final List<Binate<Integer, MenuItem>> indexes = sub.indexesOf(beanId, methodName,
                     argCount);
-            // 先在更下级中找
             if (indexes.size() > 0) { // 在更下级中找到
                 indexes.add(0, new Binary<>(i, sub)); // 加上对应的下级索引
                 return indexes;
@@ -172,6 +175,7 @@ public class MenuItem extends AbstractMenuItem implements Serializable, Comparab
 
     @Override
     public int compareTo(final MenuItem other) {
-        return Boolean.valueOf(other.isHidden()).compareTo(isHidden()); // 非隐藏的排前面
+        // 隐藏的排后面
+        return Boolean.valueOf(isHidden()).compareTo(other.isHidden());
     }
 }

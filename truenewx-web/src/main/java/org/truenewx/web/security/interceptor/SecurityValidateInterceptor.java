@@ -131,8 +131,9 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
             final HttpServletRequest request) throws BusinessException {
         if (this.menu != null) {
             final HttpMethod method = HttpMethod.valueOf(request.getMethod());
-            final Authority auth = this.menu.getAuthority(url, method);
-            subject.validateAuthority(auth);
+            final Authority authority = this.menu.getAuthority(url, method);
+            // 此时授权可能为null，为null时将被视为无访问权限，意味着在配置有菜单的系统中，URL访问均应在菜单配置中进行配置
+            subject.validateAuthority(authority);
         }
         return true;
     }

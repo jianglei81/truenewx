@@ -162,8 +162,11 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
 
     @Override
     public boolean isAuthorized(final Subject subject, final Authority authority) {
-        final Authorization authorization = getAuthorization(subject, false);
-        return authority == null || authority.isContained(authorization);
+        if (authority != null) {
+            final Authorization authorization = getAuthorization(subject, false);
+            return authority.isContained(authorization);
+        }
+        return false;
     }
 
     @Override

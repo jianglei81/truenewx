@@ -2,6 +2,7 @@ package org.truenewx.web.menu.parse;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -52,10 +53,11 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
             final Document doc = reader.read(inputStream);
             final Element menuElement = doc.getRootElement();
             final Menu menu = new Menu(menuElement.attributeValue("name"));
-            final List<MenuItem> item = getItems(menuElement, null);
-            for (final MenuItem menuItem : item) {
-                menu.addItem(menuItem);
+            final List<MenuItem> items = getItems(menuElement, null);
+            for (final MenuItem item : items) {
+                menu.addItem(item);
             }
+            menu.sortItems();
             return menu;
         } catch (final Exception e) {
             LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
@@ -83,15 +85,16 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
             final String href = itemElement.attributeValue("href");
             final String icon = itemElement.attributeValue("icon");
             final boolean hidden = Boolean.valueOf(itemElement.attributeValue("hidden"));
-            final MenuItem menuItem = new MenuItem(authority, caption, new HttpLink(href), icon,
+            final MenuItem item = new MenuItem(authority, caption, new HttpLink(href), icon,
                     hidden);
-            menuItem.getLinks().addAll(getLinks(itemElement));
-            menuItem.getRpcs().addAll(getRpcs(itemElement));
-            menuItem.getProfiles().addAll(getProfiles(itemElement));
-            menuItem.getOptions().putAll(getOptions(itemElement, parentOptions));
-            menuItem.getCaptions().putAll(getCaptions(itemElement));
-            menuItem.getSubs().addAll(getItems(itemElement, menuItem.getOptions()));
-            items.add(menuItem);
+            item.getLinks().addAll(getLinks(itemElement));
+            item.getRpcs().addAll(getRpcs(itemElement));
+            item.getProfiles().addAll(getProfiles(itemElement));
+            item.getOptions().putAll(getOptions(itemElement, parentOptions));
+            item.getCaptions().putAll(getCaptions(itemElement));
+            item.getSubs().addAll(getItems(itemElement, item.getOptions()));
+            Collections.sort(item.getSubs());
+            items.add(item);
         }
         return items;
     }

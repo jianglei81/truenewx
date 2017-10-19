@@ -242,9 +242,10 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
             }
             // 再校验菜单配置中限定的权限
             if (this.menu != null) {
-                final Authority auth = this.menu.getAuthority(beanId, method.getName(),
+                final Authority authority = this.menu.getAuthority(beanId, method.getName(),
                         method.getParameterTypes().length);
-                subject.validateAuthority(auth);
+                // 此时授权可能为null，为null时将被视为无访问权限，意味着在配置有菜单的系统中，RPC请求均应在菜单配置中进行配置
+                subject.validateAuthority(authority);
             }
         }
         return true;
