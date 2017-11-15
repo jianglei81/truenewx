@@ -1,209 +1,198 @@
+/**
+ * 非结构化存储上传组件
+ *
+ * Depends on: jquery.js, webuploader.js, truenewx.js
+ */
 (function($) {
 
-	var UnstructuredUpload = function(element, options) {
-		this.init(element, options);
-	};
+    var UnstructuredUpload = function(element, options) {
+        this.init(element, options);
+    };
 
-	var rpc = $.tnx.rpc.imports("unstructuredController");
-
-
-	var defaultOptions = {
-		authorizeType: null, // 授权类型
-		maxCapacity: null, // 最大容量,以byte为单位
-		progress: function(p,cpt) {} // 上传进度回调
-	};
-
-	var uploadOptions = {
-		filename:null,
-		resize:{
-			width:0,
-			height:0
-		},
-		crop:{
-			x:0,
-			y:0,
-			width:0,
-			height:0
-		},
-		successCallback:function(result){},
-		errorCallback:function(error){}
-	};
-
-	UnstructuredUpload.prototype = {
-		init: function(element, options) {
-			this.element = element;
-			this.setOptions(options);
-		},
-		setOptions: function(options) {
-			defaultOptions = $.extend(defaultOptions, options);
-		}
-	};
-
-	var getSuffix = function(fileName) {
-		 var ldot = fileName.lastIndexOf(".");
-		 if(ldot<0){
-			 return "";
-		 }
-		 var type = fileName.substring(ldot);
-		return type;
-	}
-
-	var bytesToSize = function(bytes) {
-		if (bytes === 0) {
-            return '0 B';
+    var defaultOptions = {
+        // 【必填】授权类型
+        authorizeType : undefined,
+        // 【建议填写】回调函数的上下文，即this
+        callbackContext : undefined,
+        // 【一般需要重填】服务端路径
+        serverPath : "/unstructured/upload",
+        // RPC控制器beanId
+        controllerId : "unstructuredController",
+        // flash文件路径，允许flash实现时需提供
+        swf : undefined,
+        // 是否压缩图片后再上传，对图片才有效
+        resize : false,
+        // 是否自动提交上传
+        auto : false,
+        events : {
+            // 当有文件被添加进队列时的回调函数
+            fileQueued : function(file) {
+            },
+            // 文件上传过程中的回调函数
+            uploadPprogress : function(file, percentage) {
+            },
+            // 上传成功的回调函数
+            uploadSuccess : function(file) {
+            },
+            // 上传失败的回调函数
+            uploadError : function(file, error) {
+            },
+            // 文件上传完成后，服务器返回结果回调函数
+            uploadAccept : function(object, result) {
+            },
+            // 通用错误处理函数
+            error : function(error) {
+                $.tnx.alert(getLocaleMessage("error"), error.message);
+            }
+        },
+        messages : { // 扩展定义错误消息
+            "default" : {},
+            "zh_TW" : {}
         }
-		var k = 1024,
-		sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
-		i = Math.floor(Math.log(bytes) / Math.log(k));
-		return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
-	}
+    };
 
-	var methods = {
-		init: function(option) {
-			var args = arguments,
-			result = null;
-			$(this).each(function(index, item) {
-				var data = $.data(document, $(item).attr("id")),
-				options = (typeof option !== 'object') ? null: option;
-				if (!data) {
-					data = new UnstructuredUpload(item, options);
-					$.data(document, $(item).attr("id"), data);
-					result = $.extend({
-						"element": data.element
-					},
-					methods);
-					return false;
-				}
-				if (typeof option === 'string') {
-					if (data[option]) {
-						result = data[option].apply(data, Array.prototype.slice.call(args, 1));
-					} else {
-						throw "Method " + option + " does not exist";
-					}
-				} else {
-					result = data.setOptions(option);
-				}
-			});
-			return result;
-		},
-		upload: function(options) {
-			// 判断浏览器是否支持文件 api
-			if (! (window.File || window.FileReader || window.FileList || window.Blob)) {
-				throw "Browser nonsupport file api";
-			}
-			uploadOptions=$.extend(uploadOptions, options);
-			var filename=uploadOptions.filename,
-				successCallback=uploadOptions.successCallback,
-				errorCallback=uploadOptions.errorCallback,
-				crop=uploadOptions.crop;
+    var messages = {
+        "default" : {
+            "error" : "错误",
+            "error.unstructured.upload.beyond_max_number" : "上传文件数不能超过 {0} 个",
+            "error.unstructured.upload.beyond_max_capacity" : "文件最大不能超过 {0}，“{1}”的大小为 {2}",
+            "error.unstructured.upload.unsupported_extension" : "仅支持 {0} 文件，不能上传“{1}”"
+        },
+        "zh_TW" : {
+            "error" : "錯誤",
+            "error.unstructured.upload.beyond_max_number" : "上載文件數不能超過 {0} 個",
+            "error.unstructured.upload.beyond_max_capacity" : "文件最大不能超過 {0}，“{1}”的大小為 {2}",
+            "error.unstructured.upload.unsupported_extension" : "僅支持 {0} 文件，不能上載“{1}”"
+        }
+    }
 
-			var type = defaultOptions.authorizeType,
-			maxCapacity = defaultOptions.maxCapacity;
-			if (!type || type == "" || type == null) {
-				throw "Please set the authorization type";
-			}
-			var $el = !this.element ? $(this) : $(this.element);
-			var files = $el.prop("files"); // 得到文件
-			if (files.length == 0) {
-				throw "Please select the uploaded file";
-			}
-			var file = files[0];
-			if (maxCapacity != null && maxCapacity < file.size) {
-				var size = bytesToSize(maxCapacity);
-				$.tnx.alert("文件最大不能超过" + size, "上传提示");
-				return;
-			}
+    var getLocaleMessage = function(code, args) {
+        var locale = $.tnx.locale;
+        var localeMessages = messages[locale] || messages["default"];
+        var message = localeMessages[code];
+        if (message) {
+            args.each(function(arg, index) {
+                var regexp = new RegExp("\\{" + index + "\\}", "g");
+                message = message.replace(regexp, args[index]);
+            });
+        }
+        return message;
+    };
 
-			var token = rpc.authorizePrivateWrite(type); // 请求授权
-			filename = !filename || filename == "" || filename == null ? token.uuid: filename;
-			var suffix = getSuffix(filename);
-			var oldSuffix=getSuffix(file.name);
-			if (suffix == "" || suffix == null) {
-				suffix = getSuffix(file.name);
-			}
-			if(filename!=file.name){
-				filename=filename.replace(suffix,"");
-				filename=filename+oldSuffix
-			}else{
-				filename=filename+suffix;
-			}
+    UnstructuredUpload.prototype = {
+        init : function(element, options) {
+            this.options = $.extend(defaultOptions, options);
+            if (!this.options.authorizeType) { // 授权类型必须有
+                throw "Please set the authorizeType";
+            }
+            // 覆盖默认错误消息
+            $.each(this.options.messages, function(locale, localeMessages) {
+                messages[locale] = $.extend(messages[locale], localeMessages);
+            });
+            delete this.options.messages;
 
+            this.element = element;
+            var _this = this;
+            $.tnx.rpc.imports(this.options.controllerId, function(rpc) {
+                _this.rpc = rpc;
 
-			if (!token) {
-				throw "Request authorization failed";
-			}
-			var ossParam={
-	                region: token.region,
-	                accessKeyId: token.accessId,
-	                accessKeySecret: token.accessSecret,
-	                bucket: token.bucket
-	            };
-			if(token.tempToken&&token.tempToken!=null){
-			    ossParam.stsToken=token.tempToken;
-			}
-			var client = new OSS.Wrapper(ossParam);
-			var storeAs = token.path + filename;
-			client.multipartUpload(storeAs, file, defaultOptions.progress).then(function(res) {
-				var innerUrl = token.innerUrl + filename
-				var protocol = window.location.protocol.replace(":");
-				var imageProcess="";
-				if(uploadOptions.resize&&uploadOptions.resize.width>0&&uploadOptions.resize.height>0){
-					// 图片缩放
-					imageProcess="/resize,m_fixed";
-					imageProcess+=",w_"+uploadOptions.resize.width;
-					imageProcess+=",h_"+uploadOptions.resize.height;
-					imageProcess+=",limit_0";
-				}
-				if(uploadOptions.crop&&uploadOptions.crop.width>0&&uploadOptions.crop.height>0){
-					// 图片裁剪
-					imageProcess+="/crop";
-					imageProcess+=",x_"+uploadOptions.crop.x+",y_"+uploadOptions.crop.y;
-					imageProcess+=",w_"+uploadOptions.crop.width+",h_"+uploadOptions.crop.height;
-				}
-				if(imageProcess){
-					// 拼接使用图片处理
-					imageProcess="?x-oss-process=image"+imageProcess
-				}
-				if (token.publicReadable) {
-					client.putACL(storeAs, 'public-read').then(function(result) {
-						if (successCallback && typeof successCallback == "function") {
-							if(imageProcess!=""){
-								innerUrl+=imageProcess;
-							}
-							var outerUrl = rpc.getOuterUrl(type, innerUrl, protocol);
-							var result = {
-								"innerUrl": innerUrl,
-								"outerUrl": outerUrl
-							};
-							successCallback(result);
-						}
-					});
-				}else{
-					if (successCallback  && typeof successCallback == "function") {
-						if(crop!=""){
-							innerUrl+=crop;
-						}
-						var outerUrl = rpc.getOuterUrl(type, innerUrl, protocol);
-						var result = {
-							"innerUrl": innerUrl,
-							"outerUrl": outerUrl
-						};
-						successCallback(result);
-					}
-				}
-			}).catch(function(err){
-				errorCallback(err);
-			}); // 上传文件
-		}
-	};
+                rpc.getUploadLimit(_this.options.authorizeType, function(uploadLimit) {
+                    var webuploaderOptions = {
+                        swf : _this.options.swf,
+                        server : _this.options.serverPath + "/" + _this.options.authorizeType,
+                        pick : element,
+                        resize : _this.options.resize,
+                        threads : 5,
+                        prepareNextFile : true,
+                        fileNumLimit : uploadLimit.number,
+                        fileSingleSizeLimit : uploadLimit.capacity,
+                        duplicate : false,
+                        accept : {
+                            extensions : uploadLimit.extensions.join(","),
+                            mimeTypes : uploadLimit.mimeTypes.join(",")
+                        }
+                    };
+                    _this.webuploader = WebUploader.create(webuploaderOptions);
 
-	$.fn.unstructuredUpload = function(method) {
-		if (methods[method]) {
-			return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-		} else if (typeof method === 'object' || !method) {
-			return methods.init.apply(this, arguments);
-		} else {
-			return $.error("Method " + method + " does not exist on plug-in: unstructured-upload");
-		}
-	};
+                    _this.webuploader.on("beforeFileQueued", function(file) {
+                        // 文件容量大小校验
+                        var capacity = uploadLimit.capacity;
+                        if (capacity > 0 && file.size > capacity) {
+                            var error = _this.buildError(
+                                    "error.unstructured.upload.beyond_max_capacity", _this
+                                            .getCapacityCaption(capacity), file.name, _this
+                                            .getCapacityCaption(file.size));
+                            _this.options.events.error(error);
+                            return false;
+                        }
+                        // 扩展名校验
+                        var extensions = uploadLimit.extensions;
+                        if (extensions.length) {
+                            var extension = _this.getFileExtension(file.name);
+                            if (extensions.indexOf(extension) < 0) {
+                                var error = _this.buildError(
+                                        "error.unstructured.upload.unsupported_extension",
+                                        extensions.join("、"), file.name);
+                                _this.options.events.error(error);
+                                return false;
+                            }
+                        }
+                        return true;
+                    });
+
+                    _this.webuploader.on("error", function(type) {
+                        switch (type) {
+                        case "Q_EXCEED_NUM_LIMIT":
+                            var error = _this.buildError(
+                                    "error.unstructured.upload.beyond_max_number",
+                                    uploadLimit.number);
+                            _this.options.events.error(error);
+                            break;
+                        }
+                    });
+
+                    $.each(_this.options.events, function(name, handler) {
+                        if (name != "error") {
+                            _this.webuploader.on(name, handler);
+                        }
+                    });
+                });
+            });
+        },
+        getCapacityCaption : function(capacity) {
+            if (capacity === 0) {
+                return '0 B';
+            }
+            var units = [ 'B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' ];
+            var step = 1024;
+            var level = Math.floor(Math.log(capacity) / Math.log(step));
+            return (capacity / Math.pow(step, level)).toPrecision(3) + ' ' + units[level];
+        },
+        getFileExtension : function(filename, withDot) {
+            var index = filename.lastIndexOf(".");
+            if (!withDot) {
+                index++;
+            }
+            return filename.substr(index);
+        },
+        buildError : function(code) {
+            var args = Array.prototype.slice.call(arguments, 1);
+            return {
+                code : code,
+                message : getLocaleMessage(code, args)
+            };
+        }
+    };
+
+    var methods = {
+        init : function(options) {
+            var element = $(this);
+            return new UnstructuredUpload(element, options);
+        }
+    };
+
+    $.fn.unstructuredUpload = function() {
+        return methods.init.apply(this, arguments);
+    };
+
 })(jQuery);
