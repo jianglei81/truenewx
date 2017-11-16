@@ -35,10 +35,10 @@
             uploadSuccess : function(file) {
             },
             // 上传失败的回调函数
-            uploadError : function(file, error) {
+            uploadError : function(file) {
             },
             // 文件上传完成后，服务器返回结果回调函数
-            uploadAccept : function(object, result) {
+            uploadAccept : function(block, result) {
             },
             // 通用错误处理函数
             error : function(error) {
@@ -101,6 +101,7 @@
                         swf : _this.options.swf,
                         server : _this.options.serverPath + "/" + _this.options.authorizeType,
                         pick : element,
+                        auto : _this.options.auto,
                         resize : _this.options.resize,
                         threads : 5,
                         prepareNextFile : true,
@@ -113,6 +114,14 @@
                         }
                     };
                     _this.webuploader = WebUploader.create(webuploaderOptions);
+
+                    $.each(_this.options.events,
+                            function(name, handler) {
+                                if (name != "beforeFileQueued" && name != "uploadAccept"
+                                        && name != "error") {
+                                    _this.webuploader.on(name, handler);
+                                }
+                            });
 
                     _this.webuploader.on("beforeFileQueued", function(file) {
                         // 文件容量大小校验
@@ -140,6 +149,18 @@
                         return true;
                     });
 
+                    _this.webuploader.on("uploadAccept", function(block, result) {
+                        if (result.errors) {
+                            var error = result.errors;
+                            if (error.length == 1) { // 只有一个错误，则转换为单错误对象
+                                error = error[0];
+                            }
+                            _this.options.events.error(error);
+                            return false;
+                        }
+                        return _this.options.events.uploadAccept(block, result);
+                    });
+
                     _this.webuploader.on("error", function(type) {
                         switch (type) {
                         case "Q_EXCEED_NUM_LIMIT":
@@ -148,12 +169,6 @@
                                     uploadLimit.number);
                             _this.options.events.error(error);
                             break;
-                        }
-                    });
-
-                    $.each(_this.options.events, function(name, handler) {
-                        if (name != "error") {
-                            _this.webuploader.on(name, handler);
                         }
                     });
                 });
