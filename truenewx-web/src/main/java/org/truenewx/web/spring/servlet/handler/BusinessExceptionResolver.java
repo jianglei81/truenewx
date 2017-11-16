@@ -69,8 +69,11 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
         ModelAndView mav = null;
         if (handler instanceof HandlerMethod) {
             final HandlerMethod handlerMethod = (HandlerMethod) handler;
-            if (isAnnotatedHandleableExceptionMessage(handlerMethod)) {
-                mav = handleExceptionToMessage(e, request.getLocale(), response);
+            final HandleableExceptionMessage hem = handlerMethod
+                    .getMethodAnnotation(HandleableExceptionMessage.class);
+            if (hem != null) {
+                mav = handleExceptionToMessage(e, request.getLocale(), response,
+                        hem.respondErrorStatus());
             } else if (e instanceof HandleableException) {
                 mav = handleExceptionToPage(request, handlerMethod, (HandleableException) e);
             } else {
@@ -85,11 +88,6 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
         return mav;
     }
 
-    private boolean isAnnotatedHandleableExceptionMessage(final HandlerMethod handlerMethod) {
-        // 方法上有@HandleableExceptionMessage注解，则返回true
-        return handlerMethod.getMethodAnnotation(HandleableExceptionMessage.class) != null;
-    }
-
     /**
      * 以错误消息的方式处理异常
      *
@@ -97,10 +95,12 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
      *            异常
      * @param response
      *            HTTP响应
+     * @param respondErrorStatus
+     *            是否返回表示业务异常的Response错误状态码
      * @return 模型视图
      */
     private ModelAndView handleExceptionToMessage(final Exception e, final Locale locale,
-            final HttpServletResponse response) {
+            final HttpServletResponse response, final boolean respondErrorStatus) {
         final List<BusinessError> errors = new ArrayList<>();
         if (e instanceof BusinessException) { // 业务异常，转换错误消息
             final BusinessException be = (BusinessException) e;
@@ -122,7 +122,9 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
                 final Map<String, Object> map = new HashMap<>();
                 map.put("errors", errors);
                 response.getWriter().print(JsonUtil.toJson(map));
-                response.setStatus(SC_BUSINESS_ERROR);
+                if (respondErrorStatus) {
+                    response.setStatus(SC_BUSINESS_ERROR);
+                }
                 return new ModelAndView();
             } catch (final IOException ex) {
                 this.logger.error(e.getMessage(), e);

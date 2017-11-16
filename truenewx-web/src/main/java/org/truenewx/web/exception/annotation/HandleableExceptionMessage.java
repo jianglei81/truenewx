@@ -19,4 +19,10 @@ import java.lang.annotation.Target;
 @Documented
 public @interface HandleableExceptionMessage {
 
+    /**
+     *
+     * @return 是否返回表示业务异常的Response错误状态码，默认为true
+     */
+    boolean respondErrorStatus() default true;
+
 }
