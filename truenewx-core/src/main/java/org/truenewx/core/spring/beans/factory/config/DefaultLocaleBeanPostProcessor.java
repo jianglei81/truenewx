@@ -4,7 +4,6 @@ import java.util.Locale;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.stereotype.Component;
 
 /**
  * 默认区域配置处理器。为了让设置默认区域的动作在所有Bean初始化之前执行
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
  * @author jianglei
  * @since JDK 1.8
  */
-@Component
 public class DefaultLocaleBeanPostProcessor implements BeanPostProcessor {
 
     public DefaultLocaleBeanPostProcessor() {

@@ -111,6 +111,22 @@ public class Strings {
      */
     public static final String DEFAULT_ENCODING = Strings.ENCODING_UTF8;
 
+    /**
+     * 简体中文
+     */
+    public static final String LOCALE_SC = "zh_CN";
+
+    /**
+     * 繁体中文
+     */
+    public static final String LOCALE_TC = "zh_TW";
+
+    /**
+     * 英文
+     */
+    public static final String LOCALE_EN = "en";
+
     private Strings() {
     }
+
 }

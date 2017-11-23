@@ -135,7 +135,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
                 EnumType enumType = readEnumType(reader, enumClass, subtype, locale);
                 // 配置文件中没有，且没有指定子类型，且为默认区域，则从枚举类中构建默认枚举类型
                 if (enumType == null && StringUtils.isBlank(subtype)) {
-                    enumType = FuncBuildDefaultEnumType.INSTANCE.apply(enumClass);
+                    enumType = FuncBuildDefaultEnumType.INSTANCE.apply(enumClass, locale);
                 }
                 return enumType;
             } else {
