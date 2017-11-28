@@ -66,22 +66,24 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
 
     private List<HttpResource> getResources(final Element element) {
         final List<HttpResource> resources = new ArrayList<>();
-        for (final Object obj : element.elements()) {
-            final Element resElement = (Element) obj;
-            final String method = resElement.attributeValue("method");
-            if ("link".equals(resElement.getName())) {
-                final String href = resElement.attributeValue("href");
-                HttpLink link;
-                if (StringUtils.isNotBlank(method)) {
-                    link = new HttpLink(href, EnumUtils.getEnum(HttpMethod.class, method));
-                } else {
-                    link = new HttpLink(href);
+        if (element != null) {
+            for (final Object obj : element.elements()) {
+                final Element resElement = (Element) obj;
+                final String method = resElement.attributeValue("method");
+                if ("link".equals(resElement.getName())) {
+                    final String href = resElement.attributeValue("href");
+                    HttpLink link;
+                    if (StringUtils.isNotBlank(method)) {
+                        link = new HttpLink(href, EnumUtils.getEnum(HttpMethod.class, method));
+                    } else {
+                        link = new HttpLink(href);
+                    }
+                    resources.add(link);
+                } else if ("rpc".equals(resElement.getName())) {
+                    final String beanId = resElement.attributeValue("id");
+                    final RpcPort rpcPort = new RpcPort(beanId, method);
+                    resources.add(rpcPort);
                 }
-                resources.add(link);
-            } else if ("rpc".equals(resElement.getName())) {
-                final String beanId = resElement.attributeValue("id");
-                final RpcPort rpcPort = new RpcPort(beanId, method);
-                resources.add(rpcPort);
             }
         }
         return resources;
