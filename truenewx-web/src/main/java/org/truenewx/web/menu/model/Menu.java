@@ -2,16 +2,15 @@ package org.truenewx.web.menu.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.truenewx.core.tuple.Binary;
 import org.truenewx.core.tuple.Binate;
+import org.truenewx.web.http.HttpLink;
+import org.truenewx.web.http.HttpResource;
+import org.truenewx.web.rpc.RpcPort;
 import org.truenewx.web.security.authority.Authority;
 
 /**
@@ -23,38 +22,25 @@ import org.truenewx.web.security.authority.Authority;
 public class Menu implements Serializable {
 
     private static final long serialVersionUID = 7864620719633440806L;
-
     /**
      * 菜单名称
      */
     private String name;
-
     /**
-     * 菜单项集合
+     * 匿名可访问的资源集
+     */
+    private List<HttpResource> anonymousResources = new ArrayList<>();
+    /**
+     * 登录即可访问的资源集
+     */
+    private List<HttpResource> loginedResources = new ArrayList<>();
+    /**
+     * 获得授权才可访问的菜单项集
      */
     private List<MenuItem> items = new ArrayList<>();
 
-    /**
-     * 菜单构造函数
-     *
-     * @param name
-     *            菜单名称
-     */
     public Menu(final String name) {
         this.name = name;
-    }
-
-    /**
-     * 菜单构造函数
-     *
-     * @param name
-     *            菜单名称
-     * @param items
-     *            菜单项集合
-     */
-    public Menu(final String name, final List<MenuItem> items) {
-        this.name = name;
-        this.items = items;
     }
 
     /**
@@ -65,42 +51,70 @@ public class Menu implements Serializable {
     }
 
     /**
-     * @return 菜单项集合
+     *
+     * @return 匿名可访问的资源集
      */
-    public Iterable<MenuItem> getItems() {
+    public List<HttpResource> getAnonymousResources() {
+        return this.anonymousResources;
+    }
+
+    /**
+     *
+     * @return 登录即可访问的资源集
+     */
+    public List<HttpResource> getLoginedResources() {
+        return this.loginedResources;
+    }
+
+    /**
+     * @return 获得授权才可访问的菜单项集
+     */
+    public List<MenuItem> getItems() {
         return this.items;
     }
 
     /**
-     *
-     * @return 可见菜单项集合
+     * 判断指定链接是否可匿名访问
      */
-    public Iterable<MenuItem> getVisibleItems() {
-        return this.items.stream().filter(item -> {
-            return !item.isHidden();
-        }).collect(Collectors.toList());
+    public boolean isAnonymous(final String href, final HttpMethod method) {
+        for (final HttpResource res : this.anonymousResources) {
+            if (res instanceof HttpLink) {
+                final HttpLink link = (HttpLink) res;
+                if (link.matches(href, method)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
-     * 获取指定菜单项
-     *
-     * @param index
-     *            菜单项索引下标
-     * @return 菜单项
+     * 判断指定RPC请求是否可匿名访问
      */
-    public MenuItem getItem(final int index) {
-        return this.items.get(index);
-    }
-
-    public void addItem(final MenuItem item) {
-        this.items.add(item);
-    }
-
-    public void sortItems() {
-        Collections.sort(this.items);
+    public boolean isAnonymous(final String beanId, final String methodName,
+            final Integer argCount) {
+        for (final HttpResource res : this.anonymousResources) {
+            if (res instanceof RpcPort) {
+                final RpcPort rpc = (RpcPort) res;
+                if (rpc.matches(beanId, methodName, argCount)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public Authority getAuthority(final String href, final HttpMethod method) {
+        // 登录即可访问资源匹配查找
+        for (final HttpResource res : this.loginedResources) {
+            if (res instanceof HttpLink) {
+                final HttpLink link = (HttpLink) res;
+                if (link.matches(href, method)) {
+                    return Authority.LOGINED;
+                }
+            }
+        }
+        // 菜单项权限匹配查找
         for (final MenuItem item : this.items) {
             final Authority authority = item.findAuthority(href, method);
             if (authority != null) {
@@ -112,6 +126,16 @@ public class Menu implements Serializable {
 
     public Authority getAuthority(final String beanId, final String methodName,
             final Integer argCount) {
+        // 登录即可访问资源匹配查找
+        for (final HttpResource res : this.loginedResources) {
+            if (res instanceof RpcPort) {
+                final RpcPort rpc = (RpcPort) res;
+                if (rpc.matches(beanId, methodName, argCount)) {
+                    return Authority.LOGINED;
+                }
+            }
+        }
+        // 菜单项权限匹配查找
         for (final MenuItem item : this.items) {
             final Authority authority = item.findAuthority(beanId, methodName, argCount);
             if (authority != null) {
@@ -119,14 +143,6 @@ public class Menu implements Serializable {
             }
         }
         return null;
-    }
-
-    public Authority[] getAllAuthorities() {
-        final Set<Authority> authorities = new HashSet<>();
-        for (final MenuItem item : this.items) {
-            authorities.addAll(item.getAllAuthorities());
-        }
-        return authorities.toArray(new Authority[authorities.size()]);
     }
 
     /**
@@ -138,7 +154,8 @@ public class Menu implements Serializable {
      *            链接方法
      * @return 匹配指定链接地址和链接方法的菜单动作下标和对象集合
      */
-    public List<Binate<Integer, MenuItem>> indexesOf(final String href, final HttpMethod method) {
+    public List<Binate<Integer, MenuItem>> indexesOfItems(final String href,
+            final HttpMethod method) {
         if (StringUtils.isBlank(href)) {
             return null;
         }
@@ -159,8 +176,8 @@ public class Menu implements Serializable {
         return new ArrayList<>();
     }
 
-    public List<Binate<Integer, MenuItem>> indexesOf(final String beanId, final String methodName,
-            final Integer argCount) {
+    public List<Binate<Integer, MenuItem>> indexesOfItems(final String beanId,
+            final String methodName, final Integer argCount) {
         for (int i = 0; i < this.items.size(); i++) {
             final MenuItem item = this.items.get(i);
             // 先在更下级中找

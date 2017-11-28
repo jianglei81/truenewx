@@ -16,6 +16,7 @@ import org.truenewx.web.rpc.server.annotation.RpcController;
 import org.truenewx.web.rpc.server.annotation.RpcMethod;
 import org.truenewx.web.rpc.server.annotation.RpcResult;
 import org.truenewx.web.rpc.server.annotation.RpcResultFilter;
+import org.truenewx.web.security.annotation.Accessibility;
 import org.truenewx.web.spring.context.SpringWebContext;
 
 /**
@@ -29,8 +30,9 @@ public class RegionController {
     @Autowired
     private RegionSource regionSource;
 
-    @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = Region.class, includes = {
-            "code", "caption", "subs", "includingGrandSub" })))
+    @RpcMethod(result = @RpcResult(filter = @RpcResultFilter(type = Region.class,
+            includes = { "code", "caption", "subs", "includingGrandSub" })))
+    @Accessibility(anonymous = true)
     public Map<String, Region> getAll() {
         final Locale locale = SpringWebContext.getLocale();
         final Map<String, Region> result = new LinkedHashMap<>();
@@ -41,8 +43,9 @@ public class RegionController {
         return result;
     }
 
-    @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = Region.class, includes = {
-            "code", "caption", "subs", "includingGrandSub" })))
+    @RpcMethod(result = @RpcResult(filter = @RpcResultFilter(type = Region.class,
+            includes = { "code", "caption", "subs", "includingGrandSub" })))
+    @Accessibility(anonymous = true)
     public Map<String, Region> getLimits(final String[] limits) {
         if (ArrayUtils.isEmpty(limits)) {
             return null;
@@ -78,8 +81,9 @@ public class RegionController {
         }
     }
 
-    @RpcMethod(logined = false, result = @RpcResult(filter = @RpcResultFilter(type = Region.class, includes = {
-            "code", "caption", "level", "subs" })))
+    @RpcMethod(result = @RpcResult(filter = @RpcResultFilter(type = Region.class,
+            includes = { "code", "caption", "level", "subs" })))
+    @Accessibility(anonymous = true)
     public Region getRegion(final String code) {
         final Locale locale = SpringWebContext.getLocale();
         return this.regionSource.getRegion(code, locale);
@@ -92,7 +96,8 @@ public class RegionController {
      *            区划代号
      * @return 各级父级代号集合
      */
-    @RpcMethod(logined = false)
+    @RpcMethod
+    @Accessibility(anonymous = true)
     public Iterable<String> getParentCodes(final String region) {
         final List<String> codes = new ArrayList<>();
         final Locale locale = SpringWebContext.getLocale();

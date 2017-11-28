@@ -51,7 +51,9 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
         for (final MenuItem item : this.menu.getItems()) {
             copyMatchedItemTo(item, authorization, items);
         }
-        return new Menu(this.menu.getName(), items);
+        final Menu menu = new Menu(this.menu.getName());
+        menu.getItems().addAll(items);
+        return menu;
     }
 
     /**
@@ -80,9 +82,7 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
             copyMatchedItemTo(sub, authorization, newSubs);
         }
         // 构建新的菜单项对象，以免影响缓存的完整菜单对象的数据
-        final MenuItem newItem = new MenuItem(item.getAuthority(), item.getCaption(),
-                item.getLink(), item.getIcon(), item.isHidden());
-        newItem.getLinks().addAll(item.getLinks());
+        final MenuItem newItem = new MenuItem(item.getCaption(), item.getIcon(), item.getAction());
         newItem.getOptions().putAll(item.getOptions());
         newItem.getCaptions().putAll(item.getCaptions());
         newItem.getSubs().addAll(newSubs);

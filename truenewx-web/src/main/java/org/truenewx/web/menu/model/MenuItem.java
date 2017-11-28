@@ -12,7 +12,6 @@ import org.springframework.http.HttpMethod;
 import org.truenewx.core.spring.core.env.functor.FuncProfile;
 import org.truenewx.core.tuple.Binary;
 import org.truenewx.core.tuple.Binate;
-import org.truenewx.web.http.HttpLink;
 import org.truenewx.web.security.authority.Authority;
 import org.truenewx.web.security.authority.Authorization;
 
@@ -22,13 +21,12 @@ import org.truenewx.web.security.authority.Authorization;
  * @author jianglei
  * @since JDK 1.8
  */
-public class MenuItem extends AbstractMenuItem implements Serializable, Comparable<MenuItem> {
+public class MenuItem extends AbstractMenuItem implements Serializable {
 
     private static final long serialVersionUID = -6145127565332857618L;
 
-    public MenuItem(final Authority authority, final String caption, final HttpLink link,
-            final String icon, final boolean hidden) {
-        super(authority, caption, link, icon, hidden);
+    public MenuItem(final String caption, final String icon, final MenuItemAction action) {
+        super(caption, icon, action);
     }
 
     public boolean isProfileFitted() {
@@ -37,38 +35,34 @@ public class MenuItem extends AbstractMenuItem implements Serializable, Comparab
                 || getProfiles().contains(profile);
     }
 
-    /**
-     * 相当于获取 auth.role
-     *
-     * @return 所需角色
-     */
-    public String getRole() {
-        return getAuthority().getRole();
-    }
-
-    /**
-     * 相当于获取 auth.permission
-     *
-     * @return 所需权限
-     */
-    public String getPermission() {
-        return getAuthority().getPermission();
-    }
-
     public String getCaption() {
         return getCaptions().get(Locale.getDefault());
     }
 
-    public HttpLink getLink() {
-        return getLinks().stream().findFirst().orElse(null); // 第一个链接为默认链接
+    public Authority getAuthority() {
+        final MenuItemAction action = getAction();
+        return action == null ? null : action.getAuthority();
+    }
+
+    public String getPermission() {
+        final Authority authority = getAuthority();
+        return authority == null ? null : authority.getPermission();
     }
 
     public boolean contains(final String href, final HttpMethod method) {
-        return getLinks().stream().anyMatch(link -> link.matches(href, method));
+        final MenuItemAction action = getAction();
+        return action != null && action.contains(href, method);
     }
 
     public boolean contains(final String beanId, final String methodName, final Integer argCount) {
-        return getRpcs().stream().anyMatch(rpc -> rpc.matches(beanId, methodName, argCount));
+        final MenuItemAction action = getAction();
+        return action != null && action.contains(beanId, methodName, argCount);
+    }
+
+    public boolean isContained(final Authorization authorization) {
+        final MenuItemAction action = getAction();
+        // 当前菜单项没有设置动作，则视作无权限限制
+        return action == null || action.isContained(authorization);
     }
 
     /**
@@ -117,11 +111,6 @@ public class MenuItem extends AbstractMenuItem implements Serializable, Comparab
             result.addAll(sub.getAllAuthorities());
         }
         return result;
-    }
-
-    public boolean isContained(final Authorization authorization) {
-        // 如果当前动作未指定授权，表示没有授权限制，视为匹配
-        return getAuthority() == null || getAuthority().isContained(authorization);
     }
 
     /**
@@ -173,9 +162,4 @@ public class MenuItem extends AbstractMenuItem implements Serializable, Comparab
         return new ArrayList<>();
     }
 
-    @Override
-    public int compareTo(final MenuItem other) {
-        // 隐藏的排后面
-        return Boolean.valueOf(isHidden()).compareTo(other.isHidden());
-    }
 }

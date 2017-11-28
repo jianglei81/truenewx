@@ -9,6 +9,7 @@ import org.truenewx.core.util.ArrayUtil;
 import org.truenewx.web.rpc.server.annotation.RpcArg;
 import org.truenewx.web.rpc.server.annotation.RpcMethod;
 import org.truenewx.web.rpc.server.annotation.RpcResult;
+import org.truenewx.web.security.annotation.Accessibility;
 
 /**
  * RPC方法元数据
@@ -79,14 +80,14 @@ public class RpcMethodMeta implements Comparable<RpcMethodMeta> {
         return returnTypeMeta;
     }
 
-    public boolean isLogined() {
-        final RpcMethod rpcMethod = this.method.getAnnotation(RpcMethod.class);
-        return rpcMethod == null ? false : rpcMethod.logined();
+    public boolean isAnonymous() {
+        final Accessibility accessibility = this.method.getAnnotation(Accessibility.class);
+        return accessibility != null && accessibility.anonymous();
     }
 
     public boolean isLan() {
-        final RpcMethod rpcMethod = this.method.getAnnotation(RpcMethod.class);
-        return rpcMethod == null ? false : rpcMethod.lan();
+        final Accessibility accessibility = this.method.getAnnotation(Accessibility.class);
+        return accessibility != null && accessibility.lan();
     }
 
     public String getCaption() {

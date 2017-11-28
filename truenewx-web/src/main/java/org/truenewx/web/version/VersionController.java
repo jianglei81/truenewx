@@ -7,6 +7,7 @@ import org.truenewx.core.Strings;
 import org.truenewx.core.version.VersionReader;
 import org.truenewx.web.rpc.server.annotation.RpcController;
 import org.truenewx.web.rpc.server.annotation.RpcMethod;
+import org.truenewx.web.security.annotation.Accessibility;
 
 /**
  * 版本显示控制器
@@ -39,7 +40,8 @@ public class VersionController {
         return Strings.EMPTY;
     }
 
-    @RpcMethod(logined = false)
+    @RpcMethod
+    @Accessibility(anonymous = true)
     public String getVersion(final boolean withBuild) {
         if (this.versionReader != null) {
             return this.versionReader.getVersion(withBuild);
@@ -47,7 +49,8 @@ public class VersionController {
         return null;
     }
 
-    @RpcMethod(logined = false)
+    @RpcMethod
+    @Accessibility(anonymous = true)
     public String getBuild() {
         if (this.versionReader != null) {
             return this.versionReader.getBuild();

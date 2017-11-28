@@ -2,6 +2,7 @@ package org.truenewx.web.menu.model;
 
 import org.truenewx.core.util.StringUtil;
 import org.truenewx.core.util.TreeNode;
+import org.truenewx.web.security.authority.Authority;
 
 /**
  * 菜单节点
@@ -17,7 +18,10 @@ public class MenuNode extends TreeNode<String> {
 
     public MenuNode(final MenuItem item) {
         super(StringUtil.uuid32(), item.getCaption());
-        this.permission = item.getPermission();
+        final Authority authority = item.getAuthority();
+        if (authority != null) {
+            this.permission = authority.getPermission();
+        }
         item.getSubs().forEach(sub -> addSub(new MenuNode(sub)));
     }
 

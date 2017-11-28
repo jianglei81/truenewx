@@ -1,7 +1,5 @@
 package org.truenewx.web.http;
 
-import java.io.Serializable;
-
 import org.springframework.http.HttpMethod;
 import org.truenewx.core.util.StringUtil;
 
@@ -11,7 +9,7 @@ import org.truenewx.core.util.StringUtil;
  * @author jianglei
  * @since JDK 1.8
  */
-public class HttpLink implements Serializable {
+public class HttpLink implements HttpResource {
 
     private static final long serialVersionUID = -787088699797769453L;
 

@@ -26,17 +26,6 @@ public @interface RpcMethod {
     RpcArg[] args() default {};
 
     /**
-     * @return 是否只有局域网可访问
-     */
-    boolean lan() default false;
-
-    /**
-     *
-     * @return 是否登录后才能访问
-     */
-    boolean logined() default true;
-
-    /**
      * @return 结果过滤器
      */
     RpcResult result() default @RpcResult();

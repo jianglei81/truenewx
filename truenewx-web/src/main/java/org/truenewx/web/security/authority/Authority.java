@@ -16,6 +16,10 @@ public class Authority {
 
     private String role;
     private String permission;
+    /**
+     * 登录即可访问的权限
+     */
+    public static final Authority LOGINED = new Authority(":logined", null);
 
     public Authority(final String role, final String permission) {
         this.role = role;
@@ -45,6 +49,9 @@ public class Authority {
     public boolean isContained(final Authorization authorization) {
         if (authorization == null) {
             return false;
+        }
+        if (this == LOGINED) { // 当前授权如果为登录即可访问，authorization不为null，则为已登录，此时返回true
+            return true;
         }
         Iterable<String> roles = authorization.getRoles();
         if (roles == null) {

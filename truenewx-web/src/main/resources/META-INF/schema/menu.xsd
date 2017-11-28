@@ -4,47 +4,103 @@
     <xs:element name="menu">
         <xs:complexType>
             <xs:sequence>
+                <xs:element ref="anonymous" minOccurs="1" maxOccurs="1" />
+                <xs:element ref="logined" minOccurs="1" maxOccurs="1" />
                 <xs:element ref="item" minOccurs="1" maxOccurs="unbounded" />
             </xs:sequence>
             <xs:attribute name="name" type="xs:string" use="required" />
         </xs:complexType>
     </xs:element>
+    <xs:element name="anonymous">
+        <xs:annotation>
+            <xs:documentation>可匿名访问的资源</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element ref="link" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="rpc" minOccurs="0" maxOccurs="unbounded" />
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="logined">
+        <xs:annotation>
+            <xs:documentation>登录后即可访问的资源</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element ref="link" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="rpc" minOccurs="0" maxOccurs="unbounded" />
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
     <xs:element name="item">
+        <xs:annotation>
+            <xs:documentation>菜单项</xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:sequence>
-                <xs:choice maxOccurs="unbounded">
-                    <xs:element name="link" minOccurs="0" maxOccurs="unbounded">
-                        <xs:complexType>
-                            <xs:attribute name="href" type="xs:string" use="required" />
-                            <xs:attribute name="method" type="HttpMethod" use="optional" />
-                        </xs:complexType>
-                    </xs:element>
-                    <xs:element name="rpc" minOccurs="0" maxOccurs="unbounded">
-                        <xs:complexType>
-                            <xs:attribute name="id" type="xs:string" use="required" />
-                            <xs:attribute name="method" type="xs:string" use="required" />
-                            <xs:attribute name="args" type="xs:nonNegativeInteger" use="optional" />
-                        </xs:complexType>
-                    </xs:element>
-                </xs:choice>
                 <xs:element ref="caption" minOccurs="0" maxOccurs="unbounded" />
-                <xs:element ref="options" minOccurs="0" />
+                <xs:element ref="options" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="action" minOccurs="0" maxOccurs="1" />
                 <xs:element ref="item" minOccurs="0" maxOccurs="unbounded" />
             </xs:sequence>
-            <xs:attribute name="caption" type="xs:string" use="required" />
-            <xs:attribute name="href" type="xs:string" use="optional" />
-            <xs:attribute name="hidden" type="xs:boolean" use="optional" />
-            <xs:attribute name="type" type="xs:string" use="optional" />
-            <xs:attribute name="role" type="xs:string" use="optional" />
-            <xs:attribute name="permission" type="xs:string" use="optional" />
+            <xs:attribute name="caption" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation>显示名称</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
             <xs:attribute name="profile" type="xs:string" use="optional" />
             <xs:attribute name="icon" type="xs:string" use="optional" />
         </xs:complexType>
     </xs:element>
+    <xs:element name="action">
+        <xs:annotation>
+            <xs:documentation>菜单项动作，用于配置权限</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="link" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="rpc" minOccurs="0" maxOccurs="unbounded" />
+            </xs:choice>
+            <xs:attribute name="href" type="xs:string" use="optional" />
+            <xs:attribute name="type" type="xs:string" use="optional">
+                <xs:annotation>
+                    <xs:documentation>permission来源于枚举类型时，指定枚举类型的类名</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="permission" type="xs:string" use="optional" />
+            <xs:attribute name="role" type="xs:string" use="optional" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="link">
+        <xs:annotation>
+            <xs:documentation>资源链接</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="href" type="xs:string" use="required" />
+            <xs:attribute name="method" type="HttpMethod" use="optional" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="rpc">
+        <xs:annotation>
+            <xs:documentation>RPC请求</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:string" use="required" />
+            <xs:attribute name="method" type="xs:string" use="required" />
+            <xs:attribute name="args" type="xs:nonNegativeInteger" use="optional" />
+        </xs:complexType>
+    </xs:element>
     <xs:element name="options">
+        <xs:annotation>
+            <xs:documentation>选项集</xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="option" minOccurs="0" maxOccurs="unbounded">
+                    <xs:annotation>
+                        <xs:documentation>选项</xs:documentation>
+                    </xs:annotation>
                     <xs:complexType>
                         <xs:simpleContent>
                             <xs:extension base="xs:string">
@@ -59,6 +115,9 @@
         </xs:complexType>
     </xs:element>
     <xs:element name="caption">
+        <xs:annotation>
+            <xs:documentation>显示名称</xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:simpleContent>
                 <xs:extension base="xs:string">

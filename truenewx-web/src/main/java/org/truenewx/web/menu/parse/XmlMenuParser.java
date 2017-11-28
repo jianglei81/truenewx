@@ -2,7 +2,6 @@ package org.truenewx.web.menu.parse;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,8 +24,10 @@ import org.truenewx.core.functor.impl.FuncFindClass;
 import org.truenewx.core.util.ClassUtil;
 import org.truenewx.core.util.CollectionUtil;
 import org.truenewx.web.http.HttpLink;
+import org.truenewx.web.http.HttpResource;
 import org.truenewx.web.menu.model.Menu;
 import org.truenewx.web.menu.model.MenuItem;
+import org.truenewx.web.menu.model.MenuItemAction;
 import org.truenewx.web.menu.util.MenuUtil;
 import org.truenewx.web.rpc.RpcPort;
 import org.truenewx.web.security.authority.Authority;
@@ -53,16 +54,37 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
             final Document doc = reader.read(inputStream);
             final Element menuElement = doc.getRootElement();
             final Menu menu = new Menu(menuElement.attributeValue("name"));
-            final List<MenuItem> items = getItems(menuElement, null);
-            for (final MenuItem item : items) {
-                menu.addItem(item);
-            }
-            menu.sortItems();
+            menu.getAnonymousResources().addAll(getResources(menuElement.element("anonymous")));
+            menu.getLoginedResources().addAll(getResources(menuElement.element("logined")));
+            menu.getItems().addAll(getItems(menuElement, null));
             return menu;
         } catch (final Exception e) {
             LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
         }
         return null;
+    }
+
+    private List<HttpResource> getResources(final Element element) {
+        final List<HttpResource> resources = new ArrayList<>();
+        for (final Object obj : element.elements()) {
+            final Element resElement = (Element) obj;
+            final String method = resElement.attributeValue("method");
+            if ("link".equals(resElement.getName())) {
+                final String href = resElement.attributeValue("href");
+                HttpLink link;
+                if (StringUtils.isNotBlank(method)) {
+                    link = new HttpLink(href, EnumUtils.getEnum(HttpMethod.class, method));
+                } else {
+                    link = new HttpLink(href);
+                }
+                resources.add(link);
+            } else if ("rpc".equals(resElement.getName())) {
+                final String beanId = resElement.attributeValue("id");
+                final RpcPort rpcPort = new RpcPort(beanId, method);
+                resources.add(rpcPort);
+            }
+        }
+        return resources;
     }
 
     /**
@@ -80,23 +102,28 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
         final List<MenuItem> items = new ArrayList<>();
         for (final Object itemObj : element.elements("item")) {
             final Element itemElement = (Element) itemObj;
-            final Authority authority = getAuthority(itemElement);
             final String caption = itemElement.attributeValue("caption");
-            final String href = itemElement.attributeValue("href");
             final String icon = itemElement.attributeValue("icon");
-            final boolean hidden = Boolean.valueOf(itemElement.attributeValue("hidden"));
-            final MenuItem item = new MenuItem(authority, caption, new HttpLink(href), icon,
-                    hidden);
-            item.getLinks().addAll(getLinks(itemElement));
-            item.getRpcs().addAll(getRpcs(itemElement));
+            final MenuItemAction action = getAction(itemElement.element("action"));
+            final MenuItem item = new MenuItem(caption, icon, action);
             item.getProfiles().addAll(getProfiles(itemElement));
             item.getOptions().putAll(getOptions(itemElement, parentOptions));
             item.getCaptions().putAll(getCaptions(itemElement));
             item.getSubs().addAll(getItems(itemElement, item.getOptions()));
-            Collections.sort(item.getSubs());
             items.add(item);
         }
         return items;
+    }
+
+    private MenuItemAction getAction(final Element element) {
+        if (element != null) {
+            final Authority authority = getAuthority(element);
+            final String href = element.attributeValue("href");
+            final MenuItemAction action = new MenuItemAction(authority, new HttpLink(href));
+            action.getResources().addAll(getResources(element));
+            return action;
+        }
+        return null;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -141,30 +168,6 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
     }
 
     /**
-     * 获取链接集合
-     *
-     * @param element
-     *            元素
-     * @return 链接集合
-     *
-     * @author jianglei
-     */
-    private List<HttpLink> getLinks(final Element element) {
-        final List<HttpLink> links = new ArrayList<>();
-        for (final Object linkObj : element.elements("link")) {
-            final Element linkElement = (Element) linkObj;
-            final String method = linkElement.attributeValue("method");
-            if (StringUtils.isNotBlank(method)) {
-                links.add(new HttpLink(linkElement.attributeValue("href"),
-                        EnumUtils.getEnum(HttpMethod.class, method)));
-            } else {
-                links.add(new HttpLink(linkElement.attributeValue("href")));
-            }
-        }
-        return links;
-    }
-
-    /**
      * 获取可见环境集合
      *
      * @param element
@@ -181,25 +184,6 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
             CollectionUtil.addAll(links, profiles);
         }
         return links;
-    }
-
-    /**
-     * 获取rpc集合
-     *
-     * @param element
-     *            元素
-     * @return rpc集合
-     *
-     * @author jianglei
-     */
-    private List<RpcPort> getRpcs(final Element element) {
-        final List<RpcPort> rpcs = new ArrayList<>();
-        for (final Object rpcObj : element.elements("rpc")) {
-            final Element rpcElement = (Element) rpcObj;
-            rpcs.add(new RpcPort(rpcElement.attributeValue("id"),
-                    rpcElement.attributeValue("method")));
-        }
-        return rpcs;
     }
 
     /**

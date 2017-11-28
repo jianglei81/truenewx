@@ -1,8 +1,7 @@
 package org.truenewx.web.rpc;
 
-import java.io.Serializable;
-
 import org.truenewx.core.util.StringUtil;
+import org.truenewx.web.http.HttpResource;
 
 /**
  * RPC端口
@@ -10,7 +9,7 @@ import org.truenewx.core.util.StringUtil;
  * @author jianglei
  * @since JDK 1.8
  */
-public class RpcPort implements Serializable {
+public class RpcPort implements HttpResource {
 
     private static final long serialVersionUID = 581148104864740468L;
 

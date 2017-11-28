@@ -41,6 +41,7 @@ import org.truenewx.web.rpc.server.functor.PredEquivalentClass;
 import org.truenewx.web.rpc.server.meta.RpcControllerMeta;
 import org.truenewx.web.rpc.server.meta.RpcMethodMeta;
 import org.truenewx.web.rpc.server.meta.RpcVariableMeta;
+import org.truenewx.web.security.annotation.Accessibility;
 import org.truenewx.web.security.authority.Authority;
 import org.truenewx.web.security.mgt.SubjectManager;
 import org.truenewx.web.security.subject.Subject;
@@ -197,8 +198,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
 
         // 执行调用
         try {
-            // 权限校验
-            if (!validateAuthority(beanId, method, request, response)) {
+            if (!validate(beanId, method, request, response)) {
                 return new RpcInvokeResult(Strings.EMPTY);
             }
             if (getInterceptor() != null) {
@@ -223,27 +223,35 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
         }
     }
 
-    private boolean validateAuthority(final String beanId, final Method method,
+    private boolean validate(final String beanId, final Method method,
             final HttpServletRequest request, final HttpServletResponse response) throws Exception {
-        final RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
+        final Accessibility accessibility = method.getAnnotation(Accessibility.class);
         // 检查局域网限制
+        final String methodName = method.getName();
         final String ip = WebUtil.getRemoteAddrIp(request);
-        if (rpcMethod.lan() && !NetUtil.isLanIp(ip)) {
-            this.logger.warn("Forbidden rpc request {}.{} from {}", beanId, method.getName(), ip);
+        if (accessibility != null && accessibility.lan() && !NetUtil.isLanIp(ip)) {
+            this.logger.warn("Forbidden rpc request {}.{} from {}", beanId, methodName, ip);
             response.sendError(HttpStatus.FORBIDDEN.value()); // 禁止非局域网访问
             return false;
         }
         // 检查登录限制
-        if (this.subjectManager != null && rpcMethod.logined()) {
+        if (this.subjectManager != null) {
             final Subject subject = this.subjectManager.getSubject(request, response);
-            if (!subject.isLogined()) { // 登录校验失败，则返回错误码
-                response.sendError(HttpStatus.UNAUTHORIZED.value());
+            final int argCount = method.getParameterCount();
+            if (!subject.isLogined()) { // 未登录
+                // 在访问性注解中设置了可匿名访问，则验证通过
+                if (accessibility != null && accessibility.anonymous()) {
+                    return true;
+                }
+                // 在菜单中设置了可匿名访问，则验证通过
+                if (this.menu != null && this.menu.isAnonymous(beanId, methodName, argCount)) {
+                    return true;
+                }
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 return false;
             }
-            // 再校验菜单配置中限定的权限
-            if (this.menu != null) {
-                final Authority authority = this.menu.getAuthority(beanId, method.getName(),
-                        method.getParameterTypes().length);
+            if (this.menu != null) { // 已登录，校验菜单配置中限定的权限
+                final Authority authority = this.menu.getAuthority(beanId, methodName, argCount);
                 // 此时授权可能为null，为null时将被视为无访问权限，意味着在配置有菜单的系统中，RPC请求均应在菜单配置中进行配置
                 subject.validateAuthority(authority);
             }

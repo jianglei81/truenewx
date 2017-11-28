@@ -12,6 +12,7 @@ import org.truenewx.web.rpc.server.annotation.RpcArg;
 import org.truenewx.web.rpc.server.annotation.RpcController;
 import org.truenewx.web.rpc.server.annotation.RpcMethod;
 import org.truenewx.web.rpc.server.annotation.RpcResult;
+import org.truenewx.web.security.annotation.Accessibility;
 
 /**
  * ApiTestController
@@ -21,8 +22,10 @@ import org.truenewx.web.rpc.server.annotation.RpcResult;
  */
 @RpcController(caption = "API测试", module = "测试")
 public class ApiTestController {
-    @RpcMethod(logined = false, caption = "整数相加", args = { @RpcArg(name = "x", caption = "整数x"),
-            @RpcArg(name = "y", caption = "整数y") }, result = @RpcResult(caption = "x+y的值"))
+    @RpcMethod(caption = "整数相加",
+            args = { @RpcArg(name = "x", caption = "整数x"), @RpcArg(name = "y", caption = "整数y") },
+            result = @RpcResult(caption = "x+y的值"))
+    @Accessibility(anonymous = true)
     public int add(final int x, final int y) {
         return x + y;
     }
@@ -32,35 +35,42 @@ public class ApiTestController {
         return x - y;
     }
 
-    @RpcMethod(logined = false, lan = true)
+    @RpcMethod
+    @Accessibility(anonymous = true, lan = true)
     public float multiply(final float x, final float y) {
         return x * y;
     }
 
-    @RpcMethod(lan = true)
+    @RpcMethod
+    @Accessibility(lan = true)
     public double divide(final double x, final double y) {
         return x / y;
     }
 
-    @RpcMethod(logined = false, caption = "从图片列表中获取指定下标的图片", args = {
-            @RpcArg(name = "list", caption = "图片列表", componentType = Image.class),
-            @RpcArg(name = "index", caption = "索引下标") })
+    @RpcMethod(caption = "从图片列表中获取指定下标的图片",
+            args = { @RpcArg(name = "list", caption = "图片列表", componentType = Image.class),
+                    @RpcArg(name = "index", caption = "索引下标") })
+    @Accessibility(anonymous = true)
     public Image getImageByIndex(final List<Image> list, final int index) {
         return CollectionUtil.get(list, index);
     }
 
-    @RpcMethod(logined = false, caption = "将指定关键字和图片转换为Map", args = {
-            @RpcArg(name = "key", caption = "关键字"),
-            @RpcArg(name = "image", caption = "图片") }, result = @RpcResult(componentType = Image.class))
+    @RpcMethod(caption = "将指定关键字和图片转换为Map",
+            args = { @RpcArg(name = "key", caption = "关键字"),
+                    @RpcArg(name = "image", caption = "图片") },
+            result = @RpcResult(componentType = Image.class))
+    @Accessibility(anonymous = true)
     public Map<String, Image> toMap(final String key, final Image image) {
         final Map<String, Image> map = new HashMap<>();
         map.put(key, image);
         return map;
     }
 
-    @RpcMethod(logined = false, caption = "为指定日期添加指定天数", args = {
-            @RpcArg(name = "date", caption = "日期"),
-            @RpcArg(name = "days", caption = "添加的天数") }, result = @RpcResult(caption = "添加了天数后的新日期"))
+    @RpcMethod(caption = "为指定日期添加指定天数",
+            args = { @RpcArg(name = "date", caption = "日期"),
+                    @RpcArg(name = "days", caption = "添加的天数") },
+            result = @RpcResult(caption = "添加了天数后的新日期"))
+    @Accessibility(anonymous = true)
     public Date addDays(final Date date, final int days) {
         return DateUtil.addDays(date, days);
     }

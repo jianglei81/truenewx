@@ -8,10 +8,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.truenewx.web.http.HttpLink;
-import org.truenewx.web.rpc.RpcPort;
-import org.truenewx.web.security.authority.Authority;
-
 /**
  * 抽象的菜单项
  *
@@ -25,10 +21,6 @@ abstract class AbstractMenuItem {
      */
     private Set<String> profiles = new HashSet<>();
     /**
-     * 所需授权
-     */
-    private Authority authority;
-    /**
      * 地域说明集合（菜单显示）
      */
     private Map<Locale, String> captions = new HashMap<>();
@@ -37,33 +29,21 @@ abstract class AbstractMenuItem {
      */
     private Map<String, Object> options = new HashMap<>();
     /**
-     * 链接集合
-     */
-    private List<HttpLink> links = new ArrayList<>();
-    /**
-     * RPC端口集合
-     */
-    private List<RpcPort> rpcs = new ArrayList<>();
-    /**
      * 图标
      */
     private String icon;
+
     /**
      * 子项集合
      */
     private List<MenuItem> subs = new ArrayList<>();
-    /**
-     * 是否隐藏
-     */
-    private boolean hidden;
 
-    public AbstractMenuItem(final Authority authority, final String caption, final HttpLink link,
-            final String icon, final boolean hidden) {
-        this.authority = authority;
+    private MenuItemAction action;
+
+    public AbstractMenuItem(final String caption, final String icon, final MenuItemAction action) {
         this.captions.put(Locale.getDefault(), caption);
-        this.links.add(link);
         this.icon = icon;
-        this.hidden = hidden;
+        this.action = action;
     }
 
     /**
@@ -72,14 +52,6 @@ abstract class AbstractMenuItem {
      */
     public Set<String> getProfiles() {
         return this.profiles;
-    }
-
-    /**
-     *
-     * @return 所需授权
-     */
-    public Authority getAuthority() {
-        return this.authority;
     }
 
     /**
@@ -94,20 +66,6 @@ abstract class AbstractMenuItem {
      */
     public Map<String, Object> getOptions() {
         return this.options;
-    }
-
-    /**
-     * 连接集合
-     */
-    public List<HttpLink> getLinks() {
-        return this.links;
-    }
-
-    /**
-     * RPC端口集合
-     */
-    public List<RpcPort> getRpcs() {
-        return this.rpcs;
     }
 
     /**
@@ -126,10 +84,10 @@ abstract class AbstractMenuItem {
 
     /**
      *
-     * @return 是否隐藏
+     * @return 菜单项动作
      */
-    public boolean isHidden() {
-        return this.hidden;
+    public MenuItemAction getAction() {
+        return this.action;
     }
 
 }

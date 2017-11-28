@@ -77,8 +77,8 @@ $(function() {
                         </c:if>
                         </td>
                         <td>
-                        <c:if test="${method.logined}">
-                            <span class="label label-important" title="登录后才可访问" render="tooltip">登录</span>
+                        <c:if test="${method.anonymous}">
+                            <span class="label label-important" title="可匿名访问" render="tooltip">匿名</span>
                         </c:if>
                         <c:if test="${method.lan}">
                             <span class="label" title="仅局域网内部可访问" render="tooltip">LAN</span>

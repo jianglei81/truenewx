@@ -7,15 +7,20 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
 import org.truenewx.core.exception.BusinessException;
+import org.truenewx.core.util.NetUtil;
 import org.truenewx.web.menu.MenuResolver;
 import org.truenewx.web.menu.model.Menu;
+import org.truenewx.web.security.annotation.Accessibility;
 import org.truenewx.web.security.authority.Authority;
 import org.truenewx.web.security.mgt.SubjectManager;
 import org.truenewx.web.security.subject.Subject;
@@ -34,6 +39,8 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
      * 请求转发的前缀
      */
     public static final String FORWARD_PREFIX = "forward:";
+
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     private SubjectManager subjectManager;
 
@@ -92,13 +99,20 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
         if (matches(url)) { // URL匹配才进行校验
             final Class<?> userClass = getUserClass(request, response);
             final Subject subject = this.subjectManager.getSubject(request, response, userClass);
-            if (subject != null) { // 能取得subject才进行校验
-                // 登录校验
-                if (!validateLogin(subject, request, response)) {
+            if (subject != null && handler instanceof HandlerMethod) { // 能取得subject才进行校验
+                final Accessibility accessibility = ((HandlerMethod) handler)
+                        .getMethodAnnotation(Accessibility.class);
+                // 局域网访问限制校验
+                if (!validateLan(url, accessibility, request, response)) {
                     return false;
                 }
-                // 登录校验成功后，校验授权
-                if (!validateAuthority(url, subject, request)) {
+                final HttpMethod method = HttpMethod.valueOf(request.getMethod());
+                // 登录校验
+                if (!validateLogin(url, method, accessibility, subject, request, response)) {
+                    return false;
+                }
+                // 授权校验
+                if (!validateAuthority(url, method, subject, request)) {
                     return false;
                 }
             }
@@ -106,9 +120,32 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
         return true;
     }
 
-    protected boolean validateLogin(final Subject subject, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException, IOException {
+    protected boolean validateLan(final String url, final Accessibility accessibility,
+            final HttpServletRequest request, final HttpServletResponse response)
+            throws IOException {
+        final String ip = WebUtil.getRemoteAddrIp(request);
+        if (accessibility != null && accessibility.lan() && !NetUtil.isLanIp(ip)) {
+            this.logger.warn("Forbidden rpc request {} from {}", url, ip);
+            response.sendError(HttpStatus.FORBIDDEN.value()); // 禁止非局域网访问
+            return false;
+        }
+        return true;
+    }
+
+    protected boolean validateLogin(final String url, final HttpMethod method,
+            final Accessibility accessibility, final Subject subject,
+            final HttpServletRequest request, final HttpServletResponse response)
+            throws ServletException, IOException {
         if (!subject.isLogined()) {
+            // 在访问性注解中设置了可匿名访问，则验证通过
+            if (accessibility != null && accessibility.anonymous()) {
+                return true;
+            }
+            // 配置菜单中当前链接允许匿名访问，则跳过不作限制
+            if (this.menu != null && this.menu.isAnonymous(url, method)) {
+                return true;
+            }
+            // 未登录且不允许匿名访问
             if (WebUtil.isAjaxRequest(request)) { // AJAX请求未登录时，返回错误状态
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
             } else { // 普通请求未登录时，跳转至登录页面
@@ -121,16 +158,15 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
                 } else { // 直接重定向
                     WebUtil.redirect(request, response, loginUrl);
                 }
-                return false; // 阻止后续拦截器
             }
+            return false;
         }
         return true;
     }
 
-    protected boolean validateAuthority(final String url, final Subject subject,
-            final HttpServletRequest request) throws BusinessException {
+    protected boolean validateAuthority(final String url, final HttpMethod method,
+            final Subject subject, final HttpServletRequest request) throws BusinessException {
         if (this.menu != null) {
-            final HttpMethod method = HttpMethod.valueOf(request.getMethod());
             final Authority authority = this.menu.getAuthority(url, method);
             // 此时授权可能为null，为null时将被视为无访问权限，意味着在配置有菜单的系统中，URL访问均应在菜单配置中进行配置
             subject.validateAuthority(authority);
