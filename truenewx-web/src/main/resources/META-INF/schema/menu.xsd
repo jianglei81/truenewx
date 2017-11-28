@@ -40,7 +40,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="caption" minOccurs="0" maxOccurs="unbounded" />
-                <xs:element ref="options" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="options" minOccurs="0" maxOccurs="1" />
                 <xs:element ref="action" minOccurs="0" maxOccurs="1" />
                 <xs:element ref="item" minOccurs="0" maxOccurs="unbounded" />
             </xs:sequence>
