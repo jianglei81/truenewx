@@ -97,18 +97,33 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
         }
         final String url = WebUtil.getRelativeRequestUrl(request);
         if (matches(url)) { // URL匹配才进行校验
-            final Class<?> userClass = getUserClass(request, response);
-            final Subject subject = this.subjectManager.getSubject(request, response, userClass);
-            if (subject != null && handler instanceof HandlerMethod) { // 能取得subject才进行校验
+            // 校验Accessibility注解限制
+            if (handler instanceof HandlerMethod) {
                 final Accessibility accessibility = ((HandlerMethod) handler)
                         .getMethodAnnotation(Accessibility.class);
                 // 局域网访问限制校验
-                if (!validateLan(url, accessibility, request, response)) {
-                    return false;
+                if (accessibility != null) {
+                    if (accessibility.lan()) {
+                        final String ip = WebUtil.getRemoteAddrIp(request);
+                        if (!NetUtil.isLanIp(ip)) {
+                            this.logger.warn("Forbidden rpc request {} from {}", url, ip);
+                            response.sendError(HttpStatus.FORBIDDEN.value()); // 禁止非局域网访问
+                            return false;
+                        }
+                    }
+                    // 在访问性注解中设置了可匿名访问，则验证通过
+                    if (accessibility.anonymous()) {
+                        return true;
+                    }
                 }
+            }
+            // 校验菜单权限
+            final Class<?> userClass = getUserClass(request, response);
+            final Subject subject = this.subjectManager.getSubject(request, response, userClass);
+            if (subject != null) { // 能取得subject才进行校验
                 final HttpMethod method = HttpMethod.valueOf(request.getMethod());
                 // 登录校验
-                if (!validateLogin(url, method, accessibility, subject, request, response)) {
+                if (!validateLogin(url, method, subject, request, response)) {
                     return false;
                 }
                 // 授权校验
@@ -120,27 +135,10 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
         return true;
     }
 
-    protected boolean validateLan(final String url, final Accessibility accessibility,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException {
-        final String ip = WebUtil.getRemoteAddrIp(request);
-        if (accessibility != null && accessibility.lan() && !NetUtil.isLanIp(ip)) {
-            this.logger.warn("Forbidden rpc request {} from {}", url, ip);
-            response.sendError(HttpStatus.FORBIDDEN.value()); // 禁止非局域网访问
-            return false;
-        }
-        return true;
-    }
-
     protected boolean validateLogin(final String url, final HttpMethod method,
-            final Accessibility accessibility, final Subject subject,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException {
+            final Subject subject, final HttpServletRequest request,
+            final HttpServletResponse response) throws ServletException, IOException {
         if (!subject.isLogined()) {
-            // 在访问性注解中设置了可匿名访问，则验证通过
-            if (accessibility != null && accessibility.anonymous()) {
-                return true;
-            }
             // 配置菜单中当前链接允许匿名访问，则跳过不作限制
             if (this.menu != null && this.menu.isAnonymous(url, method)) {
                 return true;

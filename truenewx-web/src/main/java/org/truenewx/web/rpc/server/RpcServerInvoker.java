@@ -225,24 +225,29 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
 
     private boolean validate(final String beanId, final Method method,
             final HttpServletRequest request, final HttpServletResponse response) throws Exception {
-        final Accessibility accessibility = method.getAnnotation(Accessibility.class);
-        // 检查局域网限制
         final String methodName = method.getName();
-        final String ip = WebUtil.getRemoteAddrIp(request);
-        if (accessibility != null && accessibility.lan() && !NetUtil.isLanIp(ip)) {
-            this.logger.warn("Forbidden rpc request {}.{} from {}", beanId, methodName, ip);
-            response.sendError(HttpStatus.FORBIDDEN.value()); // 禁止非局域网访问
-            return false;
+        // 校验Accessibility注解限制
+        final Accessibility accessibility = method.getAnnotation(Accessibility.class);
+        if (accessibility != null) {
+            // 检查局域网限制
+            if (accessibility.lan()) {
+                final String ip = WebUtil.getRemoteAddrIp(request);
+                if (!NetUtil.isLanIp(ip)) {
+                    this.logger.warn("Forbidden rpc request {}.{} from {}", beanId, methodName, ip);
+                    response.sendError(HttpStatus.FORBIDDEN.value()); // 禁止非局域网访问
+                    return false;
+                }
+            }
+            // 在访问性注解中设置了可匿名访问，则验证通过
+            if (accessibility.anonymous()) {
+                return true;
+            }
         }
-        // 检查登录限制
+        // 校验菜单权限
         if (this.subjectManager != null) {
             final Subject subject = this.subjectManager.getSubject(request, response);
             final int argCount = method.getParameterCount();
             if (!subject.isLogined()) { // 未登录
-                // 在访问性注解中设置了可匿名访问，则验证通过
-                if (accessibility != null && accessibility.anonymous()) {
-                    return true;
-                }
                 // 在菜单中设置了可匿名访问，则验证通过
                 if (this.menu != null && this.menu.isAnonymous(beanId, methodName, argCount)) {
                     return true;
