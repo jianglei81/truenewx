@@ -244,14 +244,14 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
             }
         }
         // 校验菜单权限
+        final int argCount = method.getParameterCount();
+        // 在菜单中设置了可匿名访问，则验证通过
+        if (this.menu != null && this.menu.isAnonymous(beanId, methodName, argCount)) {
+            return true;
+        }
         if (this.subjectManager != null) {
             final Subject subject = this.subjectManager.getSubject(request, response);
-            final int argCount = method.getParameterCount();
             if (!subject.isLogined()) { // 未登录
-                // 在菜单中设置了可匿名访问，则验证通过
-                if (this.menu != null && this.menu.isAnonymous(beanId, methodName, argCount)) {
-                    return true;
-                }
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 return false;
             }

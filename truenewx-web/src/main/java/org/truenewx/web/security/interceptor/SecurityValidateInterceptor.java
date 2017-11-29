@@ -122,8 +122,12 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
             final Subject subject = this.subjectManager.getSubject(request, response, userClass);
             if (subject != null) { // 能取得subject才进行校验
                 final HttpMethod method = HttpMethod.valueOf(request.getMethod());
+                // 配置菜单中当前链接允许匿名访问，则跳过不作限制
+                if (this.menu != null && this.menu.isAnonymous(url, method)) {
+                    return true;
+                }
                 // 登录校验
-                if (!validateLogin(url, method, subject, request, response)) {
+                if (!validateLogin(subject, request, response)) {
                     return false;
                 }
                 // 授权校验
@@ -135,14 +139,9 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
         return true;
     }
 
-    protected boolean validateLogin(final String url, final HttpMethod method,
-            final Subject subject, final HttpServletRequest request,
+    protected boolean validateLogin(final Subject subject, final HttpServletRequest request,
             final HttpServletResponse response) throws ServletException, IOException {
         if (!subject.isLogined()) {
-            // 配置菜单中当前链接允许匿名访问，则跳过不作限制
-            if (this.menu != null && this.menu.isAnonymous(url, method)) {
-                return true;
-            }
             // 未登录且不允许匿名访问
             if (WebUtil.isAjaxRequest(request)) { // AJAX请求未登录时，返回错误状态
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
