@@ -66,7 +66,7 @@ public class RpcServerController {
     @ResponseBody
     public String methods(@PathVariable("beanId") final String beanId) throws Exception {
         final Collection<String> methodNames = this.server.methods(beanId);
-        return this.serializer.serializeCollection(methodNames);
+        return this.serializer.serialize(methodNames);
     }
 
     @RequestMapping(value = "/invoke/{beanId}/{methodName}",
@@ -142,7 +142,7 @@ public class RpcServerController {
                         false, true, true, argTypeMeta.getIncludes(), argTypeMeta.getExcludes());
                 metas = getPropertyVariableMetas(clazz, propertyMetas, false);
             }
-            return this.serializer.serializeBean(metas);
+            return this.serializer.serialize(metas);
         } else {
             response.sendError(HttpStatus.NOT_FOUND.value()); // 禁止非局域网访问
             return null;
@@ -229,7 +229,7 @@ public class RpcServerController {
                         true, false, true, includes, excludues);
                 metas = getPropertyVariableMetas(clazz, propertyMetas, true);
             }
-            return this.serializer.serializeBean(metas);
+            return this.serializer.serialize(metas);
         } else {
             response.sendError(HttpStatus.NOT_FOUND.value()); // 禁止非局域网访问
             return null;

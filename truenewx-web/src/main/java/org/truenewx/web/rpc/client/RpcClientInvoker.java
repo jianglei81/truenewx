@@ -49,7 +49,7 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
     private Map<String, Object> getInvokeParams(final Object[] args) throws Exception {
         final Map<String, Object> params = new HashMap<>();
         if (args.length > 0) {
-            params.put("args", this.serializer.serializeArray(args));
+            params.put("args", this.serializer.serialize(args));
 
             // final Class<?>[] argTypes = new Class<?>[args.length];
             // for (int i = 0; i < args.length; i++) {
@@ -82,7 +82,7 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
             return content;
         }
         case BusinessExceptionResolver.SC_BUSINESS_ERROR: { // 业务异常
-            throw new AjaxException(this.serializer.deserializeBean(content, Map.class));
+            throw new AjaxException(this.serializer.deserialize(content, Map.class));
         }
         default: { // 其他错误
             throw new AjaxException(content);
@@ -96,7 +96,7 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
         final String url = getInvokeUrl(beanId, methodName);
         final Map<String, Object> params = getInvokeParams(args);
         final String response = requestContent(url, params);
-        return this.serializer.deserializeBean(response, resultType);
+        return this.serializer.deserialize(response, resultType);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
     private Map<String, Object> getInvokeParams(final Map<String, Object> args) throws Exception {
         final Map<String, Object> params = new HashMap<>();
         for (final Entry<String, Object> entry : args.entrySet()) {
-            params.put(entry.getKey(), this.serializer.serializeBean(entry.getValue()));
+            params.put(entry.getKey(), this.serializer.serialize(entry.getValue()));
         }
         return params;
     }
@@ -122,7 +122,7 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
         final String url = getInvokeUrl(beanId, methodName);
         final Map<String, Object> params = getInvokeParams(args);
         final String response = requestContent(url, params);
-        return this.serializer.deserializeBean(response, resultType);
+        return this.serializer.deserialize(response, resultType);
     }
 
     @Override

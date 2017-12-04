@@ -181,7 +181,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
                 if ((Collection.class.isAssignableFrom(argType) && rpcArg != null
                         && rpcArg.componentType() != Object.class)
                         || (argType.isArray() && ClassUtil.isComplex(argType.getComponentType()))) {
-                    final String argValueString = this.serializer.serializeBean(args[i]);
+                    final String argValueString = this.serializer.serialize(args[i]);
                     args[i] = deserializeArgValue(argValueString, argType, rpcArg);
                 }
             }
@@ -328,7 +328,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
                 }
             }
         } else { // 其它需要转换的情况，均先序列号成字符串再反序列化为指定声明类型
-            args[i] = this.serializer.deserializeBean(this.serializer.serializeBean(arg),
+            args[i] = this.serializer.deserialize(this.serializer.serialize(arg),
                     declaredArgType);
         }
     }
@@ -350,7 +350,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
             }
             return array;
         } else { // 默认按声明参数类型反序列化
-            return this.serializer.deserializeBean(argValueString, argType);
+            return this.serializer.deserialize(argValueString, argType);
         }
     }
 

@@ -1,7 +1,6 @@
 package org.truenewx.core.serializer;
 
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -13,31 +12,24 @@ import java.util.List;
 public interface StringSerializer {
 
     /**
-     * 序列化数组
-     *
-     * @param array
-     *            数组
-     * @return 序列化后的字符串
-     */
-    String serializeArray(Object[] array);
-
-    /**
-     * 序列化集合
-     *
-     * @param collection
-     *            集合
-     * @return 序列化后的字符串
-     */
-    String serializeCollection(Collection<?> collection);
-
-    /**
      * 序列化Bean
      *
      * @param bean
      *            Bean
      * @return 序列化后的字符串
      */
-    String serializeBean(Object bean);
+    String serialize(Object bean);
+
+    /**
+     * 反序列化为Bean
+     *
+     * @param s
+     *            序列化字符串
+     * @param type
+     *            期望类型
+     * @return Bean
+     */
+    <T> T deserialize(String s, Class<T> type);
 
     /**
      * 反序列化为数组
@@ -49,17 +41,6 @@ public interface StringSerializer {
      * @return 数组
      */
     Object[] deserializeArray(String s, Type... elementTypes);
-
-    /**
-     * 反序列化为Bean
-     *
-     * @param s
-     *            序列化字符串
-     * @param type
-     *            期望类型
-     * @return Bean
-     */
-    <T> T deserializeBean(String s, Class<T> type);
 
     /**
      * 反序列化为集合

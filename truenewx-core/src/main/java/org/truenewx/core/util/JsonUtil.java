@@ -2,6 +2,9 @@ package org.truenewx.core.util;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,13 +14,16 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.truenewx.core.serializer.JsonDateCodec;
 import org.truenewx.core.util.json.MultiPropertyPreFilter;
 import org.truenewx.core.util.json.TypeSerializeFilter;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.PropertyPreFilter;
+import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 
 /**
@@ -27,6 +33,16 @@ import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
  * @since JDK 1.8
  */
 public class JsonUtil {
+
+    static {
+        final JsonDateCodec dateCodec = new JsonDateCodec();
+        SerializeConfig.getGlobalInstance().put(Date.class, dateCodec);
+        SerializeConfig.getGlobalInstance().put(java.sql.Date.class, dateCodec);
+        SerializeConfig.getGlobalInstance().put(Timestamp.class, dateCodec);
+        ParserConfig.getGlobalInstance().putDeserializer(Date.class, dateCodec);
+        ParserConfig.getGlobalInstance().putDeserializer(java.sql.Date.class, dateCodec);
+        ParserConfig.getGlobalInstance().putDeserializer(Timestamp.class, dateCodec);
+    }
 
     /**
      * 获取JSON过滤器实例
@@ -176,6 +192,23 @@ public class JsonUtil {
      */
     public static <T> List<T> json2List(final String json, final Class<T> clazz) {
         return JSON.parseArray(json, clazz);
+    }
+
+    /**
+     * 将JSON标准形式的字符串转换为指定类型的对象List
+     *
+     * @param json
+     *            JSON标准形式的字符串
+     * @param types
+     *            依次为结果数组的每一个元素的类型，为空则不限制类型
+     * @return 转换形成的对象List
+     */
+    public static List<Object> json2List(final String json, final Type[] types) {
+        if (types != null && types.length > 0) {
+            return JSON.parseArray(json, types);
+        } else {
+            return JSON.parseArray(json);
+        }
     }
 
     /**

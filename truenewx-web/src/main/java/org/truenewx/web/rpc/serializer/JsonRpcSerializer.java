@@ -5,6 +5,7 @@ import org.truenewx.core.serializer.JsonSerializer;
 import org.truenewx.web.rpc.server.annotation.RpcResultFilter;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 /**
  * JSON-RPC序列化器
@@ -15,13 +16,15 @@ import com.alibaba.fastjson.JSON;
 @Component
 public class JsonRpcSerializer extends JsonSerializer implements RpcSerializer {
 
+    private final SerializerFeature[] serializerFeatures = { SerializerFeature.DisableCircularReferenceDetect };
+
     @Override
     public String serializeBean(final Object bean, final RpcResultFilter[] filters) {
         if (bean != null) {
             if (filters.length > 0) { // RPC结果有特殊设置，则启用过滤器
-                return JSON.toJSONString(bean, new JsonRpcResultPropertyPreFilter(filters));
+                return JSON.toJSONString(bean, new JsonRpcResultPropertyPreFilter(filters), this.serializerFeatures);
             } else {
-                return JSON.toJSONString(bean);
+                return JSON.toJSONString(bean, this.serializerFeatures);
             }
         }
         return JSON.toJSONString(null);
