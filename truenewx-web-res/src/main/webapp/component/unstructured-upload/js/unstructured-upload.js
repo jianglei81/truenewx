@@ -136,10 +136,11 @@
                     _this.webuploader = WebUploader.create(webuploaderOptions);
                     $.each(_this.options.events,
                         function(name, handler) {
-                            var eventArray = ["beforeFileQueued","filesQueued","uploadAccept","error","fileDequeued","uploadComplete"];
+                            var eventArray = ["ready","beforeFileQueued","filesQueued","uploadAccept","error","fileDequeued","uploadComplete"];
                             var executeEvent = false;
-                            for(var i =0; i< eventArray.lengthe; i++){
+                            for(var i = 0; i < eventArray.length; i++){
                                 if(name == eventArray[i]){
+                                    executeEvent = false;
                                     break
                                 }else{
                                     executeEvent = true;
