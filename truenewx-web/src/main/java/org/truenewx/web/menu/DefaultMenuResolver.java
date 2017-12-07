@@ -10,6 +10,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.truenewx.web.menu.model.Menu;
 import org.truenewx.web.menu.model.MenuItem;
+import org.truenewx.web.menu.model.MenuItemAction;
 import org.truenewx.web.security.authority.Authority;
 import org.truenewx.web.security.authority.Authorization;
 
@@ -81,13 +82,17 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
         for (final MenuItem sub : item.getSubs()) {
             copyMatchedItemTo(sub, authorization, newSubs);
         }
-        // 构建新的菜单项对象，以免影响缓存的完整菜单对象的数据
-        final MenuItem newItem = new MenuItem(item.getCaption(), item.getIcon(), item.getAction());
-        newItem.getOptions().putAll(item.getOptions());
-        newItem.getCaptions().putAll(item.getCaptions());
-        newItem.getSubs().addAll(newSubs);
+        final MenuItemAction action = item.getAction();
+        // 当前菜单项配置有匹配的授权，或者子菜单项中有匹配的，才加入结果集中
+        if (action != null || newSubs.size() > 0) {
+            // 构建新的菜单项对象，以免影响缓存的完整菜单对象的数据
+            final MenuItem newItem = new MenuItem(item.getCaption(), item.getIcon(), action);
+            newItem.getOptions().putAll(item.getOptions());
+            newItem.getCaptions().putAll(item.getCaptions());
+            newItem.getSubs().addAll(newSubs);
 
-        items.add(newItem);
+            items.add(newItem);
+        }
     }
 
     @Override
