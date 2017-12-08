@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.truenewx.core.Strings;
 
@@ -16,16 +17,14 @@ import org.truenewx.core.Strings;
  * @author jianglei
  *
  */
-public abstract class AbstractNationalRegionSource implements NationalRegionSource {
+public abstract class AbstractNationalRegionSource
+        implements NationalRegionSource, InitializingBean {
 
-    /**
-     * 资源文件目录
-     */
-    protected static final String RESOURCE_DIR = "classpath:META-INF/region/";
     /**
      * 国家代号
      */
     private String nation;
+    protected String basename;
     /**
      * 显示区域-当前国家级行政区划的映射集
      */
@@ -41,10 +40,21 @@ public abstract class AbstractNationalRegionSource implements NationalRegionSour
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
+    public void setBasename(final String basename) {
+        this.basename = basename;
+    }
+
     public void setNation(final String nation) {
         Assert.isTrue(nation.length() == RegionSource.NATION_LENGTH,
                 "The length of nation must be " + RegionSource.NATION_LENGTH);
         this.nation = nation.toUpperCase();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (this.basename == null) { // 如果未配置则按照默认规则确定资源文件基本名称
+            setBasename("classpath:META-INF/region/" + this.nation);
+        }
     }
 
     @Override

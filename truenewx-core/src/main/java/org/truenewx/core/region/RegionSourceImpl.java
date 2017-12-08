@@ -8,13 +8,16 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import org.springframework.context.ApplicationContext;
+import org.truenewx.core.spring.beans.ContextInitializedBean;
+
 /**
  * 行政区划来源实现
  *
  * @author jianglei
  * @since JDK 1.8
  */
-public class RegionSourceImpl implements RegionSource {
+public class RegionSourceImpl implements RegionSource, ContextInitializedBean {
     /**
      * 国家级行政区划解析器映射集
      */
@@ -27,6 +30,13 @@ public class RegionSourceImpl implements RegionSource {
                 this.nationalSources.put(nation.toUpperCase(), nationalRegionSource);
             }
         }
+    }
+
+    @Override
+    public void afterInitialized(final ApplicationContext context) throws Exception {
+        final Map<String, NationalRegionSource> nrss = context
+                .getBeansOfType(NationalRegionSource.class);
+        setNationalSources(nrss.values()); // 如果有重复，则覆盖原有配置
     }
 
     /**

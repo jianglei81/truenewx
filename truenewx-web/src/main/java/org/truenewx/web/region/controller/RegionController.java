@@ -36,9 +36,9 @@ public class RegionController {
     public Map<String, Region> getAll() {
         final Locale locale = SpringWebContext.getLocale();
         final Map<String, Region> result = new LinkedHashMap<>();
-        final Collection<Region> nationalOptions = this.regionSource.getNationalRegions(locale);
-        for (final Region nationalOption : nationalOptions) {
-            result.put(nationalOption.getCode(), nationalOption);
+        final Collection<Region> nationalRegions = this.regionSource.getNationalRegions(locale);
+        for (final Region nationalRegion : nationalRegions) {
+            result.put(nationalRegion.getCode(), nationalRegion);
         }
         return result;
     }

@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
 import org.truenewx.core.spring.context.MessagesSource;
 import org.truenewx.core.spring.context.support.ReloadableResourceBundleMessageSource;
@@ -32,11 +31,8 @@ public class ResourceBundleNationalRegionSource extends AbstractNationalRegionSo
     }
 
     @Override
-    public void setNation(final String nation) {
-        super.setNation(nation);
-        // 设置好国家代号后，即可初始化国际化消息来源
-        this.messagesSource = new ReloadableResourceBundleMessageSource(
-                StringUtils.join(RESOURCE_DIR, nation));
+    public void setBasename(final String basename) {
+        this.messagesSource = new ReloadableResourceBundleMessageSource(basename);
     }
 
     /**

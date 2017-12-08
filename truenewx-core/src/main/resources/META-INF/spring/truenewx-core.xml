@@ -10,18 +10,7 @@
         <property name="excludedCaption" value="*市辖区,县,*行政区划,台湾*,香港*,澳门*" />
     </bean>
 
-    <bean id="regionSource" class="org.truenewx.core.region.RegionSourceImpl">
-        <property name="nationalSources">
-            <list>
-                <bean class="org.truenewx.core.region.JsonFileNationalRegionSource">
-                    <property name="nation" value="CN" />
-                </bean>
-                <bean class="org.truenewx.core.region.ResourceBundleNationalRegionSource">
-                    <property name="nation" value="OT" />
-                </bean>
-            </list>
-        </property>
-    </bean>
+    <bean id="regionSource" class="org.truenewx.core.region.RegionSourceImpl" />
 
     <bean id="regionInetAddressSetMapParser" class="org.truenewx.core.region.address.Cz88RegionInetAddressSetMapParser">
         <property name="regionSource" ref="regionSource" />

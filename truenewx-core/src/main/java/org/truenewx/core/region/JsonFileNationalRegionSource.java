@@ -23,7 +23,7 @@ import org.truenewx.core.util.JsonUtil;
  */
 public class JsonFileNationalRegionSource extends AbstractNationalRegionSource {
 
-    private String encoding = Strings.DEFAULT_ENCODING;
+    private String encoding = Strings.ENCODING_UTF8;
 
     /**
      * @param encoding
@@ -43,8 +43,7 @@ public class JsonFileNationalRegionSource extends AbstractNationalRegionSource {
     @Override
     @Nullable
     protected Region buildNationalRegion(final Locale locale) {
-        final Resource resource = IOUtil.findI18nResource(RESOURCE_DIR + getNation(), locale,
-                "json");
+        final Resource resource = IOUtil.findI18nResource(this.basename, locale, "json");
         if (resource != null) {
             try {
                 final String json = IOUtils.toString(resource.getInputStream(), this.encoding);
