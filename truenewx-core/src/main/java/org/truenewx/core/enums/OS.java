@@ -13,11 +13,17 @@ public enum OS {
 
     @Caption("Windows")
     @EnumValue("W")
-    WINDOWS, @Caption("Android")
+    WINDOWS,
+
+    @Caption("安卓")
     @EnumValue("A")
-    ANDROID, @Caption("MAC")
+    ANDROID,
+
+    @Caption("苹果")
     @EnumValue("M")
-    MAC, @Caption("所有")
+    MAC,
+
+    @Caption("所有")
     @EnumValue("L")
     ALL;
 }
