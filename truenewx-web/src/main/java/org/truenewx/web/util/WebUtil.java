@@ -646,8 +646,7 @@ public class WebUtil {
      * @return 是否AJAX请求
      */
     public static boolean isAjaxRequest(final HttpServletRequest request) {
-        return request.getHeader("X-Requested-With") != null
-                && "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+        return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
     }
 
     /**
