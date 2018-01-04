@@ -2,6 +2,7 @@ package org.truenewx.core.spring.exception.message;
 
 import java.util.Locale;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.truenewx.core.enums.support.EnumDictResolver;
 import org.truenewx.core.exception.BusinessException;
@@ -18,6 +19,7 @@ public class BusinessExceptionMessageResolver extends AbstractSingleExceptionMes
 
     private EnumDictResolver enumDictResolver;
 
+    @Autowired(required = false)
     public void setEnumDictResolver(final EnumDictResolver enumDictResolver) {
         this.enumDictResolver = enumDictResolver;
     }
@@ -27,9 +29,11 @@ public class BusinessExceptionMessageResolver extends AbstractSingleExceptionMes
         if (se instanceof BusinessException) {
             final BusinessException be = (BusinessException) se;
             final Object[] args = be.getArgs();
-            for (int i = 0; i < args.length; i++) {
-                if (args[i] instanceof Enum) {
-                    args[i] = this.enumDictResolver.getText((Enum<?>) args[i], locale);
+            if (this.enumDictResolver != null) {
+                for (int i = 0; i < args.length; i++) {
+                    if (args[i] instanceof Enum) {
+                        args[i] = this.enumDictResolver.getText((Enum<?>) args[i], locale);
+                    }
                 }
             }
             return this.messageSource.getMessage(be.getCode(), args, be.getCode(), locale);
