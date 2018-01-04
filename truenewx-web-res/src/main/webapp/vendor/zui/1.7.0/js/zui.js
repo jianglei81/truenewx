@@ -1133,6 +1133,35 @@
             return result;
         };
     }
+    
+    
+    /**
+     * TODO 自定义添加方法，为了临时解决与Sugar冲突问题
+     */
+    if(!String.prototype.zuiformat) {
+        String.prototype.zuiformat = function(args) {
+            var result = this;
+            if(arguments.length > 0) {
+                var reg;
+                if(arguments.length <= 2 && typeof(args) == 'object') {
+                    for(var key in args) {
+                        if(args[key] !== undefined) {
+                            reg = new RegExp('(' + (arguments[1] ? arguments[1].replace('0', key) : '{' + key + '}') + ')', 'g');
+                            result = result.replace(reg, args[key]);
+                        }
+                    }
+                } else {
+                    for(var i = 0; i < arguments.length; i++) {
+                        if(arguments[i] !== undefined) {
+                            reg = new RegExp('({[' + i + ']})', 'g');
+                            result = result.replace(reg, arguments[i]);
+                        }
+                    }
+                }
+            }
+            return result;
+        };
+    }
 
     /**
      * Judge the string is a integer number
@@ -4302,9 +4331,8 @@
                 var modal = e.modal,
                     groups = that.groups,
                     groupIndex = that.groupIndex;
-
                 modal.addClass('modal-lightbox')
-                    .html(options.modalTeamplate.format(options))
+                    .html(options.modalTeamplate.zuiformat(options))
                     .toggleClass('lightbox-with-caption', typeof options.caption == 'string')
                     .removeClass('lightbox-full')
                     .data('group-index', groupIndex);
@@ -4426,7 +4454,7 @@
         all[that.id] = that;
         that.message = (options.icon ? '<i class="icon-' + options.icon + ' icon"></i> ' : '') + message;
 
-        that.$ = $(template.format(options)).toggleClass('fade', options.fade).toggleClass('scale', options.scale).attr('id', 'messager-' + that.id);
+        that.$ = $(template.zuiformat(options)).toggleClass('fade', options.fade).toggleClass('scale', options.scale).attr('id', 'messager-' + that.id);
 
         if(options.cssClass) that.$.addClass(options.cssClass);
 
