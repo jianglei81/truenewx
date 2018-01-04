@@ -42,6 +42,7 @@ public class JsonUtil {
         ParserConfig.getGlobalInstance().putDeserializer(Date.class, dateCodec);
         ParserConfig.getGlobalInstance().putDeserializer(java.sql.Date.class, dateCodec);
         ParserConfig.getGlobalInstance().putDeserializer(Timestamp.class, dateCodec);
+        ParserConfig.getGlobalInstance().setAutoTypeSupport(true);
     }
 
     /**
@@ -53,8 +54,7 @@ public class JsonUtil {
      *            需排除的属性
      * @return JSON过滤器实例
      */
-    private static PropertyPreFilter getFilterInstance(final Class<?> clazz,
-            final String... excludeProperties) {
+    private static PropertyPreFilter getFilterInstance(final Class<?> clazz, final String... excludeProperties) {
         final SimplePropertyPreFilter filter = new SimplePropertyPreFilter(clazz);
         final Set<String> excludeList = filter.getExcludes();
         for (final String exclude : excludeProperties) {
@@ -70,8 +70,7 @@ public class JsonUtil {
      *            过滤属性映射集
      * @return JSON过滤器实例
      */
-    private static PropertyPreFilter getFilterInstance(
-            final Map<Class<?>, FilteredTokens> filteredPropertiesMap) {
+    private static PropertyPreFilter getFilterInstance(final Map<Class<?>, FilteredTokens> filteredPropertiesMap) {
         final MultiPropertyPreFilter filter = new MultiPropertyPreFilter();
         for (final Entry<Class<?>, FilteredTokens> entry : filteredPropertiesMap.entrySet()) {
             final FilteredTokens value = entry.getValue();
@@ -91,8 +90,7 @@ public class JsonUtil {
      *            需排除的属性
      * @return JSON格式的字符串
      */
-    public static String toJson(final Object obj, final Class<?> clazz,
-            final String... excludeProperties) {
+    public static String toJson(final Object obj, final Class<?> clazz, final String... excludeProperties) {
         return JSON.toJSONString(obj, getFilterInstance(clazz, excludeProperties));
     }
 
@@ -105,8 +103,7 @@ public class JsonUtil {
      *            过滤属性映射集
      * @return JSON格式的字符串
      */
-    public static String toJson(final Object obj,
-            final Map<Class<?>, FilteredTokens> filteredPropertiesMap) {
+    public static String toJson(final Object obj, final Map<Class<?>, FilteredTokens> filteredPropertiesMap) {
         return JSON.toJSONString(obj, getFilterInstance(filteredPropertiesMap));
     }
 
@@ -224,8 +221,7 @@ public class JsonUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <K, V> Map<K, V> json2Map(final String json, final Class<K> keyClass,
-            final Class<V> valueClass) {
+    public static <K, V> Map<K, V> json2Map(final String json, final Class<K> keyClass, final Class<V> valueClass) {
         final Map<K, V> result = new HashMap<>();
         final Map<String, Object> map = JSON.parseObject(json);
         for (final Entry<String, Object> entry : map.entrySet()) {
