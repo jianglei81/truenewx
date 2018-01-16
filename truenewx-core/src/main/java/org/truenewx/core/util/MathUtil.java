@@ -411,4 +411,18 @@ public class MathUtil {
         return index;
     }
 
+    public static byte[] int2Bytes(final int value) {
+        final byte[] bytes = new byte[4];
+        bytes[0] = (byte) ((value >> 24) & 0xFF);
+        bytes[1] = (byte) ((value >> 16) & 0xFF);
+        bytes[2] = (byte) ((value >> 8) & 0xFF);
+        bytes[3] = (byte) (value & 0xFF);
+        return bytes;
+    }
+
+    public static int bytes2Int(final byte[] bytes, final int offset) {
+        return (((bytes[offset] & 0xFF) << 24) | ((bytes[offset + 1] & 0xFF) << 16)
+                | ((bytes[offset + 2] & 0xFF) << 8) | (bytes[offset + 3] & 0xFF));
+    }
+
 }
