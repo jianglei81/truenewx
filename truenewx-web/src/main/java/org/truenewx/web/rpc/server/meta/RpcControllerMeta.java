@@ -90,7 +90,7 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
         if (this.methodMetas == null) {
             synchronized (this.beanId) {
                 if (this.methodMetas == null) {
-                    this.methodMetas = new ArrayList<RpcMethodMeta>();
+                    this.methodMetas = new ArrayList<>();
                     Method[] methods;
                     try {
                         methods = this.controller.getClass().getMethods();
@@ -124,7 +124,7 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
     }
 
     public Set<String> getMethodNames() {
-        final Set<String> methodNames = new HashSet<String>();
+        final Set<String> methodNames = new HashSet<>();
         final Collection<RpcMethodMeta> methods = getMethodMetas();
         for (final RpcMethodMeta method : methods) {
             methodNames.add(method.getName());
