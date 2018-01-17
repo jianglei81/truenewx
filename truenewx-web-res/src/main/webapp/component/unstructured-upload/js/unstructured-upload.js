@@ -118,151 +118,144 @@
                 _this.rpc = rpc;
 
                 rpc.getUploadLimit(_this.options.authorizeType, function(uploadLimit) {
-                    var webuploaderOptions = {
-                        swf : _this.options.swf,
-                        server : _this.options.serverPath + "/" + _this.options.authorizeType,
-                        pick : element,
-                        auto : _this.options.auto,
-                        resize : _this.options.resize,
-                        threads : 5,
-                        prepareNextFile : true,
-                        fileNumLimit : uploadLimit.number,
-                        fileSingleSizeLimit : uploadLimit.capacity,
-                        duplicate : false,
-                        accept : {
-                            extensions : uploadLimit.extensions.join(","),
-                            mimeTypes : uploadLimit.mimeTypes.join(",")
-                        }
-                    };
-                    _this.webuploader = WebUploader.create(webuploaderOptions);
-                    var _wu = _this.webuploader;
-                    var _fs = _this.fileStats;
-
-                    $.each(_this.options.events, function(name, handler) {
-                        var eventArray = [ "ready", "beforeFileQueued", "filesQueued",
-                                "uploadAccept", "error", "fileDequeued", "uploadComplete" ];
-                        var executeEvent = false;
-                        for (var i = 0; i < eventArray.length; i++) {
-                            if (name == eventArray[i]) {
-                                executeEvent = false;
-                                break
-                            } else {
-                                executeEvent = true;
-                            }
-                        }
-                        if (executeEvent) {
-                            _wu.on(name, handler);
-                        }
-                    });
-
-                    _wu.on("beforeFileQueued", function(file) {
-                        _fs.stopCause = null;
-                        // 文件容量大小校验
-                        var capacity = uploadLimit.capacity;
-                        if (capacity > 0 && file.size > capacity) {
-                            var error = _this.buildError(
-                                    "error.unstructured.upload.beyond_max_capacity", _this
-                                            .getCapacityCaption(capacity), file.name, _this
-                                            .getCapacityCaption(file.size));
-                            _this.options.events.error(error);
-                            return false;
-                        }
-                        // 扩展名校验
-                        var extensions = uploadLimit.extensions;
-                        if (extensions.length) {
-                            var extension = _this.getFileExtension(file.name);
-                            if (extensions.indexOf(extension) < 0) {
-                                var error = _this.buildError(
-                                        "error.unstructured.upload.unsupported_extension",
-                                        extensions.join("、"), file.name);
-                                _this.options.events.error(error);
-                                return false;
-                            }
-                        }
-                        // 文件数限制验证
-                        var filesLimitNum = uploadLimit.number;
-                        if (_fs.updateFileId) { // 存在待更新id
-                            // 给待加入队列的文件设置hash值
-                            file.valiHash = _this.hashString(file.name + file.size
-                                    + file.lastModifiedDate)
-                            // 当文件验证重复时，设置阻止上传标识为2
-                            $.each(_wu.getFiles(), function() {
-                                if (this.__hash == file.valiHash) {
-                                    _fs.stopCause = "duplicate";
-                                }
-                            })
-                            // 已有文件数大于限制文件数，阻止上传；
-                            if (_wu.getFiles().length > filesLimitNum) {
-                                _fs.stopCause = "number";
-                            }
-                            _fs.removeFileId = _fs.updateFileId;
-                            _fs.updateFileId = null
-                        } else {
-                            // 不存在更新文件id，已有文件数等于限制文件数时，阻止上传；
-                            if (_wu.getFiles().length >= filesLimitNum) {
-                                _fs.stopCause = "number";
-                            }
-                        }
-                        // 阻止上传标识为空，且移除文件标识存在时，删除待更新文件；
-                        if (_fs.stopCause == null && _fs.removeFileId) {
-                            _wu.removeFile(_fs.removeFileId, true);
-                            // 设置给accept事件接受的参数
-                            _fs.acceptFileId = _fs.removeFileId
-                            _fs.updateFileId = null;
-                        }
-                        _fs.removeFileId = null;
-                        return true;
-                    });
-
-                    _wu.on("filesQueued", function(files) {
-                        // 存在阻止上传原因，清空队列；
-                        if (_fs.stopCause) {
-                            $.each(files, function() {
-                                _wu.removeFile(this.id, true)
-                            });
-                            // 超过数量限制
-                            if (_fs.stopCause == "number") {
-                                var error = _this.buildError(
-                                        "error.unstructured.upload.beyond_max_number",
-                                        uploadLimit.number);
-                                _this.options.events.error(error);
-                            }
-                        }
-                        _fs.stopCause = null;
-                        return _this.options.events.filesQueued(files);
-                    });
-
-                    _wu.on("uploadAccept", function(block, result) {
-                        if (result.errors) {
-                            var error = result.errors;
-                            if (error.length == 1) { // 只有一个错误，则转换为单错误对象
-                                error = error[0];
-                            }
-                            _this.options.events.error(error);
-                            return false;
-                        }
-                        // 根据是否存在更新id，执行回调函数
-                        if (_fs.acceptFileId) {
-                            var updateId = _fs.acceptFileId;
-                            _fs.acceptFileId = null;
-                            return _this.options.events.uploadAccept(block, result, updateId);
-                        } else {
-                            return _this.options.events.uploadAccept(block, result);
-                        }
-                    });
-
-                    _wu.on("uploadComplete", function(file) {
-                        // 上传结束后判断是否隐藏上传按钮
-                        if (_wu.getFiles().length >= _wu.options.fileNumLimit) {
-                            element.hide();
-                        }
-                        return _this.options.events.uploadComplete(file);
-                    });
-                    // 加载完执行ready事件
-                    _this.options.events.ready();
+                    _this.buildWebUploader(uploadLimit);
                 });
             });
             element.data("unstructuredUpload", this);
+        },
+        buildWebUploader : function(uploadLimit) {
+            var webuploaderOptions = {
+                swf : this.options.swf,
+                server : this.options.serverPath + "/" + this.options.authorizeType,
+                pick : this.element,
+                auto : this.options.auto,
+                resize : this.options.resize,
+                threads : 5,
+                prepareNextFile : true,
+                fileNumLimit : uploadLimit.number,
+                fileSingleSizeLimit : uploadLimit.capacity,
+                duplicate : false,
+                accept : {
+                    extensions : uploadLimit.extensions.join(","),
+                    mimeTypes : uploadLimit.mimeTypes.join(",")
+                }
+            };
+            this.webuploader = WebUploader.create(webuploaderOptions);
+            var _wu = this.webuploader;
+            var _fs = this.fileStats;
+
+            $.each(this.options.events, function(name, handler) {
+                var eventArray = [ "ready", "beforeFileQueued", "filesQueued", "uploadAccept",
+                        "error", "fileDequeued", "uploadComplete" ];
+                if (!eventArray.includes(name)) {
+                    _wu.on(name, handler);
+                }
+            });
+
+            var _this = this;
+
+            _wu.on("beforeFileQueued", function(file) {
+                _fs.stopCause = null;
+                // 文件容量大小校验
+                var capacity = uploadLimit.capacity;
+                if (capacity > 0 && file.size > capacity) {
+                    var error = _this.buildError("error.unstructured.upload.beyond_max_capacity",
+                            _this.getCapacityCaption(capacity), file.name, _this
+                                    .getCapacityCaption(file.size));
+                    _this.options.events.error(error);
+                    return false;
+                }
+                // 扩展名校验
+                var extensions = uploadLimit.extensions;
+                if (extensions.length) {
+                    var extension = _this.getFileExtension(file.name);
+                    if (extensions.indexOf(extension) < 0) {
+                        var error = _this.buildError(
+                                "error.unstructured.upload.unsupported_extension", extensions
+                                        .join("、"), file.name);
+                        _this.options.events.error(error);
+                        return false;
+                    }
+                }
+                // 文件数限制验证
+                var filesLimitNum = uploadLimit.number;
+                if (_fs.updateFileId) { // 存在待更新id
+                    // 给待加入队列的文件设置hash值
+                    file.valiHash = _this.hashString(file.name + file.size + file.lastModifiedDate)
+                    // 当文件验证重复时，设置阻止上传标识为2
+                    $.each(_wu.getFiles(), function() {
+                        if (this.__hash == file.valiHash) {
+                            _fs.stopCause = "duplicate";
+                        }
+                    })
+                    // 已有文件数大于限制文件数，阻止上传；
+                    if (_wu.getFiles().length > filesLimitNum) {
+                        _fs.stopCause = "number";
+                    }
+                    _fs.removeFileId = _fs.updateFileId;
+                    _fs.updateFileId = null
+                } else {
+                    // 不存在更新文件id，已有文件数等于限制文件数时，阻止上传；
+                    if (_wu.getFiles().length >= filesLimitNum) {
+                        _fs.stopCause = "number";
+                    }
+                }
+                // 阻止上传标识为空，且移除文件标识存在时，删除待更新文件；
+                if (_fs.stopCause == null && _fs.removeFileId) {
+                    _wu.removeFile(_fs.removeFileId, true);
+                    // 设置给accept事件接受的参数
+                    _fs.acceptFileId = _fs.removeFileId
+                    _fs.updateFileId = null;
+                }
+                _fs.removeFileId = null;
+                return true;
+            });
+
+            _wu.on("filesQueued", function(files) {
+                // 存在阻止上传原因，清空队列；
+                if (_fs.stopCause) {
+                    $.each(files, function() {
+                        _wu.removeFile(this.id, true)
+                    });
+                    // 超过数量限制
+                    if (_fs.stopCause == "number") {
+                        var error = _this.buildError("error.unstructured.upload.beyond_max_number",
+                                uploadLimit.number);
+                        _this.options.events.error(error);
+                    }
+                }
+                _fs.stopCause = null;
+                return _this.options.events.filesQueued(files);
+            });
+
+            _wu.on("uploadAccept", function(block, result) {
+                if (result.errors) {
+                    var error = result.errors;
+                    if (error.length == 1) { // 只有一个错误，则转换为单错误对象
+                        error = error[0];
+                    }
+                    _this.options.events.error(error);
+                    return false;
+                }
+                // 根据是否存在更新id，执行回调函数
+                if (_fs.acceptFileId) {
+                    var updateId = _fs.acceptFileId;
+                    _fs.acceptFileId = null;
+                    return _this.options.events.uploadAccept(block, result, updateId);
+                } else {
+                    return _this.options.events.uploadAccept(block, result);
+                }
+            });
+
+            _wu.on("uploadComplete", function(file) {
+                // 上传结束后判断是否隐藏上传按钮
+                if (_wu.getFiles().length >= _wu.options.fileNumLimit) {
+                    _this.element.hide();
+                }
+                return _this.options.events.uploadComplete(file);
+            });
+            // 加载完执行ready事件
+            this.options.events.ready();
         },
         getCapacityCaption : function(capacity) {
             if (capacity === 0) {
@@ -289,12 +282,57 @@
         },
         hashString : function(str) {
             var hash = 0, i = 0, len = str.length, _char;
-
             for (; i < len; i++) {
                 _char = str.charCodeAt(i);
                 hash = _char + (hash << 6) + (hash << 16) - hash;
             }
             return hash;
+        },
+        addFiles : function(storageUrls, callback) {
+            var _this = this;
+            this.rpc.getReadMetadatas(storageUrls, function(metadatas) {
+                var wuFiles = [];
+                $.each(metadatas, function(i, metadata) {
+                    var blobFile = new File([ "files" ], metadata.filename, {
+                        type : metadata.mimeType,
+                        lastModified : metadata.lastModifiedTime
+                    });
+                    var runtimeForRuid = new WebUploader.Runtime.Runtime();
+                    var wuFile = new WebUploader.File(new WebUploader.Lib.File(WebUploader
+                            .guid('rt_'), blobFile));
+                    wuFile.size = metadata.size;
+                    wuFile.lastModified = metadata.lastModifiedTime;
+                    wuFile.url = metadata.readUrl;
+                    wuFile.__hash = _this.hashString(wuFile.name + wuFile.size
+                            + wuFile.lastModified);
+                    wuFile.setStatus("complete"); // 回显文件设置为已完成状态
+                    wuFiles.push(wuFile);
+                });
+                var _webuploader = _this.webuploader;
+                _webuploader.addFile(wuFiles);
+                if (callback) {
+                    callback(_webuploader.getFiles());
+                }
+            });
+        },
+        updateFile : function(fileId) {
+            this.element.find("input[type='file']").trigger("click");
+            this.fileStats.updateFileId = fileId;
+        },
+        deleteFile : function(fieldId) {
+            // 如果待删除文件和待更新文件ID一致，则清空待更新文件id
+            if (this.fileStats.updateFileId == fieldId) {
+                this.fileStats.updateFileId = null;
+            }
+            this.webuploader.removeFile(fieldId, true);
+            // 移除页面DOM元素
+            $("#" + fieldId).parents(".webuploader-item").remove();
+            // 执行删除后，如果队列里的文件小于限制文件，则显示上传按钮
+            var filesLength = this.webuploader.getFiles().length;
+            var fileNumLimit = this.webuploader.options.fileNumLimit;
+            if (filesLength < fileNumLimit) {
+                this.element.show();
+            }
         }
     };
 
@@ -303,57 +341,20 @@
             var element = $(this);
             return new UnstructuredUpload(element, options);
         },
-        addFile : function(storageUrls, callback) {
-            var _unstructuredUpload = $(this).data("unstructuredUpload");
-            $.tnx.rpc.imports("unstructuredController", function(rpc) {
-                rpc.getReadMetadatas(storageUrls, function(metadatas) {
-                    var wuFiles = [];
-                    $.each(metadatas, function(i, metadata) {
-                        var blobFile = new File([ "files" ], metadata.filename, {
-                            type : metadata.mimeType,
-                            lastModified : metadata.lastModifiedTime
-                        });
-                        var runtimeForRuid = new WebUploader.Runtime.Runtime();
-                        var wuFile = new WebUploader.File(new WebUploader.Lib.File(WebUploader
-                                .guid('rt_'), blobFile));
-                        wuFile.size = metadata.size;
-                        wuFile.lastModified = metadata.lastModifiedTime;
-                        wuFile.url = metadata.readUrl;
-                        wuFile.__hash = _unstructuredUpload.hashString(wuFile.name + wuFile.size
-                                + wuFile.lastModified);
-                        wuFile.setStatus("complete"); // 回显文件设置为已完成状态
-                        wuFiles.push(wuFile);
-                    });
-                    var _webuploader = _unstructuredUpload.webuploader;
-                    _webuploader.addFile(wuFiles);
-                    if (callback) {
-                        callback(_webuploader.getFiles());
-                    }
-                });
-            });
+        addFiles : function(storageUrls, callback) {
+            var element = $(this);
+            var _unstructuredUpload = element.data("unstructuredUpload");
+            _unstructuredUpload.addFiles(storageUrls, callback);
         },
-        // 更新文件方法
-        updateFile : function(options) {
-            var _unstructuredUpload = $(this).data('unstructuredUpload');
-            $(this).find('input[type="file"]').trigger('click');
-            _unstructuredUpload.fileStats.updateFileId = options['triggerFileid'];
+        updateFile : function(fileId) {
+            var element = $(this);
+            var _unstructuredUpload = element.data("unstructuredUpload");
+            _unstructuredUpload.updateFile(fileId);
         },
-        // 删除文件方法
-        deleteFile : function(options) {
-            var _unstructuredUpload = $(this).data('unstructuredUpload');
-            // 如果待删除文件和待更新文件ID一致，则清空待更新文件id
-            if (_unstructuredUpload.fileStats.updateFileId == options['deleteFileid']) {
-                _unstructuredUpload.fileStats.updateFileId = null;
-            }
-            _unstructuredUpload.webuploader.removeFile(options['deleteFileid'], true);
-            // 移除页面DOM元素
-            $("#" + options['deleteFileid']).parents('.webuploader-item').remove();
-            // 执行删除后，如果队列里的文件小于限制文件，则显示上传按钮；
-            var filesLength = $(this).data('unstructuredUpload').webuploader.getFiles().length;
-            var fileNumLimit = $(this).data('unstructuredUpload').webuploader.options.fileNumLimit;
-            if (filesLength < fileNumLimit) {
-                $(this).show();
-            }
+        deleteFile : function(fileId) {
+            var element = $(this);
+            var _unstructuredUpload = element.data("unstructuredUpload");
+            _unstructuredUpload.deleteFile(fileId);
         }
     };
 
