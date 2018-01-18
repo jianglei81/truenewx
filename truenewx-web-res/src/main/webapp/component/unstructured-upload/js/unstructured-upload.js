@@ -118,6 +118,7 @@
                 _this.rpc = rpc;
 
                 rpc.getUploadLimit(_this.options.authorizeType, function(uploadLimit) {
+                    _this.uploadLimit = uploadLimit;
                     _this.buildWebUploader(uploadLimit);
                 });
             });
@@ -293,25 +294,34 @@
             this.rpc.getReadMetadatas(storageUrls, function(metadatas) {
                 var wuFiles = [];
                 $.each(metadatas, function(i, metadata) {
-                    var blobFile = new File([ "files" ], metadata.filename, {
-                        type : metadata.mimeType,
-                        lastModified : metadata.lastModifiedTime
-                    });
-                    var runtimeForRuid = new WebUploader.Runtime.Runtime();
-                    var wuFile = new WebUploader.File(new WebUploader.Lib.File(WebUploader
-                            .guid('rt_'), blobFile));
-                    wuFile.size = metadata.size;
-                    wuFile.lastModified = metadata.lastModifiedTime;
-                    wuFile.url = metadata.readUrl;
-                    wuFile.__hash = _this.hashString(wuFile.name + wuFile.size
-                            + wuFile.lastModified);
-                    wuFile.setStatus("complete"); // 回显文件设置为已完成状态
-                    wuFiles.push(wuFile);
+                    if (metadata) {
+                        var blobFile = new File([ "files" ], metadata.filename, {
+                            type : metadata.mimeType,
+                            lastModified : metadata.lastModifiedTime
+                        });
+                        var runtimeForRuid = new WebUploader.Runtime.Runtime();
+                        var wuFile = new WebUploader.File(new WebUploader.Lib.File(WebUploader
+                                .guid("rt_"), blobFile));
+                        // 由于服务端接收到的文件可能比原始文件更大，此时加载的文件可能超出容量限制，此时通过设置虚假文件大小，避免容量超限
+                        if (metadata.size > _this.uploadLimit.capacity) {
+                            wuFile.size = _this.uploadLimit.capacity;
+                        } else {
+                            wuFile.size = metadata.size;
+                        }
+                        wuFile.lastModified = metadata.lastModifiedTime;
+                        wuFile.url = metadata.readUrl;
+                        wuFile.__hash = _this.hashString(wuFile.name + wuFile.size
+                                + wuFile.lastModified);
+                        wuFile.setStatus("complete"); // 回显文件设置为已完成状态
+                        wuFiles.push(wuFile);
+                    }
                 });
-                var _webuploader = _this.webuploader;
-                _webuploader.addFile(wuFiles);
-                if (callback) {
-                    callback(_webuploader.getFiles());
+                if (wuFiles.length) {
+                    var _webuploader = _this.webuploader;
+                    _webuploader.addFile(wuFiles);
+                    if (callback) {
+                        callback(_webuploader.getFiles());
+                    }
                 }
             });
         },
