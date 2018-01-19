@@ -1,6 +1,6 @@
 /**
  * truenewx-domain.js v1.1.0
- * 
+ *
  * Depends on: truenewx.js
  */
 $.tnx.domain = {
@@ -245,8 +245,13 @@ $.tnx.domain = {
             }
         });
     },
-    initImageLazyLoad : function(placeholderImageUrl, loadingImageUrl) {
-        if ($("img:first").lazyload) {
+    initImageLazyLoad : function(container, placeholderImageUrl, loadingImageUrl) {
+        if (typeof (container) == "string") {
+            loadingImageUrl = placeholderImageUrl;
+            placeholderImageUrl = container;
+            container = undefined;
+        }
+        if ($("img:first").lazyload) { // 已加载lazyload
             if ($.tnx.domain.site.path.resContext) {
                 if (!placeholderImageUrl) {
                     placeholderImageUrl = $.tnx.domain.site.path.resContext
@@ -257,7 +262,7 @@ $.tnx.domain = {
                             + "/assets/image/loading.gif";
                 }
             }
-            $("img[data-src]:not([src][data-original])").each(function(index, image) {
+            $("img[data-src]:not([src][data-original])", container).each(function(index, image) {
                 image = $(image);
                 if (loadingImageUrl) {
                     image.css("background", "url(" + loadingImageUrl + ") no-repeat center");
@@ -282,6 +287,16 @@ $.tnx.domain = {
                 image.lazyload($.extend({}, options, {
                     container : $(containerSelector)
                 }));
+            });
+        } else { // 未加载lazyload
+            $("img[data-src]:not([src][data-original])", container).each(function(index, image) {
+                image = $(image);
+                var src = image.attr("data-src");
+                // 图片标签上存在data-src但不存在src，因未加载lazyload，故需要将data-src更改为src
+                if (src && !image.attr("src")) {
+                    image.attr("src", src);
+                    image.removeAttr("data-src");
+                }
             });
         }
     }
@@ -355,7 +370,7 @@ $.tnx.domain.site = {
     },
     /**
      * 用模态窗体打开指定URL
-     * 
+     *
      * @param url
      *            URL
      * @param params
