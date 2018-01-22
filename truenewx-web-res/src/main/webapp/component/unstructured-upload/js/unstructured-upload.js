@@ -22,10 +22,15 @@
         resize : false,
         // 是否自动提交上传
         auto : false,
+        messages : { // 扩展定义错误消息
+            "default" : {},
+            "zh_TW" : {}
+        },
+        // 获取初始数据的函数，也可以直接赋值为一个数组
+        data : function() {
+            return undefined;
+        },
         events : {
-            // 当组件初始化完成的回调函数
-            ready : function() {
-            },
             // 当有文件被添加进队列时的回调函数
             fileQueued : function(file) {
             },
@@ -51,10 +56,6 @@
             error : function(error) {
                 $.tnx.alert(getLocaleMessage("error"), error.message);
             }
-        },
-        messages : { // 扩展定义错误消息
-            "default" : {},
-            "zh_TW" : {}
         }
     };
 
@@ -246,8 +247,17 @@
                     _this.options.events.error(error);
                 }
             });
-            // 加载完执行ready事件
-            this.options.events.ready();
+
+            // 加载初始数据
+            var data;
+            if (typeof (this.options.data) == "function") {
+                data = this.options.data();
+            } else {
+                data = this.options.data;
+            }
+            if (data.length) {
+                this.addFile(data);
+            }
         },
         // 获取webuploader队列中的有效文件数
         getFileNum : function(excludedFile) {
