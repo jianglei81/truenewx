@@ -470,7 +470,7 @@
 
     Tree.prototype.setSelectedState = function(node, state, options) {
 
-        if (!node || state === node.state.selected) {
+        if (!node || (node.state && state === node.state.selected)) {
             return;
         }
 
