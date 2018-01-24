@@ -1,6 +1,7 @@
 package org.truenewx.data.validation.constraint.validator;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -15,7 +16,7 @@ import org.truenewx.data.validation.constraint.NotContains;
  * @since JDK 1.8
  */
 public abstract class AbstractNotContainsValidator<A extends Annotation>
-        implements ConstraintValidator<A, CharSequence> {
+        implements ConstraintValidator<A, Object> {
 
     private String[] values;
 
@@ -28,11 +29,27 @@ public abstract class AbstractNotContainsValidator<A extends Annotation>
     }
 
     @Override
-    public boolean isValid(final CharSequence value, final ConstraintValidatorContext context) {
-        if (StringUtils.isNotEmpty(value)) {
+    public boolean isValid(final Object value, final ConstraintValidatorContext context) {
+        if (value instanceof CharSequence) {
             final String s = value.toString();
-            for (final String v : this.values) {
-                if (s.contains(v)) {
+            if (StringUtils.isNotEmpty(s)) {
+                for (final String v : this.values) {
+                    if (s.contains(v)) {
+                        return false;
+                    }
+                }
+            }
+        } else if (value instanceof Collection) {
+            final Collection<?> collection = (Collection<?>) value;
+            for (final Object obj : collection) {
+                if (!isValid(obj, context)) {
+                    return false;
+                }
+            }
+        } else if (value instanceof Object[]) {
+            final Object[] array = (Object[]) value;
+            for (final Object obj : array) {
+                if (!isValid(obj, context)) {
                     return false;
                 }
             }
