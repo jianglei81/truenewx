@@ -909,6 +909,36 @@
         </attribute>
     </tag>
     <tag>
+        <name>enumForEach</name>
+        <tag-class>org.truenewx.web.enums.tag.EnumForEachTag</tag-class>
+        <body-content>JSP</body-content>
+        <description>枚举遍历</description>
+        <attribute>
+            <name>type</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>枚举类型</description>
+        </attribute>
+        <attribute>
+            <name>subtype</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>枚举子类型</description>
+        </attribute>
+        <attribute>
+            <name>var</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>遍历时的当前对象变量名</description>
+        </attribute>
+        <attribute>
+            <name>varStatus</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>遍历时的当前状态变量名</description>
+        </attribute>
+    </tag>
+    <tag>
         <name>amountText</name>
         <tag-class>org.truenewx.web.tag.AmountTextTag</tag-class>
         <body-content>empty</body-content>
@@ -1156,7 +1186,7 @@
             <description>结束层级</description>
         </attribute>
     </tag>
-    
+
     <tag>
         <name>qrcode</name>
         <tag-class>org.truenewx.web.qrcode.tag.QrCodeTag</tag-class>
@@ -1207,7 +1237,7 @@
             <rtexprvalue>false</rtexprvalue>
         </attribute>
     </tag>
-    
+
     <tag>
         <name>prev-url</name>
         <tag-class>org.truenewx.web.tag.PrevUrlTag</tag-class>
@@ -1226,7 +1256,7 @@
             <description>是否包含站点上下文根路径，默认为true</description>
         </attribute>
     </tag>
-    
+
     <tag>
         <name>to-html</name>
         <tag-class>org.truenewx.web.tag.ToHtmlTag</tag-class>
@@ -1244,7 +1274,7 @@
             <description>是否不能为null，true-至少输出一个html空格</description>
         </attribute>
     </tag>
-    
+
     <tag>
         <name>authorized</name>
         <tag-class>org.truenewx.web.security.tag.AuthorizedTag</tag-class>
