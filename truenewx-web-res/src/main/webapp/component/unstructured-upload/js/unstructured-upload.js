@@ -64,14 +64,16 @@
             "error" : "错误",
             "error.unstructured.upload.beyond_max_number" : "上传文件数不能超过 {0} 个",
             "error.unstructured.upload.beyond_max_capacity" : "文件最大不能超过 {0}，“{1}”的大小为 {2}",
-            "error.unstructured.upload.unsupported_extension" : "仅支持 {0} 文件，不能上传“{1}”",
+            "error.unstructured.upload.only_supported_extension" : "仅支持 {0} 文件，不能上传“{1}”",
+            "error.unstructured.upload.unsupported_extension" : "不支持 {0} 文件，不能上传“{1}”",
             "error.unstructured.upload.duplicated_file" : "文件 {0} 重复，将被忽略"
         },
         "zh_TW" : {
             "error" : "錯誤",
             "error.unstructured.upload.beyond_max_number" : "上載文件數不能超過 {0} 個",
             "error.unstructured.upload.beyond_max_capacity" : "文件最大不能超過 {0}，“{1}”的大小為 {2}",
-            "error.unstructured.upload.unsupported_extension" : "僅支持 {0} 文件，不能上載“{1}”",
+            "error.unstructured.upload.only_supported_extension" : "僅支持 {0} 文件，不能上載“{1}”",
+            "error.unstructured.upload.unsupported_extension" : "不支持 {0} 文件，不能上载“{1}”",
             "error.unstructured.upload.duplicated_file" : "文件 {0} 重複，將被忽略"
         }
     }
@@ -123,12 +125,15 @@
                 prepareNextFile : true,
                 fileNumLimit : uploadLimit.number,
                 fileSingleSizeLimit : uploadLimit.capacity,
-                duplicate : false,
-                accept : {
+                duplicate : false
+            };
+            // 接受扩展名的模式，则添加扩展名限定
+            if (!uploadLimit.rejectedExtension) {
+                webuploaderOptions.accept = {
                     extensions : uploadLimit.extensions.join(","),
                     mimeTypes : uploadLimit.mimeTypes.join(",")
                 }
-            };
+            }
             this.webuploader = WebUploader.create(webuploaderOptions);
             var _wu = this.webuploader;
 
@@ -146,6 +151,20 @@
                 // 如果存在待更新文件，且当前加入文件不是重新加入队列的待更新文件，则先从队列中移除待更新文件
                 if (_this.updatingFile && _this.updatingFile.id != file.id) {
                     _wu.removeFile(_this.updatingFile.id);
+                }
+                // 扩展名拒绝模式，需要校验扩展名
+                if (uploadLimit.rejectedExtension) {
+                    var extensions = uploadLimit.extensions;
+                    if (extensions.length) {
+                        var extension = _this.getFileExtension(file.name);
+                        if (extensions.indexOf(extension) >= 0) {
+                            var error = _this.buildError(
+                                    "error.unstructured.upload.unsupported_extension", extensions
+                                            .join("、"), file.name);
+                            _this.options.events.error(error);
+                            return false;
+                        }
+                    }
                 }
                 return true;
             });
@@ -234,7 +253,7 @@
                     break;
                 case "Q_TYPE_DENIED":
                     var file = arguments[1];
-                    error = _this.buildError("error.unstructured.upload.unsupported_extension",
+                    error = _this.buildError("error.unstructured.upload.only_supported_extension",
                             uploadLimit.extensions.join("、"), file.name);
                     break;
                 case "F_DUPLICATE":
@@ -255,7 +274,7 @@
             } else {
                 data = this.options.data;
             }
-            if (data.length) {
+            if (data && data.length) {
                 this.addFile(data);
             }
         },
@@ -281,6 +300,13 @@
             var step = 1024;
             var level = Math.floor(Math.log(capacity) / Math.log(step));
             return (capacity / Math.pow(step, level)).toPrecision(3) + ' ' + units[level];
+        },
+        getFileExtension : function(filename, withDot) {
+            var index = filename.lastIndexOf(".");
+            if (!withDot) {
+                index++;
+            }
+            return filename.substr(index);
         },
         buildError : function(code) {
             var args = Array.prototype.slice.call(arguments, 1);
