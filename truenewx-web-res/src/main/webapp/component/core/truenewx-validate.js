@@ -532,7 +532,7 @@ $.tnx.Validator = Class.extend({
         this.showFormErrors(formObj, formErrorMessages);
         var firstErrorFieldObj = formObj.data("firstErrorFieldObj");
         if (firstErrorFieldObj) {
-            firstErrorFieldObj.select();
+            firstErrorFieldObj.focus();
         }
         return !this.hasFormError(formObj); // 表单无错误视为校验通过
     },
