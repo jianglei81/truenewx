@@ -170,4 +170,22 @@ public class CollectionUtil {
         }
         return array;
     }
+
+    /**
+     * 将指定枚举集合转换为key为枚举名称，value为枚举常量的映射集
+     * 
+     * @param collection
+     *            枚举集合
+     * @return 枚举映射集
+     */
+    public static <T extends Enum<T>> Map<String, T> toMap(final Collection<T> collection) {
+        if (collection == null) {
+            return null;
+        }
+        final Map<String, T> map = new HashMap<>();
+        for (final T constant : collection) {
+            map.put(constant.name(), constant);
+        }
+        return map;
+    }
 }

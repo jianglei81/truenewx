@@ -2,7 +2,9 @@ package org.truenewx.data.model.unity;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -51,6 +53,25 @@ public class UnityUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * 将指定单体集合转换为以id为key，单体对象为value的Map映射集
+     * 
+     * @param collection
+     *            单体集合
+     * @return 单体映射集
+     */
+    public static <T extends Unity<K>, K extends Serializable> Map<K, T> toMap(
+            final Collection<T> collection) {
+        if (collection == null) {
+            return null;
+        }
+        final Map<K, T> map = new HashMap<>();
+        for (final T unity : collection) {
+            map.put(unity.getId(), unity);
+        }
+        return map;
     }
 
 }
