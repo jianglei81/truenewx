@@ -13,7 +13,6 @@ import org.truenewx.data.model.SubmitModel;
 import org.truenewx.data.model.unity.Unity;
 import org.truenewx.data.orm.dao.UnityDao;
 import org.truenewx.service.AbstractService;
-import org.truenewx.service.transform.SubmitModelTransformer;
 
 /**
  * 抽象的单体服务
@@ -26,8 +25,7 @@ import org.truenewx.service.transform.SubmitModelTransformer;
  *            单体标识类型
  */
 public abstract class AbstractUnityService<T extends Unity<K>, K extends Serializable>
-        extends AbstractService<T> implements SimpleUnityService<T, K>, ModelUnityService<T, K>,
-        SubmitModelTransformer<SubmitModel<T>, T> {
+        extends AbstractService<T> implements SimpleUnityService<T, K>, ModelUnityService<T, K> {
 
     @Override
     public T find(final K id) {
@@ -161,9 +159,6 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
                 unity = find(id);
             }
         }
-        if (unity != null) {
-            transform(submitModel, unity);
-        }
         return unity;
     }
 
@@ -197,11 +192,6 @@ public abstract class AbstractUnityService<T extends Unity<K>, K extends Seriali
     protected T beforeUpdate(final K id, final SubmitModel<T> submitModel)
             throws HandleableException {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void transform(final SubmitModel<T> submitModel, final T entity)
-            throws HandleableException {
     }
 
     /**

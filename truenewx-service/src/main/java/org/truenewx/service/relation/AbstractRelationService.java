@@ -14,7 +14,6 @@ import org.truenewx.data.model.relation.Relation;
 import org.truenewx.data.model.unity.Unity;
 import org.truenewx.data.orm.dao.RelationDao;
 import org.truenewx.service.AbstractService;
-import org.truenewx.service.transform.SubmitModelTransformer;
 
 /**
  * 抽象关系服务
@@ -29,8 +28,8 @@ import org.truenewx.service.transform.SubmitModelTransformer;
  *            右标识类型
  */
 public abstract class AbstractRelationService<T extends Relation<L, R>, L extends Serializable, R extends Serializable>
-        extends AbstractService<T> implements SimpleRelationService<T, L, R>,
-        ModelRelationService<T, L, R>, SubmitModelTransformer<SubmitModel<T>, T> {
+        extends AbstractService<T>
+        implements SimpleRelationService<T, L, R>, ModelRelationService<T, L, R> {
 
     @Override
     public T find(final L leftId, final R rightId) {
@@ -94,8 +93,6 @@ public abstract class AbstractRelationService<T extends Relation<L, R>, L extend
         T relation = beforeAdd(leftId, rightId, model);
         relation = ensureNotNull(relation);
         if (relation != null) {
-            transform(model, relation);
-
             getDao().save(relation);
             afterSave(relation);
         }
@@ -135,8 +132,6 @@ public abstract class AbstractRelationService<T extends Relation<L, R>, L extend
             relation = find(leftId, rightId);
         }
         if (relation != null) {
-            transform(model, relation);
-
             Assert.isTrue(
                     relation.getLeftId().equals(leftId) && relation.getRightId().equals(rightId),
                     "leftId must equal relation's leftId, and rightId must equal relation's rightId");
@@ -196,11 +191,6 @@ public abstract class AbstractRelationService<T extends Relation<L, R>, L extend
      *             如果处理过程中出现错误
      */
     protected void afterSave(final T relation) throws HandleableException {
-    }
-
-    @Override
-    public void transform(final SubmitModel<T> submitModel, final T relation)
-            throws HandleableException {
     }
 
     protected abstract RelationDao<T, L, R> getDao();

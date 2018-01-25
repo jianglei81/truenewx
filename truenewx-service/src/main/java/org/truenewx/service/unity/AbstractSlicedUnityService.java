@@ -13,7 +13,6 @@ import org.truenewx.data.model.SubmitModel;
 import org.truenewx.data.model.unity.SlicedUnity;
 import org.truenewx.data.orm.dao.SlicedUnityDao;
 import org.truenewx.service.AbstractService;
-import org.truenewx.service.transform.SlicedModelTransformer;
 
 /**
  * 抽象的切分单体服务
@@ -28,8 +27,8 @@ import org.truenewx.service.transform.SlicedModelTransformer;
  *            切分者类型
  */
 public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K extends Serializable, S extends Serializable>
-        extends AbstractService<T> implements SimpleSlicedUnityService<T, K, S>,
-        ModelSlicedUnityService<T, K, S>, SlicedModelTransformer<SubmitModel<T>, T, S> {
+        extends AbstractService<T>
+        implements SimpleSlicedUnityService<T, K, S>, ModelSlicedUnityService<T, K, S> {
 
     @Override
     public T find(final S slicer, final K id) {
@@ -177,9 +176,6 @@ public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K 
                 unity = find(slicer, id);
             }
         }
-        if (unity != null) {
-            transform(slicer, submitModel, unity);
-        }
         return unity;
     }
 
@@ -220,11 +216,6 @@ public abstract class AbstractSlicedUnityService<T extends SlicedUnity<K, S>, K 
     protected T beforeUpdate(final S slicer, final K id, final SubmitModel<T> model)
             throws HandleableException {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void transform(final S slicer, final SubmitModel<T> model, final T unity)
-            throws HandleableException {
     }
 
     @Override

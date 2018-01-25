@@ -11,7 +11,6 @@ import org.truenewx.data.model.SubmitModel;
 import org.truenewx.data.model.TransportModel;
 import org.truenewx.data.model.unity.OwnedSlicedUnity;
 import org.truenewx.data.orm.dao.OwnedSlicedUnityDao;
-import org.truenewx.service.transform.OwnedSlicedModelTransformer;
 
 /**
  * 抽象的具有所属者的切分单体的服务
@@ -29,8 +28,7 @@ import org.truenewx.service.transform.OwnedSlicedModelTransformer;
  */
 public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity<K, S, O>, K extends Serializable, S extends Serializable, O extends Serializable>
         extends AbstractSlicedUnityService<T, K, S> implements
-        OwnedSimpleSlicedUnityService<T, K, S, O>, OwnedModelSlicedUnityService<T, K, S, O>,
-        OwnedSlicedModelTransformer<SubmitModel<T>, T, S, O> {
+        OwnedSimpleSlicedUnityService<T, K, S, O>, OwnedModelSlicedUnityService<T, K, S, O> {
 
     @Override
     public T find(final S slicer, final O owner, final K id) {
@@ -180,9 +178,6 @@ public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity
                 unity = find(slicer, owner, id);
             }
         }
-        if (unity != null) {
-            transform(slicer, owner, submitModel, unity);
-        }
         return unity;
     }
 
@@ -229,12 +224,6 @@ public abstract class AbstractOwnedSlicedUnityService<T extends OwnedSlicedUnity
     protected T beforeUpdate(final S slicer, final O owner, final K id,
             final TransportModel<T> model) throws HandleableException {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void transform(final S slicer, final O owner, final SubmitModel<T> model, final T unity)
-            throws HandleableException {
-        transform(slicer, model, unity);
     }
 
     @Override

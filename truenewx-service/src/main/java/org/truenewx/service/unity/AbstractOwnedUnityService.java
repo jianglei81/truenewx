@@ -10,7 +10,6 @@ import org.truenewx.core.exception.HandleableException;
 import org.truenewx.data.model.SubmitModel;
 import org.truenewx.data.model.unity.OwnedUnity;
 import org.truenewx.data.orm.dao.OwnedUnityDao;
-import org.truenewx.service.transform.OwnedModelTransformer;
 
 /**
  * 抽象的具有所属者的单体的服务
@@ -25,8 +24,8 @@ import org.truenewx.service.transform.OwnedModelTransformer;
  *            所属者类型
  */
 public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K extends Serializable, O extends Serializable>
-        extends AbstractUnityService<T, K> implements OwnedSimpleUnityService<T, K, O>,
-        OwnedModelUnityService<T, K, O>, OwnedModelTransformer<SubmitModel<T>, T, O> {
+        extends AbstractUnityService<T, K>
+        implements OwnedSimpleUnityService<T, K, O>, OwnedModelUnityService<T, K, O> {
 
     @Override
     public T find(final O owner, final K id) {
@@ -164,9 +163,6 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
                 unity = find(owner, id);
             }
         }
-        if (unity != null) {
-            transform(owner, submitModel, unity);
-        }
         return unity;
     }
 
@@ -209,12 +205,6 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
     protected T beforeUpdate(final O owner, final K id, final SubmitModel<T> submitModel)
             throws HandleableException {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void transform(final O owner, final SubmitModel<T> submitModel, final T unity)
-            throws HandleableException {
-        transform(submitModel, unity);
     }
 
     @Override

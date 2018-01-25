@@ -29,7 +29,6 @@ import org.truenewx.web.exception.annotation.HandleableExceptionResult;
 import org.truenewx.web.tagext.ErrorTagSupport;
 import org.truenewx.web.util.WebUtil;
 import org.truenewx.web.validation.generate.HandlerValidationGenerator;
-import org.truenewx.web.validation.generate.annotation.ValidationGeneratable;
 
 /**
  * Spring的业务异常解决器
@@ -78,11 +77,6 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
                 mav = handleExceptionToPage(request, handlerMethod, (HandleableException) e);
             } else {
                 LoggerFactory.getLogger(handlerMethod.getBeanType()).error(e.getMessage(), e);
-            }
-            final ValidationGeneratable vg = handlerMethod
-                    .getMethodAnnotation(ValidationGeneratable.class);
-            if (vg != null) {
-                this.handlerValidationGenerator.generate(request, vg.value(), mav);
             }
         }
         return mav;
