@@ -19,17 +19,17 @@ public class DecimalRuleMapGenerator implements ValidationMapGenerator<DecimalRu
 
     @Override
     public Map<String, Object> generate(final DecimalRule rule, final Locale locale) {
-        final Map<String, Object> result = new HashMap<String, Object>();
+        final Map<String, Object> result = new HashMap<>();
         result.put("number", Boolean.TRUE); // 至少必须为数值
         final int precision = rule.getPrecision();
         final int scale = rule.getScale();
         if (scale >= 0 && precision > scale) { // 精度大于等于0且长度大于精度才有效，不支持负精度
             if (scale == 0) { // 小数位精度为0，则限定为整数
-                result.put("int", Boolean.TRUE);
+                result.put("integer", Boolean.TRUE);
                 result.put("maxLength", precision);
                 result.remove("number");
             } else {
-                result.put("integer", precision - scale); // 整数部分长度
+                result.put("integerLength", precision - scale);
                 result.put("scale", scale);
             }
         }
