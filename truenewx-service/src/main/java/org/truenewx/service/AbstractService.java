@@ -19,7 +19,7 @@ public abstract class AbstractService<T> extends ServiceSupport implements Servi
     }
 
     /**
-     * 确保指定模型非null
+     * 确保指定实体非null
      *
      * @param entity
      *            实体

@@ -7,7 +7,7 @@ import org.truenewx.data.orm.dao.OwnedSlicedUnityDao;
 import org.truenewx.data.orm.hibernate.HibernateTemplate;
 
 /**
- * Hibernate具有所属者的切分单体DAO支持
+ * Hibernate从属切分单体DAO支持
  *
  * @author jianglei
  * @since JDK 1.8

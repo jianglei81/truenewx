@@ -3,7 +3,7 @@ package org.truenewx.data.model.unity;
 import java.io.Serializable;
 
 /**
- * 具有所属者的切分单体
+ * 从属切分单体
  *
  * @author jianglei
  * @since JDK 1.8

@@ -7,7 +7,7 @@ import org.truenewx.data.model.SubmitModel;
 import org.truenewx.data.model.unity.OwnedUnity;
 
 /**
- * 具有所属者的基于传输模型的单体服务
+ * 从属基于传输模型的单体服务
  *
  * @author jianglei
  * @since JDK 1.8
@@ -15,7 +15,7 @@ import org.truenewx.data.model.unity.OwnedUnity;
 public interface OwnedModelUnityService<T extends OwnedUnity<K, O>, K extends Serializable, O extends Serializable>
                 extends OwnedUnityService<T, K, O> {
     /**
-     * 添加具有所属者的单体
+     * 添加从属单体
      *
      * @param owner
      *            所属者
@@ -28,7 +28,7 @@ public interface OwnedModelUnityService<T extends OwnedUnity<K, O>, K extends Se
     T add(O owner, SubmitModel<T> submitModel) throws HandleableException;
 
     /**
-     * 修改具有所属者的单体<br/>
+     * 修改从属单体<br/>
      * 注意：子类不应修改单体的所属者
      *
      * @param owner

@@ -1,4 +1,4 @@
-package org.truenewx.service.unity;
+package org.truenewx.service.unity.sliced;
 
 import java.io.Serializable;
 
@@ -9,7 +9,7 @@ import org.truenewx.data.model.unity.OwnedSlicedUnity;
 import org.truenewx.service.Service;
 
 /**
- * 具有所属者的切分单体服务
+ * 从属切分单体服务
  *
  * @author jianglei
  * @since JDK 1.8
@@ -41,7 +41,7 @@ public interface OwnedSlicedUnityService<T extends OwnedSlicedUnity<K, S, O>, K 
     T load(S slicer, O owner, K id) throws BusinessException;
 
     /**
-     * 在指定切分者下，删除具有所属者的单体
+     * 在指定切分者下，删除从属单体
      *
      * @param slicer
      *            切分者

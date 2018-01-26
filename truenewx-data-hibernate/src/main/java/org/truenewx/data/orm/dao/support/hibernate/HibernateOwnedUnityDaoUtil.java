@@ -8,7 +8,7 @@ import org.truenewx.data.model.unity.OwnedUnity;
 import org.truenewx.data.orm.hibernate.HibernateTemplate;
 
 /**
- * 具有所属者的单体DAO工具类
+ * 从属单体DAO工具类
  *
  * @author jianglei
  * @since JDK 1.8

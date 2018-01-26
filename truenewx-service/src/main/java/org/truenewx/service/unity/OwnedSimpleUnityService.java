@@ -6,7 +6,7 @@ import org.truenewx.core.exception.HandleableException;
 import org.truenewx.data.model.unity.OwnedUnity;
 
 /**
- * 具有所属者的简单的单体服务
+ * 从属简单的单体服务
  *
  * @author jianglei
  * @since JDK 1.8
@@ -14,7 +14,7 @@ import org.truenewx.data.model.unity.OwnedUnity;
 public interface OwnedSimpleUnityService<T extends OwnedUnity<K, O>, K extends Serializable, O extends Serializable>
                 extends OwnedUnityService<T, K, O> {
     /**
-     * 添加具有所属者的单体
+     * 添加从属单体
      *
      * @param owner
      *            所属者
@@ -27,7 +27,7 @@ public interface OwnedSimpleUnityService<T extends OwnedUnity<K, O>, K extends S
     T add(O owner, T unity) throws HandleableException;
 
     /**
-     * 修改具有所属者的单体
+     * 修改从属单体
      *
      * @param owner
      *            所属者

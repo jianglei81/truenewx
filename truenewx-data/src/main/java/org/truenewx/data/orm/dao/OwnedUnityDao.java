@@ -6,7 +6,7 @@ import org.truenewx.data.finder.OwnedUnityFinder;
 import org.truenewx.data.model.unity.OwnedUnity;
 
 /**
- * 具有所属者的单体的DAO
+ * 从属单体的DAO
  *
  * @author jianglei
  * @since JDK 1.8

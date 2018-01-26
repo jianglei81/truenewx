@@ -12,7 +12,7 @@ import org.truenewx.data.model.unity.OwnedUnity;
 import org.truenewx.data.orm.dao.OwnedUnityDao;
 
 /**
- * 抽象的具有所属者的单体的服务
+ * 抽象的从属单体的服务
  *
  * @author jianglei
  * @since JDK 1.8
@@ -94,7 +94,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
     }
 
     /**
-     * 在添加具有所属者的单体前调用，由子类覆写
+     * 在添加从属单体前调用，由子类覆写
      *
      * @param owner
      *            所属者
@@ -167,7 +167,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
     }
 
     /**
-     * 在添加具有所属者的单体前调用，由子类覆写<br/>
+     * 在添加从属单体前调用，由子类覆写<br/>
      * {@link #transform(Serializable, SubmitModel, OwnedUnity)}
      * 方法会被上层调用，子类覆写本方法时可不调用该方法
      *
@@ -186,7 +186,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
     }
 
     /**
-     * 在修改具有所属者的单体前调用，由子类覆写<br/>
+     * 在修改从属单体前调用，由子类覆写<br/>
      * {@link #transform(Serializable, SubmitModel, OwnedUnity)}
      * 方法会被上层调用，子类覆写本方法时可不调用该方法<br/>
      * 注意：子类不应在此修改单体的所属者
@@ -219,7 +219,7 @@ public abstract class AbstractOwnedUnityService<T extends OwnedUnity<K, O>, K ex
     }
 
     /**
-     * 根据标识删除具有所属者的单体前调用，由子类覆写<br/>
+     * 根据标识删除从属单体前调用，由子类覆写<br/>
      * 子类不覆写或调用父类的本方法，将无法删除单体
      *
      * @param owner

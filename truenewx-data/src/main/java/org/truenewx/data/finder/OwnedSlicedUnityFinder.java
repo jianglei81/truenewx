@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import org.truenewx.data.model.unity.OwnedSlicedUnity;
 
 /**
- * 具有所属者的切分单体的查找器
+ * 从属切分单体的查找器
  *
  * @author jianglei
  * @since JDK 1.8

@@ -10,7 +10,7 @@ import org.truenewx.data.orm.dao.OwnedUnityDao;
 import org.truenewx.data.orm.hibernate.HibernateTemplate;
 
 /**
- * Hibernate具有所属者的单体的DAO支持
+ * Hibernate从属单体的DAO支持
  *
  * @author jianglei
  * @since JDK 1.8

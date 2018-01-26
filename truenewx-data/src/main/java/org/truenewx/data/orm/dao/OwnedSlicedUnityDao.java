@@ -6,7 +6,7 @@ import org.truenewx.data.finder.OwnedSlicedUnityFinder;
 import org.truenewx.data.model.unity.OwnedSlicedUnity;
 
 /**
- * 具有所属者的切分单体DAO
+ * 从属切分单体DAO
  *
  * @author jianglei
  * @since JDK 1.8

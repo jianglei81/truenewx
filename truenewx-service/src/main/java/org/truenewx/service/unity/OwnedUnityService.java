@@ -8,7 +8,7 @@ import org.truenewx.data.finder.OwnedUnityFinder;
 import org.truenewx.data.model.unity.OwnedUnity;
 
 /**
- * 具有所属者的单体服务
+ * 从属单体服务
  *
  * @author jianglei
  * @since JDK 1.8
@@ -35,7 +35,7 @@ public interface OwnedUnityService<T extends OwnedUnity<K, O>, K extends Seriali
     T load(O owner, K id) throws BusinessException;
 
     /**
-     * 删除具有所属者的单体
+     * 删除从属单体
      *
      * @param owner
      *            所属者

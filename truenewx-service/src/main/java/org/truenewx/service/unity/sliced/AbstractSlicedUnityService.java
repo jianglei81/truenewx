@@ -1,4 +1,4 @@
-package org.truenewx.service.unity;
+package org.truenewx.service.unity.sliced;
 
 import java.io.Serializable;
 import java.util.List;
