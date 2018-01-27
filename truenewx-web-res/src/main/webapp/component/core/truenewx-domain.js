@@ -110,12 +110,6 @@ $.tnx.domain = {
             });
             return model;
         },
-        bindBusinessValidate : function(controllerId) {
-            var _this = this;
-            $("input[name][business]").blur(function() {
-                _this.validateFieldBusiness($(this), controllerId);
-            });
-        },
         validateFieldBusiness : function(fieldObj, controllerId) {
             var fieldName = fieldObj.attr("name");
             if (fieldName) {
@@ -139,6 +133,40 @@ $.tnx.domain = {
                         }
                     });
                 }
+            }
+        },
+        bindBusinessValidate : function(controllerId) {
+            var _this = this;
+            $("form input[name][business]").blur(function() {
+                _this.validateFieldBusiness($(this), controllerId);
+            });
+        },
+        validateFormBusiness : function(formObj, controllerId) {
+            var model = {};
+            $("input[name][business]", formObj).each(function() {
+                var fieldObj = $(this);
+                var fieldValue = fieldObj.val();
+                if (fieldValue) {
+                    var fieldName = fieldObj.attr("name");
+                    model[fieldName] = fieldValue;
+                }
+            });
+            if (!$.isEmptyObject(model)) {
+                var _this = this;
+                $.tnx.rpc.imports(controllerId, function(rpc) {
+                    if (rpc.validateBusiness) {
+                        var id = formObj.attr("data-id");
+                        if (id) {
+                            id = parseInt(id);
+                        }
+                        rpc.validateBusiness(id, model, function() {
+                        }, function(error) {
+                            $.tnx.validator.showFieldErrors(fieldObj, error.message);
+                            fieldObj.attr("business", "false");
+                            fieldObj.focus();
+                        });
+                    }
+                });
             }
         }
     }),
