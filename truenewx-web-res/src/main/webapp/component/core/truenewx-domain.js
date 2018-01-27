@@ -1,6 +1,6 @@
 /**
  * truenewx-domain.js v1.1.0
- *
+ * 
  * Depends on: truenewx.js
  */
 $.tnx.domain = {
@@ -9,6 +9,18 @@ $.tnx.domain = {
         rpc : undefined,
         getRpcClassNames : function() {
             return undefined;
+        },
+        init : function() {
+            var classNames = this.getRpcClassNames();
+            if (classNames) {
+                var _this = this;
+                $.each(classNames, function(i, className) {
+                    var rpcObject = $.tnx.rpc.imports(className);
+                    var names = className.split(".");
+                    var name = names[names.length - 1];
+                    _this.rpc[name] = rpcObject;
+                });
+            }
         },
         focusEmpty : function(selector, trim) {
             var fieldObj = $(selector);
@@ -98,16 +110,35 @@ $.tnx.domain = {
             });
             return model;
         },
-        init : function() {
-            var classNames = this.getRpcClassNames();
-            if (classNames) {
-                var _this = this;
-                $.each(classNames, function(i, className) {
-                    var rpcObject = $.tnx.rpc.imports(className);
-                    var names = className.split(".");
-                    var name = names[names.length - 1];
-                    _this.rpc[name] = rpcObject;
-                });
+        bindBusinessValidate : function(controllerId) {
+            var _this = this;
+            $("input[name][business]").blur(function() {
+                _this.validateFieldBusiness($(this), controllerId);
+            });
+        },
+        validateFieldBusiness : function(fieldObj, controllerId) {
+            var fieldName = fieldObj.attr("name");
+            if (fieldName) {
+                var fieldValue = fieldObj.val();
+                if (fieldValue) {
+                    $.tnx.rpc.imports(controllerId, function(rpc) {
+                        if (rpc.validateBusiness) {
+                            var formObj = $(fieldObj[0].form);
+                            var id = formObj.attr("data-id");
+                            if (id) {
+                                id = parseInt(id);
+                            }
+                            var model = {};
+                            model[fieldName] = fieldValue;
+                            rpc.validateBusiness(id, model, function() {
+                            }, function(error) {
+                                $.tnx.validator.showFieldErrors(fieldObj, error.message);
+                                fieldObj.attr("business", "false");
+                                fieldObj.focus();
+                            });
+                        }
+                    });
+                }
             }
         }
     }),
@@ -370,7 +401,7 @@ $.tnx.domain.site = {
     },
     /**
      * 用模态窗体打开指定URL
-     *
+     * 
      * @param url
      *            URL
      * @param params

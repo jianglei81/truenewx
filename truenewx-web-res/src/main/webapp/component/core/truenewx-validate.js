@@ -349,12 +349,6 @@ $.tnx.Validator = Class.extend({
         }
         return validation;
     },
-    _markFieldError : function(formObj, fieldObj) {
-        if (formObj.data("firstErrorFieldObj") == undefined) {
-            formObj.data("firstErrorFieldObj", fieldObj); // 校验未通过，标记表单有错误
-        }
-        formObj.attr("validateError", "true");
-    },
     validateField : function(fieldObj) {
         if (!(fieldObj instanceof jQuery)) {
             fieldObj = $(fieldObj);
@@ -387,7 +381,6 @@ $.tnx.Validator = Class.extend({
                             var message = undefined;
                             if (typeof (checkResult) == "boolean") { // 若检查方法返回布尔值，则按默认规则格式化错误消息
                                 if (!checkResult) {
-                                    validator._markFieldError(formObj, fieldObj);
                                     message = validator.getErrorMessage(fieldObj, validationName,
                                             validationValue);
                                     if (message) {
@@ -397,7 +390,6 @@ $.tnx.Validator = Class.extend({
                             } else if (typeof (checkResult) == "string") { // 若检查方法返回字符串，则转为使用该字符串表示的校验规则
                                 arguments.callee(checkResult, validationValue);
                             } else if ($.isArray(checkResult)) { // 若检查方法返回数组，则将数组作为消息格式化参数
-                                validator._markFieldError(formObj, fieldObj);
                                 message = validator.getErrorMessage(fieldObj, validationName,
                                         checkResult);
                                 if (message) {
@@ -417,7 +409,6 @@ $.tnx.Validator = Class.extend({
         }
         if (errorMessages.length > 0) { // 存在错误
             errorMessages = this.showFieldErrors(fieldObj, errorMessages); // 返回处理完后剩余的错误消息
-            validator._markFieldError(formObj, fieldObj);
             return errorMessages;
         } else {
             this.showFieldCorrect(fieldObj);
@@ -480,6 +471,8 @@ $.tnx.Validator = Class.extend({
     showFieldErrors : function(fieldObj, errorMessages) {
         // 显示错误提示框前先隐藏正确提示框
         this.hideFieldCorrect(fieldObj);
+        // 一旦显示字段错误，即表示存在校验错误，需标识字段错误存在
+        this._markFieldError(fieldObj);
 
         var errorObj = this.getFieldErrorObj(fieldObj);
         if (errorObj) {
@@ -487,6 +480,13 @@ $.tnx.Validator = Class.extend({
             return undefined; // 表示已完成错误消息显示
         }
         return errorMessages; // 交由表单错误消息一起处理
+    },
+    _markFieldError : function(fieldObj) {
+        var formObj = $(fieldObj[0].form);
+        if (formObj.data("firstErrorFieldObj") == undefined) {
+            formObj.data("firstErrorFieldObj", fieldObj); // 校验未通过，标记表单有错误
+        }
+        formObj.attr("validateError", "true");
     },
     hideFieldErrors : function(fieldObj) {
         var errorObj = this.getFieldErrorObj(fieldObj);
