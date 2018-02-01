@@ -1,23 +1,24 @@
 /**
  * truenewx-validate.js v1.0.0
- *
+ * 
  * Depends on: truenewx.js
  */
 // 为避免一行过宽导致整个文档格式缩进过多，单独设置Email的正则表达式
 var _regExps_email = /^[a-zA-Z0-9_\-]([a-zA-Z0-9_\-\.]{0,62})@[a-zA-Z0-9_\-]([a-zA-Z0-9_\-\.]{0,62})$/;
+// 注意：代码中不能出现int标识符，否则浏览器执行没问题，但eclipse格式化无法进行
 $.tnx.Validator = Class.extend({
     checkers : {
         parent : undefined,
         regExps : {
             number : /^-?([1-9]\d{0,2}((,?\d{3})*|\d*)(\.\d*)?|0?\.\d*|0)$/,
-            int : /^(-?[1-9]\d{0,2}(,?\d{3}))|0*$/,
+            integer : /^(-?[1-9]\d{0,2}(,?\d{3}))|0*$/,
             email : _regExps_email,
             mobilePhone : /^1[34578]\d{9}$/,
             url : /^https?:\/\/[A-Za-z0-9]+(\.?[A-Za-z0-9_-]+)*(:[0-9]+)?(\/\S*)?$/
         },
         required : function(validationValue, fieldValue) {
             if (validationValue) {
-                if (typeof fieldValue == "string") {
+                if (typeof (fieldValue) == "string") {
                     return fieldValue.length > 0;
                 } else {
                     return fieldValue != undefined && fieldValue != null;
@@ -26,7 +27,7 @@ $.tnx.Validator = Class.extend({
             return true; // 不要求必填，则检查通过
         },
         notBlank : function(validationValue, fieldValue) {
-            if (typeof fieldValue == "string") {
+            if (typeof (fieldValue) == "string") {
                 if (fieldValue.length > 0 && fieldValue.trim().length == 0) { // 为纯空格时校验失败
                     return false;
                 } else { // 否则转为使用required规则
@@ -37,7 +38,7 @@ $.tnx.Validator = Class.extend({
         },
         maxLength : function(validationValue, fieldValue) {
             var checker = function(validationValue, fieldValue) {
-                if (typeof validationValue == "number") {
+                if (typeof (validationValue) == "number") {
                     var enterLength = fieldValue.indexOf("\n") == -1 ? 0
                             : fieldValue.match(/\n/g).length;
                     return fieldValue.length != undefined
@@ -54,7 +55,7 @@ $.tnx.Validator = Class.extend({
         },
         minLength : function(validationValue, fieldValue) {
             var checker = function(validationValue, fieldValue) {
-                if (typeof validationValue == "number") {
+                if (typeof (validationValue) == "number") {
                     var enterLength = fieldValue.indexOf("\n") == -1 ? 0
                             : fieldValue.match(/\n/g).length;
                     return fieldValue.length != undefined && fieldValue.length != 0
@@ -71,13 +72,13 @@ $.tnx.Validator = Class.extend({
         },
         number : function(validationValue, fieldValue) {
             if (validationValue && fieldValue != "") {
-                return typeof fieldValue == "number" || this.regExps.number.test(fieldValue);
+                return typeof (fieldValue) == "number" || this.regExps.number.test(fieldValue);
             }
             return true; // 不要求为数字，则检查通过
         },
-        integer : function(validationValue, fieldValue) {
-            if (typeof validationValue == "number") { // 校验值为数字才可校验
-                if (typeof fieldValue != "string") { // 字段值一律转换为字符串再进行校验
+        integerLength : function(validationValue, fieldValue) {
+            if (typeof (validationValue) == "number") { // 校验值为数字才可校验
+                if (typeof (fieldValue) != "string") { // 字段值一律转换为字符串再进行校验
                     fieldValue = String(fieldValue);
                 }
                 if (this.regExps.number.test(fieldValue)) { // 字段值为数值才可进行校验
@@ -97,8 +98,8 @@ $.tnx.Validator = Class.extend({
             return undefined;
         },
         scale : function(validationValue, fieldValue) {
-            if (typeof validationValue == "number" && validationValue > 0) { // 校验值为数字且大于0才可校验
-                if (typeof fieldValue != "string") { // 字段值一律转换为字符串再进行校验
+            if (typeof (validationValue) == "number" && validationValue > 0) { // 校验值为数字且大于0才可校验
+                if (typeof (fieldValue) != "string") { // 字段值一律转换为字符串再进行校验
                     fieldValue = String(fieldValue);
                 }
                 if (this.regExps.number.test(fieldValue)) { // 字段值为数值才可进行校验
@@ -114,17 +115,17 @@ $.tnx.Validator = Class.extend({
             }
             return undefined;
         },
-        int : function(validationValue, fieldValue) {
+        integer : function(validationValue, fieldValue) {
             if (validationValue && fieldValue != "") {
                 // 本身为数值时，四舍五入为整数时与原值相等，说明其为整数
-                return (typeof fieldValue == "number" && Math.ceil(fieldValue) == fieldValue)
-                        || this.regExps.int.test(fieldValue);
+                return (typeof (fieldValue) == "number" && Math.ceil(fieldValue) == fieldValue)
+                        || this.regExps.integer.test(fieldValue);
             }
             return true; // 不要求为整数，则检查通过
         },
         maxValue : function(validationValue, fieldValue) {
-            if (typeof validationValue == "number") {
-                if (typeof fieldValue == "number") {
+            if (typeof (validationValue) == "number") {
+                if (typeof (fieldValue) == "number") {
                     return fieldValue <= validationValue;
                 } else if (this.regExps.number.test(fieldValue)) {
                     return Number(fieldValue) <= validationValue;
@@ -133,8 +134,8 @@ $.tnx.Validator = Class.extend({
             return true; // 校验值不为数字无法校验，忽略该检查器
         },
         minValue : function(validationValue, fieldValue) {
-            if (typeof validationValue == "number") {
-                if (typeof fieldValue == "number") {
+            if (typeof (validationValue) == "number") {
+                if (typeof (fieldValue) == "number") {
                     return fieldValue >= validationValue;
                 } else if (this.regExps.number.test(fieldValue)) {
                     return Number(fieldValue) >= validationValue;
@@ -267,9 +268,9 @@ $.tnx.Validator = Class.extend({
         maxLength : "{0}长度最多可以有{1}位，已超出{2}位",
         minLength : "{0}长度最少必须有{1}位，还缺少{2}位",
         number : "{0}必须为数字",
-        integer : "{0}整数位最多可以有{1}位，已超出{2}位",
+        integer : "{0}必须为整数",
+        integerLength : "{0}整数位最多可以有{1}位，已超出{2}位",
         scale : "{0}小数位最多可以有{1}位，已超出{2}位",
-        int : "{0}必须为整数",
         maxValue : "{0}最大可以为{1}",
         minValue : "{0}最小可以为{1}",
         email : "{0}只能包含字母、数字、下划线、-和.，@两边各自的长度应小于64",
@@ -285,7 +286,7 @@ $.tnx.Validator = Class.extend({
     },
     /**
      * 扩展校验
-     *
+     * 
      * @param name
      *            校验名
      * @param message
@@ -295,7 +296,7 @@ $.tnx.Validator = Class.extend({
      */
     extend : function(name, message, checker) {
         this.messages[name] = message;
-        if (typeof checker == "function") {
+        if (typeof (checker) == "function") {
             this.checkers[name] = check;
         } else if (checker instanceof RegExp) { // 为正则表达式时生成正则表达式检查函数
             this.checkers.regExps[name] = check;
@@ -348,12 +349,6 @@ $.tnx.Validator = Class.extend({
         }
         return validation;
     },
-    _markFieldError : function(formObj, fieldObj) {
-        if (formObj.data("firstErrorFieldObj") == undefined) {
-            formObj.data("firstErrorFieldObj", fieldObj); // 校验未通过，标记表单有错误
-        }
-        formObj.attr("validateError", "true");
-    },
     validateField : function(fieldObj) {
         if (!(fieldObj instanceof jQuery)) {
             fieldObj = $(fieldObj);
@@ -384,19 +379,17 @@ $.tnx.Validator = Class.extend({
                             var checkResult = checker.call(validator.checkers, validationValue,
                                     fieldValue);
                             var message = undefined;
-                            if (typeof checkResult == "boolean") { // 若检查方法返回布尔值，则按默认规则格式化错误消息
+                            if (typeof (checkResult) == "boolean") { // 若检查方法返回布尔值，则按默认规则格式化错误消息
                                 if (!checkResult) {
-                                    validator._markFieldError(formObj, fieldObj);
                                     message = validator.getErrorMessage(fieldObj, validationName,
                                             validationValue);
                                     if (message) {
                                         errorMessages.push(message);
                                     }
                                 }
-                            } else if (typeof checkResult == "string") { // 若检查方法返回字符串，则转为使用该字符串表示的校验规则
+                            } else if (typeof (checkResult) == "string") { // 若检查方法返回字符串，则转为使用该字符串表示的校验规则
                                 arguments.callee(checkResult, validationValue);
                             } else if ($.isArray(checkResult)) { // 若检查方法返回数组，则将数组作为消息格式化参数
-                                validator._markFieldError(formObj, fieldObj);
                                 message = validator.getErrorMessage(fieldObj, validationName,
                                         checkResult);
                                 if (message) {
@@ -416,7 +409,6 @@ $.tnx.Validator = Class.extend({
         }
         if (errorMessages.length > 0) { // 存在错误
             errorMessages = this.showFieldErrors(fieldObj, errorMessages); // 返回处理完后剩余的错误消息
-            validator._markFieldError(formObj, fieldObj);
             return errorMessages;
         } else {
             this.showFieldCorrect(fieldObj);
@@ -479,6 +471,8 @@ $.tnx.Validator = Class.extend({
     showFieldErrors : function(fieldObj, errorMessages) {
         // 显示错误提示框前先隐藏正确提示框
         this.hideFieldCorrect(fieldObj);
+        // 一旦显示字段错误，即表示存在校验错误，需标识字段错误存在
+        this._markFieldError(fieldObj);
 
         var errorObj = this.getFieldErrorObj(fieldObj);
         if (errorObj) {
@@ -486,6 +480,13 @@ $.tnx.Validator = Class.extend({
             return undefined; // 表示已完成错误消息显示
         }
         return errorMessages; // 交由表单错误消息一起处理
+    },
+    _markFieldError : function(fieldObj) {
+        var formObj = $(fieldObj[0].form);
+        if (formObj.data("firstErrorFieldObj") == undefined) {
+            formObj.data("firstErrorFieldObj", fieldObj); // 校验未通过，标记表单有错误
+        }
+        formObj.attr("validateError", "true");
     },
     hideFieldErrors : function(fieldObj) {
         var errorObj = this.getFieldErrorObj(fieldObj);
@@ -628,7 +629,7 @@ $.tnx.Validator = Class.extend({
                 if (requiredAppend == undefined) { // 所属表单上无附加函数，则从BODY上获取
                     requiredAppend = $("body").attr("required-append");
                     if (requiredAppend == undefined) { // BODY无附加函数，则从站点框架上取
-                        if (typeof $.tnx.domain.site.requiredAppend == "function") {
+                        if (typeof ($.tnx.domain.site.requiredAppend) == "function") {
                             requiredAppend = "$.tnx.domain.site.requiredAppend";
                             $("body").attr("required-append", requiredAppend);
                         }
