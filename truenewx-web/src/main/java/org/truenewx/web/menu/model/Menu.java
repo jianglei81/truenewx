@@ -13,6 +13,8 @@ import org.truenewx.web.http.HttpResource;
 import org.truenewx.web.rpc.RpcPort;
 import org.truenewx.web.security.authority.Authority;
 
+import com.google.common.base.Predicate;
+
 /**
  * 菜单类
  *
@@ -71,6 +73,22 @@ public class Menu implements Serializable {
      */
     public List<MenuItem> getItems() {
         return this.items;
+    }
+
+    public List<MenuItem> getItems(final Predicate<MenuItem> predicate) {
+        final List<MenuItem> items = getItems();
+        if (predicate == null) {
+            return items;
+        }
+        final List<MenuItem> list = new ArrayList<>();
+        for (final MenuItem item : items) {
+            if (predicate.apply(item)) {
+                final MenuItem newItem = item.cloneWithoutSubs();
+                newItem.getSubs().addAll(item.getSubs(predicate));
+                list.add(newItem);
+            }
+        }
+        return list;
     }
 
     /**

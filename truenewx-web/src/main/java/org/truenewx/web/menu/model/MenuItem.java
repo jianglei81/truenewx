@@ -15,6 +15,8 @@ import org.truenewx.core.tuple.Binate;
 import org.truenewx.web.security.authority.Authority;
 import org.truenewx.web.security.authority.Authorization;
 
+import com.google.common.base.Predicate;
+
 /**
  * 菜单项类
  *
@@ -47,6 +49,30 @@ public class MenuItem extends AbstractMenuItem implements Serializable {
     public String getPermission() {
         final Authority authority = getAuthority();
         return authority == null ? null : authority.getPermission();
+    }
+
+    public List<MenuItem> getSubs(final Predicate<MenuItem> predicate) {
+        final List<MenuItem> subs = getSubs();
+        if (predicate == null) {
+            return subs;
+        }
+        final List<MenuItem> list = new ArrayList<>();
+        for (final MenuItem sub : subs) {
+            if (predicate.apply(sub)) {
+                final MenuItem newSub = sub.cloneWithoutSubs();
+                newSub.getSubs().addAll(sub.getSubs(predicate));
+                list.add(newSub);
+            }
+        }
+        return list;
+    }
+
+    MenuItem cloneWithoutSubs() {
+        final MenuItem item = new MenuItem(getCaption(), getIcon(), getAction());
+        item.getCaptions().putAll(getCaptions());
+        item.getProfiles().addAll(getProfiles());
+        item.getOptions().putAll(getOptions());
+        return item;
     }
 
     public boolean contains(final String href, final HttpMethod method) {
