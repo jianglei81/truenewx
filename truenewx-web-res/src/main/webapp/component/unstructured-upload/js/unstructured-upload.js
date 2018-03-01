@@ -343,6 +343,8 @@
                         } else {
                             wuFile.size = metadata.size;
                         }
+                        wuFile.storageUrl = storageUrls[i];
+                        wuFile.name = metadata.filename;
                         wuFile.lastModified = metadata.lastModifiedTime;
                         wuFile.url = metadata.readUrl;
                         wuFile.__hash = _this.hashString(wuFile.name + wuFile.size
