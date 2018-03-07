@@ -1300,4 +1300,23 @@
         </attribute>
     </tag>
 
+    <tag>
+        <name>message</name>
+        <tag-class>org.truenewx.web.tag.MessageTag</tag-class>
+        <body-content>empty</body-content>
+        <description>输出国际化消息</description>
+        <attribute>
+            <name>code</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>消息代码</description>
+        </attribute>
+        <attribute>
+            <name>args</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>消息参数，多个参数之间用英文逗号,分隔</description>
+        </attribute>
+    </tag>
+
 </taglib>
