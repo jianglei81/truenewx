@@ -312,6 +312,67 @@ $.tnx = {
     _version : "1.1.0",
     encoding : "UTF-8",
     locale : "zh_CN",
+    messages : {
+        "zh_CN" : {
+            alert : {
+                title : "提示",
+                ok : "确定"
+            },
+            confirm : {
+                title : "确定",
+                yes : "确定",
+                no : "取消"
+            },
+            error : {
+                title : "错误"
+            }
+        },
+        "zh_TW" : {
+            alert : {
+                title : "提示",
+                ok : "確定"
+            },
+            confirm : {
+                title : "確定",
+                yes : "確定",
+                no : "取消"
+            },
+            error : {
+                title : "錯誤"
+            }
+        },
+        "en" : {
+            alert : {
+                title : "Alert",
+                ok : "OK"
+            },
+            confirm : {
+                title : "Confirm",
+                yes : "Yes",
+                no : "No"
+            },
+            error : {
+                title : "Error"
+            }
+        }
+    },
+    message : function(subject, code) {
+        var messages;
+        if ($.tnx.locale.startsWith("en")) {
+            messages = subject.messages["en"];
+        } else {
+            messages = subject.messages[$.tnx.locale];
+        }
+        if (code) {
+            if (messages) {
+                return messages[code];
+            } else {
+                return undefined;
+            }
+        } else {
+            return messages;
+        }
+    },
     namespace : function(namespace) {
         var names = namespace.split(".");
         var space = null;
@@ -444,10 +505,10 @@ $.tnx = {
             title = undefined;
         }
         if (!title) {
-            title = "提示";
+            title = $.tnx.message($.tnx).alert.title;
         }
         this.dialog(title, content, [ {
-            text : "确定",
+            text : $.tnx.message($.tnx).alert.ok,
             "class" : "btn-primary",
             focus : true,
             click : function() {
@@ -471,9 +532,9 @@ $.tnx = {
             callback = options;
             options = temp;
         }
-        var title = options.title || "确定";
-        var yesText = options.yes || "确定";
-        var noText = options.no || "取消";
+        var title = options.title || $.tnx.message($.tnx).confirm.title;
+        var yesText = options.yes || $.tnx.message($.tnx).confirm.yes;
+        var noText = options.no || $.tnx.message($.tnx).confirm.no;
         var buttonStyle = options.style ? options.style : "";
         if (buttonStyle.indexOf("margin-left") < 0) {
             buttonStyle += "margin-left: 10px;";
@@ -890,7 +951,7 @@ $.tnx.rpc = {
         this.showErrorMessage(message);
     },
     showErrorMessage : function(message) {
-        $.tnx.alert(message, "错误");
+        $.tnx.alert(message, $.tnx.message($.tnx).error.title);
     },
     imports : function(beanId, contextUrl, callback) {
         if (typeof (contextUrl) == "function") {
