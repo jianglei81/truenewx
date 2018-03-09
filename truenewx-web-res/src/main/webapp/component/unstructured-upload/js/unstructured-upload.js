@@ -54,57 +54,48 @@
             },
             // 通用错误处理函数
             error : function(error) {
-                $.tnx.alert(getLocaleMessage("error"), error.message);
+                $.tnx.alert(message, $.tnx.message($.tnx).error.title);
             }
         }
     };
 
-    var messages = {
-        "default" : {
-            "error" : "错误",
-            "error.unstructured.upload.beyond_max_number" : "上传文件数不能超过 {0} 个",
-            "error.unstructured.upload.beyond_max_capacity" : "文件最大不能超过 {0}，“{1}”的大小为 {2}",
-            "error.unstructured.upload.only_supported_extension" : "仅支持 {0} 文件，不能上传“{1}”",
-            "error.unstructured.upload.unsupported_extension" : "不支持 {0} 文件，不能上传“{1}”",
-            "error.unstructured.upload.duplicated_file" : "文件 {0} 重复，将被忽略"
-        },
-        "zh_TW" : {
-            "error" : "錯誤",
-            "error.unstructured.upload.beyond_max_number" : "上載文件數不能超過 {0} 個",
-            "error.unstructured.upload.beyond_max_capacity" : "文件最大不能超過 {0}，“{1}”的大小為 {2}",
-            "error.unstructured.upload.only_supported_extension" : "僅支持 {0} 文件，不能上載“{1}”",
-            "error.unstructured.upload.unsupported_extension" : "不支持 {0} 文件，不能上载“{1}”",
-            "error.unstructured.upload.duplicated_file" : "文件 {0} 重複，將被忽略"
-        }
-    }
-
-    var getLocaleMessage = function(code, args) {
-        var locale = $.tnx.locale;
-        var localeMessages = messages[locale] || messages["default"];
-        var message = localeMessages[code];
-        if (message) {
-            args.each(function(arg, index) {
-                var regexp = new RegExp("\\{" + index + "\\}", "g");
-                message = message.replace(regexp, args[index]);
-            });
-        }
-        return message;
-    };
-
     UnstructuredUpload.prototype = {
+        messages : {
+            "zh_CN" : {
+                "error.unstructured.upload.beyond_max_number" : "上传文件数不能超过 {0} 个",
+                "error.unstructured.upload.beyond_max_capacity" : "文件最大不能超过 {0}，“{1}”的大小为 {2}",
+                "error.unstructured.upload.only_supported_extension" : "仅支持 {0} 文件，不能上传“{1}”",
+                "error.unstructured.upload.unsupported_extension" : "不支持 {0} 文件，不能上传“{1}”",
+                "error.unstructured.upload.duplicated_file" : "文件 {0} 重复，将被忽略"
+            },
+            "zh_TW" : {
+                "error.unstructured.upload.beyond_max_number" : "上載文件數不能超過 {0} 個",
+                "error.unstructured.upload.beyond_max_capacity" : "文件最大不能超過 {0}，“{1}”的大小為 {2}",
+                "error.unstructured.upload.only_supported_extension" : "僅支持 {0} 文件，不能上載“{1}”",
+                "error.unstructured.upload.unsupported_extension" : "不支持 {0} 文件，不能上载“{1}”",
+                "error.unstructured.upload.duplicated_file" : "文件 {0} 重複，將被忽略"
+            },
+            "en" : {
+                "error.unstructured.upload.beyond_max_number" : "Cannot upload more than {0} files",
+                "error.unstructured.upload.beyond_max_capacity" : "Maximum file size cannot exceed {0}, size of \"{1}\" is {2}",
+                "error.unstructured.upload.only_supported_extension" : "Only {0} files are supported, \"{1}\" cannot be uploaded",
+                "error.unstructured.upload.unsupported_extension" : "Does not support {0} files, cannot upload \"{1}\"",
+                "error.unstructured.upload.duplicated_file" : "Duplicated file {0} will be ignored"
+            }
+        },
         init : function(element, options) {
             this.options = $.extend(true, {}, defaultOptions, options);
             if (!this.options.authorizeType) { // 授权类型必须有
                 throw "Please set the authorizeType";
             }
+            var _this = this;
             // 覆盖默认错误消息
             $.each(this.options.messages, function(locale, localeMessages) {
-                messages[locale] = $.extend({}, messages[locale], localeMessages);
+                _this.messages[locale] = $.extend({}, _this.messages[locale], localeMessages);
             });
             delete this.options.messages;
 
             this.element = element;
-            var _this = this;
             $.tnx.rpc.imports(this.options.controllerId, function(rpc) {
                 _this.rpc = rpc;
 
@@ -312,7 +303,7 @@
             var args = Array.prototype.slice.call(arguments, 1);
             return {
                 code : code,
-                message : getLocaleMessage(code, args)
+                message : $.tnx.message(this, code, args)
             };
         },
         hashString : function(str) {

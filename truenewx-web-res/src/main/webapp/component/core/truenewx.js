@@ -356,7 +356,7 @@ $.tnx = {
             }
         }
     },
-    message : function(subject, code) {
+    message : function(subject, code, args) {
         var messages;
         if ($.tnx.locale.startsWith("en")) {
             messages = subject.messages["en"];
@@ -365,7 +365,14 @@ $.tnx = {
         }
         if (code) {
             if (messages) {
-                return messages[code];
+                var message = messages[code];
+                if (message && args) {
+                    $.each(args, function(index, arg) {
+                        var regexp = new RegExp("\\{" + index + "\\}", "g");
+                        message = message.replace(regexp, args[index]);
+                    });
+                }
+                return message;
             } else {
                 return undefined;
             }
