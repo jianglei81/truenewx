@@ -1,6 +1,6 @@
 /**
  * truenewx-validate.js v1.0.0
- *
+ * 
  * Depends on: truenewx.js
  */
 // 为避免一行过宽导致整个文档格式缩进过多，单独设置Email的正则表达式
@@ -335,7 +335,7 @@ $.tnx.Validator = Class
             },
             /**
              * 扩展校验
-             *
+             * 
              * @param name
              *            校验名
              * @param message
@@ -721,20 +721,19 @@ $.tnx.Validator = Class
                     }
                 });
 
-                validatableFields
-                        .each(function() {
-                            var fieldObj = $(this);
-                            var validation = validator.getFieldValidation(fieldObj);
-                            if (validation
-                                    && (validation.required == true || validation.notBlank == true)) {
-                                var requiredClass = validator.getRequiredClass(fieldObj);
-                                if (requiredClass && requiredClass != "false") {
-                                    var requriedTag = validator.getRequiredTag(fieldObj);
-                                    validator.appendRequiredTag(fieldObj, requriedTag,
-                                            requiredClass);
-                                }
+                $.each(validatableFields, function() {
+                    var fieldObj = $(this);
+                    var validation = validator.getFieldValidation(fieldObj);
+                    if (validation && fieldObj.attr("type") != "hidden") {
+                        if (validation.required == true || validation.notBlank == true) {
+                            var requiredClass = validator.getRequiredClass(fieldObj);
+                            if (requiredClass && requiredClass != "false") {
+                                var requriedTag = validator.getRequiredTag(fieldObj);
+                                validator.appendRequiredTag(fieldObj, requriedTag, requiredClass);
                             }
-                        });
+                        }
+                    }
+                });
 
                 formObj.attr("validate", "false"); // 避免重复初始化
             },
