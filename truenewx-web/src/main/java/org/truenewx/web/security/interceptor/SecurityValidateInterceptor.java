@@ -106,7 +106,7 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
                     if (accessibility.lan()) {
                         final String ip = WebUtil.getRemoteAddrIp(request);
                         if (!NetUtil.isLanIp(ip)) {
-                            this.logger.warn("Forbidden rpc request {} from {}", url, ip);
+                            this.logger.warn("Forbidden request {} from {}", url, ip);
                             response.sendError(HttpStatus.FORBIDDEN.value()); // 禁止非局域网访问
                             return false;
                         }

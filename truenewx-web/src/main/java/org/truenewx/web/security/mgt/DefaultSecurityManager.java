@@ -86,7 +86,7 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
         final Realm<?> realm = getRealm(subject.getUserClass());
         if (realm != null) {
             final HttpServletRequest request = subject.getServletRequest();
-            final HttpSession session = request.getSession(false);
+            final HttpSession session = request.getSession(auto);
             if (session != null) {
                 Object user = session.getAttribute(realm.getUserSessionName());
                 // 如果从会话中无法取得用户，则尝试自动登录验证
