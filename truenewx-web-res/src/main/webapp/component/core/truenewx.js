@@ -309,60 +309,54 @@ $.String = {
 
 $.tnx = {
     name : "truenewx",
-    _version : "1.1.0",
+    version : "2.0.0",
     encoding : "UTF-8",
+    context : "",
     locale : "zh_CN",
     messages : {
-        "zh_CN" : {
-            alert : {
-                title : "提示",
-                ok : "确定"
-            },
-            confirm : {
-                title : "确定",
-                yes : "确定",
-                no : "取消"
-            },
-            error : {
-                title : "错误"
-            }
-        },
-        "zh_TW" : {
-            alert : {
-                title : "提示",
-                ok : "確定"
-            },
-            confirm : {
-                title : "確定",
-                yes : "確定",
-                no : "取消"
-            },
-            error : {
-                title : "錯誤"
-            }
-        },
-        "en" : {
-            alert : {
-                title : "Alert",
-                ok : "OK"
-            },
-            confirm : {
-                title : "Confirm",
-                yes : "Yes",
-                no : "No"
-            },
-            error : {
-                title : "Error"
+        "alert.title" : "提示",
+        "alert.ok" : "确定",
+        "confirm.title" : "确定",
+        "confirm.yes" : "确定",
+        "confirm.no" : "取消",
+        "error.title" : "错误"
+    },
+    initMessages : function(component, locale, context, path, callback) {
+        component.locale = component.locale || "zh_CN"; // 组件的默认语言区域一律为简体中文
+        locale = locale || $.tnx.locale;
+        if (component.locale != locale) {
+            component.locale = locale;
+            if ($.i18n) {
+                context = context || $.tnx.context;
+                path = path || "/component/core/" + $.tnx.name;
+                // 确保路径以/开头
+                if (!path.startsWith("/")) {
+                    path = "/" + path;
+                }
+                // 路径的最后一级为组件名称
+                var index = path.lastIndexOf("/");
+                var name = path.substr(index + 1);
+                path = path.substr(0, index);
+                $.i18n.properties({
+                    name : name,
+                    path : context + path + "/i18n/",
+                    mode : "map",
+                    language : locale,
+                    cache : true,
+                    callback : function() {
+                        $.each(component.messages, function(key, value) {
+                            component.messages[key] = $.i18n.map[key];
+                        });
+                        if (typeof (callback) == "function") {
+                            callback.apply($.i18n.map);
+                        }
+                    }
+                });
             }
         }
     },
-    message : function(subject, code, args) {
-        var messages;
-        if ($.tnx.locale.startsWith("en")) {
-            messages = subject.messages["en"];
-        } else {
-            messages = subject.messages[$.tnx.locale];
-        }
+    message : function(component, code, args) {
+        var messages = component.messages;
         if (code) {
             if (messages) {
                 var message = messages[code];
@@ -512,10 +506,10 @@ $.tnx = {
             title = undefined;
         }
         if (!title) {
-            title = $.tnx.message($.tnx).alert.title;
+            title = $.tnx.message($.tnx, "alert.title");
         }
         this.dialog(title, content, [ {
-            text : $.tnx.message($.tnx).alert.ok,
+            text : $.tnx.message($.tnx, "alert.ok"),
             "class" : "btn-primary",
             focus : true,
             click : function() {
@@ -539,9 +533,9 @@ $.tnx = {
             callback = options;
             options = temp;
         }
-        var title = options.title || $.tnx.message($.tnx).confirm.title;
-        var yesText = options.yes || $.tnx.message($.tnx).confirm.yes;
-        var noText = options.no || $.tnx.message($.tnx).confirm.no;
+        var title = options.title || $.tnx.message($.tnx, "confirm.title");
+        var yesText = options.yes || $.tnx.message($.tnx, "confirm.yes");
+        var noText = options.no || $.tnx.message($.tnx, "confirm.no");
         var buttonStyle = options.style ? options.style : "";
         if (buttonStyle.indexOf("margin-left") < 0) {
             buttonStyle += "margin-left: 10px;";
@@ -958,7 +952,7 @@ $.tnx.rpc = {
         this.showErrorMessage(message);
     },
     showErrorMessage : function(message) {
-        $.tnx.alert(message, $.tnx.message($.tnx).error.title);
+        $.tnx.alert(message, $.tnx.message($.tnx, "error.title"));
     },
     imports : function(beanId, contextUrl, callback) {
         if (typeof (contextUrl) == "function") {

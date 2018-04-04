@@ -23,8 +23,6 @@
         // 是否自动提交上传
         auto : false,
         messages : { // 扩展定义错误消息
-            "default" : {},
-            "zh_TW" : {}
         },
         // 获取初始数据的函数，也可以直接赋值为一个数组
         data : function() {
@@ -54,48 +52,32 @@
             },
             // 通用错误处理函数
             error : function(error) {
-                $.tnx.alert(message, $.tnx.message($.tnx).error.title);
+                $.tnx.alert(message, $.tnx.message($.tnx, "error.title"));
             }
         }
     };
 
     UnstructuredUpload.prototype = {
         messages : {
-            "zh_CN" : {
-                "error.unstructured.upload.beyond_max_number" : "上传文件数不能超过 {0} 个",
-                "error.unstructured.upload.beyond_max_capacity" : "文件最大不能超过 {0}，“{1}”的大小为 {2}",
-                "error.unstructured.upload.only_supported_extension" : "仅支持 {0} 文件，不能上传“{1}”",
-                "error.unstructured.upload.unsupported_extension" : "不支持 {0} 文件，不能上传“{1}”",
-                "error.unstructured.upload.duplicated_file" : "文件 {0} 重复，将被忽略"
-            },
-            "zh_TW" : {
-                "error.unstructured.upload.beyond_max_number" : "上載文件數不能超過 {0} 個",
-                "error.unstructured.upload.beyond_max_capacity" : "文件最大不能超過 {0}，“{1}”的大小為 {2}",
-                "error.unstructured.upload.only_supported_extension" : "僅支持 {0} 文件，不能上載“{1}”",
-                "error.unstructured.upload.unsupported_extension" : "不支持 {0} 文件，不能上载“{1}”",
-                "error.unstructured.upload.duplicated_file" : "文件 {0} 重複，將被忽略"
-            },
-            "en" : {
-                "error.unstructured.upload.beyond_max_number" : "Cannot upload more than {0} files",
-                "error.unstructured.upload.beyond_max_capacity" : "Maximum file size cannot exceed {0}, size of \"{1}\" is {2}",
-                "error.unstructured.upload.only_supported_extension" : "Only {0} files are supported, \"{1}\" cannot be uploaded",
-                "error.unstructured.upload.unsupported_extension" : "Does not support {0} files, cannot upload \"{1}\"",
-                "error.unstructured.upload.duplicated_file" : "Duplicated file {0} will be ignored"
-            }
+            "error.unstructured.upload.beyond_max_number" : "上传文件数不能超过 {0} 个",
+            "error.unstructured.upload.beyond_max_capacity" : "文件最大不能超过 {0}，“{1}”的大小为 {2}",
+            "error.unstructured.upload.only_supported_extension" : "仅支持 {0} 文件，不能上传“{1}”",
+            "error.unstructured.upload.unsupported_extension" : "不支持 {0} 文件，不能上传“{1}”",
+            "error.unstructured.upload.duplicated_file" : "文件 {0} 重复，将被忽略"
         },
         init : function(element, options) {
             this.options = $.extend(true, {}, defaultOptions, options);
             if (!this.options.authorizeType) { // 授权类型必须有
                 throw "Please set the authorizeType";
             }
-            var _this = this;
             // 覆盖默认错误消息
-            $.each(this.options.messages, function(locale, localeMessages) {
-                _this.messages[locale] = $.extend({}, _this.messages[locale], localeMessages);
-            });
+            this.messages = $.extend(this.messages, this.options.messages);
             delete this.options.messages;
 
             this.element = element;
+            $.tnx.initMessages(this, this.options.locale, undefined,
+                    "/component/unstructured-upload/js/unstructured-upload");
+            var _this = this;
             $.tnx.rpc.imports(this.options.controllerId, function(rpc) {
                 _this.rpc = rpc;
 
