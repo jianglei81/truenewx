@@ -1,6 +1,6 @@
 /**
  * truenewx-domain.js v1.1.0
- * 
+ *
  * Depends on: truenewx.js
  */
 $.tnx.domain = {
@@ -429,7 +429,7 @@ $.tnx.domain.site = {
     },
     /**
      * 用模态窗体打开指定URL
-     * 
+     *
      * @param url
      *            URL
      * @param params
@@ -449,6 +449,7 @@ $.tnx.domain.site = {
             backdrop = undefined;
         }
         var _this = this;
+        var _controller = controller; // 缓存当前controller变量
         var options = {
             backdrop : backdrop,
             callback : function(container) {
@@ -459,7 +460,12 @@ $.tnx.domain.site = {
                 if (extendToWin) {
                     $.extend(win, extendToWin);
                 }
-                $.tnx.domain.site.init(container, win);
+                $.tnx.domain.site.init(container, win); // controller变量在此处会被更改
+            },
+            events : {
+                hidden : function() {
+                    controller = _controller; // 弹出框关闭后，恢复controller变量
+                }
             }
         };
         if (typeof unLogined != "function") {
