@@ -4,12 +4,15 @@ import java.io.Serializable;
 import java.util.Set;
 
 import org.truenewx.core.exception.HandleableException;
+import org.truenewx.data.model.UnitaryEntity;
 
 /**
  * 有限状态机
  *
  * @author jianglei
  * @since JDK 1.8
+ * @param <U>
+ *            实体类型
  * @param <K>
  *            标识类型
  * @param <S>
@@ -19,7 +22,7 @@ import org.truenewx.core.exception.HandleableException;
  * @param <E>
  *            转换事件类型
  */
-public interface StateMachine<K extends Serializable, S extends Enum<S>, T extends Enum<T>, E extends TransitEvent<K, T>> {
+public interface StateMachine<U extends UnitaryEntity<K>, K extends Serializable, S extends Enum<S>, T extends Enum<T>, E extends TransitEvent<K, T>> {
     /**
      * 获取起始状态。有限状态机具有且仅具有一个起始状态
      *
@@ -52,9 +55,10 @@ public interface StateMachine<K extends Serializable, S extends Enum<S>, T exten
      *
      * @param event
      *            事件
+     * @return 转换事件影响的实体
      * @throws HandleableException
      *             转换过程中出现异常
      */
-    void transit(E event) throws HandleableException;
+    U transit(E event) throws HandleableException;
 
 }

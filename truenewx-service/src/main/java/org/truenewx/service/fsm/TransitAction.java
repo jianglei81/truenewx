@@ -5,12 +5,15 @@ import java.io.Serializable;
 import javax.annotation.Nullable;
 
 import org.truenewx.core.exception.HandleableException;
+import org.truenewx.data.model.UnitaryEntity;
 
 /**
  * 转换动作
  *
  * @author jianglei
  * @since JDK 1.8
+ * @param <U>
+ *            实体类型
  * @param <K>
  *            标识类型
  * @param <S>
@@ -18,7 +21,7 @@ import org.truenewx.core.exception.HandleableException;
  * @param <T>
  *            转换枚举类型
  */
-public interface TransitAction<K extends Serializable, S extends Enum<S>, T extends Enum<T>> {
+public interface TransitAction<U extends UnitaryEntity<K>, K extends Serializable, S extends Enum<S>, T extends Enum<T>> {
     /**
      * 获取转换枚举。每个转换动作都对应且仅对应一个转换枚举
      *
@@ -52,8 +55,9 @@ public interface TransitAction<K extends Serializable, S extends Enum<S>, T exte
      *            标识
      * @param context
      *            上下文
+     * @return 指定标识表示的实体
      * @throws HandleableException
      *             如果执行过程中出现错误
      */
-    void execute(K key, Object context) throws HandleableException;
+    U execute(K key, Object context) throws HandleableException;
 }

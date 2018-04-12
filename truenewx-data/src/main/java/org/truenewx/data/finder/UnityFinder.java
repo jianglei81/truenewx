@@ -16,7 +16,8 @@ import org.truenewx.data.model.unity.Unity;
  * @param <K>
  *            单体标识类型
  */
-public interface UnityFinder<T extends Unity<K>, K extends Serializable> extends EntityFinder<T> {
+public interface UnityFinder<T extends Unity<K>, K extends Serializable>
+        extends UnitaryEntityFinder<T, K> {
     /**
      * 根据标识获取单体
      *
@@ -24,6 +25,7 @@ public interface UnityFinder<T extends Unity<K>, K extends Serializable> extends
      *            标识
      * @return 单体，如果没有匹配的标识，则返回null
      */
+    @Override
     @Nullable
     T find(K id);
 }
