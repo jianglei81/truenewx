@@ -449,7 +449,10 @@ $.tnx.domain.site = {
             backdrop = undefined;
         }
         var _this = this;
-        var _controller = controller; // 缓存当前controller变量
+        var _controller;
+        if (typeof (controller) == "object") {
+            _controller = controller; // 缓存当前controller变量
+        }
         var options = {
             backdrop : backdrop,
             callback : function(container) {
