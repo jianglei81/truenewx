@@ -1,6 +1,6 @@
 /**
  * truenewx.js v1.1.0
- * 
+ *
  * Depends on: sugar.js, jquery.js, jquery.json.js, bootstrap.js
  */
 
@@ -64,7 +64,7 @@ $.bootstrap = {
 
 /**
  * 等待指定断言为真后执行指定函数
- * 
+ *
  * @param predicate
  *            断言
  * @param func
@@ -87,7 +87,7 @@ $.wait = function(predicate, func, interval) {
 
 /**
  * 使当前DOM元素在指定容器中水平和垂直居中
- * 
+ *
  * @param container
  *            容器，不指定时为window
  */
@@ -134,7 +134,7 @@ $.fn.center = function(container) {
 
 /**
  * 闪现当前DOM元素
- * 
+ *
  * @param inDuration
  *            淡入耗时
  * @param stayDuration
@@ -233,7 +233,7 @@ $.Object = {
 $.String = {
     /**
      * 获取指定URL的上一级URL
-     * 
+     *
      * @param url
      *            URL
      */
@@ -243,7 +243,7 @@ $.String = {
     },
     /**
      * 获取相对于指定js文件的相对路径的绝对路径
-     * 
+     *
      * @param jsFileName
      *            js文件名
      * @param relativePath
@@ -280,14 +280,14 @@ $.String = {
     },
     /**
      * 对文本超长进行处理
-     * 
+     *
      * @param str
      *            需处理的文本
      * @param maxLen
      *            最大长度
      * @param replaceStr
      *            超长替换符
-     * 
+     *
      * @returns 处理后的文本
      */
     cut : function(str, maxLen, replaceStr) {
@@ -321,9 +321,10 @@ $.tnx = {
         "confirm.no" : "取消",
         "error.title" : "错误"
     },
-    setContext : function(context, locale) {
-        $.tnx.context = context;
-        $.tnx.initMessages($.tnx, locale);
+    setContext : function(context, siteContext, locale) {
+        this.context = context;
+        this.siteContext = siteContext;
+        this.initMessages($.tnx, locale);
     },
     initMessages : function(component, locale, context, path, callback) {
         component.locale = component.locale || "zh_CN"; // 组件的默认语言区域一律为简体中文
@@ -476,7 +477,7 @@ $.tnx = {
     },
     /**
      * 加载模板
-     * 
+     *
      * @param relativeUrl
      *            模板文件相对URL
      * @param baseFile
@@ -576,7 +577,7 @@ $.tnx = {
     },
     /**
      * 用模态窗体打开指定URL
-     * 
+     *
      * @param url
      *            URL
      * @param params
@@ -584,7 +585,8 @@ $.tnx = {
      * @param buttons
      *            按钮集，详见$.tnx.dialog()方法中关于按钮设置的说明
      * @param options
-     *            选项，形如：{ title: "标题", type: "GET", //或'POST'，默认为'GET' callback: function(){
+     *            选项，形如：{ title: "标题", type: "GET", //或'POST'，默认为'GET' callback:
+     *            function(){
      *            //窗体显示完全后调用的回调函数，其this为模态对话框窗体jquery对象，有一个参数为内容的容器jquery对象 } }
      */
     open : function(url, params, buttons, options) {
@@ -670,7 +672,7 @@ $.tnx = {
     },
     /**
      * 闪现对话框
-     * 
+     *
      * @param content
      *            内容
      * @param timeout
@@ -711,24 +713,9 @@ $.tnx = {
 };
 
 $.tnx.pager = {
-    callback : null,
-    contextPath : "",
-    /**
-     * 获取指定相对URL的绝对URL
-     * 
-     * @param url
-     *            相对URL
-     * @returns {String} 绝对URL
-     */
-    getUrl : function(url) {
-        if (!url.startsWith("/")) {
-            url = "/" + url;
-        }
-        return this.contextPath + url;
-    },
     /**
      * 指定每页显示大小
-     * 
+     *
      * @param pageSize
      *            页大小
      */
@@ -736,25 +723,17 @@ $.tnx.pager = {
         $("#pageSize").val(pageSize);
         $("#pageNo").val(1);
         $("#pageNo").attr("name", "pageNo");
-        if (this.callback) {// 判断是否有回调方法
-            if (typeof this.callback == "function") {
-                var callbacks = $.Callbacks('once');
-                callbacks.add(this.callback);
-                callbacks.fire(); // 执行回调方法
+        var formObj = $("#pageNo")[0].form;
+        if (formObj.length > 0) {
+            if (formObj.onsubmit != null && formObj.onsubmit() == false) {
+                return;
             }
-        } else {
-            var formObj = $("#pageNo")[0].form;
-            if (formObj.length > 0) {
-                if (formObj.onsubmit != null && formObj.onsubmit() == false) {
-                    return;
-                }
-                formObj.submit();
-            }
+            formObj.submit();
         }
     },
     /**
      * 跳转至指定页
-     * 
+     *
      * @param pageNo
      *            指定页
      */
@@ -770,19 +749,11 @@ $.tnx.pager = {
         }
         $("#pageNo", $form).val(pageNo);
         $("#pageNo", $form).attr("name", "pageNo");
-        if (this.callback) {// 判断是否有回调方法
-            if (typeof this.callback == "function") {
-                var callbacks = $.Callbacks('once');
-                callbacks.add(this.callback);
-                callbacks.fire(); // 执行回调方法
+        if ($form && $form.length > 0) {
+            if ($form.onsubmit != null && $form.onsubmit() == false) {
+                return;
             }
-        } else {
-            if ($form && $form.length > 0) {
-                if ($form.onsubmit != null && $form.onsubmit() == false) {
-                    return;
-                }
-                $form.submit();
-            }
+            $form.submit();
         }
     },
     pageNoKeydown : function(event) {
@@ -801,39 +772,6 @@ $.tnx.pager = {
                 value = "";
             }
             $(el).val("").focus().val(value);// 获得焦点后重新把自己复制粘帖一下
-        }
-    },
-    /**
-     * rpc调用分页
-     * 
-     * @param paging
-     *            分页对象
-     * @param args
-     *            分页参数（goText=GO&pageSizeOptions=10,20,40&showPageNo=true&pageNoSpan=1）...
-     * @param _callback
-     *            回调方法
-     */
-    rpcPager : function(paging, args, _callback) {
-        this.callback = _callback;
-        var params = "total=" + paging.total + "&pageSize=" + paging.pageSize + "&pageNo="
-                + paging.pageNo + "&morePage=" + paging.morePage;
-        if (args != null && args != "") {
-            params += "&" + args;
-        }
-        var options = {
-            cache : false,
-            type : "GET",
-            contentType : "application/x-www-form-urlencoded; charset=" + $.tnx.encoding, // 不能更改
-            async : false,
-            data : params
-        };
-        var url = this.getUrl("/pager.ajax");
-        var resp = $.ajax(url, options);
-        if (options.async === false) { // 同步，返回结果
-            var response = resp.responseText;
-            if (response) {
-                $("#pager").html(response);
-            }
         }
     }
 };
@@ -870,13 +808,13 @@ $.tnx.rpc = {
             options.async = true; // 有回调函数则异步
         }
         var url = undefined;
-        if (contextUrl) {
+        if (contextUrl) { // TODO 指定了上下文路径，则视为跨域访问，有待改进
             url = contextUrl + "/rpc/invoke/" + beanId + "/" + methodName + ".json";
             // 跨域访问必须使用GET请求，数据格式必须JSONP
             options.type = "GET";
             options.dataType = "jsonp";
         } else {
-            url = $.tnx.pager.getUrl("/rpc/invoke/" + beanId + "/" + methodName + ".json");
+            url = $.tnx.siteContext + "/rpc/invoke/" + beanId + "/" + methodName + ".json";
         }
         if (error || options.async) {
             var _this = this;
@@ -900,7 +838,7 @@ $.tnx.rpc = {
     },
     /**
      * 处理响应中的错误
-     * 
+     *
      * @param response
      *            响应
      * @param error
@@ -981,7 +919,7 @@ $.tnx.rpc = {
         if (contextUrl) {
             url = contextUrl + "/rpc/methods/" + beanId + ".json";
         } else {
-            url = $.tnx.pager.getUrl("/rpc/methods/" + beanId + ".json");
+            url = $.tnx.siteContext + "/rpc/methods/" + beanId + ".json";
         }
         var options = {
             cache : false,
