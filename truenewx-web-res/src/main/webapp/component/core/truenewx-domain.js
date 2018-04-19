@@ -1,6 +1,6 @@
 /**
  * truenewx-domain.js v1.1.0
- *
+ * 
  * Depends on: truenewx.js
  */
 $.tnx.domain = {
@@ -311,14 +311,12 @@ $.tnx.domain = {
             container = undefined;
         }
         if ($("img:first").lazyload) { // 已加载lazyload
-            if ($.tnx.domain.site.path.resContext) {
+            if ($.tnx.context) {
                 if (!placeholderImageUrl) {
-                    placeholderImageUrl = $.tnx.domain.site.path.resContext
-                            + "/assets/image/placeholder.png";
+                    placeholderImageUrl = $.tnx.context + "/assets/image/placeholder.png"; // 默认的占位图片路径
                 }
                 if (!loadingImageUrl) {
-                    loadingImageUrl = $.tnx.domain.site.path.resContext
-                            + "/assets/image/loading.gif";
+                    loadingImageUrl = $.tnx.context + "/assets/image/loading.gif"; // 默认的加载中图片路径
                 }
             }
             $("img[data-src]:not([src][data-original])", container).each(function(index, image) {
@@ -365,12 +363,12 @@ $.tnx.domain = {
  * 站点设置，由具体站点负责初始化
  */
 $.tnx.domain.site = {
-    namespace : undefined, // 站点默认命名空间
+    namespace : "site", // 站点默认命名空间
     path : {
-        context : $.tnx.pager.contextPath, // 站点根路径
-        assets : undefined, // 站点资源文件夹相对域名的路径
-        js : undefined
-    // 站点js文件夹相对域名的路径
+        context : $.tnx.siteContext, // 默认站点根路径
+        assets : $.tnx.siteContext + "/assets", // 默认站点资源文件夹相对域名的路径
+        // 默认站点js文件夹相对域名的路径
+        js : $.tnx.siteContext + "/assets/js"
     },
     components : {}, // 组件名称-相关js文件相对域名路径清单的映射集
     Controller : $.tnx.domain.Controller.extend({
@@ -429,7 +427,7 @@ $.tnx.domain.site = {
     },
     /**
      * 用模态窗体打开指定URL
-     *
+     * 
      * @param url
      *            URL
      * @param params
