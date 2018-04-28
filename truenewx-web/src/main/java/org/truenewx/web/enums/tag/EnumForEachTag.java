@@ -33,7 +33,7 @@ public class EnumForEachTag extends ForEachSupport implements LoopTag, Iteration
     }
 
     public final void setSubtype(final String subtype) throws JspException {
-        this.subtype = getElExpressionValue("subtype", this.type, String.class);
+        this.subtype = getElExpressionValue("subtype", subtype, String.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -51,8 +51,8 @@ public class EnumForEachTag extends ForEachSupport implements LoopTag, Iteration
                 getLocale());
         if (enumType != null) {
             this.rawItems = enumType.getItems();
-            super.prepare();
         }
+        super.prepare();
     }
 
     private <T> T getBeanFromApplicationContext(final Class<T> beanClass) {
