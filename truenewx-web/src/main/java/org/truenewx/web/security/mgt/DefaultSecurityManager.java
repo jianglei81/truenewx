@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.truenewx.core.Strings;
@@ -119,11 +118,7 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
                 session.setAttribute(realm.getUserSessionName(), loginInfo.getUser());
                 // 保存cookie
                 for (final Cookie cookie : loginInfo.getCookies()) {
-                    // cookie路径加上工程根目录
-                    final String contextPath = request.getContextPath();
-                    if (StringUtils.isNotEmpty(contextPath)) {
-                        cookie.setPath(contextPath + cookie.getPath());
-                    }
+                    cookie.setPath(request.getContextPath()); // cookie路径固定为站点根路径，以便于管理
                     subject.getServletResponse().addCookie(cookie);
                 }
             }
@@ -198,12 +193,7 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
                 if (cookieNames != null) {
                     final HttpServletResponse response = subject.getServletResponse();
                     for (final String cookieName : cookieNames) {
-                        final Cookie cookie = WebUtil.getCookie(request, cookieName);
-                        if (cookie != null) {
-                            cookie.setMaxAge(0);
-                            cookie.setValue(Strings.EMPTY);
-                            response.addCookie(cookie);
-                        }
+                        WebUtil.removeCookie(response, cookieName, request.getContextPath());
                     }
                 }
                 realm.onLogouted(user);
