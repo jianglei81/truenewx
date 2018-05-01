@@ -95,8 +95,10 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
                     user = ((RememberMeRealm<?>) realm).getLoginUser(host, cookies);
                     session.setAttribute(realm.getUserSessionName(), user);
                     // cookie可能被修改，重新回写以生效
-                    for (final Cookie cookie : cookies) {
-                        subject.getServletResponse().addCookie(cookie);
+                    if (cookies != null) {
+                        for (final Cookie cookie : cookies) {
+                            subject.getServletResponse().addCookie(cookie);
+                        }
                     }
                 }
                 return user;
