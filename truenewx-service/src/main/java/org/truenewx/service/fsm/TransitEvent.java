@@ -3,6 +3,7 @@ package org.truenewx.service.fsm;
 import java.io.Serializable;
 
 import org.truenewx.core.event.ContextEvent;
+import org.truenewx.data.user.UserIdentity;
 
 /**
  * 状态转换事件
@@ -14,20 +15,27 @@ import org.truenewx.core.event.ContextEvent;
  * @param <T>
  *            转换枚举类型
  */
-public class TransitEvent<K extends Serializable, T extends Enum<T>>
-                implements ContextEvent<Object> {
+public class TransitEvent<I extends UserIdentity, K extends Serializable, T extends Enum<T>>
+        implements ContextEvent<Object> {
+    private I userIdentity;
     private K key;
     private T transition;
     private Object context;
 
-    public TransitEvent(final K key, final T transition, final Object context) {
+    public TransitEvent(final I userIdentity, final K key, final T transition,
+            final Object context) {
+        this.userIdentity = userIdentity;
         this.key = key;
         this.transition = transition;
         this.context = context;
     }
 
-    public TransitEvent(final K key, final T transition) {
-        this(key, transition, null);
+    public TransitEvent(final I userIdentity, final K key, final T transition) {
+        this(userIdentity, key, transition, null);
+    }
+
+    public I getUserIdentity() {
+        return this.userIdentity;
     }
 
     public K getKey() {

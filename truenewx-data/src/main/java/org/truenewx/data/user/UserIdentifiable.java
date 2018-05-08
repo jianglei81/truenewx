@@ -6,12 +6,12 @@ package org.truenewx.data.user;
  * @author jianglei
  * @since JDK 1.8
  */
-public interface UserIdentifiable {
+public interface UserIdentifiable<I extends UserIdentity> {
 
     /**
      *
      * @return 用户标识
      */
-    UserIdentity getUserIdentity();
+    I getUserIdentity();
 
 }
