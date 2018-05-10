@@ -38,10 +38,11 @@ public interface StateMachine<U extends UnitaryEntity<K>, K extends Serializable
      *            用户标识
      * @param state
      *            状态
-     *
+     * @param context
+     *            上下文
      * @return 可进行的转换清单
      */
-    Set<T> getTransitions(UserIdentity userIdentity, S state);
+    Set<T> getTransitions(I userIdentity, S state, Object context);
 
     /**
      * 获取指定用户在指定状态下进行指定转换后将进入的下一个状态
@@ -50,9 +51,12 @@ public interface StateMachine<U extends UnitaryEntity<K>, K extends Serializable
      *            状态
      * @param transition
      *            转换
+     * @param context
+     *            上下文
+     *
      * @return 下一个状态
      */
-    S getNextState(UserIdentity userIdentity, S state, T transition);
+    S getNextState(I userIdentity, S state, T transition, Object context);
 
     /**
      * 指定用户对指定实体进行指定转换
@@ -70,7 +74,6 @@ public interface StateMachine<U extends UnitaryEntity<K>, K extends Serializable
      * @throws HandleableException
      *             转换过程中出现异常
      */
-    U transit(UserIdentity userIdentity, K key, T transition, Object context)
-            throws HandleableException;
+    U transit(I userIdentity, K key, T transition, Object context) throws HandleableException;
 
 }

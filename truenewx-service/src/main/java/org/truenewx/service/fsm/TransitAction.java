@@ -21,8 +21,10 @@ import org.truenewx.data.user.UserIdentity;
  *            状态枚举类型
  * @param <T>
  *            转换枚举类型
+ * @param <I>
+ *            用户标识类型
  */
-public interface TransitAction<U extends UnitaryEntity<K>, K extends Serializable, S extends Enum<S>, T extends Enum<T>> {
+public interface TransitAction<U extends UnitaryEntity<K>, K extends Serializable, S extends Enum<S>, T extends Enum<T>, I extends UserIdentity> {
     /**
      * 获取转换枚举。每个转换动作都对应且仅对应一个转换枚举
      *
@@ -37,11 +39,12 @@ public interface TransitAction<U extends UnitaryEntity<K>, K extends Serializabl
      *            用户标识，为null表示不考虑用户限定的情况
      * @param state
      *            状态。如果该状态不被本转换动作支持，则将返回null
-     *
+     * @param context
+     *            上下文
      * @return 下一个状态
      */
     @Nullable
-    S getNextState(UserIdentity userIdentity, S state);
+    S getNextState(I userIdentity, S state, Object context);
 
     /**
      * 指定用户对指定标识表示的实体，在指定上下文情况时，执行动作
@@ -57,5 +60,5 @@ public interface TransitAction<U extends UnitaryEntity<K>, K extends Serializabl
      * @throws HandleableException
      *             如果执行过程中出现错误
      */
-    U execute(UserIdentity userIdentity, K key, Object context) throws HandleableException;
+    U execute(I userIdentity, K key, Object context) throws HandleableException;
 }

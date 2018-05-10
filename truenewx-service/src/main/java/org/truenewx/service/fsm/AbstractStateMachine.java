@@ -1,14 +1,12 @@
 package org.truenewx.service.fsm;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.EnumUtils;
 import org.truenewx.core.exception.HandleableException;
 import org.truenewx.core.spring.transaction.annotation.WriteTransactional;
 import org.truenewx.data.model.UnitaryEntity;
@@ -37,31 +35,15 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
      */
     private S startState;
 
-    private Map<S, Map<T, TransitAction<U, K, S, T>>> stateTransitionActionMapping = new HashMap<>();
+    private List<TransitAction<U, K, S, T, I>> actions = new ArrayList<>();
 
     public void setStartState(final S startState) {
         this.startState = startState;
     }
 
     public void setTransitActions(
-            final Collection<? extends TransitAction<U, K, S, T>> transitActions) {
-        @SuppressWarnings("unchecked")
-        final List<S> states = EnumUtils.getEnumList(this.startState.getClass());
-        for (final S state : states) {
-            this.stateTransitionActionMapping.put(state,
-                    getTransitableActions(transitActions, state));
-        }
-    }
-
-    private Map<T, TransitAction<U, K, S, T>> getTransitableActions(
-            final Collection<? extends TransitAction<U, K, S, T>> actions, final S state) {
-        final Map<T, TransitAction<U, K, S, T>> result = new HashMap<>();
-        for (final TransitAction<U, K, S, T> action : actions) {
-            if (action.getNextState(null, state) != null) {
-                result.put(action.getTransition(), action);
-            }
-        }
-        return result;
+            final Collection<? extends TransitAction<U, K, S, T, I>> transitActions) {
+        this.actions.addAll(transitActions);
     }
 
     @Override
@@ -70,46 +52,49 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
     }
 
     @Override
-    public Set<T> getTransitions(final UserIdentity userIdentity, final S state) {
+    public Set<T> getTransitions(final I userIdentity, final S state, final Object context) {
         final Set<T> transitions = new HashSet<>();
-        final Map<T, TransitAction<U, K, S, T>> transitionActionMapping = this.stateTransitionActionMapping
-                .get(state);
-        if (transitionActionMapping != null) {
-            transitions.addAll(transitionActionMapping.keySet());
+        for (final TransitAction<U, K, S, T, I> action : this.actions) {
+            if (action.getNextState(userIdentity, state, context) != null) {
+                transitions.add(action.getTransition());
+            }
         }
         return transitions;
     }
 
-    private TransitAction<U, K, S, T> getTransitAction(final S state, final T transition) {
-        if (state != null && transition != null) {
-            final Map<T, TransitAction<U, K, S, T>> transitionActionMapping = this.stateTransitionActionMapping
-                    .get(state);
-            if (transitionActionMapping != null) {
-                return transitionActionMapping.get(transition);
+    private TransitAction<U, K, S, T, I> getTransitAction(final I userIdentity, final S state,
+            final T transition, final Object context) {
+        for (final TransitAction<U, K, S, T, I> action : this.actions) {
+            if (action.getTransition() == action
+                    && action.getNextState(userIdentity, state, context) != null) {
+                return action;
             }
         }
         return null;
     }
 
     @Override
-    public S getNextState(final UserIdentity userIdentity, final S state, final T transition) {
-        final TransitAction<U, K, S, T> action = getTransitAction(state, transition);
+    public S getNextState(final I userIdentity, final S state, final T transition,
+            final Object context) {
+        final TransitAction<U, K, S, T, I> action = getTransitAction(userIdentity, state,
+                transition, context);
         if (action != null) {
-            return action.getNextState(userIdentity, state);
+            return action.getNextState(userIdentity, state, context);
         }
         return null;
     }
 
     @Override
     @WriteTransactional
-    public U transit(final UserIdentity userIdentity, final K key, final T transition,
-            final Object context) throws HandleableException {
+    public U transit(final I userIdentity, final K key, final T transition, final Object context)
+            throws HandleableException {
         final S state = getState(key);
-        final TransitAction<U, K, S, T> action = getTransitAction(state, transition);
+        final TransitAction<U, K, S, T, I> action = getTransitAction(userIdentity, state,
+                transition, context);
         if (action == null) {
             throw new UnsupportedTransitionException(state, transition);
         }
-        return action.execute(null, key, context);
+        return action.execute(userIdentity, key, context);
     }
 
     protected abstract S getState(K key);
