@@ -55,7 +55,7 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
     public Set<T> getTransitions(final I userIdentity, final S state, final Object context) {
         final Set<T> transitions = new HashSet<>();
         for (final TransitAction<U, K, S, T, I> action : this.actions) {
-            if (action.getNextState(userIdentity, state, context) != null) {
+            if (action.getEndState(state, context) != null) {
                 transitions.add(action.getTransition());
             }
         }
@@ -66,7 +66,7 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
             final T transition, final Object context) {
         for (final TransitAction<U, K, S, T, I> action : this.actions) {
             if (action.getTransition() == action
-                    && action.getNextState(userIdentity, state, context) != null) {
+                    && action.getEndState(state, context) != null) {
                 return action;
             }
         }
@@ -79,7 +79,7 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
         final TransitAction<U, K, S, T, I> action = getTransitAction(userIdentity, state,
                 transition, context);
         if (action != null) {
-            return action.getNextState(userIdentity, state, context);
+            return action.getEndState(state, context);
         }
         return null;
     }
