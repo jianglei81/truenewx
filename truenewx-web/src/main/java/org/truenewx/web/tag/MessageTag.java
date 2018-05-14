@@ -10,9 +10,7 @@ import javax.servlet.jsp.tagext.SimpleTagSupport;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.servlet.LocaleResolver;
 import org.truenewx.core.Strings;
-import org.truenewx.core.spring.util.SpringUtil;
 import org.truenewx.web.spring.util.SpringWebUtil;
 
 /**
@@ -43,15 +41,9 @@ public class MessageTag extends SimpleTagSupport {
     }
 
     private Locale getLocale() {
-        final LocaleResolver localeResolver = SpringUtil
-                .getFirstBeanByClass(getApplicationContext(), LocaleResolver.class);
         final HttpServletRequest request = (HttpServletRequest) ((PageContext) getJspContext())
                 .getRequest();
-        if (localeResolver != null) {
-            return localeResolver.resolveLocale(request);
-        } else {
-            return request.getLocale();
-        }
+        return SpringWebUtil.getLocale(request);
     }
 
     @Override
