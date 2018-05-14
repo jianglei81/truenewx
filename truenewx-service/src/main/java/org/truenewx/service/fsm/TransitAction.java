@@ -33,18 +33,23 @@ public interface TransitAction<U extends UnitaryEntity<K>, K extends Serializabl
     T getTransition();
 
     /**
-     * 获取指定用户在指定状态下进行当前转换动作将进入的下一个状态
      *
-     * @param userIdentity
-     *            用户标识，为null表示不考虑用户限定的情况
-     * @param state
-     *            状态。如果该状态不被本转换动作支持，则将返回null
-     * @param context
-     *            上下文
-     * @return 下一个状态
+     * @return 当前转换动作可能的起始状态集
+     */
+    S[] getBeginStates();
+
+    /**
+     * 获取在指定起始状态执行当前转换动作后的结束状态
+     *
+     * @param beginState
+     *            起始状态
+     * @param condition
+     *            条件
+     *
+     * @return 结束状态，如果在指定起始状态下不能根据指定条件执行当前转换动作，则返回null
      */
     @Nullable
-    S getNextState(I userIdentity, S state, Object context);
+    S getEndState(S beginState, Object condition);
 
     /**
      * 指定用户对指定标识表示的实体，在指定上下文情况时，执行动作
