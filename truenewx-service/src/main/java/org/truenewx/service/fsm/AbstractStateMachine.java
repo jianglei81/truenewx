@@ -7,8 +7,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.truenewx.core.exception.HandleableException;
 import org.truenewx.core.spring.transaction.annotation.WriteTransactional;
+import org.truenewx.data.finder.UnitaryEntityFinder;
 import org.truenewx.data.model.UnitaryEntity;
 import org.truenewx.data.user.UserIdentity;
 
@@ -52,21 +54,20 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
     }
 
     @Override
-    public Set<T> getTransitions(final I userIdentity, final S state, final Object context) {
+    public Set<T> getTransitions(final S state) {
         final Set<T> transitions = new HashSet<>();
         for (final TransitAction<U, K, S, T, I> action : this.actions) {
-            if (action.getEndState(state, context) != null) {
+            if (ArrayUtils.contains(action.getBeginStates(), state)) {
                 transitions.add(action.getTransition());
             }
         }
         return transitions;
     }
 
-    private TransitAction<U, K, S, T, I> getTransitAction(final I userIdentity, final S state,
-            final T transition, final Object context) {
+    private TransitAction<U, K, S, T, I> getTransitAction(final S state, final T transition,
+            final Object condition) {
         for (final TransitAction<U, K, S, T, I> action : this.actions) {
-            if (action.getTransition() == action
-                    && action.getEndState(state, context) != null) {
+            if (action.getTransition() == action && action.getEndState(state, condition) != null) {
                 return action;
             }
         }
@@ -74,12 +75,10 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
     }
 
     @Override
-    public S getNextState(final I userIdentity, final S state, final T transition,
-            final Object context) {
-        final TransitAction<U, K, S, T, I> action = getTransitAction(userIdentity, state,
-                transition, context);
+    public S getNextState(final S state, final T transition, final Object condition) {
+        final TransitAction<U, K, S, T, I> action = getTransitAction(state, transition, condition);
         if (action != null) {
-            return action.getEndState(state, context);
+            return action.getEndState(state, condition);
         }
         return null;
     }
@@ -88,15 +87,27 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
     @WriteTransactional
     public U transit(final I userIdentity, final K key, final T transition, final Object context)
             throws HandleableException {
-        final S state = getState(key);
-        final TransitAction<U, K, S, T, I> action = getTransitAction(userIdentity, state,
-                transition, context);
-        if (action == null) {
-            throw new UnsupportedTransitionException(state, transition);
+        final U entity = getFinder().find(key);
+        if (entity != null) {
+            final S state = getState(entity);
+            final Object condition = getCondition(userIdentity, entity, transition, context);
+            final TransitAction<U, K, S, T, I> action = getTransitAction(state, transition,
+                    condition);
+            if (action == null) {
+                throw new UnsupportedTransitionException(state, transition);
+            }
+            if (!action.execute(userIdentity, entity, context)) {
+                return null;
+            }
         }
-        return action.execute(userIdentity, key, context);
+        return entity;
     }
 
-    protected abstract S getState(K key);
+    protected abstract UnitaryEntityFinder<U, K> getFinder();
+
+    protected abstract S getState(U entity);
+
+    protected abstract Object getCondition(I userIdentity, final U entity, T transition,
+            final Object context);
 
 }

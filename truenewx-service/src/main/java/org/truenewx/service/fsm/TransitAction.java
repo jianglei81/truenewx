@@ -56,14 +56,14 @@ public interface TransitAction<U extends UnitaryEntity<K>, K extends Serializabl
      *
      * @param userIdentity
      *            用户标识
-     * @param key
+     * @param entity
      *            实体标识
      * @param context
      *            上下文
+     * @return 动作是否正常执行
      *
-     * @return 影响的实体
      * @throws HandleableException
      *             如果执行过程中出现错误
      */
-    U execute(I userIdentity, K key, Object context) throws HandleableException;
+    boolean execute(I userIdentity, U entity, Object context) throws HandleableException;
 }

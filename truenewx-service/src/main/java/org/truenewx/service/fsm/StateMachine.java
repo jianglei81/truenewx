@@ -32,31 +32,28 @@ public interface StateMachine<U extends UnitaryEntity<K>, K extends Serializable
     S getStartState();
 
     /**
-     * 获取指定用户在指定状态下可进行的转换清单
+     * 获取在指定状态下可进行的转换清单
      *
-     * @param userIdentity
-     *            用户标识
      * @param state
      *            状态
-     * @param context
-     *            上下文
+     *
      * @return 可进行的转换清单
      */
-    Set<T> getTransitions(I userIdentity, S state, Object context);
+    Set<T> getTransitions(S state);
 
     /**
-     * 获取指定用户在指定状态下进行指定转换后将进入的下一个状态
+     * 获取在指定状态下，在指定条件下，进行指定转换后将进入的下一个状态
      *
      * @param state
      *            状态
      * @param transition
      *            转换
-     * @param context
-     *            上下文
+     * @param condition
+     *            条件
      *
      * @return 下一个状态
      */
-    S getNextState(I userIdentity, S state, T transition, Object context);
+    S getNextState(S state, T transition, Object condition);
 
     /**
      * 指定用户对指定实体进行指定转换
