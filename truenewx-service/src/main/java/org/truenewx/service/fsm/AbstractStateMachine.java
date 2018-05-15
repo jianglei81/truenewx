@@ -8,11 +8,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.truenewx.core.exception.BusinessException;
 import org.truenewx.core.exception.HandleableException;
 import org.truenewx.core.spring.transaction.annotation.WriteTransactional;
-import org.truenewx.data.finder.UnitaryEntityFinder;
 import org.truenewx.data.model.UnitaryEntity;
 import org.truenewx.data.user.UserIdentity;
+import org.truenewx.service.ServiceSupport;
 
 /**
  * 抽象的有限状态机
@@ -31,7 +32,7 @@ import org.truenewx.data.user.UserIdentity;
  *            转换事件类型
  */
 public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends Serializable, S extends Enum<S>, T extends Enum<T>, I extends UserIdentity>
-        implements StateMachine<U, K, S, T, I> {
+        extends ServiceSupport implements StateMachine<U, K, S, T, I> {
     /**
      * 起始状态
      */
@@ -67,7 +68,8 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
     private TransitAction<U, K, S, T, I> getTransitAction(final S state, final T transition,
             final Object condition) {
         for (final TransitAction<U, K, S, T, I> action : this.actions) {
-            if (action.getTransition() == action && action.getEndState(state, condition) != null) {
+            if (action.getTransition() == transition
+                    && action.getEndState(state, condition) != null) {
                 return action;
             }
         }
@@ -87,27 +89,44 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
     @WriteTransactional
     public U transit(final I userIdentity, final K key, final T transition, final Object context)
             throws HandleableException {
-        final U entity = getFinder().find(key);
-        if (entity != null) {
-            final S state = getState(entity);
-            final Object condition = getCondition(userIdentity, entity, transition, context);
-            final TransitAction<U, K, S, T, I> action = getTransitAction(state, transition,
-                    condition);
-            if (action == null) {
-                throw new UnsupportedTransitionException(state, transition);
-            }
-            if (!action.execute(userIdentity, entity, context)) {
-                return null;
-            }
+        final U entity = loadEntity(userIdentity, key, context);
+        final S state = getState(entity);
+        final Object condition = getCondition(userIdentity, entity, context);
+        final TransitAction<U, K, S, T, I> action = getTransitAction(state, transition, condition);
+        if (action == null) {
+            throw new UnsupportedTransitionException(state, transition);
+        }
+        if (!action.execute(userIdentity, entity, context)) {
+            return null;
         }
         return entity;
     }
 
-    protected abstract UnitaryEntityFinder<U, K> getFinder();
+    /**
+     * 加载指定实体，需确保返回非空的实体，如果找不到指定实体，则需抛出业务异常
+     *
+     * @param userIdentity
+     *            用户标识
+     * @param key
+     *            实体标识
+     * @param context
+     *            上下文
+     * @return 实体
+     * @throws BusinessException
+     *             如果找不到实体
+     */
+    protected abstract U loadEntity(I userIdentity, final K key, final Object context)
+            throws BusinessException;
 
+    /**
+     * 从指定实体中获取状态值。实体可能包含多个状态属性，故不通过让实体实现获取状态的接口来实现
+     *
+     * @param entity
+     *            实体
+     * @return 状态值
+     */
     protected abstract S getState(U entity);
 
-    protected abstract Object getCondition(I userIdentity, final U entity, T transition,
-            final Object context);
+    protected abstract Object getCondition(I userIdentity, final U entity, final Object context);
 
 }
