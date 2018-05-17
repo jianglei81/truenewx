@@ -5,9 +5,9 @@ import java.util.List;
 
 /**
  * 扩展的MD5加密器
- * 
+ *
  * @author jianglei
- * 
+ *
  */
 public class Md5xEncrypter implements KeyEncrypter {
     /**
@@ -20,12 +20,9 @@ public class Md5xEncrypter implements KeyEncrypter {
      */
     public static final int MD5_ENCRYPT_LENGTH = 32;
 
-    protected final int staticKey;
+    private final long staticKey;
 
-    public Md5xEncrypter(final int staticKey) {
-        if (staticKey < 0 || staticKey > 31) {
-            throw new IllegalArgumentException("The argument 'staticKey' must between [0, 31]");
-        }
+    public Md5xEncrypter(final long staticKey) {
         this.staticKey = staticKey;
     }
 
@@ -39,15 +36,16 @@ public class Md5xEncrypter implements KeyEncrypter {
         return encryptByMd5Source(md5Source, secretKey);
     }
 
-    public boolean validate(final String encryptedText, final Object source, final Object secretKey) {
+    public boolean validate(final String encryptedText, final Object source,
+            final Object secretKey) {
         final String md5Source = Md5Encrypter.encrypt32(source);
         return validateByMd5Source(encryptedText, md5Source, secretKey);
     }
 
-    private Integer[] getMd5SourceCharIndexes(final int staticKey, final int maxIndex) {
+    private Integer[] getMd5SourceCharIndexes(final long staticKey, final int maxIndex) {
         final char[] c = Md5Encrypter.encrypt32(staticKey).toCharArray();
         final int length = c.length;
-        final List<Integer> list = new ArrayList<Integer>(length);
+        final List<Integer> list = new ArrayList<>(length);
         for (int i = 0; i < length; i++) {
             int value;
             if (i == 0) {
@@ -67,8 +65,8 @@ public class Md5xEncrypter implements KeyEncrypter {
         return list.toArray(new Integer[length]);
     }
 
-    protected String encryptByMd5Source(final String md5Source, Object secretKey,
-            final int staticKey) {
+    private String encryptByMd5Source(final String md5Source, Object secretKey,
+            final long staticKey) {
         if (secretKey == null) {
             secretKey = "";
         }
@@ -101,8 +99,8 @@ public class Md5xEncrypter implements KeyEncrypter {
 
     public String getMd5Source(final String encryptedText) {
         if (encryptedText.length() != ENCRYPTED_TEXT_LENGTH) {
-            throw new IllegalArgumentException("The length of encrypted text must be "
-                    + ENCRYPTED_TEXT_LENGTH);
+            throw new IllegalArgumentException(
+                    "The length of encrypted text must be " + ENCRYPTED_TEXT_LENGTH);
         }
         final Integer[] indexes = getMd5SourceCharIndexes(this.staticKey, encryptedText.length());
         final char[] c = new char[indexes.length];
