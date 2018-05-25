@@ -83,7 +83,7 @@ public class StringUtil {
 
     public static final String EMAIL_PATTERN = "^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$";
 
-    public static final String MOBILE_PHONE_PATTERN = "^1[34578]\\d{9}$";
+    public static final String MOBILE_PHONE_PATTERN = "^1\\d{10}$";
 
     private static final PathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
