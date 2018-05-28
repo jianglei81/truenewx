@@ -142,8 +142,13 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
                 this.logger.warn("{} is not an enum class, so didn't build from it", type);
             }
         } catch (final ClassNotFoundException e) {
-            // type如果不是一个有效的类名，则无法自动构建枚举项
-            this.logger.warn(e.getMessage());
+            // type如果不是一个有效的类名，则尝试从枚举配置文件中构建
+            final SAXReader reader = new SAXReader();
+            final String basename = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "META-INF/"
+                    + EnumDictFactory.CONFIG_FILE_BASE_NAME;
+            final Resource resource = IOUtil.findI18nResource(basename, locale,
+                    CONFIG_FILE_EXTENSION);
+            return readEnumType(reader, resource, type, subtype);
         }
         return null;
     }
