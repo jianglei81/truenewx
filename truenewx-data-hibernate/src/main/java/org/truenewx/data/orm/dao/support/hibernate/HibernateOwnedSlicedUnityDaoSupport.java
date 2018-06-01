@@ -21,16 +21,18 @@ import org.truenewx.data.orm.hibernate.HibernateTemplate;
  *            所属者类型
  */
 public abstract class HibernateOwnedSlicedUnityDaoSupport<T extends OwnedSlicedUnity<K, S, O>, K extends Serializable, S extends Serializable, O extends Serializable>
-                extends HibernateSlicedUnityDaoSupport<T, K, S>
-                implements OwnedSlicedUnityDao<T, K, S, O> {
+        extends HibernateSlicedUnityDaoSupport<T, K, S> implements OwnedSlicedUnityDao<T, K, S, O> {
 
     @Override
     public T find(final S slicer, final O owner, final K id) {
+        if (id == null) {
+            return null;
+        }
         final String entityName = getEntityName(slicer);
         final HibernateTemplate hibernateTemplate = getDataAccessTemplate(entityName);
         final String ownerProperty = getOwnerProperty();
         return HibernateOwnedUnityDaoUtil.find(hibernateTemplate, entityName, ownerProperty, owner,
-                        id);
+                id);
     }
 
     @Override
@@ -39,7 +41,7 @@ public abstract class HibernateOwnedSlicedUnityDaoSupport<T extends OwnedSlicedU
         final HibernateTemplate hibernateTemplate = getDataAccessTemplate(entityName);
         final String ownerProperty = getOwnerProperty();
         return HibernateOwnedUnityDaoUtil.count(hibernateTemplate, entityName, ownerProperty,
-                        owner);
+                owner);
     }
 
     /**

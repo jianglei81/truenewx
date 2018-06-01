@@ -20,32 +20,33 @@ public class HibernateOwnedUnityDaoUtil {
 
     @SuppressWarnings("unchecked")
     public static <T extends OwnedUnity<K, O>, K extends Serializable, O extends Serializable> T find(
-                    final HibernateTemplate hibernateTemplate, final String entityName,
-                    final String ownerProperty, final O owner, final K id) {
+            final HibernateTemplate hibernateTemplate, final String entityName,
+            final String ownerProperty, final O owner, final K id) {
+        if (id == null) {
+            return null;
+        }
         if (ownerProperty == null) {
             final T entity = (T) hibernateTemplate.getSession().get(entityName, id);
             if (entity != null && owner.equals(entity.getOwner())) {
                 return entity;
             }
             return null;
-        } else {
-            final StringBuffer hql = new StringBuffer("from ").append(entityName)
-                            .append(" e where e.").append(ownerProperty)
-                            .append("=:owner and e.id=:id");
-            final Map<String, Object> params = new HashMap<>();
-            params.put("owner", owner);
-            params.put("id", id);
-            return hibernateTemplate.first(hql.toString(), params);
         }
+        final StringBuffer hql = new StringBuffer("from ").append(entityName).append(" e where e.")
+                .append(ownerProperty).append("=:owner and e.id=:id");
+        final Map<String, Object> params = new HashMap<>();
+        params.put("owner", owner);
+        params.put("id", id);
+        return hibernateTemplate.first(hql.toString(), params);
     }
 
     public static int count(final HibernateTemplate hibernateTemplate, final String entityName,
-                    final String ownerProperty, final Object owner) {
+            final String ownerProperty, final Object owner) {
         if (ownerProperty == null) {
             throw new UnsupportedOperationException();
         }
         final StringBuffer hql = new StringBuffer("select count(*) from ").append(entityName)
-                        .append(" e where e.").append(ownerProperty).append("=:owner");
+                .append(" e where e.").append(ownerProperty).append("=:owner");
         return hibernateTemplate.count(hql.toString(), "owner", owner);
     }
 

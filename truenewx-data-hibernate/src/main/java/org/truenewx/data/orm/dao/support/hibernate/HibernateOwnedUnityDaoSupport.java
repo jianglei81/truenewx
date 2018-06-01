@@ -25,6 +25,9 @@ public abstract class HibernateOwnedUnityDaoSupport<T extends OwnedUnity<K, O>, 
         extends HibernateUnityDaoSupport<T, K> implements OwnedUnityDao<T, K, O> {
     @Override
     public T find(final O owner, final K id) {
+        if (id == null) {
+            return null;
+        }
         final String entityName = getEntityName();
         final HibernateTemplate hibernateTemplate = getHibernateTemplate();
         final String ownerProperty = getOwnerProperty();
