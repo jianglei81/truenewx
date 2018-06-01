@@ -176,4 +176,25 @@ public class OqlUtil {
         }
         return condition.toString();
     }
+
+    /**
+     * 构建指定字段的为null条件子句
+     * 
+     * @param fieldName
+     *            字段名
+     * @param ifNull
+     *            是否为null，其值本身为null表示忽略该字段条件
+     * @return 条件子句
+     */
+    public static String buildNullConditionString(final String fieldName, final Boolean ifNull) {
+        final StringBuffer condition = new StringBuffer();
+        if (ifNull != null) {
+            condition.append(fieldName).append(" is");
+            if (!ifNull) {
+                condition.append(" not");
+            }
+            condition.append(" null");
+        }
+        return condition.toString();
+    }
 }
