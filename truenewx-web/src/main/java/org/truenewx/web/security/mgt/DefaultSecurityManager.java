@@ -38,11 +38,11 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
     private Map<Class<?>, Realm<?>> realms = new HashMap<>();
 
     @Override
-    public void afterInitialized(final ApplicationContext context) throws Exception {
+    public void afterInitialized(ApplicationContext context) throws Exception {
         @SuppressWarnings("rawtypes")
-        final Map<String, Realm> beans = context.getBeansOfType(Realm.class);
-        for (final Realm<?> realm : beans.values()) {
-            final Class<?> userClass = realm.getUserClass();
+        Map<String, Realm> beans = context.getBeansOfType(Realm.class);
+        for (Realm<?> realm : beans.values()) {
+            Class<?> userClass = realm.getUserClass();
             // 一个用户类型只能有一个Realm
             Assert.isNull(this.realms.put(userClass, realm),
                     "one userClass can only have one realm");
@@ -50,7 +50,7 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
     }
 
     @SuppressWarnings("unchecked")
-    protected final <T> Realm<T> getRealm(final Class<T> userClass) {
+    protected <T> Realm<T> getRealm(Class<T> userClass) {
         if (this.realms.size() > 0) {
             if (userClass == null) {
                 if (this.realms.size() > 1) {
@@ -65,15 +65,14 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
     }
 
     @Override
-    public Subject getSubject(final HttpServletRequest request,
-            final HttpServletResponse response) {
+    public Subject getSubject(HttpServletRequest request, HttpServletResponse response) {
         return getSubject(request, response, null);
     }
 
     @Override
-    public Subject getSubject(final HttpServletRequest request, final HttpServletResponse response,
-            final Class<?> userClass) {
-        final Realm<?> realm = getRealm(userClass);
+    public Subject getSubject(HttpServletRequest request, HttpServletResponse response,
+            Class<?> userClass) {
+        Realm<?> realm = getRealm(userClass);
         if (realm != null) { // 用户类型对应的Realm存在才有效
             return new DelegatingSubject(request, response, userClass, this);
         }
@@ -81,22 +80,23 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
     }
 
     @Override
-    public Object getUser(final Subject subject, final boolean auto) {
-        final Realm<?> realm = getRealm(subject.getUserClass());
+    public Object getUser(Subject subject, boolean auto) {
+        Realm<?> realm = getRealm(subject.getUserClass());
         if (realm != null) {
-            final HttpServletRequest request = subject.getServletRequest();
-            final HttpSession session = request.getSession(auto);
+            HttpServletRequest request = subject.getServletRequest();
+            HttpSession session = request.getSession(auto);
             if (session != null) {
                 Object user = session.getAttribute(realm.getUserSessionName());
                 // 如果从会话中无法取得用户，则尝试自动登录验证
                 if (user == null && auto && realm instanceof RememberMeRealm) {
-                    final String host = WebUtil.getRemoteAddrIp(request);
-                    final Cookie[] cookies = request.getCookies();
+                    String host = WebUtil.getRemoteAddrIp(request);
+                    Cookie[] cookies = request.getCookies();
                     user = ((RememberMeRealm<?>) realm).getLoginUser(host, cookies);
                     session.setAttribute(realm.getUserSessionName(), user);
                     // cookie可能被修改，重新回写以生效
                     if (cookies != null) {
-                        for (final Cookie cookie : cookies) {
+                        for (Cookie cookie : cookies) {
+                            cookie.setPath(request.getContextPath()); // 统一路径以便于删除
                             subject.getServletResponse().addCookie(cookie);
                         }
                     }
@@ -108,43 +108,43 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
     }
 
     @Override
-    public void login(final Subject subject, final LoginToken token) throws HandleableException {
-        final Realm<?> realm = getRealm(subject.getUserClass());
+    public void login(Subject subject, LoginToken token) throws HandleableException {
+        Realm<?> realm = getRealm(subject.getUserClass());
         if (realm != null) {
-            final LoginInfo loginInfo = realm.getLoginInfo(token);
+            LoginInfo loginInfo = realm.getLoginInfo(token);
             if (loginInfo != null) {
-                final HttpServletRequest request = subject.getServletRequest();
+                HttpServletRequest request = subject.getServletRequest();
                 request.getSession().invalidate(); // 重置会话，以避免新登录用户取得原用户会话信息
-                final HttpSession session = request.getSession(true); // 重新创建会话对象
+                HttpSession session = request.getSession(true); // 重新创建会话对象
                 // 登录用户保存至会话
                 session.setAttribute(realm.getUserSessionName(), loginInfo.getUser());
                 // 保存cookie
-                for (final Cookie cookie : loginInfo.getCookies()) {
-                    cookie.setPath(request.getContextPath()); // cookie路径固定为站点根路径，以便于管理
+                for (Cookie cookie : loginInfo.getCookies()) {
+                    cookie.setPath(request.getContextPath()); // 统一路径以便于删除
                     subject.getServletResponse().addCookie(cookie);
                 }
             }
         }
     }
 
-    protected String getAuthorizationSessionName(final Realm<?> realm) {
+    protected String getAuthorizationSessionName(Realm<?> realm) {
         return realm.getUserSessionName() + Strings.UNDERLINE + Authorization.class.getSimpleName();
     }
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Authorization getAuthorization(final Subject subject, final boolean reset) {
-        final Realm realm = getRealm(subject.getUserClass());
+    public Authorization getAuthorization(Subject subject, boolean reset) {
+        Realm realm = getRealm(subject.getUserClass());
         if (realm != null) {
-            final HttpSession session = subject.getServletRequest().getSession();
-            final String authorizationSessionName = getAuthorizationSessionName(realm);
+            HttpSession session = subject.getServletRequest().getSession();
+            String authorizationSessionName = getAuthorizationSessionName(realm);
             if (reset) {
                 session.removeAttribute(authorizationSessionName);
             }
             AuthorizationInfo ai = (AuthorizationInfo) session
                     .getAttribute(authorizationSessionName);
             if (ai == null) {
-                final Object user = getUser(subject, false);
+                Object user = getUser(subject, false);
                 if (user != null) {
                     ai = realm.getAuthorizationInfo(user);
                     if (ai != null && ai.isCaching()) {
@@ -158,17 +158,16 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
     }
 
     @Override
-    public boolean isAuthorized(final Subject subject, final Authority authority) {
+    public boolean isAuthorized(Subject subject, Authority authority) {
         if (authority != null) {
-            final Authorization authorization = getAuthorization(subject, false);
+            Authorization authorization = getAuthorization(subject, false);
             return authority.isContained(authorization);
         }
         return false;
     }
 
     @Override
-    public void validateAuthority(final Subject subject, final Authority authority)
-            throws BusinessException {
+    public void validateAuthority(Subject subject, Authority authority) throws BusinessException {
         if (!isAuthorized(subject, authority)) {
             throw new NoAuthorityException(authority);
         }
@@ -176,14 +175,14 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void logout(final Subject subject) throws BusinessException {
-        final Realm realm = getRealm(subject.getUserClass());
+    public void logout(Subject subject) throws BusinessException {
+        Realm realm = getRealm(subject.getUserClass());
         if (realm != null) {
-            final Object user = getUser(subject, false);
-            final LogoutInfo logoutInfo = realm.getLogoutInfo(user);
+            Object user = getUser(subject, false);
+            LogoutInfo logoutInfo = realm.getLogoutInfo(user);
             if (logoutInfo != null) {
-                final HttpServletRequest request = subject.getServletRequest();
-                final HttpSession session = request.getSession();
+                HttpServletRequest request = subject.getServletRequest();
+                HttpSession session = request.getSession();
                 if (logoutInfo.isInvalidatingSession()) {
                     session.invalidate();
                 } else { // 不用无效化session则移除session中的属性
@@ -191,10 +190,10 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
                 }
 
                 // 移除需要移除的cookie
-                final Iterable<String> cookieNames = logoutInfo.getCookieNames();
+                Iterable<String> cookieNames = logoutInfo.getCookieNames();
                 if (cookieNames != null) {
-                    final HttpServletResponse response = subject.getServletResponse();
-                    for (final String cookieName : cookieNames) {
+                    HttpServletResponse response = subject.getServletResponse();
+                    for (String cookieName : cookieNames) {
                         WebUtil.removeCookie(response, cookieName, request.getContextPath());
                     }
                 }
@@ -209,8 +208,8 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
      * @param session
      *            会话
      */
-    protected void removeSessionAttributesOnLogout(final HttpSession session) {
-        final Enumeration<String> attributeNames = session.getAttributeNames();
+    protected void removeSessionAttributesOnLogout(HttpSession session) {
+        Enumeration<String> attributeNames = session.getAttributeNames();
         while (attributeNames.hasMoreElements()) {
             session.removeAttribute(attributeNames.nextElement());
         }
