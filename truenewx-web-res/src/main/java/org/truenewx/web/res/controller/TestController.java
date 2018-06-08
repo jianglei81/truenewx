@@ -19,7 +19,7 @@ import org.truenewx.web.security.annotation.Accessibility;
 public class TestController {
 
     @RpcMethod
-    @Accessibility(anonymous = true)
+    @Accessibility(anonymous = true, lan = true)
     public String append(final String s, final String other) throws BusinessException {
         final StringBuffer sb = new StringBuffer(s);
         if ("be".equals(other)) {
@@ -30,7 +30,7 @@ public class TestController {
     }
 
     @RpcMethod
-    @Accessibility(anonymous = true)
+    @Accessibility(anonymous = true, lan = true)
     public String appendArray(final String s, final String[] others) throws BusinessException {
         final StringBuffer sb = new StringBuffer(s);
         for (final String other : others) {
@@ -43,7 +43,7 @@ public class TestController {
     }
 
     @RpcMethod
-    @Accessibility(anonymous = true)
+    @Accessibility(anonymous = true, lan = true)
     public String appendList(final String s, final List<String> others) throws BusinessException {
         final StringBuffer sb = new StringBuffer(s);
         for (final String other : others) {
@@ -56,7 +56,7 @@ public class TestController {
     }
 
     @RpcMethod
-    @Accessibility(anonymous = true)
+    @Accessibility(anonymous = true, lan = true)
     public String appendSyntheticArray(final String s, final Image[] images)
             throws BusinessException {
         final StringBuffer sb = new StringBuffer(s);
@@ -72,7 +72,7 @@ public class TestController {
 
     @RpcMethod(
             args = { @RpcArg(name = "s"), @RpcArg(name = "images", componentType = Image.class) })
-    @Accessibility(anonymous = true)
+    @Accessibility(anonymous = true, lan = true)
     public String appendSyntheticList(final String s, final List<Image> images)
             throws BusinessException {
         final StringBuffer sb = new StringBuffer(s);
@@ -87,7 +87,7 @@ public class TestController {
     }
 
     @RpcMethod
-    @Accessibility(anonymous = true)
+    @Accessibility(anonymous = true, lan = true)
     public String[] split(final String s, final String regex) {
         return s.split(regex);
     }

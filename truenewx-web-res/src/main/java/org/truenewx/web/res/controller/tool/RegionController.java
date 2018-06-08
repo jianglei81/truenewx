@@ -20,6 +20,7 @@ import org.truenewx.web.rpc.server.annotation.RpcController;
 import org.truenewx.web.rpc.server.annotation.RpcMethod;
 import org.truenewx.web.rpc.server.annotation.RpcResult;
 import org.truenewx.web.rpc.server.annotation.RpcResultFilter;
+import org.truenewx.web.security.annotation.Accessibility;
 
 /**
  * 工具
@@ -34,6 +35,7 @@ public class RegionController {
     @Autowired
     private RegionMapParser parser;
 
+    @Accessibility(lan = true)
     @RequestMapping(method = RequestMethod.GET)
     public String index() {
         return "/tool/region/index";
