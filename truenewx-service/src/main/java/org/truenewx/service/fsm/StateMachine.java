@@ -6,6 +6,7 @@ import java.util.Set;
 import org.truenewx.core.exception.HandleableException;
 import org.truenewx.data.model.UnitaryEntity;
 import org.truenewx.data.user.UserIdentity;
+import org.truenewx.service.Service;
 
 /**
  * 有限状态机
@@ -23,7 +24,8 @@ import org.truenewx.data.user.UserIdentity;
  * @param <I>
  *            用户标识类型
  */
-public interface StateMachine<U extends UnitaryEntity<K>, K extends Serializable, S extends Enum<S>, T extends Enum<T>, I extends UserIdentity> {
+public interface StateMachine<U extends UnitaryEntity<K>, K extends Serializable, S extends Enum<S>, T extends Enum<T>, I extends UserIdentity>
+        extends Service {
     /**
      * 获取起始状态。有限状态机具有且仅具有一个起始状态
      *

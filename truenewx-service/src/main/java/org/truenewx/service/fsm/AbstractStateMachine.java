@@ -127,6 +127,17 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
      */
     protected abstract S getState(U entity);
 
+    /**
+     * 获取转换条件，用于定位转换动作
+     *
+     * @param userIdentity
+     *            用户标识
+     * @param entity
+     *            实体
+     * @param context
+     *            转换上下文
+     * @return 转换条件
+     */
     protected abstract Object getCondition(I userIdentity, final U entity, final Object context);
 
 }
