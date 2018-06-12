@@ -60,14 +60,14 @@ public class SpringWebUtil {
 
     /**
      * 先尝试从Spring的LocaleResolver中获取区域，以便以自定义的方式获取区域
-     * 
+     *
      * @param request
      *            请求
      * @return 区域
      */
     public static Locale getLocale(final HttpServletRequest request) {
         final LocaleResolver localeResolver = SpringUtil
-                .getFirstBeanByClass(getApplicationContext(), LocaleResolver.class);
+                .getFirstBeanByClass(getApplicationContext(request), LocaleResolver.class);
         if (localeResolver != null) {
             return localeResolver.resolveLocale(request);
         } else {
