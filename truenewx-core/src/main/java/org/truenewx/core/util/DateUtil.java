@@ -33,7 +33,7 @@ public class DateUtil {
      * 长日期格式
      */
     public static final String LONG_DATE_PATTERN = DateUtil.SHORT_DATE_PATTERN + Strings.SPACE
-                    + DateUtil.TIME_PATTERN;
+            + DateUtil.TIME_PATTERN;
     /**
      * 没分隔符长日期格式
      */
@@ -196,13 +196,30 @@ public class DateUtil {
     }
 
     /**
+     * 计算指定两个时间之间的相差年份数。如果earlierDate晚于laterDate，则返回负值
+     *
+     * @param earlierDate
+     *            较早时间
+     * @param laterDate
+     *            较晚时间
+     * @return 相差年份数
+     */
+    public static int yearsBetween(final Date earlierDate, final Date laterDate) {
+        final Calendar earlierCalendar = Calendar.getInstance();
+        final Calendar laterCalendar = Calendar.getInstance();
+        earlierCalendar.setTime(earlierDate);
+        laterCalendar.setTime(laterDate);
+        return laterCalendar.get(Calendar.YEAR) - earlierCalendar.get(Calendar.YEAR);
+    }
+
+    /**
      * 计算指定两个时间之间的相差月份数。如果earlierDate晚于laterDate，则返回负值
      *
      * @param earlierDate
      *            较早时间
      * @param laterDate
      *            较晚时间
-     * @return 天数差
+     * @return 相差月份数
      */
     public static int monthsBetween(final Date earlierDate, final Date laterDate) {
         final Calendar earlierCalendar = Calendar.getInstance();
@@ -210,7 +227,7 @@ public class DateUtil {
         earlierCalendar.setTime(earlierDate);
         laterCalendar.setTime(laterDate);
         final int months = (laterCalendar.get(Calendar.YEAR) - earlierCalendar.get(Calendar.YEAR))
-                        * 12;
+                * 12;
         return months - earlierCalendar.get(Calendar.MONTH) + laterCalendar.get(Calendar.MONTH);
     }
 
@@ -221,7 +238,7 @@ public class DateUtil {
      *            较早时间
      * @param laterDate
      *            较晚时间
-     * @return 天数差
+     * @return 相差天数
      */
     public static int daysBetween(final Date earlierDate, final Date laterDate) {
         final Calendar earlierCalendar = setTimeToCalendar(earlierDate, 0, 0, 0, 0);
@@ -298,7 +315,7 @@ public class DateUtil {
      * @return 日期
      */
     public static Date createDate(final int year, final int month, final int day, final int hour,
-                    final int minute, final int second, final int millisecond) {
+            final int minute, final int second, final int millisecond) {
         final Calendar c = Calendar.getInstance();
         c.set(Calendar.YEAR, year);
         c.set(Calendar.MONTH, month - 1); // 月份从0开始
@@ -455,13 +472,13 @@ public class DateUtil {
      * @return 新日期
      */
     public static Date setTime(final Date date, final int hour, final int minute, final int second,
-                    final int millisecond) {
+            final int millisecond) {
         final Calendar c = setTimeToCalendar(date, hour, minute, second, millisecond);
         return c == null ? null : c.getTime();
     }
 
     private static Calendar setTimeToCalendar(final Date date, final int hour, final int minute,
-                    final int second, final int millisecond) {
+            final int second, final int millisecond) {
         final Calendar c = getCalendar(date);
         if (c == null) {
             return null;
