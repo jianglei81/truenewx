@@ -1319,4 +1319,23 @@
         </attribute>
     </tag>
 
+    <tag>
+        <name>cover-email</name>
+        <tag-class>org.truenewx.web.tag.CoverEmailTag</tag-class>
+        <body-content>empty</body-content>
+        <description>掩盖Email</description>
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>Email的值</description>
+        </attribute>
+        <attribute>
+            <name>coverChar</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>用于掩盖的字符</description>
+        </attribute>
+    </tag>
+
 </taglib>
