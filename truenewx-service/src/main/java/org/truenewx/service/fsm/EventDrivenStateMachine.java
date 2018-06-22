@@ -2,6 +2,7 @@ package org.truenewx.service.fsm;
 
 import java.io.Serializable;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.truenewx.core.event.EventRegistrar;
 import org.truenewx.core.exception.HandleableException;
 import org.truenewx.data.model.UnitaryEntity;
@@ -18,6 +19,7 @@ import com.google.common.eventbus.Subscribe;
 public abstract class EventDrivenStateMachine<U extends UnitaryEntity<K>, K extends Serializable, S extends Enum<S>, T extends Enum<T>, I extends UserIdentity, E extends TransitEvent<I, K, T>>
         extends AbstractStateMachine<U, K, S, T, I> {
 
+    @Autowired
     public void setEventRegistrar(final EventRegistrar eventRegistrar) {
         eventRegistrar.register(this);
     }
