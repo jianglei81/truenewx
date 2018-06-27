@@ -48,7 +48,7 @@ public class RpcTypeMetaTag extends DynamicAttributeTagSupport {
                 final String fullName = type.isArray() ? type.getComponentType().getFullName()
                                 : type.getFullName();
                 print("<span title=\"", fullName, Strings.DOUBLE_QUOTES);
-                if (type.isComposite()) {
+                if (type.isComplex()) {
                     print(" expandable=\"true\"");
                 }
                 if (type.getType().isEnum()) {

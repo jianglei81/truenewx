@@ -69,15 +69,15 @@ public class RpcMethodMeta implements Comparable<RpcMethodMeta> {
         return this.argMetas;
     }
 
-    public RpcTypeMeta getReturnType() {
-        final RpcTypeMeta returnTypeMeta = new RpcTypeMeta(this.method.getReturnType());
+    public RpcTypeMeta getResultType() {
+        final RpcTypeMeta typeMeta = new RpcTypeMeta(this.method.getReturnType());
         final RpcMethod rpcMethod = this.method.getAnnotation(RpcMethod.class);
         if (rpcMethod != null) {
             final RpcResult rpcResult = rpcMethod.result();
-            returnTypeMeta.setComponentType(rpcResult.componentType());
-            returnTypeMeta.setCaption(rpcResult.caption());
+            typeMeta.setComponentType(rpcResult.componentType());
+            typeMeta.setCaption(rpcResult.caption());
         }
-        return returnTypeMeta;
+        return typeMeta;
     }
 
     public boolean isAnonymous() {

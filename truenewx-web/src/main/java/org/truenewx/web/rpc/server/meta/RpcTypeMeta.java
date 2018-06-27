@@ -3,8 +3,8 @@ package org.truenewx.web.rpc.server.meta;
 import java.util.Date;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
+import org.truenewx.core.util.ClassUtil;
 
 /**
  * RPC类型元数据
@@ -128,9 +128,14 @@ public class RpcTypeMeta {
         return this.type.getSimpleName();
     }
 
-    public boolean isComposite() {
-        final String packageName = getPackageName();
-        return StringUtils.isNotBlank(packageName) && !packageName.startsWith("java.");
+    public boolean isComplex() {
+        // JDK中的类型一律视为非复合类型
+        Class<?> clazz = this.type.isArray() ? this.type.getComponentType() : this.type;
+        Package pack = clazz.getPackage();
+        if (pack != null && pack.getName().startsWith("java.")) {
+            return false;
+        }
+        return ClassUtil.isComplex(clazz);
     }
 
 }

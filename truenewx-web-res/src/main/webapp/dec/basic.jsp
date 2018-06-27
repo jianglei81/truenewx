@@ -32,7 +32,6 @@ function selectMenu(index){
             <ul class="nav nav-list">
                 <li><a href="${context}/component/basic/validate">字段校验</a></li>
                 <li><a href="${context}/component/basic/rpc">RPC 调用</a></li>
-                <li><a href="${context}/rpc/api">RPC API</a></li>
             </ul>
         </div>
         <div class="span10">

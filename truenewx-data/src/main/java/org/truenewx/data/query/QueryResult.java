@@ -1,6 +1,7 @@
 package org.truenewx.data.query;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ import java.util.List;
  * @param <R>
  *            结果记录类型
  */
-public class QueryResult<R> {
+public class QueryResult<R> implements Iterable<R> {
     /**
      * 结果记录集
      */
@@ -71,6 +72,11 @@ public class QueryResult<R> {
 
     public boolean isEmpty() {
         return this.paging.getTotal() < 0 && this.records.isEmpty();
+    }
+
+    @Override
+    public Iterator<R> iterator() {
+        return this.records.iterator();
     }
 
 }

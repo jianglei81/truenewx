@@ -11,7 +11,6 @@ public class RpcVariableMeta {
     private RpcTypeMeta type;
     private String name;
     private String caption;
-    private boolean deprecated;
 
     public RpcVariableMeta(final Class<?> type) {
         this.type = new RpcTypeMeta(type);
@@ -35,14 +34,6 @@ public class RpcVariableMeta {
 
     public void setCaption(final String caption) {
         this.caption = caption;
-    }
-
-    public boolean isDeprecated() {
-        return this.deprecated;
-    }
-
-    public void setDeprecated(final boolean deprecated) {
-        this.deprecated = deprecated;
     }
 
 }
