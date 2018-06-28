@@ -31,6 +31,8 @@ import org.truenewx.core.enums.support.EnumDictResolver;
 import org.truenewx.core.enums.support.EnumItem;
 import org.truenewx.core.enums.support.EnumType;
 import org.truenewx.core.spring.util.SpringUtil;
+import org.truenewx.core.tuple.Binary;
+import org.truenewx.core.tuple.Binate;
 import org.truenewx.core.util.CaptionUtil;
 import org.truenewx.core.util.ClassUtil;
 import org.truenewx.core.util.MathUtil;
@@ -196,49 +198,58 @@ public class RpcApiController {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
-    @RequestMapping("/{beanId}/{methodName}/{argCount}/arg/{argType}/properties")
+    @RequestMapping("/{beanId}/{methodName}/{argCount}/arg/{argType}/properties") // 必须带后缀结尾，否则argType中包含.，将被识别为扩展名
     @ResponseBody
-    public String arg(@PathVariable("beanId") String beanId,
+    public String argProperties(@PathVariable("beanId") String beanId,
             @PathVariable("methodName") String methodName, @PathVariable("argCount") int argCount,
             @PathVariable("argType") String argType, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         if (checkLan(request, response)) {
-            RpcTypeMeta argTypeMeta = null;
-            if (StringUtils.isNumeric(argType)) { // 参数类型为数字，则作为参数索引下标处理
-                int argIndex = MathUtil.parseInt(argType);
-                RpcVariableMeta argMeta = this.server.getArgMeta(beanId, methodName, argCount,
-                        argIndex);
-                argTypeMeta = argMeta.getType();
-            } else { // 参数的下级类型会直接指定参数类型，此时直接构建参数的类型元数据
-                try {
-                    argTypeMeta = new RpcTypeMeta(this.context.getClassLoader().loadClass(argType));
-                } catch (ClassNotFoundException e) {
-                    return "null";
-                }
-            }
-            if (argTypeMeta == null) {
+            Binate<Class<?>, List<RpcVariableMeta>> binate = argProperties(beanId, methodName,
+                    argCount, argType);
+            if (binate == null) {
                 return "null";
             }
-
-            Class<?> clazz = argTypeMeta.getType();
-            List<RpcVariableMeta> metas;
-            if (clazz.isEnum()) {
-                Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
-                String subType = this.server.getEnumSubType(beanId, methodName, argCount,
-                        enumClass);
-                metas = getConstantMetas(enumClass, subType);
-            } else {
-                Collection<PropertyMeta> propertyMetas = ClassUtil.findPropertyMetas(clazz, false,
-                        true, true, argTypeMeta.getIncludes(), argTypeMeta.getExcludes());
-                metas = getPropertyVariableMetas(clazz, propertyMetas, false);
-            }
             Map<String, Object> result = new HashMap<>();
-            result.put("caption", CaptionUtil.getCaption(clazz, request.getLocale()));
-            result.put("properties", metas);
+            result.put("caption", CaptionUtil.getCaption(binate.getLeft(), request.getLocale()));
+            result.put("properties", binate.getRight());
             return this.serializer.serialize(result);
         }
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Binate<Class<?>, List<RpcVariableMeta>> argProperties(String beanId, String methodName,
+            int argCount, String argType) {
+        RpcTypeMeta argTypeMeta = null;
+        if (StringUtils.isNumeric(argType)) { // 参数类型为数字，则作为参数索引下标处理
+            int argIndex = MathUtil.parseInt(argType);
+            RpcVariableMeta argMeta = this.server.getArgMeta(beanId, methodName, argCount,
+                    argIndex);
+            argTypeMeta = argMeta.getType();
+        } else { // 参数的下级类型会直接指定参数类型，此时直接构建参数的类型元数据
+            try {
+                argTypeMeta = new RpcTypeMeta(this.context.getClassLoader().loadClass(argType));
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
+        if (argTypeMeta == null) {
+            return null;
+        }
+
+        Class<?> clazz = argTypeMeta.getType();
+        List<RpcVariableMeta> metas;
+        if (clazz.isEnum()) {
+            Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
+            String subType = this.server.getEnumSubType(beanId, methodName, argCount, enumClass);
+            metas = getConstantMetas(enumClass, subType);
+        } else {
+            Collection<PropertyMeta> propertyMetas = ClassUtil.findPropertyMetas(clazz, false, true,
+                    true, argTypeMeta.getIncludes(), argTypeMeta.getExcludes());
+            metas = getPropertyVariableMetas(clazz, propertyMetas, false);
+        }
+        return new Binary<>(clazz, metas);
     }
 
     private List<RpcVariableMeta> getConstantMetas(Class<? extends Enum<?>> enumClass,
@@ -288,42 +299,84 @@ public class RpcApiController {
         return metas;
     }
 
-    @SuppressWarnings("unchecked")
-    @RequestMapping("/{beanId}/{methodName}/{argCount}/result/{className}/properties")
+    @RequestMapping("/{beanId}/{methodName}/{argCount}/result/{className}/properties") // 必须带后缀结尾，否则className中包含.，将被识别为扩展名
     @ResponseBody
-    public String result(@PathVariable("beanId") String beanId,
+    public String resultProperties(@PathVariable("beanId") String beanId,
             @PathVariable("methodName") String methodName, @PathVariable("argCount") int argCount,
             @PathVariable("className") String className, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         if (checkLan(request, response)) {
-            Class<?> clazz;
-            try {
-                clazz = this.context.getClassLoader().loadClass(className);
-            } catch (ClassNotFoundException e) {
+            Binate<Class<?>, List<RpcVariableMeta>> binate = resultProperties(beanId, methodName,
+                    argCount, className);
+            if (binate == null) {
                 return "null";
             }
-
-            List<RpcVariableMeta> metas;
-            if (clazz.isEnum()) {
-                Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
-                String subType = this.server.getEnumSubType(beanId, methodName, argCount,
-                        enumClass);
-                metas = getConstantMetas(enumClass, subType);
-            } else {
-                RpcResultFilter filter = this.server.getResultFilter(beanId, methodName, argCount,
-                        clazz);
-                String[] includes = filter == null ? null : filter.includes();
-                String[] excludues = filter == null ? null : filter.excludes();
-                Collection<PropertyMeta> propertyMetas = ClassUtil.findPropertyMetas(clazz, true,
-                        false, true, includes, excludues);
-                metas = getPropertyVariableMetas(clazz, propertyMetas, true);
-            }
             Map<String, Object> result = new HashMap<>();
-            result.put("caption", CaptionUtil.getCaption(clazz, request.getLocale()));
-            result.put("properties", metas);
+            result.put("caption", CaptionUtil.getCaption(binate.getLeft(), request.getLocale()));
+            result.put("properties", binate.getRight());
             return this.serializer.serialize(result);
         }
         return null;
     }
 
+    @SuppressWarnings("unchecked")
+    private Binate<Class<?>, List<RpcVariableMeta>> resultProperties(String beanId,
+            String methodName, int argCount, String className) {
+        Class<?> clazz;
+        try {
+            clazz = this.context.getClassLoader().loadClass(className);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+
+        List<RpcVariableMeta> metas;
+        if (clazz.isEnum()) {
+            Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
+            String subType = this.server.getEnumSubType(beanId, methodName, argCount, enumClass);
+            metas = getConstantMetas(enumClass, subType);
+        } else {
+            RpcResultFilter filter = this.server.getResultFilter(beanId, methodName, argCount,
+                    clazz);
+            String[] includes = filter == null ? null : filter.includes();
+            String[] excludues = filter == null ? null : filter.excludes();
+            Collection<PropertyMeta> propertyMetas = ClassUtil.findPropertyMetas(clazz, true, false,
+                    true, includes, excludues);
+            metas = getPropertyVariableMetas(clazz, propertyMetas, true);
+        }
+        return new Binary<>(clazz, metas);
+    }
+
+    @RequestMapping("/{beanId}/{methodName}/{argCount}/arg/{argType}/codes")
+    @ResponseBody
+    public String argCodes(@PathVariable("beanId") String beanId,
+            @PathVariable("methodName") String methodName, @PathVariable("argCount") int argCount,
+            @PathVariable("argType") String argType, HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+        if (checkLan(request, response)) {
+            Binate<Class<?>, List<RpcVariableMeta>> binate = argProperties(beanId, methodName,
+                    argCount, argType);
+            if (binate == null) {
+                return "null";
+            }
+            // TODO 待代码生成器
+        }
+        return null;
+    }
+
+    @RequestMapping("/{beanId}/{methodName}/{argCount}/result/{className}/codes")
+    @ResponseBody
+    public String resultCodes(@PathVariable("beanId") String beanId,
+            @PathVariable("methodName") String methodName, @PathVariable("argCount") int argCount,
+            @PathVariable("className") String className, HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+        if (checkLan(request, response)) {
+            Binate<Class<?>, List<RpcVariableMeta>> binate = resultProperties(beanId, methodName,
+                    argCount, className);
+            if (binate == null) {
+                return "null";
+            }
+            // TODO 待代码生成器
+        }
+        return null;
+    }
 }

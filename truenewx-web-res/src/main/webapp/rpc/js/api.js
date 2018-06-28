@@ -39,9 +39,14 @@ $(function() {
                     }
                     ul.append(li);
                     li.click(function() {
-                        $("li.active", li.parent()).removeClass("active");
-                        li.addClass("active");
-                        _this.showBeansPanel(module, li);
+                        if (li.is(".active")) { // 本就是激活状态，则点击可以取消激活
+                            li.removeClass("active");
+                            _this.removePanels(1);
+                        } else {
+                            $("li.active", li.parent()).removeClass("active");
+                            li.addClass("active");
+                            _this.showBeansPanel(module, li);
+                        }
                     });
                 });
             });
@@ -76,9 +81,14 @@ $(function() {
                     li.html(html);
                     ul.append(li);
                     li.click(function() {
-                        $("li.active", li.parent()).removeClass("active");
-                        li.addClass("active");
-                        _this.showMethodsPanel(bean.beanId, li);
+                        if (li.is(".active")) { // 本就是激活状态，则点击可以取消激活
+                            li.removeClass("active");
+                            _this.removePanels(2);
+                        } else {
+                            $("li.active", li.parent()).removeClass("active");
+                            li.addClass("active");
+                            _this.showMethodsPanel(bean.beanId, li);
+                        }
                     });
                 });
             });
@@ -106,9 +116,14 @@ $(function() {
                     li.html(html);
                     ul.append(li);
                     li.click(function() {
-                        $("li.active", li.parent()).removeClass("active");
-                        li.addClass("active");
-                        _this.showMethodPanel(beanId, method.name, method.argCount, li);
+                        if (li.is(".active")) { // 本就是激活状态，则点击可以取消激活
+                            li.removeClass("active");
+                            _this.removePanels(3);
+                        } else {
+                            $("li.active", li.parent()).removeClass("active");
+                            li.addClass("active");
+                            _this.showMethodPanel(beanId, method.name, method.argCount, li);
+                        }
                     });
                 });
             });
@@ -119,6 +134,8 @@ $(function() {
             var url = $.tnx.siteContext + "/rpc/api/" + beanId + "/" + methodName + "/" + argCount;
             $.tnx.ajax(url, function(result) {
                 var panel = _this.buildPanel("方法详情", anchor);
+                var icon = _this.buildIcon("test", "测试");
+                $(".panel-title", panel).append(icon);
                 var body = $("<div></div>").addClass("panel-body");
                 panel.append(body);
 
@@ -149,7 +166,8 @@ $(function() {
                             tr.after("<tr class='arg'></tr>");
                             tr = tr.next();
                         }
-                        tr.append("<td class='argType'></td><td class='caption'></td>");
+                        tr.append("<td class='argType' nowrap='nowrap'></td>");
+                        tr.append("<td class='caption' nowrap='nowrap'></td>");
                         $(".argType", tr).append(_this.buildTypeLink(tr, arg.type, 4, i));
                         $(".caption", tr).text(arg.caption);
                     });
@@ -157,13 +175,24 @@ $(function() {
                 tr = $("tr:last", table);
                 var resultType = _this.buildTypeLink(tr, method.resultType, 4); // 结果类型不指定参数索引下标
                 if (resultType) {
-                    tr.append("<td class='resultType'></td><td class='caption'></td>");
+                    tr.append("<td class='resultType' nowrap='nowrap'></td>");
+                    tr.append("<td class='caption' nowrap='nowrap'></td>");
                     $(".resultType", tr).append(resultType);
                     $(".caption", tr).text(method.resultType.caption);
                 } else {
                     tr.append("<td class='text-muted text-center' colspan='2'>无</td>");
                 }
             });
+        },
+        buildIcon : function(type, title) {
+            var icon = $("<span class='clickable pull-right'></span>");
+            var iconClass = $("[icon-" + type + "]").attr("icon-" + type);
+            if (iconClass) {
+                icon.addClass(iconClass).attr("title", title);
+            } else {
+                icon.text(title);
+            }
+            return icon;
         },
         buildTypeLink : function(tr, type, level, argIndex) {
             if (type && type.simpleName) {
@@ -222,14 +251,39 @@ $(function() {
                     argType = type.type;
                 }
                 url = $.tnx.siteContext + "/rpc/api/" + beanId + "/" + methodName + "/" + argCount
-                        + "/arg/" + argType + "/properties";
+                        + "/arg/" + argType;
             } else { // 结果类型
                 var className = type.type;
                 url = $.tnx.siteContext + "/rpc/api/" + beanId + "/" + methodName + "/" + argCount
-                        + "/result/" + className + "/properties";
+                        + "/result/" + className;
             }
-            $.tnx.ajax(url, function(result) {
+            $.tnx.ajax(url + "/properties", function(result) {
                 var panel = _this.buildPanel(type.simpleName, anchor);
+                var icon = _this.buildIcon("code", "代码");
+                $(".panel-title", panel).append(icon);
+                icon.click(function() {
+                    var url = $.tnx.context + "/rpc/code.win";
+                    $.tnx.open(url, [ {
+                        "class" : "btn btn-default",
+                        text : "关闭",
+                        click : function() {
+                            this.close();
+                        }
+                    } ], {
+                        title : "模型代码",
+                        events : {
+                            shown : function() {
+                                var language = $("[language]").attr("language");
+                                if (language) {
+                                    $("li:not(.active) [data-toggle][href='#" + language + "']",
+                                            this).trigger("click");
+                                }
+                                _this.generateCodes(this, url + "/codes");
+                            }
+                        }
+                    });
+                });
+
                 result = $.parseJSON(result);
 
                 var body = $("<div></div>").addClass("panel-body");
@@ -265,6 +319,9 @@ $(function() {
             var left = panel.offset().left;
             left += panel.outerWidth();
             $(document).scrollLeft(left);
+        },
+        generateCodes : function(dialog, url) {
+
         }
     });
     $.tnx.rpc.api.onLoad();

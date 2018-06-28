@@ -2,6 +2,10 @@ td {
     vertical-align: top;
 }
 
+li {
+    white-space: nowrap;
+}
+
 .clickable:not(.active) {
     color: #145ccd;
     cursor: pointer;
@@ -31,4 +35,12 @@ a:link {
 
 .label[title] {
     margin-left: 8px;
+}
+
+.clickable.pull-right {
+    margin-left: 8px;
+}
+
+.tab-pane {
+    padding: 10px;
 }
