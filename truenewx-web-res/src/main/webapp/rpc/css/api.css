@@ -25,7 +25,10 @@ a:link {
     font-style: italic;
 }
 
-.label[title] {
+.label {
     cursor: pointer;
+}
+
+.label[title] {
     margin-left: 8px;
 }

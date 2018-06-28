@@ -31,7 +31,9 @@ import org.truenewx.core.enums.support.EnumDictResolver;
 import org.truenewx.core.enums.support.EnumItem;
 import org.truenewx.core.enums.support.EnumType;
 import org.truenewx.core.spring.util.SpringUtil;
+import org.truenewx.core.util.CaptionUtil;
 import org.truenewx.core.util.ClassUtil;
+import org.truenewx.core.util.MathUtil;
 import org.truenewx.core.util.NetUtil;
 import org.truenewx.core.util.PropertyMeta;
 import org.truenewx.data.rpc.annotation.RpcProperty;
@@ -195,21 +197,31 @@ public class RpcApiController {
     }
 
     @SuppressWarnings("unchecked")
-    @RequestMapping("/{beanId}/{methodName}/{argCount}/arg/{argIndex}/properties")
+    @RequestMapping("/{beanId}/{methodName}/{argCount}/arg/{argType}/properties")
     @ResponseBody
-    public String argProperties(@PathVariable("beanId") String beanId,
+    public String arg(@PathVariable("beanId") String beanId,
             @PathVariable("methodName") String methodName, @PathVariable("argCount") int argCount,
-            @PathVariable("argIndex") int argIndex, HttpServletRequest request,
+            @PathVariable("argType") String argType, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         if (checkLan(request, response)) {
-            RpcVariableMeta argMeta = this.server.getArgMeta(beanId, methodName, argCount,
-                    argIndex);
-            if (argMeta == null) {
+            RpcTypeMeta argTypeMeta = null;
+            if (StringUtils.isNumeric(argType)) { // 参数类型为数字，则作为参数索引下标处理
+                int argIndex = MathUtil.parseInt(argType);
+                RpcVariableMeta argMeta = this.server.getArgMeta(beanId, methodName, argCount,
+                        argIndex);
+                argTypeMeta = argMeta.getType();
+            } else { // 参数的下级类型会直接指定参数类型，此时直接构建参数的类型元数据
+                try {
+                    argTypeMeta = new RpcTypeMeta(this.context.getClassLoader().loadClass(argType));
+                } catch (ClassNotFoundException e) {
+                    return "null";
+                }
+            }
+            if (argTypeMeta == null) {
                 return "null";
             }
-            RpcTypeMeta argTypeMeta = argMeta.getType();
-            Class<?> clazz = argTypeMeta.getType();
 
+            Class<?> clazz = argTypeMeta.getType();
             List<RpcVariableMeta> metas;
             if (clazz.isEnum()) {
                 Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
@@ -221,7 +233,10 @@ public class RpcApiController {
                         true, true, argTypeMeta.getIncludes(), argTypeMeta.getExcludes());
                 metas = getPropertyVariableMetas(clazz, propertyMetas, false);
             }
-            return this.serializer.serialize(metas);
+            Map<String, Object> result = new HashMap<>();
+            result.put("caption", CaptionUtil.getCaption(clazz, request.getLocale()));
+            result.put("properties", metas);
+            return this.serializer.serialize(result);
         }
         return null;
     }
@@ -276,7 +291,7 @@ public class RpcApiController {
     @SuppressWarnings("unchecked")
     @RequestMapping("/{beanId}/{methodName}/{argCount}/result/{className}/properties")
     @ResponseBody
-    public String resultProperties(@PathVariable("beanId") String beanId,
+    public String result(@PathVariable("beanId") String beanId,
             @PathVariable("methodName") String methodName, @PathVariable("argCount") int argCount,
             @PathVariable("className") String className, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
@@ -303,7 +318,10 @@ public class RpcApiController {
                         false, true, includes, excludues);
                 metas = getPropertyVariableMetas(clazz, propertyMetas, true);
             }
-            return this.serializer.serialize(metas);
+            Map<String, Object> result = new HashMap<>();
+            result.put("caption", CaptionUtil.getCaption(clazz, request.getLocale()));
+            result.put("properties", metas);
+            return this.serializer.serialize(result);
         }
         return null;
     }

@@ -186,6 +186,9 @@ $(function() {
                                     .addClass("clickable");
                             obj.removeClass("clickable").addClass("label label-primary");
                             _this.showTypePanel(type, level, tr, argIndex);
+                        } else {
+                            obj.removeClass("label label-primary").addClass("clickable");
+                            _this.removePanels(level);
                         }
                     });
                 }
@@ -214,8 +217,12 @@ $(function() {
             var argCount = $(".channel:eq(3) .active .arg-count").text();
             var url;
             if (argIndex != undefined) { // 参数类型
+                var argType = argIndex;
+                if (!anchor.is(".arg")) { // 锚点不是参数行，说明当前类型为参数类型的下级类型
+                    argType = type.type;
+                }
                 url = $.tnx.siteContext + "/rpc/api/" + beanId + "/" + methodName + "/" + argCount
-                        + "/arg/" + argIndex + "/properties";
+                        + "/arg/" + argType + "/properties";
             } else { // 结果类型
                 var className = type.type;
                 url = $.tnx.siteContext + "/rpc/api/" + beanId + "/" + methodName + "/" + argCount
@@ -223,8 +230,10 @@ $(function() {
             }
             $.tnx.ajax(url, function(result) {
                 var panel = _this.buildPanel(type.simpleName, anchor);
+                result = $.parseJSON(result);
+
                 var body = $("<div></div>").addClass("panel-body");
-                body.append(type.caption);
+                body.append(result.caption);
                 if (type["enum"]) {
                     body.append("<span class='label label-success' title='枚举类型'>枚举</span>");
                 }
@@ -234,8 +243,7 @@ $(function() {
                 var table = $("<table></table>").addClass("table table-bordered");
                 panel.append(table);
 
-                var properties = $.parseJSON(result);
-                $.each(properties, function(i, property) {
+                $.each(result.properties, function(i, property) {
                     var tr = $("<tr></tr>");
                     table.append(tr);
                     var td = $("<td></td>");
