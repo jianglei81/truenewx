@@ -20,6 +20,7 @@
         <pattern>*/*-bs3</pattern>
         <pattern>*/bs3</pattern>
         <pattern>*/bs3/*</pattern>
+        <pattern>/rpc/api</pattern>
     </decorator>
     <decorator name="bs2" page="dec/bs2.jsp">
         <pattern>*/*-bs2</pattern>
@@ -29,6 +30,5 @@
     <decorator name="basic" page="dec/basic.jsp">
         <pattern>*/basic</pattern>
         <pattern>*/basic/*</pattern>
-        <pattern>/rpc/api</pattern>
     </decorator>
 </decorators>

@@ -8,8 +8,6 @@ import org.truenewx.core.exception.HandleableException;
 import org.truenewx.data.model.UnitaryEntity;
 import org.truenewx.data.user.UserIdentity;
 
-import com.google.common.eventbus.Subscribe;
-
 /**
  * 事件驱动的有限状态机
  *
@@ -24,7 +22,14 @@ public abstract class EventDrivenStateMachine<U extends UnitaryEntity<K>, K exte
         eventRegistrar.register(this);
     }
 
-    @Subscribe
+    /**
+     * 响应事件，子类必须覆写并使用@Subscribe注解进行标注，否则无法响应事件
+     *
+     * @param event
+     *            事件
+     * @throws HandleableException
+     *             如果处理过程出现异常
+     */
     public void onEvent(final E event) throws HandleableException {
         transit(event.getUserIdentity(), event.getKey(), event.getTransition(), event.getContext());
     }

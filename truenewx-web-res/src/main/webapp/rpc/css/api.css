@@ -1,37 +1,46 @@
-.tab-content > .tab-pane {
-    border-bottom: 1px solid #dddddd;
-    border-left: 1px solid #dddddd;
-    border-right: 1px solid #dddddd;
-    padding: 15px;
+td {
+    vertical-align: top;
 }
 
-td[rowspan] p {
-    margin-bottom: 0px;
+li {
+    white-space: nowrap;
 }
 
-td.arg-type {
-    padding-bottom: 0px;
-}
-
-div.arg-type:not(:first-child) {
-    border-top: 1px solid #dddddd;
-    padding-top: 8px;
-}
-
-[title], [onclick] {
+.clickable:not(.active) {
+    color: #145ccd;
     cursor: pointer;
 }
 
-[title]:not(.label) {
-    color: #0088cc;
+.method-name {
+    margin-left: 8px;
 }
 
-[expandable='true'] {
-    text-decoration: underline;
+.caption {
+    color: #222;
+    margin-left: 8px;
+}
+
+a:link {
+    text-decoration: none;
 }
 
 .deprecated {
-    color: #999999;
     text-decoration: line-through;
     font-style: italic;
+}
+
+.label {
+    cursor: pointer;
+}
+
+.label[title] {
+    margin-left: 8px;
+}
+
+.clickable.pull-right {
+    margin-left: 8px;
+}
+
+.tab-pane {
+    padding: 10px;
 }

@@ -453,17 +453,6 @@ public class StringUtil {
     }
 
     /**
-     * 判断指定字符串是否为纯数字，不包含小数点
-     *
-     * @param s
-     *            字符串
-     * @return true if 指定字符串是纯数字, otherwise false
-     */
-    public static boolean isPureNumber(final String s) {
-        return s != null && regexMatch(s, "\\d*");
-    }
-
-    /**
      * 判断是否字母字符
      *
      * @param c
@@ -505,7 +494,7 @@ public class StringUtil {
      * @param 字符串
      * @return true if 是标准URL，otherwise false
      */
-    public static boolean isURL(final String s) {
+    public static boolean isUrl(final String s) {
         if (s == null) {
             return false;
         }
