@@ -1,6 +1,6 @@
 /**
  * truenewx-validate.js v1.0.0
- *
+ * 
  * Depends on: truenewx.js
  */
 // 为避免一行过宽导致整个文档格式缩进过多，单独设置Email的正则表达式
@@ -286,7 +286,7 @@ $.tnx.Validator = Class.extend({
     },
     /**
      * 扩展校验
-     *
+     * 
      * @param name
      *            校验名
      * @param message
@@ -674,19 +674,30 @@ $.tnx.Validator = Class.extend({
 
         $.each(validatableFields, function() {
             var fieldObj = $(this);
-            var validation = validator.getFieldValidation(fieldObj);
-            if (validation && fieldObj.attr("type") != "hidden") {
-                if (validation.required == true || validation.notBlank == true) {
-                    var requiredClass = validator.getRequiredClass(fieldObj);
-                    if (requiredClass && requiredClass != "false") {
-                        var requriedTag = validator.getRequiredTag(fieldObj);
-                        validator.appendRequiredTag(fieldObj, requriedTag, requiredClass);
-                    }
-                }
-            }
+            validator.renderField(fieldObj);
         });
 
         formObj.attr("validate", "false"); // 避免重复初始化
+    },
+    /**
+     * 渲染字段
+     * 
+     * @param fiieldObj
+     *            字段对象
+     * @param validation
+     *            附加的字段校验规则，可为空
+     */
+    renderField : function(fieldObj, validation) {
+        validation = $.extend(this.getFieldValidation(fieldObj), validation);
+        if (validation && fieldObj.attr("type") != "hidden") {
+            if (validation.required == true || validation.notBlank == true) {
+                var requiredClass = this.getRequiredClass(fieldObj);
+                if (requiredClass && requiredClass != "false") {
+                    var requriedTag = this.getRequiredTag(fieldObj);
+                    this.appendRequiredTag(fieldObj, requriedTag, requiredClass);
+                }
+            }
+        }
     },
     init : function() {
         this.checkers.parent = this;
