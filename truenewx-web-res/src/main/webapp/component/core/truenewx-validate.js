@@ -349,6 +349,9 @@ $.tnx.Validator = Class.extend({
         }
         return validation;
     },
+    setFieldValidation : function(fieldObj, validation) {
+        fieldObj.attr("validation", $.toJSON(validation));
+    },
     validateField : function(fieldObj) {
         if (!(fieldObj instanceof jQuery)) {
             fieldObj = $(fieldObj);
