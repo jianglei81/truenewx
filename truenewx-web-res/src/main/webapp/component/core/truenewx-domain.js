@@ -125,9 +125,11 @@ $.tnx.domain = {
                             var model = {};
                             model[fieldName] = fieldValue;
                             rpc.validateBusiness(id, model, function() {
+                                $.tnx.validator.hideFieldErrors(fieldObj);
+                                fieldObj.attr("business", "true");
                             }, function(error) {
                                 $.tnx.validator.showFieldErrors(fieldObj, error.message);
-                                fieldObj.attr("business", "false");
+                                fieldObj.attr("business", "false"); // 标记业务校验未通过，便于阻止表单提交
                                 fieldObj.focus();
                             });
                         }
@@ -140,34 +142,6 @@ $.tnx.domain = {
             $("form input[name][business]").blur(function() {
                 _this.validateFieldBusiness($(this), controllerId);
             });
-        },
-        validateFormBusiness : function(formObj, controllerId) {
-            var model = {};
-            $("input[name][business]", formObj).each(function() {
-                var fieldObj = $(this);
-                var fieldValue = fieldObj.val();
-                if (fieldValue) {
-                    var fieldName = fieldObj.attr("name");
-                    model[fieldName] = fieldValue;
-                }
-            });
-            if (!$.isEmptyObject(model)) {
-                var _this = this;
-                $.tnx.rpc.imports(controllerId, function(rpc) {
-                    if (rpc.validateBusiness) {
-                        var id = formObj.attr("data-id");
-                        if (id) {
-                            id = parseInt(id);
-                        }
-                        rpc.validateBusiness(id, model, function() {
-                        }, function(error) {
-                            $.tnx.validator.showFieldErrors(fieldObj, error.message);
-                            fieldObj.attr("business", "false");
-                            fieldObj.focus();
-                        });
-                    }
-                });
-            }
         }
     }),
     /**
