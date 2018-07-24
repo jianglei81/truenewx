@@ -143,6 +143,7 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
     private ModelAndView handleExceptionToPage(final HttpServletRequest request,
             final HandlerMethod handlerMethod, final HandleableException he) {
         final ModelAndView mav = new ModelAndView(HandleableExceptionResult.DEFAULT_VIEW);
+        mav.addObject("ajaxRequest", WebUtil.isAjaxRequest(request));
         final HandleableExceptionResult her = handlerMethod
                 .getMethodAnnotation(HandleableExceptionResult.class);
         if (her != null) {
