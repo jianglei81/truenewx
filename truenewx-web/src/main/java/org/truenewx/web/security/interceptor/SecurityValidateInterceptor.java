@@ -95,7 +95,7 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
         if (WebUtils.isIncludeRequest(request)) {
             return true;
         }
-        final String url = WebUtil.getRelativeRequestUrl(request);
+        final String url = WebUtil.getRelativeRequestAction(request); // 取不含扩展名的URL
         if (matches(url)) { // URL匹配才进行校验
             // 校验Accessibility注解限制
             if (handler instanceof HandlerMethod) {
