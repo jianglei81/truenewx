@@ -6,6 +6,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.core.spring.util.SpringUtil;
 import org.truenewx.web.security.authority.Authority;
@@ -46,6 +47,9 @@ public class AuthorizedTag extends TagSupport {
     }
 
     private Class<?> getUserClass() throws ClassNotFoundException {
+        if (StringUtils.isBlank(this.userClassName)) {
+            return null;
+        }
         ApplicationContext context = SpringWebUtil.getApplicationContext(this.pageContext);
         return context.getClassLoader().loadClass(this.userClassName);
     }
