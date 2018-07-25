@@ -61,12 +61,25 @@ public class Authority {
         if (permissions == null) {
             permissions = Collections.emptyList();
         }
-        // 当前角色/权限为空则不校验视为包含，指定角色/权限集合中包含*则视为包含所有角色/权限
-        return (StringUtils.isEmpty(this.role) || CollectionUtil.contains(roles, Strings.ASTERISK)
-                || CollectionUtil.contains(roles, this.role))
-                && (StringUtils.isEmpty(this.permission)
-                        || CollectionUtil.contains(permissions, Strings.ASTERISK)
-                        || CollectionUtil.contains(permissions, this.permission));
+        boolean roleContained = true;
+        if (StringUtils.isNotEmpty(this.role)) { // 当前授权包含角色限定才校验角色
+            // 被校验角色中包含*通配符角色，或者包含当前授权的角色，则视为角色匹配
+            roleContained = CollectionUtil.contains(roles, Strings.ASTERISK)
+                    || CollectionUtil.contains(roles, this.role);
+        }
+        boolean permissionContained = true;
+        if (StringUtils.isNotEmpty(this.permission)) { // 当前授权包含权限限定才校验权限
+            // 被校验权限中包含*通配符权限，或者包含当前授权的权限，则视为权限匹配
+            permissionContained = CollectionUtil.contains(permissions, Strings.ASTERISK)
+                    || CollectionUtil.contains(permissions, this.permission);
+        }
+        // 角色和权限均需匹配
+        return roleContained && permissionContained;
+    }
+
+    @Override
+    public String toString() {
+        return "role=" + this.role + ", permission=" + this.permission;
     }
 
 }

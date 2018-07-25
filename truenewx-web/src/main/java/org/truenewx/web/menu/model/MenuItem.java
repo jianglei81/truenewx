@@ -188,4 +188,8 @@ public class MenuItem extends AbstractMenuItem implements Serializable {
         return new ArrayList<>();
     }
 
+    @Override
+    public String toString() {
+        return getCaption(); // 为了便于调试定位，将显示名称作为菜单项字符串形式输出
+    }
 }

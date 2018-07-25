@@ -98,4 +98,9 @@ public class HttpLink implements HttpResource {
     public boolean matches(final String href, final HttpMethod method) {
         return this.href != null && StringUtil.antPathMatch(href, this.href) && matches(method);
     }
+
+    @Override
+    public String toString() {
+        return "[" + this.method.name() + "]" + this.href;
+    }
 }

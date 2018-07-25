@@ -73,6 +73,9 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
         if (!item.isProfileFitted()) {
             return;
         }
+        if (item.getCaption().startsWith(".")) {
+            System.out.println();
+        }
         // 当前菜单授权不匹配，则不再检查子菜单项和操作
         if (!item.isContained(authorization)) {
             return;

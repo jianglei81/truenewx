@@ -66,4 +66,9 @@ public class MenuItemAction extends AbstractMenuItemAction implements Serializab
         return getAuthority() == null || getAuthority().isContained(authorization);
     }
 
+    @Override
+    public String toString() {
+        return getLink() + "(" + getAuthority() + ")";
+    }
+
 }
