@@ -24,12 +24,12 @@ public class AuthorizedTag extends TagSupport {
 
     private static final long serialVersionUID = 6818415434978927316L;
 
-    private Class<?> userClass;
+    private String userClassName;
     private String role;
     private String permission;
 
-    public void setUserClass(final Class<?> userClass) {
-        this.userClass = userClass;
+    public void setUserClass(final String userClass) {
+        this.userClassName = userClass;
     }
 
     public void setRole(final String role) {
@@ -45,13 +45,25 @@ public class AuthorizedTag extends TagSupport {
         return SpringUtil.getFirstBeanByClass(context, SecurityManager.class);
     }
 
+    private Class<?> getUserClass() throws ClassNotFoundException {
+        ApplicationContext context = SpringWebUtil.getApplicationContext(this.pageContext);
+        return context.getClassLoader().loadClass(this.userClassName);
+    }
+
     @Override
     public int doStartTag() throws JspException {
-        final HttpServletRequest request = (HttpServletRequest) this.pageContext.getRequest();
-        final HttpServletResponse response = (HttpServletResponse) this.pageContext.getResponse();
-        final Subject subject = getSubjectManager().getSubject(request, response, this.userClass);
-        if (subject != null && subject.isAuthorized(new Authority(this.role, this.permission))) {
-            return Tag.EVAL_BODY_INCLUDE;
+        try {
+            final HttpServletRequest request = (HttpServletRequest) this.pageContext.getRequest();
+            final HttpServletResponse response = (HttpServletResponse) this.pageContext
+                    .getResponse();
+            Class<?> userClass = getUserClass();
+            final Subject subject = getSubjectManager().getSubject(request, response, userClass);
+            if (subject != null
+                    && subject.isAuthorized(new Authority(this.role, this.permission))) {
+                return Tag.EVAL_BODY_INCLUDE;
+            }
+        } catch (ClassNotFoundException e) {
+            throw new JspException(e);
         }
         return Tag.SKIP_BODY;
     }
