@@ -1,7 +1,9 @@
 package org.truenewx.web.security.mgt;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
@@ -90,21 +92,32 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
                 // 如果从会话中无法取得用户，则尝试自动登录验证
                 if (user == null && auto && realm instanceof RememberMeRealm) {
                     String host = WebUtil.getRemoteAddrIp(request);
-                    Cookie[] cookies = request.getCookies();
+                    String cookiePath = request.getContextPath();
+                    Cookie[] cookies = filterCookies(request.getCookies(), cookiePath);
                     user = ((RememberMeRealm<?>) realm).getLoginUser(host, cookies);
                     session.setAttribute(realm.getUserSessionName(), user);
                     // cookie可能被修改，重新回写以生效
-                    if (cookies != null) {
-                        for (Cookie cookie : cookies) {
-                            cookie.setPath(request.getContextPath()); // 统一路径以便于删除
-                            subject.getServletResponse().addCookie(cookie);
-                        }
+                    for (Cookie cookie : cookies) {
+                        cookie.setPath(cookiePath); // 统一路径以便于删除
+                        subject.getServletResponse().addCookie(cookie);
                     }
                 }
                 return user;
             }
         }
         return null;
+    }
+
+    private Cookie[] filterCookies(Cookie[] cookies, String cookiePath) {
+        List<Cookie> list = new ArrayList<>();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookiePath.equals(cookie.getPath())) {
+                    list.add(cookie);
+                }
+            }
+        }
+        return list.toArray(new Cookie[list.size()]);
     }
 
     @Override
