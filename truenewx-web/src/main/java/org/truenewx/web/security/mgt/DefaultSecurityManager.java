@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.truenewx.core.Strings;
@@ -112,7 +113,11 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
         List<Cookie> list = new ArrayList<>();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookiePath.equals(cookie.getPath())) {
+                if (StringUtils.isEmpty(cookiePath)) {
+                    if (StringUtils.isEmpty(cookie.getPath())) {
+                        list.add(cookie);
+                    }
+                } else if (cookiePath.equals(cookie.getPath())) {
                     list.add(cookie);
                 }
             }
