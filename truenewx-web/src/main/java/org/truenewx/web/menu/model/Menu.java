@@ -83,9 +83,14 @@ public class Menu implements Serializable {
         final List<MenuItem> list = new ArrayList<>();
         for (final MenuItem item : items) {
             if (predicate.apply(item)) {
-                final MenuItem newItem = item.cloneWithoutSubs();
-                newItem.getSubs().addAll(item.getSubs(predicate));
-                list.add(newItem);
+                if (item instanceof ActableMenuItem) {
+                    ActableMenuItem actableItem = (ActableMenuItem) item;
+                    final ActableMenuItem newItem = actableItem.clone();
+                    newItem.getSubs().addAll(actableItem.getSubs(predicate));
+                    list.add(newItem);
+                } else {
+                    list.add(item.clone());
+                }
             }
         }
         return list;
@@ -134,9 +139,11 @@ public class Menu implements Serializable {
         }
         // 菜单项权限匹配查找
         for (final MenuItem item : this.items) {
-            final Authority authority = item.findAuthority(href, method);
-            if (authority != null) {
-                return authority;
+            if (item instanceof ActableMenuItem) {
+                final Authority authority = ((ActableMenuItem) item).findAuthority(href, method);
+                if (authority != null) {
+                    return authority;
+                }
             }
         }
         return null;
@@ -155,9 +162,12 @@ public class Menu implements Serializable {
         }
         // 菜单项权限匹配查找
         for (final MenuItem item : this.items) {
-            final Authority authority = item.findAuthority(beanId, methodName, argCount);
-            if (authority != null) {
-                return authority;
+            if (item instanceof ActableMenuItem) {
+                final Authority authority = ((ActableMenuItem) item).findAuthority(beanId,
+                        methodName, argCount);
+                if (authority != null) {
+                    return authority;
+                }
             }
         }
         return null;
@@ -179,16 +189,19 @@ public class Menu implements Serializable {
         }
         for (int i = 0; i < this.items.size(); i++) {
             final MenuItem item = this.items.get(i);
-            // 先在更下级中找
-            final List<Binate<Integer, MenuItem>> indexes = item.indexesOf(href, method);
-            if (indexes.size() > 0) { // 在下级中找到
-                indexes.add(0, new Binary<>(i, item)); // 加上对应的下级索引
-                return indexes;
-            }
-            // 更下级中没找到再到直接下级找，以免更下级中包含有与直接下级一样的链接
-            if (item.contains(href, method)) { // 在当前级别找到
-                indexes.add(new Binary<>(i, item));
-                return indexes;
+            if (item instanceof ActableMenuItem) {
+                ActableMenuItem actableItem = (ActableMenuItem) item;
+                // 先在更下级中找
+                final List<Binate<Integer, MenuItem>> indexes = actableItem.indexesOf(href, method);
+                if (indexes.size() > 0) { // 在下级中找到
+                    indexes.add(0, new Binary<>(i, item)); // 加上对应的下级索引
+                    return indexes;
+                }
+                // 更下级中没找到再到直接下级找，以免更下级中包含有与直接下级一样的链接
+                if (actableItem.contains(href, method)) { // 在当前级别找到
+                    indexes.add(new Binary<>(i, item));
+                    return indexes;
+                }
             }
         }
         return new ArrayList<>();
@@ -198,17 +211,20 @@ public class Menu implements Serializable {
             final String methodName, final Integer argCount) {
         for (int i = 0; i < this.items.size(); i++) {
             final MenuItem item = this.items.get(i);
-            // 先在更下级中找
-            final List<Binate<Integer, MenuItem>> indexes = item.indexesOf(beanId, methodName,
-                    argCount);
-            if (indexes.size() > 0) { // 在下级中找到
-                indexes.add(0, new Binary<>(i, item)); // 加上对应的下级索引
-                return indexes;
-            }
-            // 更下级中没找到再到直接下级找，以免更下级中包含有与直接下级一样的RPC
-            if (item.contains(beanId, methodName, argCount)) { // 在当前级别找到
-                indexes.add(new Binary<>(i, item));
-                return indexes;
+            if (item instanceof ActableMenuItem) {
+                ActableMenuItem actableItem = (ActableMenuItem) item;
+                // 先在更下级中找
+                final List<Binate<Integer, MenuItem>> indexes = actableItem.indexesOf(beanId,
+                        methodName, argCount);
+                if (indexes.size() > 0) { // 在下级中找到
+                    indexes.add(0, new Binary<>(i, item)); // 加上对应的下级索引
+                    return indexes;
+                }
+                // 更下级中没找到再到直接下级找，以免更下级中包含有与直接下级一样的RPC
+                if (actableItem.contains(beanId, methodName, argCount)) { // 在当前级别找到
+                    indexes.add(new Binary<>(i, item));
+                    return indexes;
+                }
             }
         }
         return new ArrayList<>();

@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
+import org.truenewx.web.menu.model.ActableMenuItem;
 import org.truenewx.web.menu.model.Menu;
 import org.truenewx.web.menu.model.MenuItem;
 import org.truenewx.web.menu.model.MenuItemAction;
@@ -25,11 +26,11 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
     private Menu menu;
     private Map<String, Object> defaultOptions;
 
-    public DefaultMenuResolver(final String menuName, final MenuFactory menuFactory) {
+    public DefaultMenuResolver(String menuName, MenuFactory menuFactory) {
         this.menu = menuFactory.getMenu(menuName);
     }
 
-    public void setDefaultOptions(final Map<String, Object> defaultOptions) {
+    public void setDefaultOptions(Map<String, Object> defaultOptions) {
         this.defaultOptions = defaultOptions;
     }
 
@@ -47,12 +48,12 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
     }
 
     @Override
-    public Menu getAuthorizedMenu(final Authorization authorization) {
-        final List<MenuItem> items = new ArrayList<>();
-        for (final MenuItem item : this.menu.getItems()) {
+    public Menu getAuthorizedMenu(Authorization authorization) {
+        List<MenuItem> items = new ArrayList<>();
+        for (MenuItem item : this.menu.getItems()) {
             copyMatchedItemTo(item, authorization, items);
         }
-        final Menu menu = new Menu(this.menu.getName());
+        Menu menu = new Menu(this.menu.getName());
         menu.getItems().addAll(items);
         return menu;
     }
@@ -67,44 +68,44 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
      * @param items
      *            目标菜单项集合
      */
-    private void copyMatchedItemTo(final MenuItem item, final Authorization authorization,
-            final List<MenuItem> items) {
+    private void copyMatchedItemTo(MenuItem item, Authorization authorization,
+            List<MenuItem> items) {
         // 如果profile不匹配，则直接忽略，也不再查找子菜单
         if (!item.isProfileFitted()) {
             return;
         }
-        if (item.getCaption().startsWith(".")) {
-            System.out.println();
+        if (!(item instanceof ActableMenuItem)) { // 非动作型菜单项，直接视为匹配，加入
+            items.add(item.clone());
+            return;
         }
+        // 动作型菜单项需进行更复杂的权限匹配校验
+        ActableMenuItem actableItem = (ActableMenuItem) item;
         // 当前菜单授权不匹配，则不再检查子菜单项和操作
-        if (!item.isContained(authorization)) {
+        if (!actableItem.isContained(authorization)) {
             return;
         }
         // 检查子菜单项
-        final List<MenuItem> newSubs = new ArrayList<>();
-        for (final MenuItem sub : item.getSubs()) {
+        List<MenuItem> newSubs = new ArrayList<>();
+        for (MenuItem sub : actableItem.getSubs()) {
             copyMatchedItemTo(sub, authorization, newSubs);
         }
-        final MenuItemAction action = item.getAction();
+        MenuItemAction action = actableItem.getAction();
         // 当前菜单项配置有匹配的授权，或者子菜单项中有匹配的，才加入结果集中
         if (action != null || newSubs.size() > 0) {
             // 构建新的菜单项对象，以免影响缓存的完整菜单对象的数据
-            final MenuItem newItem = new MenuItem(item.getCaption(), item.getIcon(), action);
-            newItem.getOptions().putAll(item.getOptions());
-            newItem.getCaptions().putAll(item.getCaptions());
-            newItem.getSubs().addAll(newSubs);
-
-            items.add(newItem);
+            ActableMenuItem newActableItem = actableItem.clone();
+            newActableItem.getSubs().addAll(newSubs);
+            items.add(newActableItem);
         }
     }
 
     @Override
-    public List<Authority> getAuthorites(final Map<String, Object> options) {
+    public List<Authority> getAuthorites(Map<String, Object> options) {
         if (options == null) {
             return new ArrayList<>();
         }
-        final List<Authority> items = new ArrayList<>();
-        for (final MenuItem item : this.menu.getItems()) {
+        List<Authority> items = new ArrayList<>();
+        for (MenuItem item : this.menu.getItems()) {
             addMatchedAuthority(item, options, items);
         }
         return items;
@@ -113,25 +114,25 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
     /**
      * 添加指定菜单动作中匹配指定选项集的权限到指定授权集中
      *
-     * @param action
+     * @param item
      *            菜单动作
      * @param options
      *            选项集
-     * @param authes
+     * @param authorities
      *            目标菜单项集
      */
-    private void addMatchedAuthority(final MenuItem action, final Map<String, Object> options,
-            final List<Authority> authes) {
-        if (isMatchedOptions(action, options)) {
-            final Authority auth = action.getAuthority();
-            if (auth != null && auth.isNotEmpty()) {
-                authes.add(auth);
+    private void addMatchedAuthority(MenuItem item, Map<String, Object> options,
+            List<Authority> authorities) {
+        if (item instanceof ActableMenuItem) {
+            ActableMenuItem actableItem = (ActableMenuItem) item;
+            if (isMatchedOptions(item, options)) {
+                Authority auth = actableItem.getAuthority();
+                if (auth != null && auth.isNotEmpty()) {
+                    authorities.add(auth);
+                }
             }
-        }
-        if (action instanceof MenuItem) { // 如果菜单动作是菜单项，则需进一步添加包含的菜单操作和子菜单项中的匹配授权
-            final MenuItem item = action;
-            for (final MenuItem sub : item.getSubs()) {
-                addMatchedAuthority(sub, options, authes);
+            for (MenuItem sub : actableItem.getSubs()) {
+                addMatchedAuthority(sub, options, authorities);
             }
         }
     }
@@ -145,11 +146,11 @@ public class DefaultMenuResolver implements MenuResolver, InitializingBean {
      *            选项映射集
      * @return 指定选项映射集是否与指定菜单动作匹配
      */
-    private boolean isMatchedOptions(final MenuItem action, final Map<String, Object> options) {
+    private boolean isMatchedOptions(MenuItem action, Map<String, Object> options) {
         // 菜单动作中的选项集必须包含指定选项集中的所有选项，且选项值要相等
         // 遍历选项集中的每一个选项，只要有一个选项不匹配，则匹配失败
-        for (final Entry<String, Object> entry : options.entrySet()) {
-            final String key = entry.getKey();
+        for (Entry<String, Object> entry : options.entrySet()) {
+            String key = entry.getKey();
             Object value = action.getOptions().get(key);
             if (value == null) { // 菜单动作的选项集中没有当前选项，则从默认选项集中取
                 value = this.defaultOptions.get(key);

@@ -25,6 +25,7 @@ import org.truenewx.core.util.ClassUtil;
 import org.truenewx.core.util.CollectionUtil;
 import org.truenewx.web.http.HttpLink;
 import org.truenewx.web.http.HttpResource;
+import org.truenewx.web.menu.model.ActableMenuItem;
 import org.truenewx.web.menu.model.Menu;
 import org.truenewx.web.menu.model.MenuItem;
 import org.truenewx.web.menu.model.MenuItemAction;
@@ -43,35 +44,35 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
     private FuncFindClass funcFindClass;
 
     @Override
-    public void setResourceLoader(final ResourceLoader resourceLoader) {
+    public void setResourceLoader(ResourceLoader resourceLoader) {
         this.funcFindClass = new FuncFindClass(resourceLoader.getClassLoader(), true);
     }
 
     @Override
-    public Menu parser(final InputStream inputStream) {
+    public Menu parser(InputStream inputStream) {
         try {
-            final SAXReader reader = new SAXReader();
-            final Document doc = reader.read(inputStream);
-            final Element menuElement = doc.getRootElement();
-            final Menu menu = new Menu(menuElement.attributeValue("name"));
+            SAXReader reader = new SAXReader();
+            Document doc = reader.read(inputStream);
+            Element menuElement = doc.getRootElement();
+            Menu menu = new Menu(menuElement.attributeValue("name"));
             menu.getAnonymousResources().addAll(getResources(menuElement.element("anonymous")));
             menu.getLoginedResources().addAll(getResources(menuElement.element("logined")));
             menu.getItems().addAll(getItems(menuElement, null));
             return menu;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
         }
         return null;
     }
 
-    private List<HttpResource> getResources(final Element element) {
-        final List<HttpResource> resources = new ArrayList<>();
+    private List<HttpResource> getResources(Element element) {
+        List<HttpResource> resources = new ArrayList<>();
         if (element != null) {
-            for (final Object obj : element.elements()) {
-                final Element resElement = (Element) obj;
-                final String method = resElement.attributeValue("method");
+            for (Object obj : element.elements()) {
+                Element resElement = (Element) obj;
+                String method = resElement.attributeValue("method");
                 if ("link".equals(resElement.getName())) {
-                    final String href = resElement.attributeValue("href");
+                    String href = resElement.attributeValue("href");
                     HttpLink link;
                     if (StringUtils.isNotBlank(method)) {
                         link = new HttpLink(href, EnumUtils.getEnum(HttpMethod.class, method));
@@ -80,8 +81,8 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
                     }
                     resources.add(link);
                 } else if ("rpc".equals(resElement.getName())) {
-                    final String beanId = resElement.attributeValue("id");
-                    final RpcPort rpcPort = new RpcPort(beanId, method);
+                    String beanId = resElement.attributeValue("id");
+                    RpcPort rpcPort = new RpcPort(beanId, method);
                     resources.add(rpcPort);
                 }
             }
@@ -99,29 +100,36 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
      *
      * @author jianglei
      */
-    private List<MenuItem> getItems(final Element element,
-            final Map<String, Object> parentOptions) {
-        final List<MenuItem> items = new ArrayList<>();
-        for (final Object itemObj : element.elements("item")) {
-            final Element itemElement = (Element) itemObj;
-            final String caption = itemElement.attributeValue("caption");
-            final String icon = itemElement.attributeValue("icon");
-            final MenuItemAction action = getAction(itemElement.element("action"));
-            final MenuItem item = new MenuItem(caption, icon, action);
-            item.getProfiles().addAll(getProfiles(itemElement));
-            item.getOptions().putAll(getOptions(itemElement, parentOptions));
-            item.getCaptions().putAll(getCaptions(itemElement));
-            item.getSubs().addAll(getItems(itemElement, item.getOptions()));
-            items.add(item);
+    private List<MenuItem> getItems(Element element, Map<String, Object> parentOptions) {
+        List<MenuItem> items = new ArrayList<>();
+        for (Object itemObj : element.elements("item")) {
+            Element itemElement = (Element) itemObj;
+            String type = itemElement.attributeValue("type");
+            if (StringUtils.isBlank(type) || ActableMenuItem.TYPE.equals(type)) { // 默认或指定为动作型菜单项
+                String caption = itemElement.attributeValue("caption");
+                String icon = itemElement.attributeValue("icon");
+                MenuItemAction action = getAction(itemElement.element("action"));
+                ActableMenuItem item = new ActableMenuItem(caption, icon, action);
+                item.getProfiles().addAll(getProfiles(itemElement));
+                item.getOptions().putAll(getOptions(itemElement, parentOptions));
+                item.getCaptions().putAll(getCaptions(itemElement));
+                item.getSubs().addAll(getItems(itemElement, item.getOptions()));
+                items.add(item);
+            } else { // 非动作型菜单项
+                MenuItem item = new MenuItem(type);
+                item.getProfiles().addAll(getProfiles(itemElement));
+                item.getOptions().putAll(getOptions(itemElement, parentOptions));
+                items.add(item);
+            }
         }
         return items;
     }
 
-    private MenuItemAction getAction(final Element element) {
+    private MenuItemAction getAction(Element element) {
         if (element != null) {
-            final Authority authority = getAuthority(element);
-            final String href = element.attributeValue("href");
-            final MenuItemAction action = new MenuItemAction(authority, new HttpLink(href));
+            Authority authority = getAuthority(element);
+            String href = element.attributeValue("href");
+            MenuItemAction action = new MenuItemAction(authority, new HttpLink(href));
             action.getResources().addAll(getResources(element));
             return action;
         }
@@ -129,24 +137,24 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Authority getAuthority(final Element element) {
+    private Authority getAuthority(Element element) {
         String permission = element.attributeValue("permission");
-        final String className = element.attributeValue("type");
+        String className = element.attributeValue("type");
         if (StringUtils.isNotBlank(className)) {
-            final Class<?> type = this.funcFindClass.apply(className);
+            Class<?> type = this.funcFindClass.apply(className);
             if (type != null) {
                 if (type.isEnum()) { // 如果为枚举类型，则取枚举的名称
-                    final Enum<?> enumConstant = Enum.valueOf((Class<Enum>) type, permission);
+                    Enum<?> enumConstant = Enum.valueOf((Class<Enum>) type, permission);
                     permission = MenuUtil.getPermission(enumConstant);
                 } else { // 否则取该类型的静态字符串属性值
-                    final Object value = ClassUtil.getPublicStaticPropertyValue(type, permission);
+                    Object value = ClassUtil.getPublicStaticPropertyValue(type, permission);
                     if (value != null && value instanceof String) {
                         permission = (String) value;
                     }
                 }
             }
         }
-        final String role = element.attributeValue("role");
+        String role = element.attributeValue("role");
         return new Authority(role, permission);
     }
 
@@ -159,10 +167,10 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
      *
      * @author jianglei
      */
-    private Map<Locale, String> getCaptions(final Element element) {
-        final Map<Locale, String> captions = new HashMap<>();
-        for (final Object captionObj : element.elements("caption")) {
-            final Element captionElement = (Element) captionObj;
+    private Map<Locale, String> getCaptions(Element element) {
+        Map<Locale, String> captions = new HashMap<>();
+        for (Object captionObj : element.elements("caption")) {
+            Element captionElement = (Element) captionObj;
             captions.put(new Locale(captionElement.attributeValue("locale")),
                     captionElement.getTextTrim());
         }
@@ -178,11 +186,11 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
      *
      * @author jianglei
      */
-    private Set<String> getProfiles(final Element element) {
-        final Set<String> links = new LinkedHashSet<>();
-        final String profile = element.attributeValue("profile");
+    private Set<String> getProfiles(Element element) {
+        Set<String> links = new LinkedHashSet<>();
+        String profile = element.attributeValue("profile");
         if (StringUtils.isNotBlank(profile)) {
-            final String[] profiles = profile.split(Strings.COMMA);
+            String[] profiles = profile.split(Strings.COMMA);
             CollectionUtil.addAll(links, profiles);
         }
         return links;
@@ -199,10 +207,9 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
      *
      * @author jianglei
      */
-    private Map<String, Object> getOptions(final Element element,
-            final Map<String, Object> parentOptions) {
-        final Map<String, Object> options = new HashMap<>();
-        final Element optionsElement = element.element("options");
+    private Map<String, Object> getOptions(Element element, Map<String, Object> parentOptions) {
+        Map<String, Object> options = new HashMap<>();
+        Element optionsElement = element.element("options");
         // 需要继承父级选项集时，先继承父级选项集
         if (requiresInheritOptions(optionsElement, parentOptions)) {
             options.putAll(parentOptions);
@@ -214,8 +221,8 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
         return options;
     }
 
-    private boolean requiresInheritOptions(final Element optionsElement,
-            final Map<String, Object> parentOptions) {
+    private boolean requiresInheritOptions(Element optionsElement,
+            Map<String, Object> parentOptions) {
         if (parentOptions == null || parentOptions.isEmpty()) { // 如果父级选项集为空，则不需要继承
             return false;
         }
@@ -234,15 +241,15 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
      * @return options
      * @author jianglei
      */
-    private Map<String, Object> getOption(final Element element) {
-        final Map<String, Object> options = new HashMap<>();
-        for (final Object optionObj : element.elements("option")) {
-            final Element optionElement = (Element) optionObj;
-            final String className = optionElement.attributeValue("type");
-            final String value = optionElement.getTextTrim();
+    private Map<String, Object> getOption(Element element) {
+        Map<String, Object> options = new HashMap<>();
+        for (Object optionObj : element.elements("option")) {
+            Element optionElement = (Element) optionObj;
+            String className = optionElement.attributeValue("type");
+            String value = optionElement.getTextTrim();
             if (StringUtils.isNotBlank(className)) {
-                final Class<?> type = this.funcFindClass.apply(className);
-                final Object typeValue = AlgoParseString.visit(value, type);
+                Class<?> type = this.funcFindClass.apply(className);
+                Object typeValue = AlgoParseString.visit(value, type);
                 options.put(optionElement.attributeValue("name"), typeValue);
             } else {
                 options.put(optionElement.attributeValue("name"), value);

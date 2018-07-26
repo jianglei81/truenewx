@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.truenewx.org/schema/menu"
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="http://www.truenewx.org/schema/menu"
     targetNamespace="http://www.truenewx.org/schema/menu">
     <xs:element name="menu">
         <xs:complexType>
@@ -44,7 +45,12 @@
                 <xs:element ref="action" minOccurs="0" maxOccurs="1" />
                 <xs:element ref="item" minOccurs="0" maxOccurs="unbounded" />
             </xs:sequence>
-            <xs:attribute name="caption" type="xs:string" use="required">
+            <xs:attribute name="type" type="xs:string" use="optional">
+                <xs:annotation>
+                    <xs:documentation>类型，不指定时默认为动作型菜单项，当指定类型时，将生成简单的非动作型菜单项</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="caption" type="xs:string" use="optional">
                 <xs:annotation>
                     <xs:documentation>显示名称</xs:documentation>
                 </xs:annotation>
@@ -104,14 +110,17 @@
                     <xs:complexType>
                         <xs:simpleContent>
                             <xs:extension base="xs:string">
-                                <xs:attribute name="name" type="xs:string" use="required" />
-                                <xs:attribute name="type" type="xs:string" use="optional" />
+                                <xs:attribute name="name" type="xs:string"
+                                    use="required" />
+                                <xs:attribute name="type" type="xs:string"
+                                    use="optional" />
                             </xs:extension>
                         </xs:simpleContent>
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>
-            <xs:attribute name="inherit" type="xs:boolean" use="optional" default="true" />
+            <xs:attribute name="inherit" type="xs:boolean" use="optional"
+                default="true" />
         </xs:complexType>
     </xs:element>
     <xs:element name="caption">

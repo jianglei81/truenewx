@@ -1,10 +1,7 @@
 package org.truenewx.web.menu.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,33 +14,28 @@ import java.util.Set;
 abstract class AbstractMenuItem {
 
     /**
+     * 类型
+     */
+    private String type;
+    /**
      * 可见环境集合
      */
     private Set<String> profiles = new HashSet<>();
     /**
-     * 地域说明集合（菜单显示）
-     */
-    private Map<Locale, String> captions = new HashMap<>();
-    /**
-     * 配置类型
+     * 配置映射集
      */
     private Map<String, Object> options = new HashMap<>();
-    /**
-     * 图标
-     */
-    private String icon;
+
+    public AbstractMenuItem(String type) {
+        this.type = type;
+    }
 
     /**
-     * 子项集合
+     *
+     * @return 类型
      */
-    private List<MenuItem> subs = new ArrayList<>();
-
-    private MenuItemAction action;
-
-    public AbstractMenuItem(final String caption, final String icon, final MenuItemAction action) {
-        this.captions.put(Locale.getDefault(), caption);
-        this.icon = icon;
-        this.action = action;
+    public String getType() {
+        return this.type;
     }
 
     /**
@@ -55,39 +47,10 @@ abstract class AbstractMenuItem {
     }
 
     /**
-     * @return 地域说明集合
-     */
-    public Map<Locale, String> getCaptions() {
-        return this.captions;
-    }
-
-    /**
-     * @return 权限类型
+     * @return 配置映射集
      */
     public Map<String, Object> getOptions() {
         return this.options;
-    }
-
-    /**
-     * 图标
-     */
-    public String getIcon() {
-        return this.icon;
-    }
-
-    /**
-     * @return 子项集合
-     */
-    public List<MenuItem> getSubs() {
-        return this.subs;
-    }
-
-    /**
-     *
-     * @return 菜单项动作
-     */
-    public MenuItemAction getAction() {
-        return this.action;
     }
 
 }

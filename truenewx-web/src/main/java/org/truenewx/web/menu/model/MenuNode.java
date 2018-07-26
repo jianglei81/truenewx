@@ -16,13 +16,17 @@ public class MenuNode extends TreeNode<String> {
 
     private String permission;
 
-    public MenuNode(final MenuItem item) {
+    public MenuNode(final ActableMenuItem item) {
         super(StringUtil.uuid32(), item.getCaption());
         final Authority authority = item.getAuthority();
         if (authority != null) {
             this.permission = authority.getPermission();
         }
-        item.getSubs().forEach(sub -> addSub(new MenuNode(sub)));
+        item.getSubs().forEach(sub -> {
+            if (sub instanceof ActableMenuItem) {
+                addSub(new MenuNode((ActableMenuItem) sub));
+            }
+        });
     }
 
     public String getPermission() {
