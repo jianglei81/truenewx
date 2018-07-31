@@ -3,7 +3,9 @@ package org.truenewx.web.region.tag;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.Tag;
@@ -77,12 +79,16 @@ public class RegionViewTag extends TagSupport {
         this.endLevel = endLevel;
     }
 
+    private Locale getLocale() {
+        final HttpServletRequest request = (HttpServletRequest) this.pageContext.getRequest();
+        return SpringWebUtil.getLocale(request);
+    }
+
     private String appendCaptions() {
         final ApplicationContext context = SpringWebUtil.getApplicationContext(this.pageContext);
         final RegionSource regionSource = SpringUtil.getFirstBeanByClass(context,
                 RegionSource.class);
-        final Region region = regionSource.getRegion(this.value,
-                this.pageContext.getRequest().getLocale());
+        final Region region = regionSource.getRegion(this.value, getLocale());
 
         final List<String> captions = new ArrayList<>();
         final StringBuffer caption = new StringBuffer();
