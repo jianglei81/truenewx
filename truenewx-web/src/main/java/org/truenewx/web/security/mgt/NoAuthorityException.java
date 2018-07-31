@@ -11,7 +11,7 @@ import org.truenewx.web.security.authority.Authority;
  */
 public class NoAuthorityException extends BusinessException {
 
-    public static final String CODE = "error.security.no_authority";
+    public static final String CODE = "error.web.security.no_authority";
 
     private static final long serialVersionUID = 5633008099906840383L;
 
