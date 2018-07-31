@@ -44,10 +44,10 @@ public class WebUtil {
     /**
      * 开发模式
      */
-    public static final String DEV_MODE = WebUtil.class.getPackage().getName() + ".devMode";
+    public static String DEV_MODE = WebUtil.class.getPackage().getName() + ".devMode";
 
-    public static void forward(final ServletRequest request, final ServletResponse response,
-            final String url) throws ServletException, IOException {
+    public static void forward(ServletRequest request, ServletResponse response, String url)
+            throws ServletException, IOException {
         request.getRequestDispatcher(url).forward(request, response);
     }
 
@@ -60,15 +60,15 @@ public class WebUtil {
      * @throws IOException
      *             如果重定向时出现IO错误
      */
-    public static void redirect(final HttpServletRequest request,
-            final HttpServletResponse response, final String url) throws IOException {
+    public static void redirect(HttpServletRequest request, HttpServletResponse response,
+            String url) throws IOException {
         String location = url;
         if (!location.toLowerCase().startsWith("http://")
                 && !location.toLowerCase().startsWith("https://")) {
             if (!location.startsWith(Strings.SLASH)) {
                 location = Strings.SLASH + location;
             }
-            final String webRoot = request.getContextPath();
+            String webRoot = request.getContextPath();
             if (!location.startsWith(webRoot)) {
                 location = webRoot + location;
             }
@@ -85,10 +85,10 @@ public class WebUtil {
      *            排除的参数名
      * @return 指定request请求中的所有参数的map集合
      */
-    public static Map<String, Object> getRequestParameterMap(final ServletRequest request,
-            final String... excludedParameterNames) {
-        final Map<String, Object> map = new LinkedHashMap<>();
-        final Map<String, String[]> params = request.getParameterMap();
+    public static Map<String, Object> getRequestParameterMap(ServletRequest request,
+            String... excludedParameterNames) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        Map<String, String[]> params = request.getParameterMap();
         params.forEach((name, values) -> {
             if (values != null && !ArrayUtils.contains(excludedParameterNames, name)) {
                 if (values.length == 1) {
@@ -110,8 +110,8 @@ public class WebUtil {
      *            URL
      * @return 相对于web项目的URL
      */
-    public static String getRelativeUrl(final HttpServletRequest request, String url) {
-        final String root = request.getContextPath();
+    public static String getRelativeUrl(HttpServletRequest request, String url) {
+        String root = request.getContextPath();
         if (!root.equals(Strings.SLASH) && url.startsWith(root)) {
             url = url.substring(root.length());
         }
@@ -125,7 +125,7 @@ public class WebUtil {
      *            请求
      * @return 相对于web项目的请求URL
      */
-    public static String getRelativeRequestUrl(final HttpServletRequest request) {
+    public static String getRelativeRequestUrl(HttpServletRequest request) {
         return getRelativeUrl(request, request.getRequestURI());
     }
 
@@ -140,8 +140,8 @@ public class WebUtil {
      *            不包含在参数串中的参数名清单
      * @return 相对于web项目的请求URL
      */
-    public static String getRelativeRequestUrlWithQueryString(final HttpServletRequest request,
-            final boolean encode, final String... ignoredParameterNames) {
+    public static String getRelativeRequestUrlWithQueryString(HttpServletRequest request,
+            boolean encode, String... ignoredParameterNames) {
         String encoding = request.getCharacterEncoding();
         if (encoding == null) {
             encoding = System.getProperty("file.encoding", Strings.DEFAULT_ENCODING);
@@ -150,30 +150,30 @@ public class WebUtil {
         String queryString = request.getQueryString();
         if (queryString != null) {
             if (ignoredParameterNames.length > 0) {
-                final String[] params = queryString.split("&");
+                String[] params = queryString.split("&");
                 for (int i = 0; i < params.length; i++) {
-                    for (final String name : ignoredParameterNames) {
-                        final String prefix = name + "=";
+                    for (String name : ignoredParameterNames) {
+                        String prefix = name + "=";
                         if (params[i].startsWith(prefix)) {
                             params[i] = null;
                             break;
                         }
                     }
                     if (params[i] != null && encode) {
-                        final int index = params[i].indexOf('=');
+                        int index = params[i].indexOf('=');
                         if (index >= 0) {
                             String value = params[i].substring(index + 1);
                             try {
                                 value = URLEncoder.encode(value, encoding);
                                 params[i] = params[i].substring(0, index + 1) + value;
-                            } catch (final UnsupportedEncodingException e) {
+                            } catch (UnsupportedEncodingException e) {
                                 LoggerFactory.getLogger(WebUtil.class).error(e.getMessage(), e);
                             }
                         }
                     }
                 }
                 queryString = "";
-                for (final String param : params) {
+                for (String param : params) {
                     if (param != null) {
                         queryString += param + "&";
                     }
@@ -187,14 +187,14 @@ public class WebUtil {
             }
         }
         if (encode) {
-            final int index1 = url.lastIndexOf('/');
-            final int index2 = url.indexOf('.', index1);
+            int index1 = url.lastIndexOf('/');
+            int index2 = url.indexOf('.', index1);
             if (index2 > index1) {
                 String tail = url.substring(index1 + 1, index2); // 取得链接的最后一级，并去掉访问后缀
 
                 try {
                     tail = URLEncoder.encode(tail, encoding);
-                } catch (final UnsupportedEncodingException e) {
+                } catch (UnsupportedEncodingException e) {
                     LoggerFactory.getLogger(WebUtil.class).error(e.getMessage(), e);
                 }
                 url = url.substring(0, index1 + 1) + tail + url.substring(index2);
@@ -210,7 +210,7 @@ public class WebUtil {
      *            请求
      * @return 相对于web项目的请求action
      */
-    public static String getRelativeRequestAction(final HttpServletRequest request) {
+    public static String getRelativeRequestAction(HttpServletRequest request) {
         String action = getRelativeRequestUrl(request);
         int index = action.indexOf("?");
         if (index >= 0) {
@@ -233,19 +233,19 @@ public class WebUtil {
      * @return 前一个请求的URL
      * @author jianglei
      */
-    public static String getRelativePreviousUrl(final HttpServletRequest request,
-            final boolean containsQueryString) {
-        final String referrer = request.getHeader("Referer");
+    public static String getRelativePreviousUrl(HttpServletRequest request,
+            boolean containsQueryString) {
+        String referrer = request.getHeader("Referer");
         if (StringUtils.isNotBlank(referrer)) {
             String root = getProtocolAndHost(request);
-            final String contextPath = request.getContextPath();
+            String contextPath = request.getContextPath();
             if (!contextPath.equals(Strings.SLASH)) {
                 root += contextPath;
             }
             if (referrer.startsWith(root)) {
                 String url = referrer.substring(root.length());
                 if (!containsQueryString) {
-                    final int index = url.indexOf("?");
+                    int index = url.indexOf("?");
                     if (index > 0) {
                         url = url.substring(0, index);
                     }
@@ -266,17 +266,16 @@ public class WebUtil {
      * @return 替换后的新字符串
      */
     public static String replacePlaceholderFromServletContext(String s,
-            final ServletContext servletContext) {
+            ServletContext servletContext) {
         if (StringUtils.isEmpty(s)) {
             return s;
         }
-        final String begin = "${";
-        final String end = "}";
-        final String[] placeholders = StringUtil.substringsBetweens(s, begin, end);
+        String begin = "${";
+        String end = "}";
+        String[] placeholders = StringUtil.substringsBetweens(s, begin, end);
         for (String placeholder : placeholders) {
-            final String key = placeholder.substring(begin.length(),
-                    placeholder.length() - end.length());
-            final Object value = servletContext.getAttribute(key);
+            String key = placeholder.substring(begin.length(), placeholder.length() - end.length());
+            Object value = servletContext.getAttribute(key);
             if (value != null) {
                 placeholder = "\\$\\{" + key + "\\}";
                 s = s.replaceAll(placeholder, value.toString());
@@ -297,14 +296,14 @@ public class WebUtil {
 
     private static String getSubDomainByFullUrl(String url, int topDomainLevel) {
         url = getHostByFullUrl(url);
-        final int index = url.indexOf(":");
+        int index = url.indexOf(":");
         if (index >= 0) {
             url = url.substring(0, index);
         }
         if (StringUtil.isIp(url)) {
             return null;
         }
-        final String[] domains = url.split("\\.");
+        String[] domains = url.split("\\.");
         if (topDomainLevel < 2) {
             topDomainLevel = 2;
         }
@@ -318,17 +317,17 @@ public class WebUtil {
         return null;
     }
 
-    public static String getFootSubDomain(final HttpServletRequest request) {
+    public static String getFootSubDomain(HttpServletRequest request) {
         String url = request.getRequestURL().toString();
         url = getHostByFullUrl(url);
-        final int index = url.indexOf(":");
+        int index = url.indexOf(":");
         if (index >= 0) {
             url = url.substring(0, index);
         }
         if (StringUtil.isIp(url) || "localhost".equals(url)) {
             return null;
         }
-        final String[] domains = url.split("\\.");
+        String[] domains = url.split("\\.");
         if (domains.length > 0) {
             return domains[0];
         }
@@ -342,8 +341,8 @@ public class WebUtil {
      *            指定HTTP请求
      * @return 访问的主机地址
      */
-    public static String getHost(final HttpServletRequest request) {
-        final String url = request.getRequestURL().toString();
+    public static String getHost(HttpServletRequest request) {
+        String url = request.getRequestURL().toString();
         return getHostByFullUrl(url);
     }
 
@@ -354,8 +353,8 @@ public class WebUtil {
      *            指定请求
      * @return 访问的主机地址含协议
      */
-    public static String getProtocolAndHost(final HttpServletRequest request) {
-        final String url = request.getRequestURL().toString();
+    public static String getProtocolAndHost(HttpServletRequest request) {
+        String url = request.getRequestURL().toString();
         String protocol = "http://";
         if (url.startsWith("https:")) {
             protocol = "https://";
@@ -372,8 +371,8 @@ public class WebUtil {
      *            顶级域名级数，默认为2，个别情况可能大于2，小于2时将被视为2
      * @return 子域名
      */
-    public static String getSubDomain(final HttpServletRequest request, final int topDomainLevel) {
-        final String url = request.getRequestURL().toString();
+    public static String getSubDomain(HttpServletRequest request, int topDomainLevel) {
+        String url = request.getRequestURL().toString();
         return getSubDomainByFullUrl(url, topDomainLevel);
     }
 
@@ -384,14 +383,14 @@ public class WebUtil {
      *            HTTP响应对象
      * @return 图片输出流，如果出现IO错误则返回null
      */
-    public static ServletOutputStream getImageOutputStream(final HttpServletResponse response) {
+    public static ServletOutputStream getImageOutputStream(HttpServletResponse response) {
         response.setHeader("Cache-Control", "no-store");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
         response.setContentType("image/jpeg");
         try {
             return response.getOutputStream();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LoggerFactory.getLogger(WebUtil.class).error(e.getMessage(), e);
         }
         return null;
@@ -428,20 +427,19 @@ public class WebUtil {
      *            相对于WEB上下文的文件路径
      * @return 指定相对于WEB上下文的文件的二进制内容
      */
-    public static byte[] readWebContextFile(final ServletContext context,
-            final String relativePath) {
+    public static byte[] readWebContextFile(ServletContext context, String relativePath) {
         try {
-            final Resource resource = new ServletContextResource(context,
+            Resource resource = new ServletContextResource(context,
                     standardizeRelativeUrl(relativePath));
             return FileUtils.readFileToByteArray(resource.getFile());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LoggerFactory.getLogger(WebUtil.class).error(e.getMessage(), e);
             return new byte[0];
         }
     }
 
-    public static Object removeSessionAttribute(final HttpSession session, final String name) {
-        final Object value = session.getAttribute(name);
+    public static Object removeSessionAttribute(HttpSession session, String name) {
+        Object value = session.getAttribute(name);
         if (value != null) {
             session.removeAttribute(name);
         }
@@ -457,7 +455,7 @@ public class WebUtil {
      *            解码前参数
      * @return 解码后参数
      */
-    public static String decodeParameter(final HttpServletRequest request, final String param) {
+    public static String decodeParameter(HttpServletRequest request, String param) {
         if (RequestMethod.GET.name().equalsIgnoreCase(request.getMethod())) {
             String encoding = request.getCharacterEncoding();
             if (encoding == null) {
@@ -465,7 +463,7 @@ public class WebUtil {
             }
             try {
                 return URLDecoder.decode(param, encoding);
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 LoggerFactory.getLogger(WebUtil.class).error(e.getMessage(), e); // 编码已确保有效，不应该出现该异常
             }
         }
@@ -480,11 +478,11 @@ public class WebUtil {
      *            cookie名称
      * @return cookie对象
      */
-    public static Cookie getCookie(final HttpServletRequest request, final String name) {
+    public static Cookie getCookie(HttpServletRequest request, String name) {
         if (StringUtils.isNotBlank(name)) {
-            final Cookie[] cookies = request.getCookies();
+            Cookie[] cookies = request.getCookies();
             if (cookies != null) {
-                for (final Cookie cookie : cookies) {
+                for (Cookie cookie : cookies) {
                     if (cookie.getName().equals(name)) {
                         return cookie;
                     }
@@ -494,8 +492,8 @@ public class WebUtil {
         return null;
     }
 
-    public static String getCookieValue(final HttpServletRequest request, final String cookieName) {
-        final Cookie cookie = getCookie(request, cookieName);
+    public static String getCookieValue(HttpServletRequest request, String cookieName) {
+        Cookie cookie = getCookie(request, cookieName);
         return cookie == null ? null : cookie.getValue();
     }
 
@@ -505,11 +503,11 @@ public class WebUtil {
      * @param request
      * @return
      */
-    public static Map<String, Cookie> getCookieMap(final HttpServletRequest request) {
-        final Map<String, Cookie> cookieMap = new HashMap<>();
-        final Cookie[] cookies = request.getCookies();
+    public static Map<String, Cookie> getCookieMap(HttpServletRequest request) {
+        Map<String, Cookie> cookieMap = new HashMap<>();
+        Cookie[] cookies = request.getCookies();
         if (cookies != null) {
-            for (final Cookie cookie : cookies) {
+            for (Cookie cookie : cookies) {
                 cookieMap.put(cookie.getName(), cookie);
             }
         }
@@ -531,9 +529,9 @@ public class WebUtil {
      *            路径
      * @return Cookie对象
      */
-    public static Cookie createCookie(final String name, final String value, final int maxAge,
-            final boolean httpOnly, final String path) {
-        final Cookie cookie = new Cookie(name, value);
+    public static Cookie createCookie(String name, String value, int maxAge, boolean httpOnly,
+            String path) {
+        Cookie cookie = new Cookie(name, value);
         cookie.setMaxAge(maxAge);
         cookie.setHttpOnly(httpOnly);
         cookie.setPath(path);
@@ -555,8 +553,8 @@ public class WebUtil {
      *            请求
      * @return Cookie对象
      */
-    public static Cookie createCookie(final String name, final String value, final int maxAge,
-            final boolean httpOnly, final HttpServletRequest request) {
+    public static Cookie createCookie(String name, String value, int maxAge, boolean httpOnly,
+            HttpServletRequest request) {
         String contextPath = request.getContextPath();
         if (StringUtils.isBlank(contextPath)) {
             contextPath = Strings.SLASH;
@@ -580,10 +578,9 @@ public class WebUtil {
      *
      * @author jianglei
      */
-    public static void addCookie(final HttpServletRequest request,
-            final HttpServletResponse response, final String cookieName, final String cookieValue,
-            final int maxAge) {
-        final Cookie cookie = createCookie(cookieName, cookieValue, maxAge, false, request);
+    public static void addCookie(HttpServletRequest request, HttpServletResponse response,
+            String cookieName, String cookieValue, int maxAge) {
+        Cookie cookie = createCookie(cookieName, cookieValue, maxAge, false, request);
         response.addCookie(cookie);
     }
 
@@ -600,8 +597,8 @@ public class WebUtil {
      *            cookie值
      * @author jianglei
      */
-    public static void addCookie(final HttpServletRequest request,
-            final HttpServletResponse response, final String cookieName, final String cookieValue) {
+    public static void addCookie(HttpServletRequest request, HttpServletResponse response,
+            String cookieName, String cookieValue) {
         addCookie(request, response, cookieName, cookieValue, Integer.MAX_VALUE);
     }
 
@@ -617,9 +614,8 @@ public class WebUtil {
      *
      * @author jianglei
      */
-    public static void removeCookie(final HttpServletResponse response, final String name,
-            final String path) {
-        final Cookie cookie = new Cookie(name, Strings.EMPTY);
+    public static void removeCookie(HttpServletResponse response, String name, String path) {
+        Cookie cookie = new Cookie(name, Strings.EMPTY);
         cookie.setPath(path);
         cookie.setMaxAge(0);
         response.addCookie(cookie);
@@ -634,7 +630,7 @@ public class WebUtil {
      *
      * @author jianglei
      */
-    public static String getIncludeRequestUri(final ServletRequest request) {
+    public static String getIncludeRequestUri(ServletRequest request) {
         return (String) request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
     }
 
@@ -645,7 +641,7 @@ public class WebUtil {
      *            HTTP请求
      * @return 是否AJAX请求
      */
-    public static boolean isAjaxRequest(final HttpServletRequest request) {
+    public static boolean isAjaxRequest(HttpServletRequest request) {
         return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
     }
 
@@ -659,23 +655,23 @@ public class WebUtil {
      *
      * @author jianglei
      */
-    public static String getRemoteAddrIp(final HttpServletRequest request) {
-        final String ipFromNginx = getHeader(request, "X-Real-IP");
-        return StringUtils.isEmpty(ipFromNginx) ? request.getRemoteAddr() : ipFromNginx;
-    }
-
-    /**
-     * 获取请求的表头声明
-     *
-     * @param request
-     * @param headName
-     * @return
-     *
-     * @author jianglei
-     */
-    private static String getHeader(final HttpServletRequest request, final String headName) {
-        final String value = request.getHeader(headName);
-        return !StringUtils.isBlank(value) && !"unknown".equalsIgnoreCase(value) ? value : "";
+    public static String getRemoteAddrIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Real-IP");
+        if (!StringUtils.isEmpty(ip) && !"unknown".equalsIgnoreCase(ip)) {
+            return ip;
+        }
+        ip = request.getHeader("X-Forwarded-For");
+        if (!StringUtils.isEmpty(ip) && !"unknown".equalsIgnoreCase(ip)) {
+            // 多次反向代理后会有多个IP值，第一个为真实IP。
+            int index = ip.indexOf(',');
+            if (index >= 0) {
+                return ip.substring(0, index);
+            } else {
+                return ip;
+            }
+        } else {
+            return request.getRemoteAddr();
+        }
     }
 
     /**
@@ -687,7 +683,7 @@ public class WebUtil {
      *            默认协议，如："http"
      * @return 包含有协议的URL，如果输入的URL为相对路径，则原样返回
      */
-    public static String standardizeUrlProtocol(String url, final String defaultProtocol) {
+    public static String standardizeUrlProtocol(String url, String defaultProtocol) {
         if (!url.contains("://")) {
             if (url.startsWith("//")) {
                 url = defaultProtocol + Strings.COLON + url;
@@ -709,7 +705,7 @@ public class WebUtil {
      *            URL
      * @return 包含有协议（默认为HTTP协议）的URL
      */
-    public static String standardizeHttpUrl(final String url) {
+    public static String standardizeHttpUrl(String url) {
         return standardizeUrlProtocol(url, "http");
     }
 
@@ -719,10 +715,10 @@ public class WebUtil {
      * @param request
      *            请求
      */
-    public static void copyParameters2Attributes(final HttpServletRequest request) {
-        final Enumeration<String> names = request.getParameterNames();
+    public static void copyParameters2Attributes(HttpServletRequest request) {
+        Enumeration<String> names = request.getParameterNames();
         while (names.hasMoreElements()) {
-            final String name = names.nextElement();
+            String name = names.nextElement();
             request.setAttribute(name, request.getParameter(name));
         }
     }
