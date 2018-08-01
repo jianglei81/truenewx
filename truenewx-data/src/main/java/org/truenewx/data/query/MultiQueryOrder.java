@@ -1,6 +1,7 @@
 package org.truenewx.data.query;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -21,7 +22,7 @@ public class MultiQueryOrder implements QueryOrder {
     private Map<String, Boolean> orders;
 
     @Override
-    public final boolean hasOrder() {
+    public boolean hasOrder() {
         return this.orders != null && !this.orders.isEmpty();
     }
 
@@ -31,14 +32,14 @@ public class MultiQueryOrder implements QueryOrder {
     }
 
     @Override
-    public final Iterable<Entry<String, Boolean>> getOrders() {
+    public Iterable<Entry<String, Boolean>> getOrders() {
         return this.orders == null ? null : this.orders.entrySet();
     }
 
-    public final String getOrderString() {
-        final StringBuffer orderString = new StringBuffer();
+    public String getOrderString() {
+        StringBuffer orderString = new StringBuffer();
         if (this.orders != null) {
-            for (final Entry<String, Boolean> entry : this.orders.entrySet()) {
+            for (Entry<String, Boolean> entry : this.orders.entrySet()) {
                 orderString.append(Strings.COMMA).append(entry.getKey());
                 if (entry.getValue() == Boolean.TRUE) {
                     orderString.append(" desc");
@@ -51,19 +52,24 @@ public class MultiQueryOrder implements QueryOrder {
         return orderString.toString();
     }
 
-    public final void setOrderString(final String orderString) {
+    public void setOrderString(String orderString) {
         initOrderMap(true);
-        final Map<String, Boolean> orders = parseOrders(orderString);
+        Map<String, Boolean> orders = parseOrders(orderString);
         if (orders != null) {
             this.orders.putAll(orders);
         }
     }
 
-    public final void setOrders(final Map<String, Boolean> orders) {
-        this.orders = orders;
+    public void setOrders(List<Entry<String, Boolean>> orders) {
+        initOrderMap(true);
+        if (orders != null) {
+            for (Entry<String, Boolean> entry : orders) {
+                this.orders.put(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
-    private void initOrderMap(final boolean clear) {
+    private void initOrderMap(boolean clear) {
         if (this.orders == null) {
             this.orders = new LinkedHashMap<>();
         } else if (clear) {
@@ -77,9 +83,9 @@ public class MultiQueryOrder implements QueryOrder {
             return null;
         }
         initOrderMap(true);
-        final String[] entries = orderString.split(",");
-        for (final String entry : entries) {
-            final String[] values = entry.split(" ");
+        String[] entries = orderString.split(",");
+        for (String entry : entries) {
+            String[] values = entry.split(" ");
             if (values.length == 1) {
                 this.orders.put(values[0], false);
             } else if (values.length == 2) {
@@ -96,14 +102,14 @@ public class MultiQueryOrder implements QueryOrder {
     /**
      * 只保留指定可排序对象中的排序
      */
-    public final void retainAllOrder(final QueryOrder order) {
+    public void retainAllOrder(QueryOrder order) {
         // 忽略自己覆盖自己
         if (this != order) {
             initOrderMap(true);
             if (order != null) {
-                final Iterable<Entry<String, Boolean>> orders = order.getOrders();
+                Iterable<Entry<String, Boolean>> orders = order.getOrders();
                 if (orders != null) {
-                    for (final Entry<String, Boolean> entry : orders) {
+                    for (Entry<String, Boolean> entry : orders) {
                         this.orders.put(entry.getKey(), entry.getValue());
                     }
                 }
@@ -111,7 +117,7 @@ public class MultiQueryOrder implements QueryOrder {
         }
     }
 
-    public final void setOrder(final String fieldName, final Boolean desc) {
+    public void setOrder(String fieldName, Boolean desc) {
         initOrderMap(false);
         if (desc == null) {
             this.orders.remove(fieldName);
@@ -121,7 +127,16 @@ public class MultiQueryOrder implements QueryOrder {
     }
 
     @Override
-    public Boolean getOrder(final String fieldName) {
+    public Boolean getOrder(String fieldName) {
         return this.orders.get(fieldName);
     }
+
+    public Boolean rename(String oldFieldName, String newFieldName) {
+        Boolean value = this.orders.remove(oldFieldName);
+        if (value != null) {
+            this.orders.put(newFieldName, value);
+        }
+        return value;
+    }
+
 }

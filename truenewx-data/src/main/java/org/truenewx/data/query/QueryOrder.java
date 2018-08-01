@@ -1,7 +1,6 @@
 package org.truenewx.data.query;
 
 import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * 查询排序
@@ -15,7 +14,7 @@ public interface QueryOrder {
 
     Boolean getOrder(String fieldName);
 
-    Set<String> getOrderFieldNames();
+    Iterable<String> getOrderFieldNames();
 
     Iterable<Entry<String, Boolean>> getOrders();
 

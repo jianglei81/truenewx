@@ -1,6 +1,7 @@
 package org.truenewx.data.query;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -40,7 +41,7 @@ public class SingleQueryOrder implements QueryOrder {
 
     @Override
     public Set<String> getOrderFieldNames() {
-        final Set<String> fieldNames = new HashSet<>();
+        final Set<String> fieldNames = new LinkedHashSet<>();
         fieldNames.add(this.fieldName);
         return fieldNames;
     }
