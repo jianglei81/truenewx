@@ -29,7 +29,7 @@ public class FreeMarkerUtil {
         config.setDateFormat(DateUtil.SHORT_DATE_PATTERN);
         config.setDateTimeFormat(DateUtil.LONG_DATE_PATTERN);
         config.clearEncodingMap();
-        config.setDefaultEncoding(Strings.DEFAULT_ENCODING);
+        config.setDefaultEncoding(Strings.ENCODING_UTF8);
     }
 
 }

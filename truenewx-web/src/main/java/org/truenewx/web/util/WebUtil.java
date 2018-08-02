@@ -144,7 +144,7 @@ public class WebUtil {
             boolean encode, String... ignoredParameterNames) {
         String encoding = request.getCharacterEncoding();
         if (encoding == null) {
-            encoding = System.getProperty("file.encoding", Strings.DEFAULT_ENCODING);
+            encoding = System.getProperty("file.encoding", Strings.ENCODING_UTF8);
         }
         String url = getRelativeRequestUrl(request);
         String queryString = request.getQueryString();
@@ -459,7 +459,7 @@ public class WebUtil {
         if (RequestMethod.GET.name().equalsIgnoreCase(request.getMethod())) {
             String encoding = request.getCharacterEncoding();
             if (encoding == null) {
-                encoding = Strings.DEFAULT_ENCODING;
+                encoding = Strings.ENCODING_UTF8;
             }
             try {
                 return URLDecoder.decode(param, encoding);

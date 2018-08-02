@@ -265,7 +265,7 @@ public class NetUtil {
     }
 
     private static String getQueryString(final Map<String, Object> params) {
-        final String result = mergeParams(Strings.EMPTY, params, Strings.DEFAULT_ENCODING);
+        final String result = mergeParams(Strings.EMPTY, params, Strings.ENCODING_UTF8);
         if (result.length() > 0) {
             return result.substring(1); // 去掉首部问号
         }
@@ -284,7 +284,7 @@ public class NetUtil {
      */
     public static void download(String url, final Map<String, Object> params,
             final File localFile) {
-        url = mergeParams(url, params, Strings.DEFAULT_ENCODING);
+        url = mergeParams(url, params, Strings.ENCODING_UTF8);
         InputStream in = null;
         OutputStream out = null;
         try {
@@ -324,7 +324,7 @@ public class NetUtil {
     public static String requestByGet(String url, final Map<String, Object> params,
             String encoding) {
         if (StringUtils.isBlank(encoding)) {
-            encoding = Strings.DEFAULT_ENCODING;
+            encoding = Strings.ENCODING_UTF8;
         }
         url = mergeParams(url, params, encoding);
         String result = Strings.EMPTY;
@@ -357,7 +357,7 @@ public class NetUtil {
             connection.setDoInput(true);
             connection.setDoOutput(true);
             if (StringUtils.isBlank(encoding)) {
-                encoding = Strings.DEFAULT_ENCODING;
+                encoding = Strings.ENCODING_UTF8;
             }
             connection.setRequestProperty("contentType", "text/html;charset=" + encoding);
             out = new PrintWriter(new OutputStreamWriter(connection.getOutputStream(), encoding));

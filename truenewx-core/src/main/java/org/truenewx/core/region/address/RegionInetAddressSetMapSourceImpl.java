@@ -20,7 +20,7 @@ public class RegionInetAddressSetMapSourceImpl
         implements RegionInetAddressSetMapSource, InitializingBean {
     private Resource location;
     private Locale locale = Locale.getDefault();
-    private String encoding = Strings.DEFAULT_ENCODING;
+    private String encoding = Strings.ENCODING_UTF8;
     private boolean init;
     private RegionInetAddressSetMapParser parser;
     private Map<String, InetAddressSet> map;

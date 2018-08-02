@@ -128,7 +128,7 @@ public class QrCodeTag extends UiTagSupport {
             // 产生二维码资源
             final Map<EncodeHintType, Object> hints = new HashMap<>();
             hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
-            hints.put(EncodeHintType.CHARACTER_SET, Strings.DEFAULT_ENCODING);
+            hints.put(EncodeHintType.CHARACTER_SET, Strings.ENCODING_UTF8);
             hints.put(EncodeHintType.MARGIN, 0);
             BitMatrix bitMatrix = new MultiFormatWriter().encode(this.value, BarcodeFormat.QR_CODE,
                     this.size, this.size, hints);

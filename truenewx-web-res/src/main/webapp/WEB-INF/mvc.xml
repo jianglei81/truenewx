@@ -15,7 +15,7 @@
         <mvc:message-converters>
             <bean class="org.springframework.http.converter.StringHttpMessageConverter">
                 <constructor-arg>
-                    <util:constant static-field="org.truenewx.core.Strings.DEFAULT_ENCODING" />
+                    <util:constant static-field="org.truenewx.core.Strings.ENCODING_UTF8" />
                 </constructor-arg>
             </bean>
         </mvc:message-converters>

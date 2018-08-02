@@ -32,7 +32,7 @@ import org.truenewx.core.tuple.Binate;
 public class ClientRequestSupport {
     private CloseableHttpClient client = HttpClientBuilder.create().build();
     private String httpMethod = "POST";
-    private String encoding = Strings.DEFAULT_ENCODING;
+    private String encoding = Strings.ENCODING_UTF8;
     private int timeout;
 
     public void setClient(final CloseableHttpClient client) {
@@ -61,7 +61,7 @@ public class ClientRequestSupport {
      *             如果请求过程中有错误
      */
     public Binate<Integer, String> request(final String url, final Map<String, Object> params)
-                    throws Exception {
+            throws Exception {
         return request(url, params, this.encoding);
     }
 
@@ -75,7 +75,7 @@ public class ClientRequestSupport {
      *             如果请求过程中有错误
      */
     public Binate<Integer, String> request(final String url, final Map<String, Object> params,
-                    final String encoding) throws Exception {
+            final String encoding) throws Exception {
         final HttpRequestBase request;
         switch (this.httpMethod.toUpperCase()) {
         case "GET":
@@ -92,9 +92,8 @@ public class ClientRequestSupport {
         if (request != null) {
             if (this.timeout > 0) {
                 final RequestConfig requestConfig = RequestConfig.custom()
-                                .setConnectionRequestTimeout(this.timeout)
-                                .setConnectTimeout(this.timeout).setSocketTimeout(this.timeout)
-                                .build();
+                        .setConnectionRequestTimeout(this.timeout).setConnectTimeout(this.timeout)
+                        .setSocketTimeout(this.timeout).build();
                 request.setConfig(requestConfig);
             }
             final CloseableHttpResponse response = this.client.execute(request);
@@ -105,7 +104,7 @@ public class ClientRequestSupport {
                     if (statusCode != HttpStatus.SC_OK) {
                         LoggerFactory.getLogger(getClass()).error(content);
                     }
-                    return new Binary<Integer, String>(statusCode, content);
+                    return new Binary<>(statusCode, content);
                 } finally {
                     // 确保关闭请求连接
                     response.close();

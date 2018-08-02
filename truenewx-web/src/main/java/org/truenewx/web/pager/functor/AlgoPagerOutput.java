@@ -82,7 +82,7 @@ public class AlgoPagerOutput implements Algorithm {
                 if (templateFile != null) {
                     config.setDirectoryForTemplateLoading(templateFile.getParentFile());
                     final Template t = config.getTemplate(templateFile.getName(),
-                                    Strings.DEFAULT_ENCODING);
+                                    Strings.ENCODING_UTF8);
                     t.process(params, out);
                 }
             } catch (final Exception e) {
