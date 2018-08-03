@@ -40,12 +40,12 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
 
     private List<TransitAction<U, K, S, T, I>> actions = new ArrayList<>();
 
-    public void setStartState(final S startState) {
+    public void setStartState(S startState) {
         this.startState = startState;
     }
 
     public void setTransitActions(
-            final Collection<? extends TransitAction<U, K, S, T, I>> transitActions) {
+            Collection<? extends TransitAction<U, K, S, T, I>> transitActions) {
         this.actions.addAll(transitActions);
     }
 
@@ -55,9 +55,9 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
     }
 
     @Override
-    public Set<T> getTransitions(final S state) {
-        final Set<T> transitions = new HashSet<>();
-        for (final TransitAction<U, K, S, T, I> action : this.actions) {
+    public Set<T> getTransitions(S state) {
+        Set<T> transitions = new HashSet<>();
+        for (TransitAction<U, K, S, T, I> action : this.actions) {
             if (ArrayUtils.contains(action.getBeginStates(), state)) {
                 transitions.add(action.getTransition());
             }
@@ -65,9 +65,18 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
         return transitions;
     }
 
-    private TransitAction<U, K, S, T, I> getTransitAction(final S state, final T transition,
-            final Object condition) {
-        for (final TransitAction<U, K, S, T, I> action : this.actions) {
+    @Override
+    public S[] getBeginStates(T transition) {
+        for (TransitAction<U, K, S, T, I> action : this.actions) {
+            if (action.getTransition() == transition) {
+                return action.getBeginStates();
+            }
+        }
+        return null;
+    }
+
+    private TransitAction<U, K, S, T, I> getTransitAction(S state, T transition, Object condition) {
+        for (TransitAction<U, K, S, T, I> action : this.actions) {
             if (action.getTransition() == transition
                     && action.getEndState(state, condition) != null) {
                 return action;
@@ -77,8 +86,8 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
     }
 
     @Override
-    public S getNextState(final S state, final T transition, final Object condition) {
-        final TransitAction<U, K, S, T, I> action = getTransitAction(state, transition, condition);
+    public S getNextState(S state, T transition, Object condition) {
+        TransitAction<U, K, S, T, I> action = getTransitAction(state, transition, condition);
         if (action != null) {
             return action.getEndState(state, condition);
         }
@@ -87,12 +96,12 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
 
     @Override
     @WriteTransactional
-    public U transit(final I userIdentity, final K key, final T transition, final Object context)
+    public U transit(I userIdentity, K key, T transition, Object context)
             throws HandleableException {
-        final U entity = loadEntity(userIdentity, key, context);
-        final S state = getState(entity);
-        final Object condition = getCondition(userIdentity, entity, context);
-        final TransitAction<U, K, S, T, I> action = getTransitAction(state, transition, condition);
+        U entity = loadEntity(userIdentity, key, context);
+        S state = getState(entity);
+        Object condition = getCondition(userIdentity, entity, context);
+        TransitAction<U, K, S, T, I> action = getTransitAction(state, transition, condition);
         if (action == null) {
             throw new UnsupportedTransitionException(state, transition);
         }
@@ -115,8 +124,7 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
      * @throws BusinessException
      *             如果找不到实体
      */
-    protected abstract U loadEntity(I userIdentity, final K key, final Object context)
-            throws BusinessException;
+    protected abstract U loadEntity(I userIdentity, K key, Object context) throws BusinessException;
 
     /**
      * 从指定实体中获取状态值。实体可能包含多个状态属性，故不通过让实体实现获取状态的接口来实现
@@ -138,6 +146,6 @@ public abstract class AbstractStateMachine<U extends UnitaryEntity<K>, K extends
      *            转换上下文
      * @return 转换条件
      */
-    protected abstract Object getCondition(I userIdentity, final U entity, final Object context);
+    protected abstract Object getCondition(I userIdentity, U entity, Object context);
 
 }

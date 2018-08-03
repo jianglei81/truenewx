@@ -44,6 +44,15 @@ public interface StateMachine<U extends UnitaryEntity<K>, K extends Serializable
     Set<T> getTransitions(S state);
 
     /**
+     * 获取可进行指定转换的开始状态清单
+     *
+     * @param transition
+     *            转换
+     * @return 可进行指定转换的开始状态清单
+     */
+    S[] getBeginStates(T transition);
+
+    /**
      * 获取在指定状态下，在指定条件下，进行指定转换后将进入的下一个状态
      *
      * @param state
