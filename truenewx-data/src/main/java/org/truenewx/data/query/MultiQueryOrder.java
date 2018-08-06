@@ -60,6 +60,16 @@ public class MultiQueryOrder implements QueryOrder {
         }
     }
 
+    @Deprecated
+    public void setOrders(Map<String, Boolean> orders) {
+        initOrderMap(true);
+        if (orders != null) {
+            for (Entry<String, Boolean> entry : orders.entrySet()) {
+                this.orders.put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
     public void setOrders(List<Entry<String, Boolean>> orders) {
         initOrderMap(true);
         if (orders != null) {
