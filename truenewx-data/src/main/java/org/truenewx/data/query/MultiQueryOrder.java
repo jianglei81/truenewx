@@ -39,7 +39,7 @@ public class MultiQueryOrder implements QueryOrder {
     public String getOrderString() {
         StringBuffer orderString = new StringBuffer();
         if (this.orders != null) {
-            for (Entry<String, Boolean> entry : this.orders.entrySet()) {
+            for (Map.Entry<String, Boolean> entry : this.orders.entrySet()) {
                 orderString.append(Strings.COMMA).append(entry.getKey());
                 if (entry.getValue() == Boolean.TRUE) {
                     orderString.append(" desc");
@@ -60,21 +60,20 @@ public class MultiQueryOrder implements QueryOrder {
         }
     }
 
-    @Deprecated
     public void setOrders(Map<String, Boolean> orders) {
         initOrderMap(true);
         if (orders != null) {
-            for (Entry<String, Boolean> entry : orders.entrySet()) {
+            for (Map.Entry<String, Boolean> entry : orders.entrySet()) {
                 this.orders.put(entry.getKey(), entry.getValue());
             }
         }
     }
 
-    public void setOrders(List<Entry<String, Boolean>> orders) {
+    public void setFieldOrders(List<FieldOrder> orders) {
         initOrderMap(true);
         if (orders != null) {
-            for (Entry<String, Boolean> entry : orders) {
-                this.orders.put(entry.getKey(), entry.getValue());
+            for (FieldOrder entry : orders) {
+                this.orders.put(entry.getName(), entry.isDesc());
             }
         }
     }
@@ -85,6 +84,10 @@ public class MultiQueryOrder implements QueryOrder {
         } else if (clear) {
             this.orders.clear();
         }
+    }
+
+    public void clearOrders() {
+        this.orders = null;
     }
 
     private Map<String, Boolean> parseOrders(String orderString) {
@@ -117,10 +120,10 @@ public class MultiQueryOrder implements QueryOrder {
         if (this != order) {
             initOrderMap(true);
             if (order != null) {
-                Iterable<Entry<String, Boolean>> orders = order.getOrders();
-                if (orders != null) {
-                    for (Entry<String, Boolean> entry : orders) {
-                        this.orders.put(entry.getKey(), entry.getValue());
+                Iterable<String> fieldNames = order.getOrderFieldNames();
+                if (fieldNames != null) {
+                    for (String fieldName : fieldNames) {
+                        this.orders.put(fieldName, order.getOrder(fieldName));
                     }
                 }
             }
@@ -142,11 +145,14 @@ public class MultiQueryOrder implements QueryOrder {
     }
 
     public Boolean rename(String oldFieldName, String newFieldName) {
-        Boolean value = this.orders.remove(oldFieldName);
-        if (value != null) {
-            this.orders.put(newFieldName, value);
+        if (this.orders != null) {
+            Boolean value = this.orders.remove(oldFieldName);
+            if (value != null) {
+                this.orders.put(newFieldName, value);
+            }
+            return value;
         }
-        return value;
+        return null;
     }
 
 }

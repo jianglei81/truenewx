@@ -1,11 +1,10 @@
 package org.truenewx.core.tuple;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
  * 简单键值对条目
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  * @param <K>
@@ -13,14 +12,15 @@ import java.util.Objects;
  * @param <V>
  *            值类型
  */
-public class SimpleEntry<K, V> implements Binate<K, V>, Entry<K, V>, Map.Entry<K, V>, Cloneable {
+public class SimpleEntry<K, V> implements Binate<K, V>, Entry<K, V>, Cloneable {
+
     private K key;
     private V value;
 
     public SimpleEntry() {
     }
 
-    public SimpleEntry(final K key, final V value) {
+    public SimpleEntry(K key, V value) {
         this.key = key;
         this.value = value;
     }
@@ -30,7 +30,7 @@ public class SimpleEntry<K, V> implements Binate<K, V>, Entry<K, V>, Map.Entry<K
         return getKey();
     }
 
-    public void setLeft(final K left) {
+    public void setLeft(K left) {
         setKey(left);
     }
 
@@ -39,7 +39,7 @@ public class SimpleEntry<K, V> implements Binate<K, V>, Entry<K, V>, Map.Entry<K
         return getValue();
     }
 
-    public void setRight(final V right) {
+    public void setRight(V right) {
         setValue(right);
     }
 
@@ -48,7 +48,7 @@ public class SimpleEntry<K, V> implements Binate<K, V>, Entry<K, V>, Map.Entry<K
         return this.key;
     }
 
-    public void setKey(final K key) {
+    public void setKey(K key) {
         this.key = key;
     }
 
@@ -57,30 +57,29 @@ public class SimpleEntry<K, V> implements Binate<K, V>, Entry<K, V>, Map.Entry<K
         return this.value;
     }
 
-    @Override
-    public V setValue(final V value) {
-        final V result = this.value;
+    public V setValue(V value) {
+        V result = this.value;
         this.value = value;
         return result;
     }
 
     @Override
     public SimpleEntry<K, V> clone() {
-        final SimpleEntry<K, V> entry = new SimpleEntry<K, V>();
+        SimpleEntry<K, V> entry = new SimpleEntry<>();
         entry.key = this.key;
         entry.value = this.value;
         return entry;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final SimpleEntry<?, ?> other = (SimpleEntry<?, ?>) obj;
+        SimpleEntry<?, ?> other = (SimpleEntry<?, ?>) obj;
         return Objects.equals(this.key, other.key) && Objects.equals(this.value, other.value);
     }
 

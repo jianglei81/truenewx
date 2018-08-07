@@ -28,10 +28,10 @@ public class OqlUtil {
      *            查询排序序列
      * @return order by子句
      */
-    public static String buildOrderString(final Iterable<Entry<String, Boolean>> orders) {
-        final StringBuffer orderBy = new StringBuffer();
+    public static String buildOrderString(Iterable<Entry<String, Boolean>> orders) {
+        StringBuffer orderBy = new StringBuffer();
         if (orders != null) {
-            for (final Entry<String, Boolean> entry : orders) {
+            for (Entry<String, Boolean> entry : orders) {
                 orderBy.append(Strings.COMMA).append(entry.getKey());
                 if (entry.getValue() == Boolean.TRUE) {
                     orderBy.append(" desc");
@@ -45,8 +45,22 @@ public class OqlUtil {
         return orderBy.toString();
     }
 
-    public static String buildOrderString(final QueryOrder order) {
-        return buildOrderString(order.getOrders());
+    public static String buildOrderString(QueryOrder order) {
+        StringBuffer orderBy = new StringBuffer();
+        Iterable<String> fieldNames = order.getOrderFieldNames();
+        if (fieldNames != null) {
+            for (String fieldName : fieldNames) {
+                orderBy.append(Strings.COMMA).append(fieldName);
+                if (order.getOrder(fieldName) == Boolean.TRUE) {
+                    orderBy.append(" desc");
+                }
+            }
+        }
+        if (orderBy.length() > 0) {
+            orderBy.replace(0, Strings.COMMA.length(), Strings.SPACE); // 用空格替代第一个逗号
+            orderBy.insert(0, " order by"); // 前面加order by
+        }
+        return orderBy.toString();
     }
 
     /**
@@ -64,9 +78,9 @@ public class OqlUtil {
      *
      * @author jianglei
      */
-    public static String buildOrConditionString(final Map<String, Object> params,
-            final String fieldName, final Collection<?> fieldParamValues, Comparison comparison) {
-        final StringBuffer condition = new StringBuffer();
+    public static String buildOrConditionString(Map<String, Object> params, String fieldName,
+            Collection<?> fieldParamValues, Comparison comparison) {
+        StringBuffer condition = new StringBuffer();
         if (fieldParamValues != null && fieldParamValues.size() > 0) {
             if (comparison == null) { // 默认为等于比较符
                 comparison = Comparison.EQUAL;
@@ -80,18 +94,17 @@ public class OqlUtil {
                 } else {
                     condition.append(Comparison.NOT_IN.toQlString());
                 }
-                final String paramName = fieldName.replaceAll("\\.", Strings.UNDERLINE);
+                String paramName = fieldName.replaceAll("\\.", Strings.UNDERLINE);
                 condition.append(Strings.LEFT_BRACKET).append(Strings.COLON).append(paramName)
                         .append(Strings.RIGHT_BRACKET);
                 params.put(paramName, fieldParamValues);
             } else {
-                final String junction = " or ";
+                String junction = " or ";
                 int i = 0;
-                for (final Object fieldParamValue : fieldParamValues) {
+                for (Object fieldParamValue : fieldParamValues) {
                     condition.append(junction).append(fieldName);
                     if (fieldParamValue != null) { // 忽略为null的参数值
-                        final String paramName = fieldName.replaceAll("\\.", Strings.UNDERLINE)
-                                + (i++);
+                        String paramName = fieldName.replaceAll("\\.", Strings.UNDERLINE) + (i++);
                         condition.append(comparison.toQlString()).append(Strings.COLON)
                                 .append(paramName);
                         if (comparison == Comparison.LIKE || comparison == Comparison.NOT_LIKE) {
@@ -128,9 +141,9 @@ public class OqlUtil {
      *
      * @author jianglei
      */
-    public static String buildOrConditionString(final Map<String, Object> params,
-            final String fieldName, final Object[] fieldParamValues, Comparison comparison) {
-        final StringBuffer condition = new StringBuffer();
+    public static String buildOrConditionString(Map<String, Object> params, String fieldName,
+            Object[] fieldParamValues, Comparison comparison) {
+        StringBuffer condition = new StringBuffer();
         if (fieldParamValues != null && fieldParamValues.length > 0) {
             if (comparison == null) { // 默认为等于比较符
                 comparison = Comparison.EQUAL;
@@ -144,18 +157,17 @@ public class OqlUtil {
                 } else {
                     condition.append(Comparison.NOT_IN.toQlString());
                 }
-                final String paramName = fieldName.replaceAll("\\.", Strings.UNDERLINE);
+                String paramName = fieldName.replaceAll("\\.", Strings.UNDERLINE);
                 condition.append(Strings.LEFT_BRACKET).append(Strings.COLON).append(paramName)
                         .append(Strings.RIGHT_BRACKET);
                 params.put(paramName, fieldParamValues);
             } else {
-                final String junction = " or ";
+                String junction = " or ";
                 int i = 0;
-                for (final Object fieldParamValue : fieldParamValues) {
+                for (Object fieldParamValue : fieldParamValues) {
                     condition.append(junction).append(fieldName);
                     if (fieldParamValue != null) { // 忽略为null的参数值
-                        final String paramName = fieldName.replaceAll("\\.", Strings.UNDERLINE)
-                                + (i++);
+                        String paramName = fieldName.replaceAll("\\.", Strings.UNDERLINE) + (i++);
                         condition.append(comparison.toQlString()).append(Strings.COLON)
                                 .append(paramName);
                         if (comparison == Comparison.LIKE || comparison == Comparison.NOT_LIKE) {
@@ -179,15 +191,15 @@ public class OqlUtil {
 
     /**
      * 构建指定字段的为null条件子句
-     * 
+     *
      * @param fieldName
      *            字段名
      * @param ifNull
      *            是否为null，其值本身为null表示忽略该字段条件
      * @return 条件子句
      */
-    public static String buildNullConditionString(final String fieldName, final Boolean ifNull) {
-        final StringBuffer condition = new StringBuffer();
+    public static String buildNullConditionString(String fieldName, Boolean ifNull) {
+        StringBuffer condition = new StringBuffer();
         if (ifNull != null) {
             condition.append(fieldName).append(" is");
             if (!ifNull) {

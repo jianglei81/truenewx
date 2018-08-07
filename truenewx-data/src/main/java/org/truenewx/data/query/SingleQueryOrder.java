@@ -1,13 +1,10 @@
 package org.truenewx.data.query;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.Assert;
-import org.truenewx.core.tuple.SimpleEntry;
 
 /**
  * 单字段查询排序
@@ -15,42 +12,35 @@ import org.truenewx.core.tuple.SimpleEntry;
  * @author jianglei
  * @since JDK 1.8
  */
-public class SingleQueryOrder implements QueryOrder {
+public class SingleQueryOrder extends FieldOrder implements QueryOrder {
 
-    private String fieldName;
-    private boolean desc;
+    private static final long serialVersionUID = 1512449230344606821L;
 
-    public SingleQueryOrder(final String fieldName, final boolean desc) {
-        Assert.isTrue(StringUtils.isNotBlank(fieldName), "fieldName must be not blank");
-        this.fieldName = fieldName;
-        this.desc = desc;
+    public SingleQueryOrder(String name, boolean desc) {
+        super(name, desc);
     }
 
     @Override
     public boolean hasOrder() {
-        return true;
+        return StringUtils.isNotBlank(getName());
     }
 
     @Override
-    public Boolean getOrder(final String fieldName) {
-        if (this.fieldName.equals(fieldName)) {
-            return this.desc;
+    public Boolean getOrder(String fieldName) {
+        if (fieldName.equals(getName())) {
+            return isDesc();
         }
         return null;
     }
 
     @Override
-    public Set<String> getOrderFieldNames() {
-        final Set<String> fieldNames = new LinkedHashSet<>();
-        fieldNames.add(this.fieldName);
-        return fieldNames;
+    public Iterable<String> getOrderFieldNames() {
+        return Arrays.asList(getName());
     }
 
     @Override
     public Iterable<Entry<String, Boolean>> getOrders() {
-        final Set<Entry<String, Boolean>> entrySet = new HashSet<>();
-        entrySet.add(new SimpleEntry<>(this.fieldName, this.desc));
-        return entrySet;
+        return Arrays.asList(new SimpleEntry<>(getName(), isDesc()));
     }
 
 }
