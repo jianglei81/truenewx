@@ -24,6 +24,7 @@
     <mvc:resources mapping="/vendor/**" location="/vendor/" order="-1" />
     <mvc:resources mapping="/assets/**" location="/assets/" order="-1" />
     <mvc:resources mapping="/component/**/*.properties" location="/component/" order="-1" />
+    <mvc:resources mapping="/component/**/*.css" location="/component/" order="-1" />
     <mvc:resources mapping="/component/**/*.js" location="/component/" order="-1" />
     <mvc:resources mapping="/component/*.html" location="/component/" order="-1" />
     <mvc:resources mapping="/component/**/*.html" location="/component/" order="-1" />

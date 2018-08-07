@@ -1,0 +1,54 @@
+/*!
+ *  Label Options v1.0.0
+ */
+.label-options .option {
+    border: 1px solid #d7d7d7;
+    background-color: #f3f3f3;
+    font-family: "Glyphicons Halflings";
+    cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-right: 8px;
+    margin-bottom: 5px;
+}
+
+.label-options>span {
+    display: inline-block;
+}
+
+.label-options .option:before {
+    color: #aaa;
+    margin-right: 8px;
+}
+
+.label-options .option[theme] {
+    color: #fff;
+}
+
+.label-options .option[theme]:before {
+    color: #fff;
+}
+
+.label-options .option:before, 
+.label-options .option[icon='plus']:before {
+    content: "\002b";
+}
+
+.label-options .option[icon='ok']:before, 
+.label-options .option[theme]:before {
+    content: "\e013";
+}
+
+.label-options .option[icon='user']:before {
+    content: "\e008";
+}
+
+.label-options .option[theme='primary'] {
+    border-color: #337ab7;
+    background-color: #337ab7;
+}
+
+.label-options .option[theme='info'] {
+    border-color: #5bc0de;
+    background-color: #5bc0de;
+}

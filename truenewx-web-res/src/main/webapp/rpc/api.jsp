@@ -8,7 +8,7 @@
 <link href="${context}/rpc/css/api.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" language="javascript">
 $(function() {
-    selectMenu(4);
+    selectMenu(5);
     $.tnx.setContext("${context}", "${context}");
 });
 </script>
