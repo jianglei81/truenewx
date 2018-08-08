@@ -27,6 +27,10 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.truenewx.core.Strings;
 
+import com.github.stuxuhai.jpinyin.PinyinException;
+import com.github.stuxuhai.jpinyin.PinyinFormat;
+import com.github.stuxuhai.jpinyin.PinyinHelper;
+
 /**
  * 字符串工具类
  *
@@ -917,5 +921,16 @@ public class StringUtil {
             }
         }
         return null;
+    }
+
+    public static String toPinyin(String s) {
+        if (StringUtils.isBlank(s)) {
+            return s;
+        }
+        try {
+            return PinyinHelper.convertToPinyinString(s, Strings.EMPTY, PinyinFormat.WITHOUT_TONE);
+        } catch (PinyinException e) {
+            return Strings.EMPTY;
+        }
     }
 }
