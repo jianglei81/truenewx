@@ -30,7 +30,7 @@
     });
 
     function showSpanSelected() {
-        var data = $("#spanContainer").labelOptions("getSelectedData");
+        var data = $("#spanContainer").labelOptions("getSelected");
         var message = "";
         for (var i = 0; i < data.length; i++) {
             message += data[i].caption + ",";
@@ -41,7 +41,7 @@
     }
 
     function showDivSelected() {
-        var data = $("#divContainer").labelOptions("getSelectedData");
+        var data = $("#divContainer").labelOptions("getSelected");
         var message = "";
         for (var i = 0; i < data.length; i++) {
             message += data[i].caption + ",";
