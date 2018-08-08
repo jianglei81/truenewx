@@ -31,14 +31,39 @@
                 child.addClass("option");
                 _this.bindOptionEventHandler(child);
             });
-            $.each(this.options.data, function(index, option) {
-                _this.addOption(option);
-            });
+            if (this.options.data instanceof Array) {
+                $.each(this.options.data, function(index, option) {
+                    _this.addOption(option);
+                });
+            }
+            if (typeof (this.options.onRendered) == "function") {
+                this.options.onRendered.call(this.element);
+            }
             this.element.data("labelOptions", this);
         },
-        addOption : function(option) {
+        findByText : function(text) {
+            var options = [];
+            $(".option", this.element).each(function() {
+                var $option = $(this);
+                if ($option.text() == text) {
+                    options.push($option);
+                }
+            });
+            if (options.length == 0) {
+                return undefined;
+            } else if (options.length == 1) {
+                return options[0];
+            } else {
+                return options;
+            }
+        },
+        addOption : function(option, selected) {
             var $option = this.buildOption(option);
             this.bindOptionEventHandler($option);
+            if (selected) {
+                this.selectOption($option);
+            }
+            return $option;
         },
         buildOption : function(option) {
             if (typeof (this.options.buildOption) == "function") {
@@ -129,21 +154,78 @@
                         data.push(option);
                     });
             return data;
+        },
+        filter : function(condition) {
+            if (condition) {
+                var chars = [];
+                for (var i = 0; i < condition.length; i++) {
+                    chars[i] = condition.substr(i, 1);
+                }
+                var _this = this;
+                var options = $("[data-" + this.options.indexProperty + "]:not([theme])",
+                        this.element);
+                options.each(function() {
+                    var $option = $(this);
+                    var text = $option.text();
+                    var index = _this.options.indexProperty ? $option.attr("data-"
+                            + _this.options.indexProperty) : undefined;
+                    if (_this.matches(text, chars) || _this.matches(index, chars)) {
+                        $option.removeClass("hidden");
+                    } else {
+                        $option.addClass("hidden");
+                    }
+                });
+            } else {
+                $("[data-" + this.options.indexProperty + "]", this.element).removeClass("hidden");
+            }
+        },
+        matches : function(s, chars) {
+            if (s) {
+                var index = -1;
+                for (var i = 0; i < chars.length; i++) {
+                    index = s.indexOf(chars[i], index + 1);
+                    if (index < 0) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
         }
     };
 
     var methods = {
-        addOption : function(option) {
-            $(this).data("labelOptions").addOption(option);
+        findByText : function(text) {
+            return $(this).data("labelOptions").findByText(text);
         },
-        selectOption : function($option) {
-            $(this).data("labelOptions").selectOption($option);
+        add : function(option, selected) {
+            return $(this).data("labelOptions").addOption(option, selected);
         },
-        unselectOption : function($option) {
-            $(this).data("labelOptions").unselectOption($option);
+        select : function($option) {
+            var labelOptions = $(this).data("labelOptions");
+            if ($option instanceof Array) {
+                $.each($option, function() {
+                    labelOptions.selectOption(this);
+                });
+            } else {
+                return labelOptions.selectOption($option);
+            }
         },
-        getSelectedData : function(type) {
+        unselect : function($option) {
+            var labelOptions = $(this).data("labelOptions");
+            if ($option instanceof Array) {
+                $.each($option, function() {
+                    labelOptions.unselectOption(this);
+                });
+            } else {
+                return labelOptions.unselectOption($option);
+            }
+        },
+        getSelected : function(type) {
             return $(this).data("labelOptions").getSelectedData(type);
+        },
+        filter : function(condition) {
+            $(this).data("labelOptions").filter(condition);
         }
     };
 
@@ -165,7 +247,9 @@
         textProperty : "text", // 显示文本的属性名
         indexProperty : undefined, // 索引的属性名，设置了才生成索引
         buildOption : undefined, // 自定义选项构建函数
-        optionTag : undefined
+        optionTag : undefined,
+        onRendered : function() { // 渲染完之后的事件处理函数
+        }
     };
 
 })(jQuery);
