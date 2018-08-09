@@ -337,6 +337,15 @@
         },
         removeFile : function(fileId) {
             this.webuploader.removeFile(fileId, true);
+        },
+        /**
+         * 准备添加文件。该方法的存在意义是为了解决一个BUG： <br>
+         * 在修改已有文件时，如果用户取消文件选择框，后续的添加文件的操作将变成修改文件的操作
+         * 因此，需要调用者在通过添加文件按钮触发添加文件操作之前，调用本方法，以确保不会出现上述BUG
+         * 这确实是一个非常不优雅的解决办法，但却是能想到的唯一办法，未来如果能想到更好的办法，再进行改进
+         */
+        prepareAddFile : function() {
+            this.updatingFile = undefined;
         }
     };
 
@@ -359,6 +368,11 @@
             var element = $(this);
             var _unstructuredUpload = element.data("unstructuredUpload");
             _unstructuredUpload.removeFile(fileId);
+        },
+        prepareAddFile : function() {
+            var element = $(this);
+            var _unstructuredUpload = element.data("unstructuredUpload");
+            _unstructuredUpload.prepareAddFile();
         }
     };
 
