@@ -146,11 +146,16 @@ public class MultiQueryOrder implements QueryOrder {
 
     public Boolean rename(String oldFieldName, String newFieldName) {
         if (this.orders != null) {
-            Boolean value = this.orders.remove(oldFieldName);
-            if (value != null) {
-                this.orders.put(newFieldName, value);
+            // 为保留字段顺序，采取逐一从原映射集中取出字段，进行判断后再重新插入的方式
+            Map<String, Boolean> temp = new LinkedHashMap<>(this.orders);
+            this.orders.clear();
+            for (Entry<String, Boolean> entry : temp.entrySet()) {
+                String key = entry.getKey();
+                if (key.equals(oldFieldName)) {
+                    key = newFieldName;
+                }
+                this.orders.put(key, entry.getValue());
             }
-            return value;
         }
         return null;
     }
