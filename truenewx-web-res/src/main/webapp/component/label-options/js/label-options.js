@@ -155,6 +155,19 @@
                     });
             return data;
         },
+        getSelectedValues : function(type) {
+            var _this = this;
+            var values = [];
+            $("[theme]", this.element).each(function() {
+                var $option = $(this);
+                var value = $option.attr("data-" + _this.options.valueProperty);
+                if (type == "int") {
+                    value = parseInt(value);
+                }
+                values.push(value);
+            });
+            return values;
+        },
         filter : function(condition) {
             if (condition) {
                 var chars = [];
@@ -223,6 +236,9 @@
         },
         getSelected : function(type) {
             return $(this).data("labelOptions").getSelectedData(type);
+        },
+        getSelectedValues : function(type) {
+            return $(this).data("labelOptions").getSelectedValues(type);
         },
         filter : function(condition) {
             $(this).data("labelOptions").filter(condition);
