@@ -1,6 +1,7 @@
 package org.truenewx.core.model;
 
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
 import org.truenewx.core.enums.Device;
 import org.truenewx.core.enums.OS;
@@ -30,17 +31,20 @@ public class Terminal {
      */
     private Program program;
 
-    public Terminal(final Device device, final OS os, final Program program) {
+    public Terminal(Device device, OS os, Program program) {
         this.device = device;
         this.os = os;
         this.program = program;
     }
 
-    public Terminal(final String s) {
-        final String[] array = s.split(Strings.DOT);
-        this.device = EnumUtils.getEnum(Device.class, ArrayUtil.get(array, 0));
-        this.os = EnumUtils.getEnum(OS.class, ArrayUtil.get(array, 1));
-        this.program = EnumUtils.getEnum(Program.class, ArrayUtil.get(array, 2));
+    public Terminal(String s) {
+        // 允许空的终端表示
+        if (StringUtils.isNotBlank(s)) {
+            String[] array = s.split(Strings.MINUS);
+            this.device = EnumUtils.getEnum(Device.class, ArrayUtil.get(array, 0));
+            this.os = EnumUtils.getEnum(OS.class, ArrayUtil.get(array, 1));
+            this.program = EnumUtils.getEnum(Program.class, ArrayUtil.get(array, 2));
+        }
     }
 
     /**
@@ -65,7 +69,7 @@ public class Terminal {
         return this.program;
     }
 
-    public boolean supports(final Terminal terminal) {
+    public boolean supports(Terminal terminal) {
         // 设备属性为null，视为支持所有设备
         if (this.device != null && this.device != terminal.device) {
             return false;
@@ -83,7 +87,7 @@ public class Terminal {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         if (this.device != null) {
             sb.append(this.device.name());
         }
