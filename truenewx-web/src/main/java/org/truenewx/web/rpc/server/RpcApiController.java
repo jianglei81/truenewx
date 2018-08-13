@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -60,7 +59,7 @@ import org.truenewx.web.util.WebUtil;
  */
 @RpcController
 @RequestMapping("/rpc/api")
-public class RpcApiController {
+public class RpcApiController extends RpcControllerSupport {
 
     @Autowired
     private RpcServer server;
@@ -223,16 +222,7 @@ public class RpcApiController {
         @SuppressWarnings("unchecked")
         Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
         String subtype = this.server.getEnumSubType(beanId, methodName, argCount, enumClass);
-        Locale locale = SpringWebContext.getLocale();
-        EnumType enumType = this.enumDictResolver.getEnumType(enumClass.getName(), subtype, locale);
-        if (enumType == null) {
-            String message = "No such enum type: " + enumClass.getName();
-            if (StringUtils.isNotBlank(subtype)) {
-                message += " for subtype '" + subtype + "'";
-            }
-            throw new IllegalArgumentException(message);
-        }
-        return enumType.getItems();
+        return getEnumItems(enumClass, subtype);
     }
 
     @RequestMapping("/{beanId}/{methodName}/{argCount}/arg/{argType}/properties") // 必须带后缀结尾，否则argType中包含.，将被识别为扩展名
