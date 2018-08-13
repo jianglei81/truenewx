@@ -101,7 +101,6 @@ $.extend($.tnx, {
                 if (typeof events.close == "function") {
                     var btnClose = $(".close", dialogObj);
                     btnClose.click(function() {
-                        alert("123");
                         events.close.apply(dialogObj);
                     });
                 } else if (typeof events.show == "function") {

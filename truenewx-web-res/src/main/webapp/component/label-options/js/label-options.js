@@ -30,6 +30,10 @@
                 child = $(child);
                 child.addClass("option");
                 _this.bindOptionEventHandler(child);
+                var value = child.attr("data-" + _this.options.valueProperty);
+                if (_this.requiresSelect(value)) {
+                    _this.selectOption(child);
+                }
             });
             if (this.options.data instanceof Array) {
                 $.each(this.options.data, function(index, option) {
@@ -60,10 +64,29 @@
         addOption : function(option, selected) {
             var $option = this.buildOption(option);
             this.bindOptionEventHandler($option);
+            if (selected == undefined) {
+                var value = option[this.options.valueProperty];
+                selected = this.requiresSelect(value);
+            }
             if (selected) {
                 this.selectOption($option);
             }
             return $option;
+        },
+        requiresSelect : function(value) {
+            if (value == undefined || value == null) {
+                return false;
+            }
+            var selectedValues;
+            if (this.options.selectedValues instanceof Array) {
+                selectedValues = this.options.selectedValues;
+            } else if (typeof (this.options.selectedValues) == "function") {
+                selectedValues = this.options.selectedValues();
+            }
+            if (selectedValues instanceof Array) {
+                return selectedValues.includes(value);
+            }
+            return false;
         },
         buildOption : function(option) {
             if (typeof (this.options.buildOption) == "function") {
@@ -264,6 +287,8 @@
         indexProperty : undefined, // 索引的属性名，设置了才生成索引
         buildOption : undefined, // 自定义选项构建函数
         optionTag : undefined,
+        data : [], // 加入的数据清单
+        selectedValues : [], // 初始选中的值清单
         onRendered : function() { // 渲染完之后的事件处理函数
         }
     };
