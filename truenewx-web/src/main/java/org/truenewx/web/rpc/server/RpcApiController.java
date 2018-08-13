@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -20,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -41,7 +41,10 @@ import org.truenewx.core.util.PropertyMeta;
 import org.truenewx.data.rpc.annotation.RpcProperty;
 import org.truenewx.web.rpc.serializer.RpcSerializer;
 import org.truenewx.web.rpc.server.annotation.RpcController;
+import org.truenewx.web.rpc.server.annotation.RpcMethod;
+import org.truenewx.web.rpc.server.annotation.RpcResult;
 import org.truenewx.web.rpc.server.annotation.RpcResultFilter;
+import org.truenewx.web.rpc.server.meta.NoSuchRpcMethodException;
 import org.truenewx.web.rpc.server.meta.RpcControllerMeta;
 import org.truenewx.web.rpc.server.meta.RpcMethodMeta;
 import org.truenewx.web.rpc.server.meta.RpcTypeMeta;
@@ -55,7 +58,7 @@ import org.truenewx.web.util.WebUtil;
  * @author jianglei
  * @since JDK 1.8
  */
-@Controller
+@RpcController
 @RequestMapping("/rpc/api")
 public class RpcApiController {
 
@@ -198,6 +201,40 @@ public class RpcApiController {
         return null;
     }
 
+    @RpcMethod(result = @RpcResult(filter = @RpcResultFilter(type = EnumItem.class, includes = {
+            "key", "caption" })))
+    public Collection<EnumItem> argEnumItems(String beanId, String methodName, int argCount,
+            int argIndex) {
+        RpcVariableMeta argMeta = this.server.getArgMeta(beanId, methodName, argCount, argIndex);
+        if (argMeta == null) {
+            throw new IllegalArgumentException(
+                    methodName + "(" + NoSuchRpcMethodException.getArgExpression(argCount)
+                            + ") in RpcController(beanId='" + beanId
+                            + "') don't contains arg(index=" + argIndex + ")");
+        }
+        RpcTypeMeta typeMeta = argMeta.getType();
+        Class<?> clazz = typeMeta.getType();
+        if (!clazz.isEnum()) {
+            throw new IllegalArgumentException(
+                    methodName + "(" + NoSuchRpcMethodException.getArgExpression(argCount)
+                            + ") in RpcController(beanId='" + beanId + "') whose arg(index="
+                            + argIndex + ") is not enum");
+        }
+        @SuppressWarnings("unchecked")
+        Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
+        String subtype = this.server.getEnumSubType(beanId, methodName, argCount, enumClass);
+        Locale locale = SpringWebContext.getLocale();
+        EnumType enumType = this.enumDictResolver.getEnumType(enumClass.getName(), subtype, locale);
+        if (enumType == null) {
+            String message = "No such enum type: " + enumClass.getName();
+            if (StringUtils.isNotBlank(subtype)) {
+                message += " for subtype '" + subtype + "'";
+            }
+            throw new IllegalArgumentException(message);
+        }
+        return enumType.getItems();
+    }
+
     @RequestMapping("/{beanId}/{methodName}/{argCount}/arg/{argType}/properties") // 必须带后缀结尾，否则argType中包含.，将被识别为扩展名
     @ResponseBody
     public String argProperties(@PathVariable("beanId") String beanId,
@@ -242,8 +279,8 @@ public class RpcApiController {
         List<RpcVariableMeta> metas;
         if (clazz.isEnum()) {
             Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
-            String subType = this.server.getEnumSubType(beanId, methodName, argCount, enumClass);
-            metas = getConstantMetas(enumClass, subType);
+            String subtype = this.server.getEnumSubType(beanId, methodName, argCount, enumClass);
+            metas = getConstantMetas(enumClass, subtype);
         } else {
             Collection<PropertyMeta> propertyMetas = ClassUtil.findPropertyMetas(clazz, false, true,
                     true, argTypeMeta.getIncludes(), argTypeMeta.getExcludes());
@@ -253,8 +290,8 @@ public class RpcApiController {
     }
 
     private List<RpcVariableMeta> getConstantMetas(Class<? extends Enum<?>> enumClass,
-            String subType) {
-        EnumType enumType = this.enumDictResolver.getEnumType(enumClass.getName(), subType,
+            String subtype) {
+        EnumType enumType = this.enumDictResolver.getEnumType(enumClass.getName(), subtype,
                 SpringWebContext.getLocale());
         if (enumType != null) {
             List<RpcVariableMeta> metas = new ArrayList<>();
@@ -332,8 +369,8 @@ public class RpcApiController {
         List<RpcVariableMeta> metas;
         if (clazz.isEnum()) {
             Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
-            String subType = this.server.getEnumSubType(beanId, methodName, argCount, enumClass);
-            metas = getConstantMetas(enumClass, subType);
+            String subtype = this.server.getEnumSubType(beanId, methodName, argCount, enumClass);
+            metas = getConstantMetas(enumClass, subtype);
         } else {
             RpcResultFilter filter = this.server.getResultFilter(beanId, methodName, argCount,
                     clazz);
