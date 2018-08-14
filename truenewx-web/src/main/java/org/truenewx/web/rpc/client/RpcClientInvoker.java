@@ -12,7 +12,7 @@ import org.truenewx.core.exception.AjaxException;
 import org.truenewx.core.tuple.Binate;
 import org.truenewx.core.util.ClientRequestSupport;
 import org.truenewx.web.rpc.serializer.RpcSerializer;
-import org.truenewx.web.spring.servlet.handler.BusinessExceptionResolver;
+import org.truenewx.web.spring.servlet.handler.HandledError;
 
 /**
  * RPC客户端调用器
@@ -81,7 +81,7 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
         case HttpServletResponse.SC_OK: { // 正常
             return content;
         }
-        case BusinessExceptionResolver.SC_BUSINESS_ERROR: { // 业务异常
+        case HandledError.SC_HANDLED_ERROR: { // 业务异常
             throw new AjaxException(this.serializer.deserialize(content, Map.class));
         }
         default: { // 其他错误

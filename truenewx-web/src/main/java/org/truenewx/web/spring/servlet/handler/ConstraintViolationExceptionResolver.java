@@ -40,7 +40,7 @@ public class ConstraintViolationExceptionResolver extends AbstractHandlerExcepti
     protected MessageSource messageSource;
 
     @Override
-    public void setMessageSource(final MessageSource messageSource) {
+    public void setMessageSource(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
 
@@ -50,56 +50,56 @@ public class ConstraintViolationExceptionResolver extends AbstractHandlerExcepti
     private FormatExceptionMessageResolver messageResolver;
 
     @Autowired
-    public void setMessageResolver(final FormatExceptionMessageResolver messageResolver) {
+    public void setMessageResolver(FormatExceptionMessageResolver messageResolver) {
         this.messageResolver = messageResolver;
     }
 
-    public void setErrorPage(final String errorPage) {
+    public void setErrorPage(String errorPage) {
         this.errorPage = errorPage;
     }
 
     @Override
-    protected ModelAndView doResolveException(final HttpServletRequest request,
-            final HttpServletResponse response, final Object handler, final Exception ex) {
+    protected ModelAndView doResolveException(HttpServletRequest request,
+            HttpServletResponse response, Object handler, Exception ex) {
         if (ex instanceof ConstraintViolationException) {
-            final ConstraintViolationException e = (ConstraintViolationException) ex;
-            final Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
+            ConstraintViolationException e = (ConstraintViolationException) ex;
+            Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
             if (violations != null && violations.size() > 0) {
                 if (WebUtil.isAjaxRequest(request)) { // AJAX请求
-                    final List<BusinessError> errors = new ArrayList<>();
+                    List<HandledError> errors = new ArrayList<>();
                     if (violations.size() == 1) {
-                        final ConstraintViolation<?> violation = AlgoFirst.visit(violations, null);
-                        final FormatException fe = buildFormatException(violation, request);
-                        final String message = this.messageResolver.resolveMessage(fe,
+                        ConstraintViolation<?> violation = AlgoFirst.visit(violations, null);
+                        FormatException fe = buildFormatException(violation, request);
+                        String message = this.messageResolver.resolveMessage(fe,
                                 request.getLocale());
-                        errors.add(new BusinessError(fe.getBeanClass().getName(), message));
+                        errors.add(new HandledError(fe.getBeanClass().getName(), message));
                     } else {
-                        for (final ConstraintViolation<?> violation : violations) {
-                            final FormatException fe = buildFormatException(violation, request);
-                            final String message = this.messageResolver.resolveMessage(fe,
+                        for (ConstraintViolation<?> violation : violations) {
+                            FormatException fe = buildFormatException(violation, request);
+                            String message = this.messageResolver.resolveMessage(fe,
                                     request.getLocale());
-                            errors.add(new BusinessError(fe.getBeanClass().getName(), message));
+                            errors.add(new HandledError(fe.getBeanClass().getName(), message));
                         }
                     }
                     if (!errors.isEmpty()) {
                         try {
-                            final Map<String, Object> map = new HashMap<>();
+                            Map<String, Object> map = new HashMap<>();
                             map.put("errors", errors);
                             response.getWriter().print(JsonUtil.toJson(map));
-                            response.setStatus(500);
+                            response.setStatus(HandledError.SC_HANDLED_ERROR);
                             return new ModelAndView();
-                        } catch (final IOException iex) {
+                        } catch (IOException iex) {
                             this.logger.error(iex.getMessage(), iex);
                         }
                     }
                 } else {
                     if (violations.size() == 1) {
-                        final ConstraintViolation<?> violation = AlgoFirst.visit(violations, null);
-                        final FormatException fe = buildFormatException(violation, request);
+                        ConstraintViolation<?> violation = AlgoFirst.visit(violations, null);
+                        FormatException fe = buildFormatException(violation, request);
                         applyException(request, fe);
                     } else {
-                        final MultiException me = new MultiException();
-                        for (final ConstraintViolation<?> violation : violations) {
+                        MultiException me = new MultiException();
+                        for (ConstraintViolation<?> violation : violations) {
                             me.add(buildFormatException(violation, request));
                         }
                         applyException(request, me);
@@ -111,16 +111,16 @@ public class ConstraintViolationExceptionResolver extends AbstractHandlerExcepti
         return null;
     }
 
-    private FormatException buildFormatException(final ConstraintViolation<?> violation,
-            final HttpServletRequest request) {
-        final String property = violation.getPropertyPath().toString();
-        final String message = this.messageSource.getMessage(
+    private FormatException buildFormatException(ConstraintViolation<?> violation,
+            HttpServletRequest request) {
+        String property = violation.getPropertyPath().toString();
+        String message = this.messageSource.getMessage(
                 violation.getMessage().replace("{", "").replace("}", ""), null,
                 violation.getMessage(), request.getLocale());
         return new FormatException(violation.getRootBeanClass(), property, message);
     }
 
-    private void applyException(final HttpServletRequest request, final HandleableException e) {
+    private void applyException(HttpServletRequest request, HandleableException e) {
         request.setAttribute(ErrorTagSupport.EXCEPTION_KEY, e);
     }
 

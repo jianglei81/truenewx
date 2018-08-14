@@ -38,11 +38,6 @@ import org.truenewx.web.validation.generate.HandlerValidationGenerator;
  */
 public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver {
     /**
-     * 响应状态码：业务错误
-     */
-    public static final int SC_BUSINESS_ERROR = HttpServletResponse.SC_CONFLICT; // 对当前资源状态，请求不能完成
-
-    /**
      * 业务异常消息解析器
      */
     private BusinessExceptionMessageResolver messageResolver;
@@ -52,23 +47,23 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
     private HandlerValidationGenerator handlerValidationGenerator;
 
     @Autowired
-    public void setMessageResolver(final BusinessExceptionMessageResolver messageResolver) {
+    public void setMessageResolver(BusinessExceptionMessageResolver messageResolver) {
         this.messageResolver = messageResolver;
     }
 
     @Autowired
     public void setHandlerValidationGenerator(
-            final HandlerValidationGenerator handlerValidationGenerator) {
+            HandlerValidationGenerator handlerValidationGenerator) {
         this.handlerValidationGenerator = handlerValidationGenerator;
     }
 
     @Override
-    protected ModelAndView doResolveException(final HttpServletRequest request,
-            final HttpServletResponse response, final Object handler, final Exception e) {
+    protected ModelAndView doResolveException(HttpServletRequest request,
+            HttpServletResponse response, Object handler, Exception e) {
         ModelAndView mav = null;
         if (handler instanceof HandlerMethod) {
-            final HandlerMethod handlerMethod = (HandlerMethod) handler;
-            final HandleableExceptionMessage hem = handlerMethod
+            HandlerMethod handlerMethod = (HandlerMethod) handler;
+            HandleableExceptionMessage hem = handlerMethod
                     .getMethodAnnotation(HandleableExceptionMessage.class);
             if (hem != null) {
                 mav = handleExceptionToMessage(e, request.getLocale(), response,
@@ -93,34 +88,34 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
      *            是否返回表示业务异常的Response错误状态码
      * @return 模型视图
      */
-    private ModelAndView handleExceptionToMessage(final Exception e, final Locale locale,
-            final HttpServletResponse response, final boolean respondErrorStatus) {
-        final List<BusinessError> errors = new ArrayList<>();
+    private ModelAndView handleExceptionToMessage(Exception e, Locale locale,
+            HttpServletResponse response, boolean respondErrorStatus) {
+        List<HandledError> errors = new ArrayList<>();
         if (e instanceof BusinessException) { // 业务异常，转换错误消息
-            final BusinessException be = (BusinessException) e;
-            final String message = this.messageResolver.resolveMessage(be, locale);
-            errors.add(new BusinessError(be.getCode(), message, be.getProperty()));
+            BusinessException be = (BusinessException) e;
+            String message = this.messageResolver.resolveMessage(be, locale);
+            errors.add(new HandledError(be.getCode(), message, be.getProperty()));
         } else if (e instanceof MultiException) { // 业务异常集，转换错误消息
-            final MultiException me = (MultiException) e;
-            for (final SingleException se : me) {
+            MultiException me = (MultiException) e;
+            for (SingleException se : me) {
                 if (se instanceof BusinessException) {
-                    final BusinessException be = (BusinessException) se;
-                    final String message = BusinessExceptionResolver.this.messageResolver
+                    BusinessException be = (BusinessException) se;
+                    String message = BusinessExceptionResolver.this.messageResolver
                             .resolveMessage(be, locale);
-                    errors.add(new BusinessError(be.getCode(), message, be.getProperty()));
+                    errors.add(new HandledError(be.getCode(), message, be.getProperty()));
                 }
             }
         }
         if (!errors.isEmpty()) {
             try {
-                final Map<String, Object> map = new HashMap<>();
+                Map<String, Object> map = new HashMap<>();
                 map.put("errors", errors);
                 response.getWriter().print(JsonUtil.toJson(map));
                 if (respondErrorStatus) {
-                    response.setStatus(SC_BUSINESS_ERROR);
+                    response.setStatus(HandledError.SC_HANDLED_ERROR);
                 }
                 return new ModelAndView();
-            } catch (final IOException ex) {
+            } catch (IOException ex) {
                 this.logger.error(e.getMessage(), e);
             }
         }
@@ -140,11 +135,11 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
      *
      * @author jianglei
      */
-    private ModelAndView handleExceptionToPage(final HttpServletRequest request,
-            final HandlerMethod handlerMethod, final HandleableException he) {
-        final ModelAndView mav = new ModelAndView(HandleableExceptionResult.DEFAULT_VIEW);
+    private ModelAndView handleExceptionToPage(HttpServletRequest request,
+            HandlerMethod handlerMethod, HandleableException he) {
+        ModelAndView mav = new ModelAndView(HandleableExceptionResult.DEFAULT_VIEW);
         mav.addObject("ajaxRequest", WebUtil.isAjaxRequest(request));
-        final HandleableExceptionResult her = handlerMethod
+        HandleableExceptionResult her = handlerMethod
                 .getMethodAnnotation(HandleableExceptionResult.class);
         if (her != null) {
             String view = her.value();
@@ -158,10 +153,10 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
                 WebUtil.copyParameters2Attributes(request);
             }
             if (her.handler()) { // 自定义处理器
-                final Object controller = handlerMethod.getBean();
+                Object controller = handlerMethod.getBean();
                 if (controller instanceof HandleableExceptionHandler) {
-                    final HandleableExceptionHandler exceptionHandler = (HandleableExceptionHandler) controller;
-                    final Method method = handlerMethod.getMethod();
+                    HandleableExceptionHandler exceptionHandler = (HandleableExceptionHandler) controller;
+                    Method method = handlerMethod.getMethod();
                     exceptionHandler.handleException(method.getName(), he, mav);
                 }
             }
@@ -174,12 +169,12 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
     }
 
     @Override
-    protected void logException(final Exception ex, final HttpServletRequest request) {
+    protected void logException(Exception ex, HttpServletRequest request) {
         if (ex instanceof BusinessException) {
             logException((BusinessException) ex);
         } else if (ex instanceof MultiException) {
-            final MultiException me = (MultiException) ex;
-            for (final SingleException se : me) {
+            MultiException me = (MultiException) ex;
+            for (SingleException se : me) {
                 if (se instanceof BusinessException) {
                     logException((BusinessException) se);
                 }
@@ -195,10 +190,10 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
      * @param e
      *            业务异常
      */
-    private void logException(final BusinessException e) {
+    private void logException(BusinessException e) {
         if (this.logger.isErrorEnabled()) {
-            final StringBuffer message = new StringBuffer(e.getCode());
-            final String args = StringUtils.join(e.getArgs(), Strings.COMMA);
+            StringBuffer message = new StringBuffer(e.getCode());
+            String args = StringUtils.join(e.getArgs(), Strings.COMMA);
             if (args.length() > 0) {
                 message.append(Strings.COLON).append(args);
             }
