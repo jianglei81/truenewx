@@ -16,6 +16,7 @@ import javax.servlet.jsp.tagext.SimpleTagSupport;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSource;
 import org.truenewx.core.Strings;
 import org.truenewx.core.spring.util.SpringUtil;
 import org.truenewx.web.spring.util.SpringWebUtil;
@@ -31,11 +32,11 @@ public class SimpleDynamicAttributeTagSupport extends SimpleTagSupport
     /**
      * 属性名-值映射集
      */
-    protected Map<String, Object> attributes = new HashMap<>();
+    protected final Map<String, Object> attributes = new HashMap<>();
 
     @Override
-    public final void setDynamicAttribute(final String uri, final String localName,
-            final Object value) throws JspException {
+    public void setDynamicAttribute(String uri, String localName, Object value)
+            throws JspException {
         if (value != null) {
             this.attributes.put(localName, value);
         }
@@ -48,10 +49,10 @@ public class SimpleDynamicAttributeTagSupport extends SimpleTagSupport
      *            忽略的属性
      * @return 属性串
      */
-    protected String joinAttributes(final String... ignoredAttributes) {
-        final StringBuffer sb = new StringBuffer();
-        for (final Entry<String, Object> entry : this.attributes.entrySet()) {
-            final String name = entry.getKey();
+    protected final String joinAttributes(String... ignoredAttributes) {
+        StringBuffer sb = new StringBuffer();
+        for (Entry<String, Object> entry : this.attributes.entrySet()) {
+            String name = entry.getKey();
             if (!ArrayUtils.contains(ignoredAttributes, name)) {
                 sb.append(Strings.SPACE).append(name).append(Strings.EQUAL)
                         .append(Strings.DOUBLE_QUOTES).append(entry.getValue())
@@ -80,8 +81,8 @@ public class SimpleDynamicAttributeTagSupport extends SimpleTagSupport
      *            bean类型
      * @return bean对象
      */
-    protected final <T> T getBeanFromApplicationContext(final Class<T> beanClass) {
-        final ApplicationContext context = SpringWebUtil.getApplicationContext(getPageContext());
+    protected final <T> T getBeanFromApplicationContext(Class<T> beanClass) {
+        ApplicationContext context = SpringWebUtil.getApplicationContext(getPageContext());
         if (context != null) {
             return SpringUtil.getFirstBeanByClass(context, beanClass);
         }
@@ -102,10 +103,15 @@ public class SimpleDynamicAttributeTagSupport extends SimpleTagSupport
      *             如果EL表达式错误
      */
     @SuppressWarnings("unchecked")
-    protected final <T> T getElExpressionValue(final String attributeName, final String expression,
-            final Class<T> expectedType) throws JspException {
+    protected final <T> T getElExpressionValue(String attributeName, String expression,
+            Class<T> expectedType) throws JspException {
         return (T) ExpressionEvaluatorManager.evaluate(attributeName, expression, expectedType,
                 getPageContext());
+    }
+
+    protected final String getMessage(String code, Object... args) {
+        MessageSource messageSource = getBeanFromApplicationContext(MessageSource.class);
+        return messageSource.getMessage(code, args, code, getLocale());
     }
 
     /**
@@ -116,10 +122,10 @@ public class SimpleDynamicAttributeTagSupport extends SimpleTagSupport
      * @throws IOException
      *             如果出现输出错误
      */
-    protected final void print(final Object... values) throws IOException {
+    protected final void print(Object... values) throws IOException {
         if (values != null) {
-            final JspWriter writer = getJspContext().getOut();
-            for (final Object value : values) {
+            JspWriter writer = getJspContext().getOut();
+            for (Object value : values) {
                 writer.print(value);
             }
         }
