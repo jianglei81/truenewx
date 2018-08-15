@@ -27,7 +27,7 @@ public class RadioTag extends ItemTagSupport {
         }
         print(" value=\"", value, "\"");
         print(joinAttributes("id", "name", "value"));
-        if (isSelectedValue(value)) {
+        if (isCurrentValue(value)) {
             print(" checked=\"checked\"");
         }
         print("/>", text, Strings.ENTER);

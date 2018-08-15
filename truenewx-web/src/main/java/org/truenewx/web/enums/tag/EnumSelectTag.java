@@ -23,7 +23,7 @@ public class EnumSelectTag extends EnumItemTagSupport {
     @Override
     protected void resolveItem(final String value, final String text) throws IOException {
         print("  <option value=", Strings.DOUBLE_QUOTES, value, Strings.DOUBLE_QUOTES);
-        if (isSelectedValue(value)) {
+        if (isCurrentValue(value)) {
             print(" selected=\"selected\"");
         }
         print(">", text, "</option>", Strings.ENTER);

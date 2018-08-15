@@ -24,8 +24,8 @@ public class EnumCheckBoxTag extends EnumItemTagSupport {
     }
 
     @Override
-    protected boolean isSelectedValue(Object value) {
-        boolean result = super.isSelectedValue(value);
+    protected boolean isCurrentValue(Object value) {
+        boolean result = super.isCurrentValue(value);
         if (!result) {
             String[] values;
             if (this.value instanceof String) {
@@ -34,6 +34,9 @@ public class EnumCheckBoxTag extends EnumItemTagSupport {
                 values = (String[]) this.value;
             } else {
                 return false;
+            }
+            if (value != null) {
+                value = value.toString();
             }
             return ArrayUtils.contains(values, value);
         }
@@ -49,7 +52,7 @@ public class EnumCheckBoxTag extends EnumItemTagSupport {
         }
         print(" value=\"", value, "\"");
         print(joinAttributes("id", "value"));
-        if (isSelectedValue(value)) {
+        if (isCurrentValue(value)) {
             print(" checked=\"checked\"");
         }
         print("/> ", text, Strings.ENTER);

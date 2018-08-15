@@ -43,7 +43,7 @@ public class EnumRadioTag extends EnumItemTagSupport {
         }
         print(" value=\"", value, "\"");
         print(joinAttributes("id", "name", "value"));
-        if (isSelectedValue(value)) {
+        if (isCurrentValue(value)) {
             print(" checked=\"checked\"");
         }
         print("/>", text, Strings.ENTER);

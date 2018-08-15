@@ -127,21 +127,17 @@ public abstract class ItemTagSupport extends UiTagSupport {
     }
 
     /**
-     * 判断指定取值是否当前选中值
+     * 判断指定取值是否当前值
      *
      * @param value
      *            取值
      * @return 指定取值是否当前值
      */
-    protected boolean isSelectedValue(Object value) {
-        // null等于""
-        if (value == null) {
-            value = Strings.EMPTY;
-        }
+    protected boolean isCurrentValue(Object value) {
         if (this.value == null) {
             this.value = Strings.EMPTY;
         }
-        return value.equals(this.value);
+        return this.value.equals(value);
     }
 
     protected abstract void resolveItem(String value, String text) throws IOException;

@@ -20,8 +20,8 @@ public class CheckBoxTag extends ItemTagSupport {
     }
 
     @Override
-    protected boolean isSelectedValue(Object value) {
-        boolean result = super.isSelectedValue(value);
+    protected boolean isCurrentValue(Object value) {
+        boolean result = super.isCurrentValue(value);
         if (!result) {
             String[] values;
             if (this.value instanceof String) {
@@ -45,7 +45,7 @@ public class CheckBoxTag extends ItemTagSupport {
         }
         print(Strings.SPACE, "value=\"", value, "\"");
         print(joinAttributes("id", "value"));
-        if (isSelectedValue(value)) {
+        if (isCurrentValue(value)) {
             print(" checked=\"checked\"");
         }
         print("/> ", text, Strings.ENTER);

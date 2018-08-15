@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
 
+import org.truenewx.core.Strings;
 import org.truenewx.core.enums.support.EnumDictResolver;
 import org.truenewx.core.enums.support.EnumItem;
 import org.truenewx.core.enums.support.EnumType;
@@ -19,20 +20,18 @@ public abstract class EnumItemTagSupport extends ItemTagSupport {
     protected String type;
     protected String subtype;
 
-    public final void setType(final String type) throws JspException {
+    public void setType(String type) throws JspException {
         this.type = getElExpressionValue("type", type, String.class);
     }
 
-    public final void setSubtype(final String subtype) throws JspException {
+    public void setSubtype(String subtype) throws JspException {
         this.subtype = getElExpressionValue("subtype", subtype, String.class);
     }
 
     @Override
-    public final void doTag() throws JspException, IOException {
-        final EnumDictResolver enumDictResolver = getBeanFromApplicationContext(
-                EnumDictResolver.class);
-        final EnumType enumType = enumDictResolver.getEnumType(this.type, this.subtype,
-                getLocale());
+    public void doTag() throws JspException, IOException {
+        EnumDictResolver enumDictResolver = getBeanFromApplicationContext(EnumDictResolver.class);
+        EnumType enumType = enumDictResolver.getEnumType(this.type, this.subtype, getLocale());
         if (enumType != null) {
             this.items = enumType.getItems();
             super.doTag();
@@ -40,12 +39,20 @@ public abstract class EnumItemTagSupport extends ItemTagSupport {
     }
 
     @Override
-    protected String getItemValue(final Object item) {
+    protected boolean isCurrentValue(Object value) {
+        if (this.value == null) {
+            this.value = Strings.EMPTY;
+        }
+        return this.value.toString().equals(value.toString());
+    }
+
+    @Override
+    protected String getItemValue(Object item) {
         return ((EnumItem) item).getKey();
     }
 
     @Override
-    protected String getItemText(final Object item) {
+    protected String getItemText(Object item) {
         return ((EnumItem) item).getCaption();
     }
 
