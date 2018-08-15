@@ -8,7 +8,7 @@ import org.truenewx.web.enums.tagext.EnumItemTagSupport;
 
 /**
  * 基于枚举的单选框标签
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -31,19 +31,19 @@ public class EnumRadioTag extends EnumItemTagSupport {
     }
 
     @Override
-    protected void resolveItem(final String value, final String text) throws IOException {
+    protected void resolveItem(String value, String text) throws IOException {
         print("<input type=\"radio\"");
-        final String name = getName();
+        String name = getName();
         if (StringUtils.isNotBlank(name)) {
             print(" name=\"", name, "\"");
         }
-        final String id = getId();
+        String id = getId();
         if (StringUtils.isNotBlank(id)) {
             print(Strings.SPACE, id, Strings.UNDERLINE, value);
         }
         print(" value=\"", value, "\"");
         print(joinAttributes("id", "name", "value"));
-        if (isCurrentValue(value)) {
+        if (isSelectedValue(value)) {
             print(" checked=\"checked\"");
         }
         print("/>", text, Strings.ENTER);

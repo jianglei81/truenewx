@@ -54,12 +54,12 @@ public abstract class ItemTagSupport extends UiTagSupport {
 
     public final void setItemValueProperty(final String itemValueProperty) throws JspException {
         this.itemValueProperty = getElExpressionValue("itemValueProperty", itemValueProperty,
-                        String.class);
+                String.class);
     }
 
     public final void setItemTextProperty(final String itemTextProperty) throws JspException {
         this.itemTextProperty = getElExpressionValue("itemTextProperty", itemTextProperty,
-                        String.class);
+                String.class);
     }
 
     public final void setSeparator(final String separator) throws JspException {
@@ -116,7 +116,7 @@ public abstract class ItemTagSupport extends UiTagSupport {
             text = ((Entry<?, ?>) item).getValue();
         } else if (item instanceof Enum) {
             final EnumDictResolver enumDictResolver = getBeanFromApplicationContext(
-                            EnumDictResolver.class);
+                    EnumDictResolver.class);
             return enumDictResolver.getText((Enum<?>) item, getLocale());
         } else if (StringUtils.isNotBlank(this.itemTextProperty)) {
             text = BeanUtil.getPropertyValue(item, this.itemTextProperty);
@@ -127,13 +127,13 @@ public abstract class ItemTagSupport extends UiTagSupport {
     }
 
     /**
-     * 判断指定取值是否当前值
+     * 判断指定取值是否当前选中值
      *
      * @param value
      *            取值
      * @return 指定取值是否当前值
      */
-    protected boolean isCurrentValue(String value) {
+    protected boolean isSelectedValue(Object value) {
         // null等于""
         if (value == null) {
             value = Strings.EMPTY;
@@ -141,7 +141,7 @@ public abstract class ItemTagSupport extends UiTagSupport {
         if (this.value == null) {
             this.value = Strings.EMPTY;
         }
-        return value.equals(this.value.toString());
+        return value.equals(this.value);
     }
 
     protected abstract void resolveItem(String value, String text) throws IOException;

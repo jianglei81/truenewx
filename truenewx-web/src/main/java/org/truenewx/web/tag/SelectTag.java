@@ -25,7 +25,7 @@ public class SelectTag extends ItemTagSupport {
     @Override
     protected void resolveItem(String value, String text) throws IOException {
         print("  <option value=", Strings.DOUBLE_QUOTES, value, Strings.DOUBLE_QUOTES);
-        if (isCurrentValue(value)) {
+        if (isSelectedValue(value)) {
             print(" selected=\"selected\"");
         }
         print(">", text, "</option>", Strings.ENTER);

@@ -15,13 +15,13 @@ import org.truenewx.web.tagext.ItemTagSupport;
  */
 public class CheckBoxTag extends ItemTagSupport {
 
-    public void setValue(final String[] value) {
+    public void setValue(String[] value) {
         super.setValue(value);
     }
 
     @Override
-    protected boolean isCurrentValue(final String value) {
-        final boolean result = super.isCurrentValue(value);
+    protected boolean isSelectedValue(Object value) {
+        boolean result = super.isSelectedValue(value);
         if (!result) {
             String[] values;
             if (this.value instanceof String) {
@@ -37,15 +37,15 @@ public class CheckBoxTag extends ItemTagSupport {
     }
 
     @Override
-    protected void resolveItem(final String value, final String text) throws IOException {
+    protected void resolveItem(String value, String text) throws IOException {
         print("<input type=\"checkbox\"");
-        final String id = getId();
+        String id = getId();
         if (StringUtils.isNotBlank(id)) {
             print(Strings.SPACE, "id=\"", id, Strings.UNDERLINE, value, "\"");
         }
         print(Strings.SPACE, "value=\"", value, "\"");
         print(joinAttributes("id", "value"));
-        if (isCurrentValue(value)) {
+        if (isSelectedValue(value)) {
             print(" checked=\"checked\"");
         }
         print("/> ", text, Strings.ENTER);

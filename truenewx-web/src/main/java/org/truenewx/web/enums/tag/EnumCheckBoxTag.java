@@ -15,8 +15,8 @@ import org.truenewx.web.enums.tagext.EnumItemTagSupport;
  */
 public class EnumCheckBoxTag extends EnumItemTagSupport {
 
-    public void setValues(final Enum<?>[] value) {
-        final String[] array = new String[value.length];
+    public void setValues(Enum<?>[] value) {
+        String[] array = new String[value.length];
         for (int i = 0; i < value.length; i++) {
             array[i] = value[i].name();
         }
@@ -24,8 +24,8 @@ public class EnumCheckBoxTag extends EnumItemTagSupport {
     }
 
     @Override
-    protected boolean isCurrentValue(final String value) {
-        final boolean result = super.isCurrentValue(value);
+    protected boolean isSelectedValue(Object value) {
+        boolean result = super.isSelectedValue(value);
         if (!result) {
             String[] values;
             if (this.value instanceof String) {
@@ -41,15 +41,15 @@ public class EnumCheckBoxTag extends EnumItemTagSupport {
     }
 
     @Override
-    protected void resolveItem(final String value, final String text) throws IOException {
+    protected void resolveItem(String value, String text) throws IOException {
         print("<input type=\"checkbox\"");
-        final String id = getId();
+        String id = getId();
         if (StringUtils.isNotBlank(id)) {
-            print(Strings.SPACE, "id=\"", id, Strings.UNDERLINE, value, "\"");
+            print(" id=\"", id, Strings.UNDERLINE, value, "\"");
         }
-        print(Strings.SPACE, "value=\"", value, "\"");
+        print(" value=\"", value, "\"");
         print(joinAttributes("id", "value"));
-        if (isCurrentValue(value)) {
+        if (isSelectedValue(value)) {
             print(" checked=\"checked\"");
         }
         print("/> ", text, Strings.ENTER);
