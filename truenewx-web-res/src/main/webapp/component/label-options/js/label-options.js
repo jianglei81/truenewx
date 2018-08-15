@@ -211,8 +211,7 @@
                     chars[i] = condition.substr(i, 1);
                 }
                 var _this = this;
-                var options = $("[data-" + this.options.indexProperty + "]:not([theme])",
-                        this.element);
+                var options = $(".option:not([theme])", this.element);
                 options.each(function() {
                     var $option = $(this);
                     var text = $option.text();
