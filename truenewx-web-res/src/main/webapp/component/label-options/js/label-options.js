@@ -40,6 +40,14 @@
                     _this.addOption(option);
                 });
             }
+            if (this.options.filterInput) { // 如果指定了过滤输入器，则绑定过滤输入器事件
+                var filterInput = $(this.options.filterInput);
+                filterInput.keyup(function() {
+                    var condition = $(this).val();
+                    _this.filter(condition);
+                });
+            }
+            this.element.removeClass("hidden");
             if (typeof (this.options.onRendered) == "function") {
                 this.options.onRendered.call(this.element);
             }
@@ -78,10 +86,15 @@
                 return false;
             }
             var selectedValues;
-            if (this.options.selectedValues instanceof Array) {
+            if (this.options.selectedValues instanceof Array) { // 已选值数组
                 selectedValues = this.options.selectedValues;
-            } else if (typeof (this.options.selectedValues) == "function") {
+            } else if (typeof (this.options.selectedValues) == "function") { // 获取已选值数组的函数
                 selectedValues = this.options.selectedValues();
+            } else if (typeof (this.options.selectedValues) == "string") { // 承载已选值的DOM元素的选择器
+                selectedValues = [];
+                $(this.options.selectedValues).each(function() {
+                    selectedValues.push($(this).val());
+                });
             }
             if (selectedValues instanceof Array) {
                 return selectedValues.includes(value);
@@ -289,6 +302,7 @@
         optionTag : undefined,
         data : [], // 加入的数据清单
         selectedValues : [], // 初始选中的值清单
+        filterInput : undefined, // 过滤输入器，可以是jQuery对象，DOM元素，或者字符串型的选择器
         onRendered : function() { // 渲染完之后的事件处理函数
         }
     };
