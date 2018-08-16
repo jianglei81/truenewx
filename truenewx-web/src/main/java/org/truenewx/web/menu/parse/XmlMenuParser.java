@@ -155,7 +155,13 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
             }
         }
         String role = element.attributeValue("role");
-        return new Authority(role, permission);
+        Authority authority = new Authority(role, permission);
+        String caption = element.attributeValue("caption");
+        if (caption != null) {
+            authority.setCaption(caption);
+        }
+        authority.getCaptions().putAll(getCaptions(element));
+        return authority;
     }
 
     /**

@@ -64,10 +64,13 @@
             <xs:documentation>菜单项动作，用于配置权限</xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element ref="link" minOccurs="0" maxOccurs="unbounded" />
-                <xs:element ref="rpc" minOccurs="0" maxOccurs="unbounded" />
-            </xs:choice>
+            <xs:sequence>
+                <xs:element ref="caption" minOccurs="0" maxOccurs="unbounded" />
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element ref="link" minOccurs="0" maxOccurs="unbounded" />
+                    <xs:element ref="rpc" minOccurs="0" maxOccurs="unbounded" />
+                </xs:choice>
+            </xs:sequence>
             <xs:attribute name="href" type="xs:string" use="optional" />
             <xs:attribute name="type" type="xs:string" use="optional">
                 <xs:annotation>
@@ -76,6 +79,7 @@
             </xs:attribute>
             <xs:attribute name="permission" type="xs:string" use="optional" />
             <xs:attribute name="role" type="xs:string" use="optional" />
+            <xs:attribute name="caption" type="xs:string" use="optional" />
         </xs:complexType>
     </xs:element>
     <xs:element name="link">

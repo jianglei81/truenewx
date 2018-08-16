@@ -1,6 +1,9 @@
 package org.truenewx.web.security.authority;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
@@ -16,6 +19,7 @@ public class Authority {
 
     private String role;
     private String permission;
+    private Map<Locale, String> captions = new HashMap<>();
     /**
      * 登录即可访问的权限
      */
@@ -32,6 +36,18 @@ public class Authority {
 
     public String getPermission() {
         return this.permission;
+    }
+
+    public Map<Locale, String> getCaptions() {
+        return this.captions;
+    }
+
+    public void setCaption(String caption) {
+        this.captions.put(Locale.getDefault(), caption);
+    }
+
+    public String getCaption() {
+        return this.captions.get(Locale.getDefault());
     }
 
     public boolean isNotEmpty() {
