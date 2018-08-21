@@ -200,10 +200,9 @@ public class RpcApiController extends RpcControllerSupport {
         return null;
     }
 
-    @RpcMethod(result = @RpcResult(filter = @RpcResultFilter(type = EnumItem.class, includes = {
-            "key", "caption" })))
-    public Collection<EnumItem> argEnumItems(String beanId, String methodName, int argCount,
-            int argIndex) {
+    @RpcMethod(result = @RpcResult(
+            filter = @RpcResultFilter(type = EnumItem.class, includes = { "key", "caption" })))
+    public EnumType argEnumType(String beanId, String methodName, int argCount, int argIndex) {
         RpcVariableMeta argMeta = this.server.getArgMeta(beanId, methodName, argCount, argIndex);
         if (argMeta == null) {
             throw new IllegalArgumentException(
@@ -222,7 +221,7 @@ public class RpcApiController extends RpcControllerSupport {
         @SuppressWarnings("unchecked")
         Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
         String subtype = this.server.getEnumSubType(beanId, methodName, argCount, enumClass);
-        return getEnumItems(enumClass, subtype);
+        return getEnumType(enumClass, subtype);
     }
 
     @RequestMapping("/{beanId}/{methodName}/{argCount}/arg/{argType}/properties") // 必须带后缀结尾，否则argType中包含.，将被识别为扩展名
