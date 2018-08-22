@@ -1,6 +1,6 @@
 /**
  * truenewx.js v1.1.0
- * 
+ *
  * Depends on: sugar.js, jquery.js, jquery.json.js, bootstrap.js
  */
 
@@ -64,7 +64,7 @@ $.bootstrap = {
 
 /**
  * 等待指定断言为真后执行指定函数
- * 
+ *
  * @param predicate
  *            断言
  * @param func
@@ -87,7 +87,7 @@ $.wait = function(predicate, func, interval) {
 
 /**
  * 使当前DOM元素在指定容器中水平和垂直居中
- * 
+ *
  * @param container
  *            容器，不指定时为window
  */
@@ -134,7 +134,7 @@ $.fn.center = function(container) {
 
 /**
  * 闪现当前DOM元素
- * 
+ *
  * @param inDuration
  *            淡入耗时
  * @param stayDuration
@@ -233,7 +233,7 @@ $.Object = {
 $.String = {
     /**
      * 获取指定URL的上一级URL
-     * 
+     *
      * @param url
      *            URL
      */
@@ -243,7 +243,7 @@ $.String = {
     },
     /**
      * 获取相对于指定js文件的相对路径的绝对路径
-     * 
+     *
      * @param jsFileName
      *            js文件名
      * @param relativePath
@@ -280,14 +280,14 @@ $.String = {
     },
     /**
      * 对文本超长进行处理
-     * 
+     *
      * @param str
      *            需处理的文本
      * @param maxLen
      *            最大长度
      * @param replaceStr
      *            超长替换符
-     * 
+     *
      * @returns 处理后的文本
      */
     cut : function(str, maxLen, replaceStr) {
@@ -477,7 +477,7 @@ $.tnx = {
     },
     /**
      * 加载模板
-     * 
+     *
      * @param relativeUrl
      *            模板文件相对URL
      * @param baseFile
@@ -577,7 +577,7 @@ $.tnx = {
     },
     /**
      * 用模态窗体打开指定URL
-     * 
+     *
      * @param url
      *            URL
      * @param params
@@ -585,7 +585,8 @@ $.tnx = {
      * @param buttons
      *            按钮集，详见$.tnx.dialog()方法中关于按钮设置的说明
      * @param options
-     *            选项，形如：{ title: "标题", type: "GET", //或'POST'，默认为'GET' callback: function(){
+     *            选项，形如：{ title: "标题", type: "GET", //或'POST'，默认为'GET' callback:
+     *            function(){
      *            //窗体显示完全后调用的回调函数，其this为模态对话框窗体jquery对象，有一个参数为内容的容器jquery对象 } }
      */
     open : function(url, params, buttons, options) {
@@ -671,7 +672,7 @@ $.tnx = {
     },
     /**
      * 闪现对话框
-     * 
+     *
      * @param content
      *            内容
      * @param timeout
@@ -714,7 +715,7 @@ $.tnx = {
 $.tnx.pager = {
     /**
      * 指定每页显示大小
-     * 
+     *
      * @param pageSize
      *            页大小
      */
@@ -732,7 +733,7 @@ $.tnx.pager = {
     },
     /**
      * 跳转至指定页
-     * 
+     *
      * @param pageNo
      *            指定页
      */
@@ -778,9 +779,9 @@ $.tnx.pager = {
 /**
  * RPC
  */
+$.tnx.rpcs = {}; // RPC对象缓存
 $.tnx.rpc = {
     requestType : "POST",
-    cache : {},
     invoke : function(beanId, methodName, args, success, error, contextUrl) {
         if (typeof args == "function") {
             contextUrl = error;
@@ -837,7 +838,7 @@ $.tnx.rpc = {
     },
     /**
      * 处理响应中的错误
-     * 
+     *
      * @param response
      *            响应
      * @param error
@@ -900,12 +901,12 @@ $.tnx.rpc = {
             contextUrl = undefined;
         }
 
-        if (this.cache[beanId]) {
+        if ($.tnx.rpcs[beanId]) {
             if (callback) {
-                callback.call(this, this.cache[beanId]);
+                callback.call(this, $.tnx.rpcs[beanId]);
                 return;
             } else {
-                return this.cache[beanId];
+                return $.tnx.rpcs[beanId];
             }
         }
 
@@ -921,53 +922,94 @@ $.tnx.rpc = {
             dataType : "json",
             contentType : "application/x-www-form-urlencoded; charset=" + $.tnx.encoding // 不能更改
         };
-        if (callback) {
-            var _this = this;
-            options.async = true;
-            options.success = function(methodNames) {
-                var rpcObject = _this._buildRpcObject(beanId, methodNames, contextUrl);
-                _this.cache[beanId] = rpcObject;
+        var _this = this;
+        options.async = true;
+        options.success = function(methodNames) {
+            var rpcObject = _this._buildRpcObject(beanId, methodNames, contextUrl);
+            $.tnx.rpcs[beanId] = rpcObject;
+            if (callback) {
                 callback.call(_this, rpcObject);
             }
-            options.error = function(resp) {
-                _this._handleErrors(resp);
-            }
-            $.ajax(url, options);
-        } else {
-            var resp = $.ajax(url, options);
-            if (this._handleErrors(resp)) {
-                var methodNames = $.parseJSON(resp.responseText);
-                var rpcObject = this._buildRpcObject(beanId, methodNames, contextUrl);
-                this.cache[beanId] = rpcObject;
-                return rpcObject;
-            }
         }
+        options.error = function(resp) {
+            _this._handleErrors(resp);
+        }
+        $.ajax(url, options);
     },
     _buildRpcObject : function(beanId, methodNames, contextUrl) {
         var _this = this;
         var rpcObject = {};
         $.each(methodNames, function(index, methodName) {
-            rpcObject[methodName] = function() {
-                var success = undefined;
-                var error = undefined;
-                var length = arguments.length;
-                var paramLength = length;
-                if (length > 0 && typeof arguments[length - 1] == "function") { // 最后一个参数为函数
-                    success = arguments[length - 1];
-                    paramLength = length - 1;
-                }
-                if (length > 1 && typeof arguments[length - 2] == "function") { // 倒数第二个参数为函数
-                    error = success;
-                    success = arguments[length - 2];
-                    paramLength = length - 2;
-                }
-                var args = new Array();
-                for (var i = 0; i < paramLength; i++) {
-                    args.push(arguments[i]);
-                }
-                return _this.invoke(beanId, methodName, args, success, error, contextUrl);
-            };
+            rpcObject[methodName] = _this._buildRpcFunction(beanId, methodName, contextUrl);
         });
+        if (rpcObject.getEnumType) { // 如果存在getEnumType方法，则通过该方法构建枚举获取方法
+            rpcObject.enums = function(name, callback) {
+                if (typeof (name) == "function") {
+                    callback = name;
+                    name = undefined;
+                }
+                this._enumModels = this._enumModels || {}; // RPC对象上的本地缓存
+                if (name) {
+                    if (this._enumModels[name]) {
+                        callback(this._enumModels[name]);
+                    } else {
+                        var rpc = this;
+                        rpcObject.getEnumType(name, function(enumType) {
+                            rpc._enumModels[name] = _this._buildEnumTypeModel(enumType);
+                            callback(rpc._enumModels[name]);
+                        });
+                    }
+                } else {
+                    name = "_";
+                    if (this._enumModels[name]) {
+                        callback(this._enumModels[name]);
+                    } else {
+                        var rpc = this;
+                        rpcObject.getEnumType(function(enumType) {
+                            rpc._enumModels[name] = _this._buildEnumTypeModel(enumType);
+                            callback(rpc._enumModels[name]);
+                        });
+                    }
+                }
+            }
+        }
         return rpcObject;
+    },
+    _buildRpcFunction : function(beanId, methodName, contextUrl) {
+        var _this = this;
+        return function() {
+            var success = undefined;
+            var error = undefined;
+            var length = arguments.length;
+            var paramLength = length;
+            if (length > 0 && typeof arguments[length - 1] == "function") { // 最后一个参数为函数
+                success = arguments[length - 1];
+                paramLength = length - 1;
+            }
+            if (length > 1 && typeof arguments[length - 2] == "function") { // 倒数第二个参数为函数
+                error = success;
+                success = arguments[length - 2];
+                paramLength = length - 2;
+            }
+            var args = new Array();
+            for (var i = 0; i < paramLength; i++) {
+                args.push(arguments[i]);
+            }
+            return _this.invoke(beanId, methodName, args, success, error, contextUrl);
+        }
+    },
+    _buildEnumTypeModel : function(enumType) {
+        var model = {
+            name : enumType.name,
+            subname : enumType.subname,
+            caption : enumType.caption,
+            list : [],
+            map : {}
+        }
+        $.each(enumType.items, function(i, item) {
+            model.list.push(item);
+            model.map[item.key] = item.caption;
+        });
+        return model;
     }
 };
