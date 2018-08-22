@@ -133,7 +133,11 @@ public abstract class ItemTagSupport extends UiTagSupport {
         if (this.value == null) {
             this.value = Strings.EMPTY;
         }
-        return this.value.equals(value);
+        if (!(this.value instanceof String) && value instanceof String) {
+            return this.value.toString().equals(value);
+        } else {
+            return this.value.equals(value);
+        }
     }
 
     protected abstract void resolveItem(String value, String text) throws IOException;
