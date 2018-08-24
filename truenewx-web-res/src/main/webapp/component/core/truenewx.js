@@ -911,8 +911,12 @@ $.tnx.rpc = {
             }
         }
 
-        contextUrl = contextUrl || $.tnx.siteContext;
-        var url = contextUrl + "/rpc/methods/" + beanId + ".json";
+        var url = undefined;
+        if (contextUrl) { // 不能修改contextUrl，后续还有用
+            url = contextUrl + "/rpc/methods/" + beanId + ".json";
+        } else {
+            url = $.tnx.siteContext + "/rpc/methods/" + beanId + ".json";
+        }
         var options = {
             cache : false,
             async : false,
