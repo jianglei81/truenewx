@@ -4,6 +4,10 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -95,14 +99,14 @@ public class DateUtil {
      *            日期格式
      * @return 日期对象
      */
-    public static Date parse(final String date, final String pattern) {
+    public static Date parse(String date, String pattern) {
         if (StringUtils.isEmpty(date)) {
             return null;
         }
-        final DateFormat formater = new SimpleDateFormat(pattern);
+        DateFormat formater = new SimpleDateFormat(pattern);
         try {
             return formater.parse(date);
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             return null;
         }
     }
@@ -116,12 +120,26 @@ public class DateUtil {
      *            日期格式
      * @return 字符串型日期
      */
-    public static String format(final Date date, final String pattern) {
+    public static String format(Date date, String pattern) {
         if (date == null) {
             return null;
         }
-        final DateFormat formater = new SimpleDateFormat(pattern);
+        DateFormat formater = new SimpleDateFormat(pattern);
         return formater.format(date);
+    }
+
+    /**
+     * 按照指定格式格式化时间点对象为字符串型日期
+     *
+     * @param instant
+     *            时间点
+     * @param pattern
+     *            日期格式
+     * @return 字符串型日期
+     */
+    public static String format(Instant instant, String pattern) {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        return localDateTime.format(DateTimeFormatter.ofPattern(pattern));
     }
 
     /**
@@ -131,7 +149,7 @@ public class DateUtil {
      *            字符串型日期
      * @return 日期对象
      */
-    public static Date parseShort(final String date) {
+    public static Date parseShort(String date) {
         return parse(date, DateUtil.SHORT_DATE_PATTERN);
     }
 
@@ -142,8 +160,19 @@ public class DateUtil {
      *            日期对象
      * @return 字符串型日期
      */
-    public static String formatShort(final Date date) {
+    public static String formatShort(Date date) {
         return format(date, DateUtil.SHORT_DATE_PATTERN);
+    }
+
+    /**
+     * 按照短日期格式(yyyy-MM-dd)格式化时间点对象为字符串型日期
+     *
+     * @param instant
+     *            时间点
+     * @return 字符串型日期
+     */
+    public static String formatShort(Instant instant) {
+        return format(instant, DateUtil.SHORT_DATE_PATTERN);
     }
 
     /**
@@ -153,7 +182,7 @@ public class DateUtil {
      *            字符串型日期
      * @return 日期对象
      */
-    public static Date parseLong(final String date) {
+    public static Date parseLong(String date) {
         return parse(date, DateUtil.LONG_DATE_PATTERN);
     }
 
@@ -164,8 +193,19 @@ public class DateUtil {
      *            日期对象
      * @return 字符串型日期
      */
-    public static String formatLong(final Date date) {
+    public static String formatLong(Date date) {
         return format(date, DateUtil.LONG_DATE_PATTERN);
+    }
+
+    /**
+     * 按照长日期格式(yyyy-MM-dd HH:mm:ss)转换时间点对象为字符串型日期
+     *
+     * @param instant
+     *            时间点
+     * @return 字符串型日期
+     */
+    public static String formatLong(Instant instant) {
+        return format(instant, DateUtil.LONG_DATE_PATTERN);
     }
 
     /**
@@ -175,8 +215,19 @@ public class DateUtil {
      *            日期对象
      * @return 字符串型日期
      */
-    public static String formatLongNoDelimiter(final Date date) {
+    public static String formatLongNoDelimiter(Date date) {
         return format(date, DateUtil.LONG_DATE_NO_DELIMITER_PATTERN);
+    }
+
+    /**
+     * 按照长日期格式(yyyyMMddHHmmss)转换时间点对象为字符串型日期
+     *
+     * @param instant
+     *            时间点
+     * @return 字符串型日期
+     */
+    public static String formatLongNoDelimiter(Instant instant) {
+        return format(instant, DateUtil.LONG_DATE_NO_DELIMITER_PATTERN);
     }
 
     /**
@@ -186,11 +237,11 @@ public class DateUtil {
      *            时间
      * @return 日历对象
      */
-    public static Calendar getCalendar(final Date date) {
+    public static Calendar getCalendar(Date date) {
         if (date == null) {
             return null;
         }
-        final Calendar c = Calendar.getInstance();
+        Calendar c = Calendar.getInstance();
         c.setTime(date);
         return c;
     }
@@ -204,9 +255,9 @@ public class DateUtil {
      *            较晚时间
      * @return 相差年份数
      */
-    public static int yearsBetween(final Date earlierDate, final Date laterDate) {
-        final Calendar earlierCalendar = Calendar.getInstance();
-        final Calendar laterCalendar = Calendar.getInstance();
+    public static int yearsBetween(Date earlierDate, Date laterDate) {
+        Calendar earlierCalendar = Calendar.getInstance();
+        Calendar laterCalendar = Calendar.getInstance();
         earlierCalendar.setTime(earlierDate);
         laterCalendar.setTime(laterDate);
         return laterCalendar.get(Calendar.YEAR) - earlierCalendar.get(Calendar.YEAR);
@@ -221,13 +272,12 @@ public class DateUtil {
      *            较晚时间
      * @return 相差月份数
      */
-    public static int monthsBetween(final Date earlierDate, final Date laterDate) {
-        final Calendar earlierCalendar = Calendar.getInstance();
-        final Calendar laterCalendar = Calendar.getInstance();
+    public static int monthsBetween(Date earlierDate, Date laterDate) {
+        Calendar earlierCalendar = Calendar.getInstance();
+        Calendar laterCalendar = Calendar.getInstance();
         earlierCalendar.setTime(earlierDate);
         laterCalendar.setTime(laterDate);
-        final int months = (laterCalendar.get(Calendar.YEAR) - earlierCalendar.get(Calendar.YEAR))
-                * 12;
+        int months = (laterCalendar.get(Calendar.YEAR) - earlierCalendar.get(Calendar.YEAR)) * 12;
         return months - earlierCalendar.get(Calendar.MONTH) + laterCalendar.get(Calendar.MONTH);
     }
 
@@ -240,10 +290,10 @@ public class DateUtil {
      *            较晚时间
      * @return 相差天数
      */
-    public static int daysBetween(final Date earlierDate, final Date laterDate) {
-        final Calendar earlierCalendar = setTimeToCalendar(earlierDate, 0, 0, 0, 0);
-        final Calendar laterCalendar = setTimeToCalendar(laterDate, 0, 0, 0, 0);
-        final long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
+    public static int daysBetween(Date earlierDate, Date laterDate) {
+        Calendar earlierCalendar = setTimeToCalendar(earlierDate, 0, 0, 0, 0);
+        Calendar laterCalendar = setTimeToCalendar(laterDate, 0, 0, 0, 0);
+        long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
         return (int) (dms / DateUtil.MS_ONE_DAY);
     }
 
@@ -256,10 +306,10 @@ public class DateUtil {
      *            较晚时间
      * @return 小时之差
      */
-    public static int hoursBetween(final Date earlierDate, final Date laterDate) {
-        final Calendar earlierCalendar = setTimeToCalendar(earlierDate, -1, 0, 0, 0);
-        final Calendar laterCalendar = setTimeToCalendar(laterDate, -1, 0, 0, 0);
-        final long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
+    public static int hoursBetween(Date earlierDate, Date laterDate) {
+        Calendar earlierCalendar = setTimeToCalendar(earlierDate, -1, 0, 0, 0);
+        Calendar laterCalendar = setTimeToCalendar(laterDate, -1, 0, 0, 0);
+        long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
         return (int) (dms / DateUtil.MS_ONE_HOUR);
     }
 
@@ -272,10 +322,10 @@ public class DateUtil {
      *            较晚时间
      * @return 分钟差
      */
-    public static int minutesBetween(final Date earlierDate, final Date laterDate) {
-        final Calendar earlierCalendar = setTimeToCalendar(earlierDate, -1, -1, 0, 0);
-        final Calendar laterCalendar = setTimeToCalendar(laterDate, -1, -1, 0, 0);
-        final long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
+    public static int minutesBetween(Date earlierDate, Date laterDate) {
+        Calendar earlierCalendar = setTimeToCalendar(earlierDate, -1, -1, 0, 0);
+        Calendar laterCalendar = setTimeToCalendar(laterDate, -1, -1, 0, 0);
+        long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
         return (int) (dms / DateUtil.MS_ONE_MINUTE);
     }
 
@@ -288,10 +338,10 @@ public class DateUtil {
      *            较晚时间
      * @return 秒差
      */
-    public static long secondsBetween(final Date earlierDate, final Date laterDate) {
-        final Calendar earlierCalendar = setTimeToCalendar(earlierDate, -1, -1, -1, 0);
-        final Calendar laterCalendar = setTimeToCalendar(laterDate, -1, -1, -1, 0);
-        final long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
+    public static long secondsBetween(Date earlierDate, Date laterDate) {
+        Calendar earlierCalendar = setTimeToCalendar(earlierDate, -1, -1, -1, 0);
+        Calendar laterCalendar = setTimeToCalendar(laterDate, -1, -1, -1, 0);
+        long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
         return dms / DateUtil.MS_ONE_SECOND;
     }
 
@@ -314,9 +364,9 @@ public class DateUtil {
      *            毫秒
      * @return 日期
      */
-    public static Date createDate(final int year, final int month, final int day, final int hour,
-            final int minute, final int second, final int millisecond) {
-        final Calendar c = Calendar.getInstance();
+    public static Date createDate(int year, int month, int day, int hour, int minute, int second,
+            int millisecond) {
+        Calendar c = Calendar.getInstance();
         c.set(Calendar.YEAR, year);
         c.set(Calendar.MONTH, month - 1); // 月份从0开始
         c.set(Calendar.DATE, day);
@@ -336,11 +386,11 @@ public class DateUtil {
      *            年数
      * @return 计算后的新日期
      */
-    public static Date addYears(final Date date, final int years) {
+    public static Date addYears(Date date, int years) {
         if (years == 0) {
             return date;
         }
-        final Calendar c = getCalendar(date);
+        Calendar c = getCalendar(date);
         c.add(Calendar.YEAR, years);
         return c.getTime();
     }
@@ -354,11 +404,11 @@ public class DateUtil {
      *            月数
      * @return 计算后的新日期
      */
-    public static Date addMonths(final Date date, final int months) {
+    public static Date addMonths(Date date, int months) {
         if (months == 0) {
             return date;
         }
-        final Calendar c = getCalendar(date);
+        Calendar c = getCalendar(date);
         c.add(Calendar.MONTH, months);
         return c.getTime();
     }
@@ -372,11 +422,11 @@ public class DateUtil {
      *            天数
      * @return 计算后的新日期
      */
-    public static Date addDays(final Date date, final int days) {
+    public static Date addDays(Date date, int days) {
         if (days == 0) {
             return date;
         }
-        final Calendar c = getCalendar(date);
+        Calendar c = getCalendar(date);
         c.add(Calendar.DATE, days);
         return c.getTime();
     }
@@ -390,11 +440,11 @@ public class DateUtil {
      *            小时数
      * @return 计算后的新日期
      */
-    public static Date addHours(final Date date, final int hours) {
+    public static Date addHours(Date date, int hours) {
         if (hours == 0) {
             return date;
         }
-        final Calendar c = getCalendar(date);
+        Calendar c = getCalendar(date);
         c.add(Calendar.HOUR_OF_DAY, hours);
         return c.getTime();
     }
@@ -408,11 +458,11 @@ public class DateUtil {
      *            分钟数
      * @return 计算后的新日期
      */
-    public static Date addMinutes(final Date date, final int minutes) {
+    public static Date addMinutes(Date date, int minutes) {
         if (minutes == 0) {
             return date;
         }
-        final Calendar c = getCalendar(date);
+        Calendar c = getCalendar(date);
         c.add(Calendar.MINUTE, minutes);
         return c.getTime();
     }
@@ -426,11 +476,11 @@ public class DateUtil {
      *            秒数
      * @return 计算后的新日期
      */
-    public static Date addSeconds(final Date date, final int seconds) {
+    public static Date addSeconds(Date date, int seconds) {
         if (seconds == 0) {
             return date;
         }
-        final Calendar c = getCalendar(date);
+        Calendar c = getCalendar(date);
         c.add(Calendar.SECOND, seconds);
         return c.getTime();
     }
@@ -448,8 +498,8 @@ public class DateUtil {
      *            日
      * @return 新日期
      */
-    public static Date setDate(final Date date, final int year, final int month, final int day) {
-        final Calendar c = getCalendar(date);
+    public static Date setDate(Date date, int year, int month, int day) {
+        Calendar c = getCalendar(date);
         c.set(Calendar.YEAR, year);
         c.set(Calendar.MONTH, month - 1); // 月份从0开始
         c.set(Calendar.DATE, day);
@@ -471,15 +521,14 @@ public class DateUtil {
      *            毫秒
      * @return 新日期
      */
-    public static Date setTime(final Date date, final int hour, final int minute, final int second,
-            final int millisecond) {
-        final Calendar c = setTimeToCalendar(date, hour, minute, second, millisecond);
+    public static Date setTime(Date date, int hour, int minute, int second, int millisecond) {
+        Calendar c = setTimeToCalendar(date, hour, minute, second, millisecond);
         return c == null ? null : c.getTime();
     }
 
-    private static Calendar setTimeToCalendar(final Date date, final int hour, final int minute,
-            final int second, final int millisecond) {
-        final Calendar c = getCalendar(date);
+    private static Calendar setTimeToCalendar(Date date, int hour, int minute, int second,
+            int millisecond) {
+        Calendar c = getCalendar(date);
         if (c == null) {
             return null;
         }
@@ -505,9 +554,9 @@ public class DateUtil {
      *            日期集合
      * @return 最早的日期
      */
-    public static Date earliest(final Date... dates) {
+    public static Date earliest(Date... dates) {
         Date result = null;
-        for (final Date date : dates) {
+        for (Date date : dates) {
             if (result == null) {
                 result = date;
             } else if (date.before(result)) {
@@ -524,9 +573,9 @@ public class DateUtil {
      *            日期集合
      * @return 最晚的日期
      */
-    public static Date latest(final Date... dates) {
+    public static Date latest(Date... dates) {
         Date result = null;
-        for (final Date date : dates) {
+        for (Date date : dates) {
             if (result == null) {
                 result = date;
             } else if (date.after(result)) {
@@ -536,15 +585,15 @@ public class DateUtil {
         return result;
     }
 
-    public static int getYear(final Date date) {
+    public static int getYear(Date date) {
         return getCalendar(date).get(Calendar.YEAR);
     }
 
-    public static int getMonth(final Date date) {
+    public static int getMonth(Date date) {
         return getCalendar(date).get(Calendar.MONTH) + 1; // 月份从0开始
     }
 
-    public static int getDay(final Date date) {
+    public static int getDay(Date date) {
         return getCalendar(date).get(Calendar.DAY_OF_MONTH);
     }
 
@@ -555,8 +604,8 @@ public class DateUtil {
      *            日期
      * @return 是否周末
      */
-    public static boolean isWeekend(final Date date) {
-        final int weekday = getCalendar(date).get(Calendar.DAY_OF_WEEK);
+    public static boolean isWeekend(Date date) {
+        int weekday = getCalendar(date).get(Calendar.DAY_OF_WEEK);
         return weekday == Calendar.SUNDAY || weekday == Calendar.SATURDAY;
     }
 
