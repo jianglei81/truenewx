@@ -5,7 +5,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
@@ -138,8 +137,8 @@ public class DateUtil {
      * @return 字符串型日期
      */
     public static String format(Instant instant, String pattern) {
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-        return localDateTime.format(DateTimeFormatter.ofPattern(pattern));
+        return DateTimeFormatter.ofPattern(pattern).withZone(ZoneId.systemDefault())
+                .format(instant);
     }
 
     /**
