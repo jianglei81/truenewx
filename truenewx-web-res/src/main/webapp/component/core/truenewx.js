@@ -922,19 +922,31 @@ $.tnx.rpc = {
             dataType : "json",
             contentType : "application/x-www-form-urlencoded; charset=" + $.tnx.encoding // 不能更改
         };
-        var _this = this;
-        options.async = true;
-        options.success = function(methodNames) {
-            var rpcObject = _this._buildRpcObject(beanId, methodNames, contextUrl);
-            $.tnx.rpcs[beanId] = rpcObject;
-            if (callback) {
-                callback.call(_this, rpcObject);
+
+        if (callback) {
+            var _this = this;
+            options.async = true;
+            options.success = function(methodNames) {
+                var rpcObject = _this._buildRpcObject(beanId, methodNames, contextUrl);
+                $.tnx.rpcs[beanId] = rpcObject;
+                if (callback) {
+                    callback.call(_this, rpcObject);
+                }
+            }
+            options.error = function(resp) {
+                _this._handleErrors(resp);
+            }
+            $.ajax(url, options);
+        } else {
+            options.async = false;
+            var resp = $.ajax(url, options);
+            if (this._handleErrors(resp)) {
+                var methodNames = $.parseJSON(resp.responseText);
+                var rpcObject = this._buildRpcObject(beanId, methodNames, contextUrl);
+                $.tnx.rpcs[beanId] = rpcObject;
+                return rpcObject;
             }
         }
-        options.error = function(resp) {
-            _this._handleErrors(resp);
-        }
-        $.ajax(url, options);
     },
     _buildRpcObject : function(beanId, methodNames, contextUrl) {
         var _this = this;
