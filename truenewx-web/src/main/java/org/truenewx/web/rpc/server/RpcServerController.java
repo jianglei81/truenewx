@@ -1,6 +1,8 @@
 package org.truenewx.web.rpc.server;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.truenewx.core.Strings;
 import org.truenewx.web.exception.annotation.HandleableExceptionMessage;
 import org.truenewx.web.rpc.serializer.RpcSerializer;
 
@@ -30,12 +33,22 @@ public class RpcServerController {
     @Autowired
     private RpcSerializer serializer;
 
-    @RequestMapping(value = "/methods/{beanId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/methods/{beanIdString}", method = RequestMethod.GET)
     @HandleableExceptionMessage
     @ResponseBody
-    public String methodNames(@PathVariable("beanId") String beanId) throws Exception {
-        Collection<String> methodNames = this.server.methods(beanId);
-        return this.serializer.serialize(methodNames);
+    public String methodNames(@PathVariable("beanIdString") String beanIdString) throws Exception {
+        if (beanIdString.contains(Strings.COMMA)) { // 带逗号的beanId分割后作为多个beanId处理
+            String[] beanIds = beanIdString.split(Strings.COMMA);
+            Map<String, Collection<String>> methodNameMap = new HashMap<>();
+            for (String beanId : beanIds) {
+                Collection<String> methodNames = this.server.methods(beanId);
+                methodNameMap.put(beanId, methodNames);
+            }
+            return this.serializer.serialize(methodNameMap);
+        } else {
+            Collection<String> methodNames = this.server.methods(beanIdString);
+            return this.serializer.serialize(methodNames);
+        }
     }
 
     @RequestMapping(value = "/invoke/{beanId}/{methodName}",
