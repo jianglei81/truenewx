@@ -895,14 +895,15 @@ $.tnx.rpc = {
     showErrorMessage : function(message) {
         $.tnx.alert(message, $.tnx.message($.tnx, "error.title"));
     },
-    imports : function(beanId, contextUrl, callback) {
-        if (typeof (contextUrl) == "function") {
+    imports : function(beanId, callback, contextUrl) {
+        // 如果callback和contextUrl参数位置相反，则调换过来
+        if (typeof (callback) == "string" && typeof (contextUrl) == "function") {
+            var temp = callback;
             callback = contextUrl;
-            contextUrl = undefined;
+            contextUrl = temp;
         }
-
         if ($.tnx.rpcs[beanId]) {
-            if (callback) {
+            if (typeof (callback) == "function") {
                 callback.call(this, $.tnx.rpcs[beanId]);
                 return;
             } else {
@@ -910,12 +911,8 @@ $.tnx.rpc = {
             }
         }
 
-        var url = undefined;
-        if (contextUrl) {
-            url = contextUrl + "/rpc/methods/" + beanId + ".json";
-        } else {
-            url = $.tnx.siteContext + "/rpc/methods/" + beanId + ".json";
-        }
+        contextUrl = contextUrl || $.tnx.siteContext;
+        var url = contextUrl + "/rpc/methods/" + beanId + ".json";
         var options = {
             cache : false,
             async : false,
@@ -929,7 +926,7 @@ $.tnx.rpc = {
             options.success = function(methodNames) {
                 var rpcObject = _this._buildRpcObject(beanId, methodNames, contextUrl);
                 $.tnx.rpcs[beanId] = rpcObject;
-                if (callback) {
+                if (typeof (callback) == "function") {
                     callback.call(_this, rpcObject);
                 }
             }
