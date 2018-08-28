@@ -14,6 +14,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.truenewx.web.spring.util.SpringWebUtil;
 
 /**
  * Spring Web上下文工具类<br/>
@@ -58,7 +59,7 @@ public class SpringWebContext {
      * @return 区域
      */
     public static Locale getLocale() {
-        return getRequest().getLocale();
+        return SpringWebUtil.getLocale(getRequest());
     }
 
     /**
