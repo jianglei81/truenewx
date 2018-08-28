@@ -2,6 +2,7 @@ package org.truenewx.core.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +42,12 @@ public class CaptionUtil {
 
     public static String getCaption(Method method, Locale locale) {
         Caption[] captionAnnonations = method.getAnnotationsByType(Caption.class);
+        Caption captionAnnonation = getCaptionAnnonation(captionAnnonations, locale);
+        return captionAnnonation == null ? null : captionAnnonation.value();
+    }
+
+    public static String getCaption(Parameter parameter, Locale locale) {
+        Caption[] captionAnnonations = parameter.getAnnotationsByType(Caption.class);
         Caption captionAnnonation = getCaptionAnnonation(captionAnnonations, locale);
         return captionAnnonation == null ? null : captionAnnonation.value();
     }
