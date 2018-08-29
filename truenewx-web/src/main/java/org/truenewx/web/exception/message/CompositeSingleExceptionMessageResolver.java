@@ -1,4 +1,4 @@
-package org.truenewx.core.exception.message;
+package org.truenewx.web.exception.message;
 
 import java.util.ArrayList;
 import java.util.List;

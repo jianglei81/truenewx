@@ -9,8 +9,8 @@ import javax.servlet.jsp.tagext.Tag;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.core.exception.MultiException;
 import org.truenewx.core.exception.SingleException;
-import org.truenewx.core.exception.message.SingleExceptionMessageResolver;
 import org.truenewx.core.spring.util.SpringUtil;
+import org.truenewx.web.exception.message.SingleExceptionMessageResolver;
 import org.truenewx.web.spring.util.SpringWebUtil;
 import org.truenewx.web.tagext.ErrorTagSupport;
 

@@ -20,6 +20,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.truenewx.core.Strings;
 
 /**
  * 类的工具类<br/>
@@ -44,11 +45,11 @@ public class ClassUtil {
      *            注解类型
      * @return 注解对象
      */
-    public static <A extends Annotation> A findAnnotation(final Class<?> clazz,
-            final String propertyName, final Class<A> annotationClass) {
-        final Field field = findField(clazz, propertyName);
+    public static <A extends Annotation> A findAnnotation(Class<?> clazz, String propertyName,
+            Class<A> annotationClass) {
+        Field field = findField(clazz, propertyName);
         if (field != null) {
-            final A annotation = field.getAnnotation(annotationClass);
+            A annotation = field.getAnnotation(annotationClass);
             if (annotation != null) {
                 return annotation;
             }
@@ -65,17 +66,47 @@ public class ClassUtil {
      *            属性名
      * @return 表示指定属性的Field对象
      */
-    public static Field findField(final Class<?> clazz, final String propertyName) {
+    public static Field findField(Class<?> clazz, String propertyName) {
         if (clazz != null && clazz != Object.class) { // Object类无法取到任何属性
             try {
                 return clazz.getDeclaredField(propertyName);
-            } catch (final SecurityException e) {
+            } catch (SecurityException e) {
                 // 当前类找到但无权限访问，则返回null
                 return null;
-            } catch (final NoSuchFieldException e) {
+            } catch (NoSuchFieldException e) {
                 // 当前类找不到，则到父类中找
                 return findField(clazz.getSuperclass(), propertyName);
             }
+        }
+        return null;
+    }
+
+    /**
+     * 获取指定类的源于其父类的实际泛型类型集<br/>
+     * 如果指定类没有父类，或者父类没有泛型，则返回长度为0的空数组
+     *
+     * @param clazz
+     *            指定了父类实际泛型的类
+     * @return 实际泛型类型集
+     */
+    public static Class<?>[] getActualGenericTypes(Class<?> clazz) {
+        Type type = clazz.getGenericSuperclass();
+        return getActualGenericTypes(type);
+    }
+
+    /**
+     * 获取指定类的源于其父类的第index个实际泛型类型
+     *
+     * @param clazz
+     *            指定了父类实际泛型的类
+     * @param index
+     *            要取的泛型位置索引
+     * @return 实际泛型类型
+     */
+    public static <T> Class<T> getActualGenericType(Class<?> clazz, int index) {
+        Type superClass = clazz.getGenericSuperclass();
+        if (superClass instanceof ParameterizedType) {
+            return getActualGenericType((ParameterizedType) superClass, index);
         }
         return null;
     }
@@ -90,10 +121,9 @@ public class ClassUtil {
      * @return 实际泛型类型
      */
     @SuppressWarnings("unchecked")
-    private static <T> Class<T> getActualGenericType(final ParameterizedType superType,
-            final int index) {
+    private static <T> Class<T> getActualGenericType(ParameterizedType superType, int index) {
         if (superType != null) {
-            final Type[] types = superType.getActualTypeArguments();
+            Type[] types = superType.getActualTypeArguments();
             Type type = types[index];
             if (type instanceof ParameterizedType) {
                 type = ((ParameterizedType) type).getRawType();
@@ -106,45 +136,16 @@ public class ClassUtil {
     }
 
     /**
-     * 获取指定类的源于其父类的实际泛型类型集<br/>
-     * 如果指定类没有父类，或者父类没有泛型，则返回长度为0的空数组
-     *
-     * @param clazz
-     *            指定了父类实际泛型的类
-     * @return 实际泛型类型集
-     */
-    public static Class<?>[] getActualGenericTypes(final Class<?> clazz) {
-        final Type type = clazz.getGenericSuperclass();
-        return getActualGenericTypes(type);
-    }
-
-    /**
-     * 获取指定类的源于指定接口的实际泛型类型集
-     *
-     * @param clazz
-     *            指定了接口实际泛型的类
-     * @param interfaceClass
-     *            接口类型
-     * @return 实际泛型类型集
-     */
-    public static <I, C extends I> Class<?>[] getActualGenericTypes(final Class<C> clazz,
-            final Class<I> interfaceClass) {
-        final Collection<ParameterizedType> types = findParameterizedGenericInterfaces(clazz);
-        final Type type = getMatchedGenericType(types, interfaceClass);
-        return getActualGenericTypes(type);
-    }
-
-    /**
      * 获取指定类型的实际泛型类型集
      *
      * @param type
      *            类型
      * @return 实际泛型类型集
      */
-    private static Class<?>[] getActualGenericTypes(final Type type) {
+    private static Class<?>[] getActualGenericTypes(Type type) {
         if (type instanceof ParameterizedType) {
-            final Type[] types = ((ParameterizedType) type).getActualTypeArguments();
-            final Class<?>[] classes = new Class<?>[types.length];
+            Type[] types = ((ParameterizedType) type).getActualTypeArguments();
+            Class<?>[] classes = new Class<?>[types.length];
             for (int i = 0; i < types.length; i++) {
                 Type argType = types[i];
                 if (argType instanceof ParameterizedType) {
@@ -161,6 +162,21 @@ public class ClassUtil {
     }
 
     /**
+     * 获取指定类的源于指定接口的实际泛型类型集
+     *
+     * @param clazz
+     *            指定了接口实际泛型的类
+     * @param interfaceClass
+     *            接口类型
+     * @return 实际泛型类型集
+     */
+    public static Class<?>[] getActualGenericTypes(Class<?> clazz, Class<?> interfaceClass) {
+        Collection<ParameterizedType> types = findParameterizedGenericInterfaces(clazz);
+        Type type = getMatchedGenericType(types, interfaceClass);
+        return getActualGenericTypes(type);
+    }
+
+    /**
      * 获取指定类的源于指定接口的第index个实际泛型类型
      *
      * @param clazz
@@ -171,10 +187,10 @@ public class ClassUtil {
      *            要取的泛型位置索引
      * @return 实际泛型类型
      */
-    public static <I, C extends I, T> Class<T> getActualGenericType(final Class<C> clazz,
-            final Class<I> interfaceClass, final int index) {
-        final Collection<ParameterizedType> types = findParameterizedGenericInterfaces(clazz);
-        final ParameterizedType superInterface = getMatchedGenericType(types, interfaceClass);
+    public static <T> Class<T> getActualGenericType(Class<?> clazz, Class<?> interfaceClass,
+            int index) {
+        Collection<ParameterizedType> types = findParameterizedGenericInterfaces(clazz);
+        ParameterizedType superInterface = getMatchedGenericType(types, interfaceClass);
         return getActualGenericType(superInterface, index);
     }
 
@@ -186,35 +202,18 @@ public class ClassUtil {
      * @return 带泛型的接口类型清单
      */
     private static Collection<ParameterizedType> findParameterizedGenericInterfaces(
-            final Class<?> clazz) {
-        final List<ParameterizedType> types = new ArrayList<>();
-        for (final Type type : clazz.getGenericInterfaces()) {
+            Class<?> clazz) {
+        List<ParameterizedType> types = new ArrayList<>();
+        for (Type type : clazz.getGenericInterfaces()) {
             if (type instanceof ParameterizedType) {
                 types.add((ParameterizedType) type);
             }
         }
-        final Type superclass = clazz.getGenericSuperclass();
+        Type superclass = clazz.getGenericSuperclass();
         if (superclass instanceof ParameterizedType) {
             types.add((ParameterizedType) superclass);
         }
         return types;
-    }
-
-    /**
-     * 获取指定类的源于其父类的第index个实际泛型类型
-     *
-     * @param clazz
-     *            指定了父类实际泛型的类
-     * @param index
-     *            要取的泛型位置索引
-     * @return 实际泛型类型
-     */
-    public static <T> Class<T> getActualGenericType(final Class<?> clazz, final int index) {
-        final Type superClass = clazz.getGenericSuperclass();
-        if (superClass instanceof ParameterizedType) {
-            return getActualGenericType((ParameterizedType) superClass, index);
-        }
-        return null;
     }
 
     /**
@@ -227,9 +226,9 @@ public class ClassUtil {
      * @return 注解的value()值
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getClassAnnotationValue(final Class<?> clazz,
-            final Class<? extends Annotation> annotationClass) {
-        final Annotation annotation = AnnotationUtils.findAnnotation(clazz, annotationClass);
+    public static <T> T getClassAnnotationValue(Class<?> clazz,
+            Class<? extends Annotation> annotationClass) {
+        Annotation annotation = AnnotationUtils.findAnnotation(clazz, annotationClass);
         return annotation == null ? null : (T) AnnotationUtils.getValue(annotation);
     }
 
@@ -245,9 +244,9 @@ public class ClassUtil {
      * @return 注解的value()值
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getFieldAnnotationValue(final Class<?> clazz, final String propertyName,
-            final Class<? extends Annotation> annotationClass) {
-        final Annotation annotation = findAnnotation(clazz, propertyName, annotationClass);
+    public static <T> T getFieldAnnotationValue(Class<?> clazz, String propertyName,
+            Class<? extends Annotation> annotationClass) {
+        Annotation annotation = findAnnotation(clazz, propertyName, annotationClass);
         return annotation == null ? null : (T) AnnotationUtils.getValue(annotation);
     }
 
@@ -260,32 +259,31 @@ public class ClassUtil {
      *            接口类型
      * @return 指定类型集中与指定接口类型泛型匹配的类型
      */
-    private static ParameterizedType getMatchedGenericType(
-            final Collection<ParameterizedType> types, final Class<?> interfaceClass) {
-        for (final ParameterizedType type : types) {
-            final Type rawType = type.getRawType();
+    private static ParameterizedType getMatchedGenericType(Collection<ParameterizedType> types,
+            Class<?> interfaceClass) {
+        for (ParameterizedType type : types) {
+            Type rawType = type.getRawType();
             if (rawType.equals(interfaceClass)) {
                 return type;
             }
         }
-        for (final ParameterizedType type : types) {
-            final Type rawType = type.getRawType();
+        for (ParameterizedType type : types) {
+            Type rawType = type.getRawType();
             if (rawType instanceof Class) {
-                final Class<?> rawClass = (Class<?>) rawType;
+                Class<?> rawClass = (Class<?>) rawType;
                 if (interfaceClass.isAssignableFrom(rawClass)) {
-                    final Type[] actualTypeArguments = type.getActualTypeArguments();
+                    Type[] actualTypeArguments = type.getActualTypeArguments();
                     // 构造满足条件的ParameterizedType
                     return new ParameterizedType() {
                         @Override
                         public Type[] getActualTypeArguments() {
                             // 从子接口中找出匹配父接口泛型的类型
-                            final TypeVariable<?>[] typeParameters = interfaceClass
-                                    .getTypeParameters();
-                            final Type[] result = new Type[typeParameters.length];
+                            TypeVariable<?>[] typeParameters = interfaceClass.getTypeParameters();
+                            Type[] result = new Type[typeParameters.length];
                             for (int i = 0; i < typeParameters.length; i++) {
-                                final TypeVariable<?>[] tvs = rawClass.getTypeParameters();
+                                TypeVariable<?>[] tvs = rawClass.getTypeParameters();
                                 for (int j = 0; j < tvs.length; j++) {
-                                    final TypeVariable<?> tv = tvs[j];
+                                    TypeVariable<?> tv = tvs[j];
                                     if (tv.getName().equals(typeParameters[i].getName())) {
                                         result[i] = actualTypeArguments[j];
                                         break;
@@ -320,17 +318,16 @@ public class ClassUtil {
      *            属性名
      * @return 属性值
      */
-    public static Object getPublicStaticPropertyValue(final Class<?> clazz,
-            final String propertyName) {
+    public static Object getPublicStaticPropertyValue(Class<?> clazz, String propertyName) {
         try {
-            final Field field = clazz.getDeclaredField(propertyName);
+            Field field = clazz.getDeclaredField(propertyName);
             if (field != null) {
-                final int modifiers = field.getModifiers();
+                int modifiers = field.getModifiers();
                 if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers)) {
                     return field.get(null);
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // 忽略异常，返回null
         }
         return null;
@@ -343,12 +340,12 @@ public class ClassUtil {
      *            类
      * @return 指定类的简单属性名
      */
-    public static Set<String> getSimplePropertyNames(final Class<?> clazz) {
-        final Set<String> names = new HashSet<String>();
-        final PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(clazz);
-        for (final PropertyDescriptor pd : propertyDescriptors) {
+    public static Set<String> getSimplePropertyNames(Class<?> clazz) {
+        Set<String> names = new HashSet<>();
+        PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(clazz);
+        for (PropertyDescriptor pd : propertyDescriptors) {
             if (BeanUtils.isSimpleValueType(pd.getPropertyType())) {
-                final String name = pd.getName();
+                String name = pd.getName();
                 if (!"class".equals(name)) {
                     names.add(name);
                 }
@@ -364,16 +361,16 @@ public class ClassUtil {
      *            类
      * @return 指定类的所有简单属性字段
      */
-    public static List<Field> getSimplePropertyField(final Class<?> clazz) {
-        final List<Field> fields = new ArrayList<Field>();
+    public static List<Field> getSimplePropertyField(Class<?> clazz) {
+        List<Field> fields = new ArrayList<>();
         // 在所有有效属性中识别简单类型字段
-        final PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(clazz);
-        for (final PropertyDescriptor pd : propertyDescriptors) {
-            final Class<?> propertyType = pd.getPropertyType();
+        PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(clazz);
+        for (PropertyDescriptor pd : propertyDescriptors) {
+            Class<?> propertyType = pd.getPropertyType();
             if (propertyType != null && BeanUtils.isSimpleValueType(propertyType)) {
-                final String name = pd.getName();
+                String name = pd.getName();
                 if (!"class".equals(name)) {
-                    final Field field = findField(clazz, name);
+                    Field field = findField(clazz, name);
                     if (field != null) {
                         fields.add(field);
                     }
@@ -400,27 +397,26 @@ public class ClassUtil {
      *            排除的属性集
      * @return 属性-类型映射集
      */
-    public static Collection<PropertyMeta> findPropertyMetas(final Class<?> clazz,
-            final boolean gettable, final boolean settable, final boolean parent,
-            final String[] includes, final String[] excludes) {
-        final Map<String, PropertyMeta> result = new LinkedHashMap<>();
+    public static Collection<PropertyMeta> findPropertyMetas(Class<?> clazz, boolean gettable,
+            boolean settable, boolean parent, String[] includes, String[] excludes) {
+        Map<String, PropertyMeta> result = new LinkedHashMap<>();
         if (gettable || settable) {
             if (parent) { // 先加入父类的属性
-                final Class<?> superclass = clazz.getSuperclass();
+                Class<?> superclass = clazz.getSuperclass();
                 if (superclass != null && superclass != Object.class) {
-                    final Collection<PropertyMeta> propertyMetas = findPropertyMetas(superclass,
-                            gettable, settable, parent, includes, excludes);
-                    for (final PropertyMeta propertyMeta : propertyMetas) {
+                    Collection<PropertyMeta> propertyMetas = findPropertyMetas(superclass, gettable,
+                            settable, parent, includes, excludes);
+                    for (PropertyMeta propertyMeta : propertyMetas) {
                         result.put(propertyMeta.getName(), propertyMeta);
                     }
                 }
             }
             if (clazz.isInterface()) { // 如果类型为接口，则根据getter/setter方法名称进行筛选
-                for (final Method method : clazz.getMethods()) {
-                    final String propertyName = getPropertyName(method, gettable, settable);
+                for (Method method : clazz.getMethods()) {
+                    String propertyName = getPropertyName(method, gettable, settable);
                     if (propertyName != null) {
                         Class<?> propertyType = null;
-                        final String methodName = method.getName();
+                        String methodName = method.getName();
                         if (methodName.startsWith("get")) { // getter方法，类型取方法结果类型
                             propertyType = method.getReturnType();
                         } else if (methodName.startsWith("set")) { // setter方法，类型取第一个参数的类型
@@ -434,11 +430,11 @@ public class ClassUtil {
                     }
                 }
             } else { // 如果类型为类则获取其属性描述进行筛选
-                final PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(clazz);
-                for (final PropertyDescriptor pd : pds) {
-                    final String propertyName = pd.getName();
-                    final Method readMethod = pd.getReadMethod();
-                    final Method writeMethod = pd.getWriteMethod();
+                PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(clazz);
+                for (PropertyDescriptor pd : pds) {
+                    String propertyName = pd.getName();
+                    Method readMethod = pd.getReadMethod();
+                    Method writeMethod = pd.getWriteMethod();
                     if (!"class".equals(propertyName)
                             && ((gettable && readMethod != null)
                                     || (settable && writeMethod != null))
@@ -461,9 +457,8 @@ public class ClassUtil {
         return result.values();
     }
 
-    private static void addPropertyMeta(final Map<String, PropertyMeta> result,
-            final String propertyName, final Class<?> propertyType,
-            final Annotation[] annotations) {
+    private static void addPropertyMeta(Map<String, PropertyMeta> result, String propertyName,
+            Class<?> propertyType, Annotation[] annotations) {
         PropertyMeta propertyMeta = result.get(propertyName);
         if (propertyMeta == null) {
             propertyMeta = new PropertyMeta(propertyName, propertyType, annotations);
@@ -473,18 +468,16 @@ public class ClassUtil {
         result.put(propertyName, propertyMeta);
     }
 
-    private static Annotation[] getDeclaredFieldAnnotations(final Class<?> clazz,
-            final String propertyName) {
+    private static Annotation[] getDeclaredFieldAnnotations(Class<?> clazz, String propertyName) {
         try {
-            final Field field = clazz.getDeclaredField(propertyName);
+            Field field = clazz.getDeclaredField(propertyName);
             return field.getAnnotations();
         } catch (NoSuchFieldException | SecurityException e) {
         }
         return new Annotation[0];
     }
 
-    private static boolean isIncluded(final String[] includes, final String[] excludes,
-            final String s) {
+    private static boolean isIncluded(String[] includes, String[] excludes, String s) {
         return (ArrayUtils.isEmpty(includes) || ArrayUtils.contains(includes, s))
                 && (ArrayUtils.isEmpty(excludes) || !ArrayUtils.contains(excludes, s));
     }
@@ -500,11 +493,10 @@ public class ClassUtil {
      *            是否考虑为setter方法的可能
      * @return 属性名
      */
-    private static String getPropertyName(final Method method, final boolean getter,
-            final boolean setter) {
+    private static String getPropertyName(Method method, boolean getter, boolean setter) {
         // 至少要考虑为getter/setter方法中的一种
         if (getter || setter) {
-            final String methodName = method.getName();
+            String methodName = method.getName();
             if (methodName.length() > 3) { // 3为"get"或"set"的长度
                 String propertyName = methodName.substring(3); // 可能的属性名
                 // 截取出来的属性名首字母需为大写
@@ -533,12 +525,11 @@ public class ClassUtil {
      *            是否getter方法，false-setter方法
      * @return 指定方法是否指定属性的访问方法
      */
-    private static boolean isPropertyMethod(final Method method, final String propertyName,
-            final boolean getter) {
+    private static boolean isPropertyMethod(Method method, String propertyName, boolean getter) {
         // 必须是公开的非静态方法
         if (Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers())) {
             // 方法名称要匹配
-            final String methodName = (getter ? "get" : "set")
+            String methodName = (getter ? "get" : "set")
                     + StringUtil.firstToUpperCase(propertyName);
             if (methodName.equals(method.getName())) {
                 if (getter) { // getter方法必须无参数且返回结果不为void
@@ -564,15 +555,14 @@ public class ClassUtil {
      *            是否getter方法，false-setter方法
      * @return 指定类型中指定属性的访问方法
      */
-    public static Method findPropertyMethod(final Class<?> clazz, final String propertyName,
-            final boolean getter) {
-        for (final Method method : clazz.getMethods()) {
+    public static Method findPropertyMethod(Class<?> clazz, String propertyName, boolean getter) {
+        for (Method method : clazz.getMethods()) {
             if (isPropertyMethod(method, propertyName, getter)) {
                 return method;
             }
         }
         // 此时没找到，则尝试从父类中查找
-        final Class<?> superclass = clazz.getSuperclass();
+        Class<?> superclass = clazz.getSuperclass();
         if (superclass != null && superclass != Object.class) {
             return findPropertyMethod(superclass, propertyName, getter);
         }
@@ -588,12 +578,12 @@ public class ClassUtil {
      *            期望的属性类型，为空时忽略属性类型限制
      * @return 符合Bean规范的属性描述集合
      */
-    public static List<PropertyDescriptor> findBeanPropertyDescriptors(final Class<?> clazz,
-            final Class<?> propertyType) {
-        final List<PropertyDescriptor> list = new ArrayList<>();
-        final PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(clazz);
-        for (final PropertyDescriptor pd : pds) {
-            final Class<?> pt = pd.getPropertyType();
+    public static List<PropertyDescriptor> findBeanPropertyDescriptors(Class<?> clazz,
+            Class<?> propertyType) {
+        List<PropertyDescriptor> list = new ArrayList<>();
+        PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(clazz);
+        for (PropertyDescriptor pd : pds) {
+            Class<?> pt = pd.getPropertyType();
             // 带参数的get方法会导致属性类型为null的属性描述，应忽略
             if (pt != null && (propertyType == null || propertyType.isAssignableFrom(pt))) {
                 list.add(pd);
@@ -611,8 +601,8 @@ public class ClassUtil {
      *            类型
      * @return 指定类型集合中是否有至少一个类型，与指定类型相同或为其父类型
      */
-    public static boolean oneIsAssignableFrom(final Class<?>[] classes, final Class<?> clazz) {
-        for (final Class<?> type : classes) {
+    public static boolean oneIsAssignableFrom(Class<?>[] classes, Class<?> clazz) {
+        for (Class<?> type : classes) {
             if (type == null || clazz == null) {
                 System.out.println();
             }
@@ -630,7 +620,7 @@ public class ClassUtil {
      *            类型
      * @return 指定类型是否复合类型
      */
-    public static boolean isComplex(final Class<?> type) {
+    public static boolean isComplex(Class<?> type) {
         return !ClassUtils.isPrimitiveOrWrapper(type) && !CharSequence.class.isAssignableFrom(type);
     }
 
@@ -645,10 +635,10 @@ public class ClassUtil {
      *            参数个数，小于0时忽略个数，返回所有同名方法
      * @return 指定类型中指定方法名称和参数个数的公开方法清单
      */
-    public static Collection<Method> findPublicMethods(final Class<?> type, final String methodName,
-            final int argCount) {
-        final Collection<Method> methods = new ArrayList<>();
-        for (final Method method : type.getMethods()) {
+    public static Collection<Method> findPublicMethods(Class<?> type, String methodName,
+            int argCount) {
+        Collection<Method> methods = new ArrayList<>();
+        for (Method method : type.getMethods()) {
             if (method.getName().equals(methodName)
                     && (argCount < 0 || method.getParameterTypes().length == argCount)) {
                 methods.add(method);
@@ -656,4 +646,23 @@ public class ClassUtil {
         }
         return methods;
     }
+
+    public static String getFullPropertyPath(Class<?> clazz, String propertyName) {
+        StringBuffer path = new StringBuffer();
+        if (clazz != null) {
+            path.append(clazz.getName()).append(Strings.WELL);
+        }
+        path.append(propertyName);
+        return path.toString();
+    }
+
+    public static String getSimplePropertyPath(Class<?> clazz, String propertyName) {
+        StringBuffer path = new StringBuffer();
+        if (clazz != null) {
+            path.append(clazz.getSimpleName()).append(Strings.WELL);
+        }
+        path.append(propertyName);
+        return path.toString();
+    }
+
 }

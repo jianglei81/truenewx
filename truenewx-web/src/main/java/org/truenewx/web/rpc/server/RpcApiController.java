@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -25,10 +26,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.truenewx.core.annotation.Caption;
 import org.truenewx.core.enums.support.EnumDictResolver;
 import org.truenewx.core.enums.support.EnumItem;
 import org.truenewx.core.enums.support.EnumType;
+import org.truenewx.core.i18n.PropertyCaptionResolver;
 import org.truenewx.core.spring.util.SpringUtil;
 import org.truenewx.core.tuple.Binary;
 import org.truenewx.core.tuple.Binate;
@@ -37,7 +38,7 @@ import org.truenewx.core.util.ClassUtil;
 import org.truenewx.core.util.MathUtil;
 import org.truenewx.core.util.NetUtil;
 import org.truenewx.core.util.PropertyMeta;
-import org.truenewx.data.rpc.annotation.RpcProperty;
+import org.truenewx.data.annotation.ComponentType;
 import org.truenewx.web.rpc.serializer.RpcSerializer;
 import org.truenewx.web.rpc.server.annotation.RpcController;
 import org.truenewx.web.rpc.server.annotation.RpcMethod;
@@ -48,7 +49,7 @@ import org.truenewx.web.rpc.server.meta.RpcControllerMeta;
 import org.truenewx.web.rpc.server.meta.RpcMethodMeta;
 import org.truenewx.web.rpc.server.meta.RpcTypeMeta;
 import org.truenewx.web.rpc.server.meta.RpcVariableMeta;
-import org.truenewx.web.spring.context.SpringWebContext;
+import org.truenewx.web.spring.util.SpringWebUtil;
 import org.truenewx.web.util.WebUtil;
 
 /**
@@ -69,6 +70,8 @@ public class RpcApiController extends RpcControllerSupport {
     private ApplicationContext context;
     @Autowired
     private EnumDictResolver enumDictResolver;
+    @Autowired
+    private PropertyCaptionResolver propertyCaptionResolver;
 
     @RequestMapping(method = RequestMethod.GET)
     public String get(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -231,13 +234,14 @@ public class RpcApiController extends RpcControllerSupport {
             @PathVariable("argType") String argType, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         if (checkLan(request, response)) {
+            Locale locale = SpringWebUtil.getLocale(request);
             Binate<Class<?>, List<RpcVariableMeta>> binate = argProperties(beanId, methodName,
-                    argCount, argType);
+                    argCount, argType, locale);
             if (binate == null) {
                 return "null";
             }
             Map<String, Object> result = new HashMap<>();
-            result.put("caption", CaptionUtil.getCaption(binate.getLeft(), request.getLocale()));
+            result.put("caption", CaptionUtil.getCaption(binate.getLeft(), locale));
             result.put("properties", binate.getRight());
             return this.serializer.serialize(result);
         }
@@ -246,7 +250,7 @@ public class RpcApiController extends RpcControllerSupport {
 
     @SuppressWarnings("unchecked")
     private Binate<Class<?>, List<RpcVariableMeta>> argProperties(String beanId, String methodName,
-            int argCount, String argType) {
+            int argCount, String argType, Locale locale) {
         RpcTypeMeta argTypeMeta = null;
         if (StringUtils.isNumeric(argType)) { // 参数类型为数字，则作为参数索引下标处理
             int argIndex = MathUtil.parseInt(argType);
@@ -269,19 +273,18 @@ public class RpcApiController extends RpcControllerSupport {
         if (clazz.isEnum()) {
             Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
             String subtype = this.server.getEnumSubType(beanId, methodName, argCount, enumClass);
-            metas = getConstantMetas(enumClass, subtype);
+            metas = getConstantMetas(enumClass, subtype, locale);
         } else {
             Collection<PropertyMeta> propertyMetas = ClassUtil.findPropertyMetas(clazz, false, true,
                     true, argTypeMeta.getIncludes(), argTypeMeta.getExcludes());
-            metas = getPropertyVariableMetas(clazz, propertyMetas, false);
+            metas = getPropertyVariableMetas(clazz, propertyMetas, locale);
         }
         return new Binary<>(clazz, metas);
     }
 
     private List<RpcVariableMeta> getConstantMetas(Class<? extends Enum<?>> enumClass,
-            String subtype) {
-        EnumType enumType = this.enumDictResolver.getEnumType(enumClass.getName(), subtype,
-                SpringWebContext.getLocale());
+            String subtype, Locale locale) {
+        EnumType enumType = this.enumDictResolver.getEnumType(enumClass.getName(), subtype, locale);
         if (enumType != null) {
             List<RpcVariableMeta> metas = new ArrayList<>();
             for (Enum<?> constant : enumClass.getEnumConstants()) {
@@ -300,23 +303,25 @@ public class RpcApiController extends RpcControllerSupport {
     }
 
     private List<RpcVariableMeta> getPropertyVariableMetas(Class<?> clazz,
-            Collection<PropertyMeta> propertyMetas, boolean getter) {
+            Collection<PropertyMeta> propertyMetas, Locale locale) {
         List<RpcVariableMeta> metas = new ArrayList<>();
         for (PropertyMeta propertyMeta : propertyMetas) {
             String propertyName = propertyMeta.getName();
             Class<?> propertyType = propertyMeta.getType();
             RpcVariableMeta meta = new RpcVariableMeta(propertyType);
             meta.setName(propertyName);
-            // 处理属性注解
-            for (Annotation annotation : propertyMeta.getAnnotations()) {
-                if (annotation instanceof RpcProperty) {
-                    RpcProperty rpcProperty = (RpcProperty) annotation;
-                    meta.setCaption(rpcProperty.caption()); // 优先使用@RpcProperty中的caption
-                    meta.getType().setComponentType(rpcProperty.componentType());
-                } else if (annotation instanceof Caption) {
-                    if (StringUtils.isBlank(meta.getCaption())) { // 其次使用@Caption中的caption
-                        Caption caption = (Caption) annotation;
-                        meta.setCaption(caption.value());
+            meta.setCaption(
+                    this.propertyCaptionResolver.resolveCaption(clazz, propertyName, locale));
+            // 处理元素类型
+            RpcTypeMeta typeMeta = meta.getType();
+            if (Collection.class.isAssignableFrom(typeMeta.getType())
+                    || Map.class.isAssignableFrom(typeMeta.getType())) {
+                for (Annotation annotation : propertyMeta.getAnnotations()) {
+                    if (annotation instanceof ComponentType) {
+                        ComponentType componentType = (ComponentType) annotation;
+                        if (componentType.value() != Object.class) {
+                            typeMeta.setComponentType(componentType.value());
+                        }
                     }
                 }
             }
@@ -332,13 +337,14 @@ public class RpcApiController extends RpcControllerSupport {
             @PathVariable("className") String className, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         if (checkLan(request, response)) {
+            Locale locale = SpringWebUtil.getLocale(request);
             Binate<Class<?>, List<RpcVariableMeta>> binate = resultProperties(beanId, methodName,
-                    argCount, className);
+                    argCount, className, locale);
             if (binate == null) {
                 return "null";
             }
             Map<String, Object> result = new HashMap<>();
-            result.put("caption", CaptionUtil.getCaption(binate.getLeft(), request.getLocale()));
+            result.put("caption", CaptionUtil.getCaption(binate.getLeft(), locale));
             result.put("properties", binate.getRight());
             return this.serializer.serialize(result);
         }
@@ -347,7 +353,7 @@ public class RpcApiController extends RpcControllerSupport {
 
     @SuppressWarnings("unchecked")
     private Binate<Class<?>, List<RpcVariableMeta>> resultProperties(String beanId,
-            String methodName, int argCount, String className) {
+            String methodName, int argCount, String className, Locale locale) {
         Class<?> clazz;
         try {
             clazz = this.context.getClassLoader().loadClass(className);
@@ -359,7 +365,7 @@ public class RpcApiController extends RpcControllerSupport {
         if (clazz.isEnum()) {
             Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
             String subtype = this.server.getEnumSubType(beanId, methodName, argCount, enumClass);
-            metas = getConstantMetas(enumClass, subtype);
+            metas = getConstantMetas(enumClass, subtype, locale);
         } else {
             RpcResultFilter filter = this.server.getResultFilter(beanId, methodName, argCount,
                     clazz);
@@ -367,7 +373,7 @@ public class RpcApiController extends RpcControllerSupport {
             String[] excludues = filter == null ? null : filter.excludes();
             Collection<PropertyMeta> propertyMetas = ClassUtil.findPropertyMetas(clazz, true, false,
                     true, includes, excludues);
-            metas = getPropertyVariableMetas(clazz, propertyMetas, true);
+            metas = getPropertyVariableMetas(clazz, propertyMetas, locale);
         }
         return new Binary<>(clazz, metas);
     }
@@ -379,8 +385,9 @@ public class RpcApiController extends RpcControllerSupport {
             @PathVariable("argType") String argType, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         if (checkLan(request, response)) {
+            Locale locale = SpringWebUtil.getLocale(request);
             Binate<Class<?>, List<RpcVariableMeta>> binate = argProperties(beanId, methodName,
-                    argCount, argType);
+                    argCount, argType, locale);
             if (binate == null) {
                 return "null";
             }
@@ -396,8 +403,9 @@ public class RpcApiController extends RpcControllerSupport {
             @PathVariable("className") String className, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         if (checkLan(request, response)) {
+            Locale locale = SpringWebUtil.getLocale(request);
             Binate<Class<?>, List<RpcVariableMeta>> binate = resultProperties(beanId, methodName,
-                    argCount, className);
+                    argCount, className, locale);
             if (binate == null) {
                 return "null";
             }

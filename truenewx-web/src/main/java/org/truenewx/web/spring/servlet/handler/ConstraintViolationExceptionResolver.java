@@ -21,8 +21,8 @@ import org.truenewx.core.exception.FormatException;
 import org.truenewx.core.exception.HandleableException;
 import org.truenewx.core.exception.MultiException;
 import org.truenewx.core.functor.algorithm.impl.AlgoFirst;
-import org.truenewx.core.spring.exception.message.FormatExceptionMessageResolver;
 import org.truenewx.core.util.JsonUtil;
+import org.truenewx.web.exception.message.FormatExceptionMessageResolver;
 import org.truenewx.web.tagext.ErrorTagSupport;
 import org.truenewx.web.util.WebUtil;
 
