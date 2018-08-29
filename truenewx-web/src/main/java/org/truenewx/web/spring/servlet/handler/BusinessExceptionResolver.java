@@ -26,9 +26,10 @@ import org.truenewx.core.util.JsonUtil;
 import org.truenewx.web.exception.annotation.HandleableExceptionMessage;
 import org.truenewx.web.exception.annotation.HandleableExceptionResult;
 import org.truenewx.web.exception.message.BusinessExceptionMessageResolver;
+import org.truenewx.web.spring.util.SpringWebUtil;
 import org.truenewx.web.tagext.ErrorTagSupport;
 import org.truenewx.web.util.WebUtil;
-import org.truenewx.web.validation.generate.HandlerValidationGenerator;
+import org.truenewx.web.validation.generate.HandlerValidationApplier;
 
 /**
  * Spring的业务异常解决器
@@ -42,9 +43,9 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
      */
     private BusinessExceptionMessageResolver messageResolver;
     /**
-     * 处理器校验生成器
+     * 处理器校验规则填充者
      */
-    private HandlerValidationGenerator handlerValidationGenerator;
+    private HandlerValidationApplier handlerValidationApplier;
 
     @Autowired
     public void setMessageResolver(BusinessExceptionMessageResolver messageResolver) {
@@ -52,9 +53,8 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
     }
 
     @Autowired
-    public void setHandlerValidationGenerator(
-            HandlerValidationGenerator handlerValidationGenerator) {
-        this.handlerValidationGenerator = handlerValidationGenerator;
+    public void setHandlerValidationApplier(HandlerValidationApplier handlerValidationApplier) {
+        this.handlerValidationApplier = handlerValidationApplier;
     }
 
     @Override
@@ -161,7 +161,8 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
                 }
             }
             // 不论默认处理方式还是自定义处理，均从@HandleableExceptionResult注解中获取异常处理完毕后要生成校验规则的模型类集合
-            this.handlerValidationGenerator.generate(request, her.validate(), mav);
+            Locale locale = SpringWebUtil.getLocale(request);
+            this.handlerValidationApplier.applyValidation(mav, her.validate(), locale);
         }
         logException(he, request);
         request.setAttribute(ErrorTagSupport.EXCEPTION_KEY, he);

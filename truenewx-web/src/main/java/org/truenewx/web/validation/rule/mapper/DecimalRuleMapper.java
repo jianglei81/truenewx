@@ -1,4 +1,4 @@
-package org.truenewx.web.validation.generate.impl;
+package org.truenewx.web.validation.rule.mapper;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -15,10 +15,10 @@ import org.truenewx.data.validation.rule.DecimalRule;
  * @since JDK 1.8
  */
 @Component
-public class DecimalRuleMapGenerator implements ValidationMapGenerator<DecimalRule> {
+public class DecimalRuleMapper implements ValidationRuleMapper<DecimalRule> {
 
     @Override
-    public Map<String, Object> generate(final DecimalRule rule, final Locale locale) {
+    public Map<String, Object> toMap(final DecimalRule rule, final Locale locale) {
         final Map<String, Object> result = new HashMap<>();
         result.put("number", Boolean.TRUE); // 至少必须为数值
         final int precision = rule.getPrecision();

@@ -1,4 +1,4 @@
-package org.truenewx.web.validation.generate.impl;
+package org.truenewx.web.validation.rule.mapper;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -14,10 +14,10 @@ import org.truenewx.data.validation.rule.LengthRule;
  * @since JDK 1.8
  */
 @Component
-public class LengRuleMapGenerator implements ValidationMapGenerator<LengthRule> {
+public class LengRuleMapper implements ValidationRuleMapper<LengthRule> {
 
     @Override
-    public Map<String, Object> generate(final LengthRule rule, final Locale locale) {
+    public Map<String, Object> toMap(final LengthRule rule, final Locale locale) {
         final Map<String, Object> result = new HashMap<String, Object>();
         final Integer min = rule.getMin();
         if (min != null && min > 0) {

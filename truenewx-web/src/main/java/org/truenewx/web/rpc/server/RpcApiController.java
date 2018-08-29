@@ -269,15 +269,15 @@ public class RpcApiController extends RpcControllerSupport {
         }
 
         Class<?> clazz = argTypeMeta.getType();
-        List<RpcVariableMeta> metas;
+        List<RpcVariableMeta> metas = null;
         if (clazz.isEnum()) {
             Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
             String subtype = this.server.getEnumSubType(beanId, methodName, argCount, enumClass);
             metas = getConstantMetas(enumClass, subtype, locale);
-        } else {
+        } else if (ClassUtil.isComplex(clazz)) {
             Collection<PropertyMeta> propertyMetas = ClassUtil.findPropertyMetas(clazz, false, true,
                     true, argTypeMeta.getIncludes(), argTypeMeta.getExcludes());
-            metas = getPropertyVariableMetas(clazz, propertyMetas, locale);
+            metas = getPropertyVariableMetas(clazz, propertyMetas, locale, true);
         }
         return new Binary<>(clazz, metas);
     }
@@ -303,7 +303,7 @@ public class RpcApiController extends RpcControllerSupport {
     }
 
     private List<RpcVariableMeta> getPropertyVariableMetas(Class<?> clazz,
-            Collection<PropertyMeta> propertyMetas, Locale locale) {
+            Collection<PropertyMeta> propertyMetas, Locale locale, boolean validatable) {
         List<RpcVariableMeta> metas = new ArrayList<>();
         for (PropertyMeta propertyMeta : propertyMetas) {
             String propertyName = propertyMeta.getName();
@@ -314,8 +314,8 @@ public class RpcApiController extends RpcControllerSupport {
                     this.propertyCaptionResolver.resolveCaption(clazz, propertyName, locale));
             // 处理元素类型
             RpcTypeMeta typeMeta = meta.getType();
-            if (Collection.class.isAssignableFrom(typeMeta.getType())
-                    || Map.class.isAssignableFrom(typeMeta.getType())) {
+            if (Iterable.class.isAssignableFrom(propertyType)
+                    || Map.class.isAssignableFrom(propertyType)) {
                 for (Annotation annotation : propertyMeta.getAnnotations()) {
                     if (annotation instanceof ComponentType) {
                         ComponentType componentType = (ComponentType) annotation;
@@ -324,6 +324,10 @@ public class RpcApiController extends RpcControllerSupport {
                         }
                     }
                 }
+            }
+            // 处理校验规则
+            if (validatable) {
+
             }
             metas.add(meta);
         }
@@ -373,7 +377,7 @@ public class RpcApiController extends RpcControllerSupport {
             String[] excludues = filter == null ? null : filter.excludes();
             Collection<PropertyMeta> propertyMetas = ClassUtil.findPropertyMetas(clazz, true, false,
                     true, includes, excludues);
-            metas = getPropertyVariableMetas(clazz, propertyMetas, locale);
+            metas = getPropertyVariableMetas(clazz, propertyMetas, locale, false);
         }
         return new Binary<>(clazz, metas);
     }

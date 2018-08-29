@@ -1,4 +1,4 @@
-package org.truenewx.web.validation.generate.impl;
+package org.truenewx.web.validation.rule.mapper;
 
 import java.lang.annotation.Annotation;
 import java.net.URL;
@@ -18,16 +18,16 @@ import org.truenewx.data.validation.rule.MarkRule;
  * @since JDK 1.8
  */
 @Component
-public class MarkRuleMapGenerator implements ValidationMapGenerator<MarkRule> {
+public class MarkRuleMapper implements ValidationRuleMapper<MarkRule> {
     private Map<Class<?>, String> annotationTypeMapping = new HashMap<>();
 
-    public MarkRuleMapGenerator() {
+    public MarkRuleMapper() {
         this.annotationTypeMapping.put(NotEmpty.class, "required");
         this.annotationTypeMapping.put(URL.class, "url");
     }
 
     @Override
-    public Map<String, Object> generate(final MarkRule rule, final Locale locale) {
+    public Map<String, Object> toMap(final MarkRule rule, final Locale locale) {
         final Map<String, Object> result = new HashMap<String, Object>();
         for (final Class<? extends Annotation> annotationType : rule.getAnnotationTypes()) {
             String name = this.annotationTypeMapping.get(annotationType);

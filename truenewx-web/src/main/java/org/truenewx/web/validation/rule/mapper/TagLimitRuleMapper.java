@@ -1,4 +1,4 @@
-package org.truenewx.web.validation.generate.impl;
+package org.truenewx.web.validation.rule.mapper;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -17,10 +17,10 @@ import org.truenewx.data.validation.rule.TagLimitRule;
  * @since JDK 1.8
  */
 @Component
-public class TagLimitRuleMapGenerator implements ValidationMapGenerator<TagLimitRule> {
+public class TagLimitRuleMapper implements ValidationRuleMapper<TagLimitRule> {
 
     @Override
-    public Map<String, Object> generate(final TagLimitRule rule, final Locale locale) {
+    public Map<String, Object> toMap(final TagLimitRule rule, final Locale locale) {
         final Map<String, Object> result = new HashMap<String, Object>();
         final Set<String> allowed = rule.getAllowed();
         final Set<String> forbidden = rule.getForbidden();
