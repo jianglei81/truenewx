@@ -5,6 +5,7 @@ import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.truenewx.web.rpc.RpcPort;
 import org.truenewx.web.rpc.server.annotation.RpcResultFilter;
 import org.truenewx.web.rpc.server.meta.RpcControllerMeta;
 import org.truenewx.web.rpc.server.meta.RpcVariableMeta;
@@ -61,49 +62,32 @@ public interface RpcServer {
 
     /**
      * 获取指定枚举类型在指定RPC方法中的子类型名
-     *
-     * @param beanId
-     *            bean id
-     * @param methodName
-     *            方法名
-     * @param argCount
-     *            参数个数
+     * @param port TODO
      * @param enumClass
      *            枚举类型
+     *
      * @return 子类型名
      */
-    String getEnumSubType(String beanId, String methodName, int argCount,
-                    Class<? extends Enum<?>> enumClass);
+    String getEnumSubType(RpcPort port, Class<? extends Enum<?>> enumClass);
 
     /**
      * 获取指定bean中的指定方法的指定参数的元数据
-     *
-     * @param beanId
-     *            beanId
-     * @param methodName
-     *            方法名称
-     * @param argCount
-     *            方法参数个数
+     * @param port TODO
      * @param argIndex
      *            方法参数索引下标
+     *
      * @return 参数的元数据
      */
-    RpcVariableMeta getArgMeta(String beanId, String methodName, int argCount, int argIndex);
+    RpcVariableMeta getArgMeta(RpcPort port, int argIndex);
 
     /**
      * 获取指定RPC方法的结果过滤
-     *
-     * @param beanId
-     *            bean id
-     * @param methodName
-     *            方法名
-     * @param argCount
-     *            参数个数
+     * @param port TODO
      * @param resultType
      *            结果类型中的过滤类型
+     *
      * @return 结果过滤
      */
-    RpcResultFilter getResultFilter(String beanId, String methodName, int argCount,
-                    Class<?> resultType);
+    RpcResultFilter getResultFilter(RpcPort port, Class<?> resultType);
 
 }

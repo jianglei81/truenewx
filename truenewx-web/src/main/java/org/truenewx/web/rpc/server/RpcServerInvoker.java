@@ -31,6 +31,7 @@ import org.truenewx.core.util.CollectionUtil;
 import org.truenewx.core.util.NetUtil;
 import org.truenewx.web.menu.MenuResolver;
 import org.truenewx.web.menu.model.Menu;
+import org.truenewx.web.rpc.RpcPort;
 import org.truenewx.web.rpc.server.annotation.RpcArg;
 import org.truenewx.web.rpc.server.annotation.RpcController;
 import org.truenewx.web.rpc.server.annotation.RpcEnum;
@@ -371,11 +372,10 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
     }
 
     @Override
-    public RpcVariableMeta getArgMeta(String beanId, String methodName, int argCount,
-            int argIndex) {
-        RpcControllerMeta meta = getMeta(beanId);
+    public RpcVariableMeta getArgMeta(RpcPort port, int argIndex) {
+        RpcControllerMeta meta = getMeta(port.getBeanId());
         try {
-            RpcMethodMeta methodMeta = meta.getMethodMeta(methodName, argCount);
+            RpcMethodMeta methodMeta = meta.getMethodMeta(port.getMethodName(), port.getArgCount());
             if (methodMeta != null) {
                 return CollectionUtil.get(methodMeta.getArgMetas(), argIndex);
             }
@@ -385,11 +385,10 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
     }
 
     @Override
-    public String getEnumSubType(String beanId, String methodName, int argCount,
-            Class<? extends Enum<?>> enumClass) {
-        RpcControllerMeta meta = getMeta(beanId);
+    public String getEnumSubType(RpcPort port, Class<? extends Enum<?>> enumClass) {
+        RpcControllerMeta meta = getMeta(port.getBeanId());
         try {
-            Method method = meta.getMethod(methodName, argCount);
+            Method method = meta.getMethod(port.getMethodName(), port.getArgCount());
             RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
             if (rpcMethod != null) {
                 for (RpcEnum rpcEnum : rpcMethod.enums()) {
@@ -404,11 +403,10 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
     }
 
     @Override
-    public RpcResultFilter getResultFilter(String beanId, String methodName, int argCount,
-            Class<?> resultType) {
-        RpcControllerMeta meta = getMeta(beanId);
+    public RpcResultFilter getResultFilter(RpcPort port, Class<?> resultType) {
+        RpcControllerMeta meta = getMeta(port.getBeanId());
         try {
-            Method method = meta.getMethod(methodName, argCount);
+            Method method = meta.getMethod(port.getMethodName(), port.getArgCount());
             RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
             if (rpcMethod != null) {
                 RpcResultFilter[] filters = rpcMethod.result().filter();

@@ -86,7 +86,7 @@ public class HandlerValidationApplierImpl implements HandlerValidationApplier {
     private Map<String, String> toExpressionMap(Map<String, Map<String, Object>> modelValidation) {
         Map<String, String> expressions = new LinkedHashMap<>();
         for (Entry<String, Map<String, Object>> entry : modelValidation.entrySet()) {
-            String expression = JsonUtil.toJson(entry.getValue());
+            String expression = JsonUtil.toJson(entry.getValue()).replace('"', '\'');
             expressions.put(entry.getKey(), expression);
         }
         return expressions;

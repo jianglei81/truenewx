@@ -1,6 +1,9 @@
 package org.truenewx.web.rpc.server.meta;
 
+import java.util.Collection;
 import java.util.Map;
+
+import org.truenewx.core.enums.support.EnumItem;
 
 /**
  * RPC变量（包括方法参数和类的属性）元数据
@@ -14,6 +17,7 @@ public class RpcVariableMeta {
     private String name;
     private String caption;
     private Map<String, Object> validation;
+    private Collection<EnumItem> items;
 
     public RpcVariableMeta(Class<?> type) {
         this.type = new RpcTypeMeta(type);
@@ -45,6 +49,14 @@ public class RpcVariableMeta {
 
     public void setValidation(Map<String, Object> validation) {
         this.validation = validation;
+    }
+
+    public Collection<EnumItem> getItems() {
+        return this.items;
+    }
+
+    public void setItems(Collection<EnumItem> items) {
+        this.items = items;
     }
 
 }

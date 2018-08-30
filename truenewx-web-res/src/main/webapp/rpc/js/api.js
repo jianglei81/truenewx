@@ -197,7 +197,7 @@ $(function() {
         buildTypeLink : function(tr, type, level, argIndex) {
             if (type && type.simpleName) {
                 var html = type.simpleName;
-                if (type.complex) { // 复合类型
+                if (type.complex && (argIndex == undefined || !type["enum"])) { // 复合类型，位于结果中的类型或参数类型中的非枚举类型
                     var clickable;
                     if (type.array) { // 复合类型数组
                         html = $("<span><span class='type clickable'>"
@@ -310,6 +310,23 @@ $(function() {
                     tr.append(td);
                     td = $("<td nowrap='nowrap'></td>");
                     td.append(property.caption);
+                    tr.append(td);
+                    if (argIndex != undefined) { // 参数中的类型需生成字段规则说明单元格
+                        td = $("<td></td>");
+                        if (property.validation) {
+                            td.append($.toJSON(property.validation));
+                        } else if (property.type["enum"]) {
+                            td.append("<span class='label label-success'>枚举</span> ");
+                            var items = [];
+                            $.each(property.items, function(i, item) {
+                                items.push({
+                                    key : item.key,
+                                    caption : item.caption
+                                });
+                            });
+                            td.append($.toJSON(items));
+                        }
+                    }
                     tr.append(td);
                 });
                 _this.scrollRightest(panel);
