@@ -51,6 +51,7 @@ import org.truenewx.web.rpc.server.meta.RpcControllerMeta;
 import org.truenewx.web.rpc.server.meta.RpcMethodMeta;
 import org.truenewx.web.rpc.server.meta.RpcTypeMeta;
 import org.truenewx.web.rpc.server.meta.RpcVariableMeta;
+import org.truenewx.web.spring.context.SpringWebContext;
 import org.truenewx.web.spring.util.SpringWebUtil;
 import org.truenewx.web.util.WebUtil;
 import org.truenewx.web.validation.generate.ModelValidationGenerator;
@@ -208,9 +209,49 @@ public class RpcApiController extends RpcControllerSupport {
         return null;
     }
 
+    @RequestMapping("/{beanId}/{methodName}/{argCount}/arg/{argType}/properties") // 必须带后缀结尾，否则argType中包含.，将被识别为扩展名
+    @ResponseBody
+    public String argProperties(@PathVariable("beanId") String beanId,
+            @PathVariable("methodName") String methodName, @PathVariable("argCount") int argCount,
+            @PathVariable("argType") String argType, HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+        if (checkLan(request, response)) {
+            RpcPort port = new RpcPort(beanId, methodName, argCount);
+            Locale locale = SpringWebUtil.getLocale(request);
+            Binate<Class<?>, List<RpcVariableMeta>> binate = argProperties(port, argType, locale);
+            if (binate == null) {
+                return "null";
+            }
+            Map<String, Object> result = new HashMap<>();
+            result.put("caption", CaptionUtil.getCaption(binate.getLeft(), locale));
+            result.put("properties", binate.getRight());
+            return this.serializer.serialize(result);
+        }
+        return null;
+    }
+
+    @RpcMethod(result = @RpcResult(filter = {
+            @RpcResultFilter(type = RpcVariableMeta.class,
+                    includes = { "caption", "typeName", "validation", "items" }),
+            @RpcResultFilter(type = EnumItem.class, includes = { "key", "caption" }) }))
+    public Map<String, RpcVariableMeta> getArgPropertyMetas(String beanId, String methodName,
+            int argCount, String argType) {
+        RpcPort port = new RpcPort(beanId, methodName, argCount);
+        Locale locale = SpringWebContext.getLocale();
+        Map<String, RpcVariableMeta> map = new HashMap<>();
+        Binate<Class<?>, List<RpcVariableMeta>> binate = argProperties(port, argType, locale);
+        if (binate != null) {
+            List<RpcVariableMeta> metas = binate.getRight();
+            for (RpcVariableMeta meta : metas) {
+                map.put(meta.getName(), meta);
+            }
+        }
+        return map;
+    }
+
     @RpcMethod(result = @RpcResult(
             filter = @RpcResultFilter(type = EnumItem.class, includes = { "key", "caption" })))
-    public EnumType argEnumType(String beanId, String methodName, int argCount, int argIndex) {
+    public EnumType getArgEnumType(String beanId, String methodName, int argCount, int argIndex) {
         RpcPort port = new RpcPort(beanId, methodName, argCount);
         RpcVariableMeta argMeta = this.server.getArgMeta(port, argIndex);
         if (argMeta == null) {
@@ -231,27 +272,6 @@ public class RpcApiController extends RpcControllerSupport {
         Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) clazz;
         String subtype = this.server.getEnumSubType(port, enumClass);
         return getEnumType(enumClass, subtype);
-    }
-
-    @RequestMapping("/{beanId}/{methodName}/{argCount}/arg/{argType}/properties") // 必须带后缀结尾，否则argType中包含.，将被识别为扩展名
-    @ResponseBody
-    public String argProperties(@PathVariable("beanId") String beanId,
-            @PathVariable("methodName") String methodName, @PathVariable("argCount") int argCount,
-            @PathVariable("argType") String argType, HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
-        if (checkLan(request, response)) {
-            RpcPort port = new RpcPort(beanId, methodName, argCount);
-            Locale locale = SpringWebUtil.getLocale(request);
-            Binate<Class<?>, List<RpcVariableMeta>> binate = argProperties(port, argType, locale);
-            if (binate == null) {
-                return "null";
-            }
-            Map<String, Object> result = new HashMap<>();
-            result.put("caption", CaptionUtil.getCaption(binate.getLeft(), locale));
-            result.put("properties", binate.getRight());
-            return this.serializer.serialize(result);
-        }
-        return null;
     }
 
     @SuppressWarnings("unchecked")

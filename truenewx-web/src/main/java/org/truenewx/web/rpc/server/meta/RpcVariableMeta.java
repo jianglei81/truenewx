@@ -27,6 +27,10 @@ public class RpcVariableMeta {
         return this.type;
     }
 
+    public String getTypeName() {
+        return this.type.getFullName();
+    }
+
     public String getName() {
         return this.name;
     }
