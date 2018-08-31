@@ -18,11 +18,11 @@ import org.truenewx.data.validation.rule.DecimalRule;
 public class DecimalRuleMapper implements ValidationRuleMapper<DecimalRule> {
 
     @Override
-    public Map<String, Object> toMap(final DecimalRule rule, final Locale locale) {
-        final Map<String, Object> result = new HashMap<>();
+    public Map<String, Object> toMap(DecimalRule rule, Locale locale) {
+        Map<String, Object> result = new HashMap<>();
         result.put("number", Boolean.TRUE); // 至少必须为数值
-        final int precision = rule.getPrecision();
-        final int scale = rule.getScale();
+        int precision = rule.getPrecision();
+        int scale = rule.getScale();
         if (scale >= 0 && precision > scale) { // 精度大于等于0且长度大于精度才有效，不支持负精度
             if (scale == 0) { // 小数位精度为0，则限定为整数
                 result.put("integer", Boolean.TRUE);
@@ -33,11 +33,11 @@ public class DecimalRuleMapper implements ValidationRuleMapper<DecimalRule> {
                 result.put("scale", scale);
             }
         }
-        final BigDecimal min = rule.getMin();
+        BigDecimal min = rule.getMin();
         if (min != null && min.compareTo(DecimalRule.MIN_DECIMAL) > 0) {
             result.put("minValue", min);
         }
-        final BigDecimal max = rule.getMax();
+        BigDecimal max = rule.getMax();
         if (max != null && max.compareTo(DecimalRule.MAX_DECIMAL) < 0) {
             result.put("maxValue", max);
         }

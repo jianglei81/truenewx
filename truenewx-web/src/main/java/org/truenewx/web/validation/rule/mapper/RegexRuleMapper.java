@@ -14,25 +14,24 @@ import org.truenewx.data.validation.rule.RegexRule;
 
 /**
  * 正则表达式规则的校验映射集生成器
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
 @Component
-public class RegexRuleMapper
-                implements ValidationRuleMapper<RegexRule>, MessageSourceAware {
+public class RegexRuleMapper implements ValidationRuleMapper<RegexRule>, MessageSourceAware {
     private MessageSource messageSource;
 
     @Override
-    public void setMessageSource(final MessageSource messageSource) {
+    public void setMessageSource(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
 
     @Override
-    public Map<String, Object> toMap(final RegexRule rule, final Locale locale) {
+    public Map<String, Object> toMap(RegexRule rule, Locale locale) {
         String message = rule.getMessage();
         if (StringUtils.isNotBlank(message) && message.startsWith("{") && message.endsWith("}")) {
-            final String code = message.substring(1, message.length() - 1);
+            String code = message.substring(1, message.length() - 1);
             message = this.messageSource.getMessage(code, null, Strings.EMPTY, locale);
         }
         if (message == null) {
@@ -40,7 +39,7 @@ public class RegexRuleMapper
         } else {
             message = HtmlUtils.htmlEscape(message);
         }
-        final Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<>();
         result.put("regex", new String[] { rule.getExpression(), message });
         return result;
     }

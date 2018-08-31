@@ -4,6 +4,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.temporal.Temporal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -50,15 +51,14 @@ public class HibernateValidationConfigurationFactory
     private Map<Class<Annotation>, ValidationRuleBuilder<?>> ruleBuilders = new HashMap<>();
 
     @Autowired
-    public void setSessionFactoryRegistry(
-            final LocalSessionFactoryRegistry sessionFactoryRegistry) {
+    public void setSessionFactoryRegistry(LocalSessionFactoryRegistry sessionFactoryRegistry) {
         this.sessionFactoryRegistry = sessionFactoryRegistry;
     }
 
     @SuppressWarnings("unchecked")
-    public void setValidationRuleBuilders(final Collection<ValidationRuleBuilder<?>> builders) {
-        for (final ValidationRuleBuilder<?> builder : builders) {
-            for (final Class<?> constraintType : builder.getConstraintTypes()) {
+    public void setValidationRuleBuilders(Collection<ValidationRuleBuilder<?>> builders) {
+        for (ValidationRuleBuilder<?> builder : builders) {
+            for (Class<?> constraintType : builder.getConstraintTypes()) {
                 Assert.isTrue(isConstraintAnnotation(constraintType),
                         "constraintType must be constraint annotation");
                 // setter方法设置的处理器优先，会覆盖掉已有的处理器
@@ -67,13 +67,13 @@ public class HibernateValidationConfigurationFactory
         }
     }
 
-    private boolean isConstraintAnnotation(final Class<?> annoClass) {
+    private boolean isConstraintAnnotation(Class<?> annoClass) {
         return annoClass.getAnnotation(Constraint.class) != null;
     }
 
     @Override
     public synchronized ValidationConfiguration getConfiguration(
-            final Class<? extends Model> modelClass) {
+            Class<? extends Model> modelClass) {
         ValidationConfiguration configuration = this.configurations.get(modelClass);
         if (configuration == null) {
             configuration = buildConfiguration(modelClass);
@@ -85,8 +85,8 @@ public class HibernateValidationConfigurationFactory
     }
 
     @SuppressWarnings("unchecked")
-    private ValidationConfiguration buildConfiguration(final Class<? extends Model> modelClass) {
-        final ValidationConfiguration configuration = new ValidationConfiguration(modelClass);
+    private ValidationConfiguration buildConfiguration(Class<? extends Model> modelClass) {
+        ValidationConfiguration configuration = new ValidationConfiguration(modelClass);
         if (TransportModel.class.isAssignableFrom(modelClass)) {
             addEntityClassRulesFromTransportClass(configuration,
                     (Class<? extends TransportModel<?>>) modelClass);
@@ -107,17 +107,17 @@ public class HibernateValidationConfigurationFactory
      * @param transportClass
      *            传输模型类
      */
-    private void addEntityClassRulesFromTransportClass(final ValidationConfiguration configuration,
-            final Class<? extends TransportModel<?>> transportClass) {
-        final Class<? extends Entity> entityClass = ClassUtil.getActualGenericType(transportClass,
+    private void addEntityClassRulesFromTransportClass(ValidationConfiguration configuration,
+            Class<? extends TransportModel<?>> transportClass) {
+        Class<? extends Entity> entityClass = ClassUtil.getActualGenericType(transportClass,
                 TransportModel.class, 0);
-        final List<Field> fields = ClassUtil.getSimplePropertyField(transportClass);
-        for (final Field field : fields) {
+        List<Field> fields = ClassUtil.getSimplePropertyField(transportClass);
+        for (Field field : fields) {
             // 加入对应实体的校验规则
             // 只加入传输模型中存在的简单属性的校验规则
             Class<? extends Entity> entityType = entityClass;
             String propertyName = field.getName();
-            final InheritConstraint ic = field.getAnnotation(InheritConstraint.class);
+            InheritConstraint ic = field.getAnnotation(InheritConstraint.class);
             if (ic != null) {
                 if (StringUtils.isNotBlank(ic.value())) {
                     propertyName = ic.value();
@@ -127,9 +127,9 @@ public class HibernateValidationConfigurationFactory
                 }
             }
             if (entityType != null) {
-                final ValidationConfiguration entityConfig = getConfiguration(entityType);
+                ValidationConfiguration entityConfig = getConfiguration(entityType);
                 if (entityConfig != null) {
-                    final Set<ValidationRule> rules = entityConfig.getRules(propertyName);
+                    Set<ValidationRule> rules = entityConfig.getRules(propertyName);
                     if (rules != null && rules.size() > 0) {
                         configuration.getRules(field.getName()).addAll(rules);
                     }
@@ -147,11 +147,9 @@ public class HibernateValidationConfigurationFactory
      * @param entityClass
      *            实体类
      */
-    private void addEntityClassRulesFromPersistentConfig(
-            final ValidationConfiguration configuration,
-            final Class<? extends Entity> entityClass) {
-        final Iterator<Property> properties = this.sessionFactoryRegistry
-                .getClassProperties(entityClass);
+    private void addEntityClassRulesFromPersistentConfig(ValidationConfiguration configuration,
+            Class<? extends Entity> entityClass) {
+        Iterator<Property> properties = this.sessionFactoryRegistry.getClassProperties(entityClass);
         if (properties != null) {
             while (properties.hasNext()) {
                 addRuleByProperty(configuration, entityClass, properties.next());
@@ -170,34 +168,36 @@ public class HibernateValidationConfigurationFactory
      *            属性
      */
     @SuppressWarnings("unchecked")
-    private void addRuleByProperty(final ValidationConfiguration configuration,
-            final Class<? extends Entity> entityClass, final Property property) {
-        final String propertyName = property.getName();
-        final PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(entityClass, propertyName);
+    private void addRuleByProperty(ValidationConfiguration configuration,
+            Class<? extends Entity> entityClass, Property property) {
+        String propertyName = property.getName();
+        PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(entityClass, propertyName);
         if (pd != null) {
-            final Class<?> propertyClass = pd.getPropertyType();
+            Class<?> propertyClass = pd.getPropertyType();
             // 只处理字符串型、数值、日期型
             if (CharSequence.class.isAssignableFrom(propertyClass)
                     || Number.class.isAssignableFrom(propertyClass)
                     || (propertyClass.isPrimitive() && propertyClass != boolean.class)
-                    || Date.class.isAssignableFrom(propertyClass)) {
-                final Iterator<Column> columns = property.getColumnIterator();
+                    || Date.class.isAssignableFrom(propertyClass)
+                    || Temporal.class.isAssignableFrom(propertyClass)) {
+                Iterator<Column> columns = property.getColumnIterator();
                 // 只支持对应且仅对应一个物理字段的
                 if (!columns.hasNext()) {
                     return;
                 }
-                final Column column = columns.next();
+                Column column = columns.next();
                 if (columns.hasNext()) {
                     return;
                 }
                 if (CharSequence.class.isAssignableFrom(propertyClass)) { // 字符串型
-                    final int maxLength = column.getLength();
+                    int maxLength = column.getLength();
                     if (maxLength > 0) { // 长度大于0才有效
-                        final LengthRule rule = new LengthRule();
+                        LengthRule rule = new LengthRule();
                         rule.setMax(maxLength);
                         configuration.addRule(propertyName, rule);
                     }
-                } else if (Date.class.isAssignableFrom(propertyClass)) { // 日期型
+                } else if (Date.class.isAssignableFrom(propertyClass)
+                        || Temporal.class.isAssignableFrom(propertyClass)) { // 日期型
                     if (!column.isNullable()) { // 不允许为null的日期型，添加不允许为空白的约束
                         configuration.addRule(propertyName, new MarkRule(NotBlank.class));
                     }
@@ -229,7 +229,7 @@ public class HibernateValidationConfigurationFactory
                         scale = 0;
                     }
                     if (scale >= 0 && precision > scale) { // 精度大于等于0且长度大于精度才有效，不支持负精度
-                        final DecimalRule rule = new DecimalRule();
+                        DecimalRule rule = new DecimalRule();
                         rule.setPrecision(precision);
                         rule.setScale(scale);
                         configuration.addRule(propertyName, rule);
@@ -247,40 +247,37 @@ public class HibernateValidationConfigurationFactory
      * @param clazz
      *            类
      */
-    private void addRulesByAnnotation(final ValidationConfiguration configuration,
-            final Class<?> clazz) {
-        final List<Field> fields = ClassUtil.getSimplePropertyField(clazz);
-        for (final Field field : fields) {
+    private void addRulesByAnnotation(ValidationConfiguration configuration, Class<?> clazz) {
+        List<Field> fields = ClassUtil.getSimplePropertyField(clazz);
+        for (Field field : fields) {
             addRulesByPropertyAnnotations(configuration, field);
         }
     }
 
-    private void addRulesByPropertyAnnotations(final ValidationConfiguration configuration,
-            final Field field) {
-        final String propertyName = field.getName();
+    private void addRulesByPropertyAnnotations(ValidationConfiguration configuration, Field field) {
+        String propertyName = field.getName();
         // 先在属性字段上找约束注解生成规则
-        for (final Annotation annotation : field.getAnnotations()) {
+        for (Annotation annotation : field.getAnnotations()) {
             addRuleByPropertyAnnotation(configuration, propertyName, annotation);
         }
         // 再尝试在属性的getter方法上找约束注解生成规则，这意味着getter方法上的约束注解优先级更高
-        final Method method = ClassUtil.findPropertyMethod(field.getDeclaringClass(), propertyName,
-                true);
+        Method method = ClassUtil.findPropertyMethod(field.getDeclaringClass(), propertyName, true);
         if (method != null) {
-            for (final Annotation annotation : method.getAnnotations()) {
+            for (Annotation annotation : method.getAnnotations()) {
                 addRuleByPropertyAnnotation(configuration, propertyName, annotation);
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void addRuleByPropertyAnnotation(final ValidationConfiguration configuration,
-            final String propertyName, final Annotation annotation) {
-        final Class<? extends Annotation> annoClass = annotation.annotationType();
+    private void addRuleByPropertyAnnotation(ValidationConfiguration configuration,
+            String propertyName, Annotation annotation) {
+        Class<? extends Annotation> annoClass = annotation.annotationType();
         if (isConstraintAnnotation(annoClass)) {
-            final ValidationRuleBuilder<ValidationRule> builder = (ValidationRuleBuilder<ValidationRule>) this.ruleBuilders
+            ValidationRuleBuilder<ValidationRule> builder = (ValidationRuleBuilder<ValidationRule>) this.ruleBuilders
                     .get(annoClass);
             if (builder != null) {
-                final Class<? extends ValidationRule> ruleClass = ClassUtil
+                Class<? extends ValidationRule> ruleClass = ClassUtil
                         .getActualGenericType(builder.getClass(), ValidationRuleBuilder.class, 0);
                 ValidationRule rule = configuration.getRule(propertyName, ruleClass);
                 if (rule == null) {
@@ -295,11 +292,11 @@ public class HibernateValidationConfigurationFactory
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void afterInitialized(final ApplicationContext context) throws Exception {
-        final Map<String, ValidationRuleBuilder> beans = context
+    public void afterInitialized(ApplicationContext context) throws Exception {
+        Map<String, ValidationRuleBuilder> beans = context
                 .getBeansOfType(ValidationRuleBuilder.class);
-        for (final ValidationRuleBuilder<?> builder : beans.values()) {
-            for (final Class<?> constraintType : builder.getConstraintTypes()) {
+        for (ValidationRuleBuilder<?> builder : beans.values()) {
+            for (Class<?> constraintType : builder.getConstraintTypes()) {
                 Assert.isTrue(isConstraintAnnotation(constraintType),
                         "constraintType must be constraint annotation");
                 // 不覆盖通过setter方法设置的处理器

@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -344,7 +345,7 @@ public class ClassUtil {
         Set<String> names = new HashSet<>();
         PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(clazz);
         for (PropertyDescriptor pd : propertyDescriptors) {
-            if (BeanUtils.isSimpleValueType(pd.getPropertyType())) {
+            if (isSimpleValueType(pd.getPropertyType())) {
                 String name = pd.getName();
                 if (!"class".equals(name)) {
                     names.add(name);
@@ -352,6 +353,10 @@ public class ClassUtil {
             }
         }
         return names;
+    }
+
+    public static boolean isSimpleValueType(Class<?> type) {
+        return BeanUtils.isSimpleValueType(type) || Temporal.class.isAssignableFrom(type);
     }
 
     /**
@@ -367,7 +372,7 @@ public class ClassUtil {
         PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(clazz);
         for (PropertyDescriptor pd : propertyDescriptors) {
             Class<?> propertyType = pd.getPropertyType();
-            if (propertyType != null && BeanUtils.isSimpleValueType(propertyType)) {
+            if (propertyType != null && isSimpleValueType(propertyType)) {
                 String name = pd.getName();
                 if (!"class".equals(name)) {
                     Field field = findField(clazz, name);

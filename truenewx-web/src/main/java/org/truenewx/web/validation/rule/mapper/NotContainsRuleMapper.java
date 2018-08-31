@@ -20,10 +20,10 @@ import org.truenewx.data.validation.rule.NotContainsRule;
 public class NotContainsRuleMapper implements ValidationRuleMapper<NotContainsRule> {
 
     @Override
-    public Map<String, Object> toMap(final NotContainsRule rule, final Locale locale) {
-        final Map<String, Object> result = new HashMap<String, Object>();
+    public Map<String, Object> toMap(NotContainsRule rule, Locale locale) {
+        Map<String, Object> result = new HashMap<>();
         if (rule.hasValue()) { // 存在不能包含的字符串
-            final String notString = StringUtils.join(rule.getValues(), Strings.SPACE);
+            String notString = StringUtils.join(rule.getValues(), Strings.SPACE);
             result.put("notContains", HtmlUtils.htmlEscape(notString));
         }
         if (rule.isNotContainsHtmlChars()) {

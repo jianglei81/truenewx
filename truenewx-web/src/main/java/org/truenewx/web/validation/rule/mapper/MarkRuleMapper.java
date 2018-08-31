@@ -1,12 +1,12 @@
 package org.truenewx.web.validation.rule.mapper;
 
 import java.lang.annotation.Annotation;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.omg.CosNaming.NamingContextPackage.NotEmpty;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.hibernate.validator.constraints.URL;
 import org.springframework.stereotype.Component;
 import org.truenewx.core.util.StringUtil;
 import org.truenewx.data.validation.rule.MarkRule;
@@ -27,9 +27,9 @@ public class MarkRuleMapper implements ValidationRuleMapper<MarkRule> {
     }
 
     @Override
-    public Map<String, Object> toMap(final MarkRule rule, final Locale locale) {
-        final Map<String, Object> result = new HashMap<String, Object>();
-        for (final Class<? extends Annotation> annotationType : rule.getAnnotationTypes()) {
+    public Map<String, Object> toMap(MarkRule rule, Locale locale) {
+        Map<String, Object> result = new HashMap<>();
+        for (Class<? extends Annotation> annotationType : rule.getAnnotationTypes()) {
             String name = this.annotationTypeMapping.get(annotationType);
             if (name == null) { // 默认以注解类型简单名首字母小写为校验规则名称
                 name = StringUtil.firstToLowerCase(annotationType.getSimpleName());

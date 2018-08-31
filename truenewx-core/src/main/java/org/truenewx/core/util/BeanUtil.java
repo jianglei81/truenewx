@@ -31,17 +31,17 @@ public class BeanUtil {
      *            另一个比较的bean
      * @return true if 指定的2个bean相等, otherwise false
      */
-    public static boolean equalsById(final Object bean, final Object otherBean) {
+    public static boolean equalsById(Object bean, Object otherBean) {
         if (bean == null || otherBean == null) {
             throw new NullPointerException();
         }
-        final Class<?> class1 = bean.getClass();
-        final Class<?> class2 = otherBean.getClass();
+        Class<?> class1 = bean.getClass();
+        Class<?> class2 = otherBean.getClass();
         if (!class1.isAssignableFrom(class2) || !class2.isAssignableFrom(class1)) { // 比较的两个bean的类型必须相同
             return false;
         }
-        final Long id1 = (Long) getPropertyValue(bean, "id");
-        final Long id2 = (Long) getPropertyValue(otherBean, "id");
+        Long id1 = (Long) getPropertyValue(bean, "id");
+        Long id2 = (Long) getPropertyValue(otherBean, "id");
         if (id1 == null && id2 == null) {
             return bean.equals(otherBean);
         }
@@ -58,11 +58,11 @@ public class BeanUtil {
      * @return 属性值
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getPropertyValue(final Object bean, final String propertyName) {
+    public static <T> T getPropertyValue(Object bean, String propertyName) {
         try {
-            final String[] names = propertyName.split("\\.");
+            String[] names = propertyName.split("\\.");
             return (T) getRefPropertyValue(bean, names);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -82,11 +82,11 @@ public class BeanUtil {
      * @throws NullPointerException
      *             如果中间有一个属性的值为null
      */
-    private static Object getRefPropertyValue(final Object bean, final String... propertyNames)
+    private static Object getRefPropertyValue(Object bean, String... propertyNames)
             throws IllegalAccessException, InvocationTargetException, NullPointerException {
         Object value = bean;
-        for (final String name : propertyNames) {
-            final PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(value.getClass(), name);
+        for (String name : propertyNames) {
+            PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(value.getClass(), name);
             value = pd.getReadMethod().invoke(value);
         }
         return value;
@@ -103,23 +103,22 @@ public class BeanUtil {
      *            属性值
      * @return 是否设置成功，当指定属性不存在或无法设置值时返回false，否则返回true
      */
-    public static boolean setPropertyValue(@Nullable
-    Object bean, String propertyName, @Nullable final Object value) {
+    public static boolean setPropertyValue(@Nullable Object bean, String propertyName,
+            @Nullable Object value) {
         if (bean != null) {
-            final String[] names = propertyName.split("\\.");
+            String[] names = propertyName.split("\\.");
             if (names.length > 1) {
                 try {
                     bean = getRefPropertyValue(bean,
                             ArrayUtils.subarray(names, 0, names.length - 1));
                     propertyName = names[names.length - 1];
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     return false; // 忽略属性设置错误，不能设置则不设置
                 }
             }
-            final PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(bean.getClass(),
-                    propertyName);
+            PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(bean.getClass(), propertyName);
             if (pd != null) {
-                final Method writeMethod = pd.getWriteMethod();
+                Method writeMethod = pd.getWriteMethod();
                 if (writeMethod != null) {
                     try {
                         writeMethod.invoke(bean, value);
@@ -144,13 +143,13 @@ public class BeanUtil {
      * @param value
      *            字段值
      */
-    public static void setFieldValue(final Object bean, final String name, final Object value) {
+    public static void setFieldValue(Object bean, String name, Object value) {
         if (bean != null) {
-            final Class<?> type = bean.getClass();
+            Class<?> type = bean.getClass();
             try {
-                final Field field = ClassUtil.findField(type, name);
+                Field field = ClassUtil.findField(type, name);
                 if (field != null) {
-                    final boolean accessible = field.isAccessible();
+                    boolean accessible = field.isAccessible();
                     if (!accessible) {
                         field.setAccessible(true);
                     }
@@ -159,29 +158,29 @@ public class BeanUtil {
                         field.setAccessible(accessible);
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T getFieldValue(final Object bean, final String name) {
+    public static <T> T getFieldValue(Object bean, String name) {
         if (bean != null) {
-            final Class<?> type = bean.getClass();
+            Class<?> type = bean.getClass();
             try {
-                final Field field = ClassUtil.findField(type, name);
+                Field field = ClassUtil.findField(type, name);
                 if (field != null) {
-                    final boolean accessible = field.isAccessible();
+                    boolean accessible = field.isAccessible();
                     if (!accessible) {
                         field.setAccessible(true);
                     }
-                    final Object value = field.get(bean);
+                    Object value = field.get(bean);
                     if (!accessible) {
                         field.setAccessible(accessible);
                     }
                     return (T) value;
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
             }
         }
         return null;
@@ -196,8 +195,8 @@ public class BeanUtil {
      *            比较bean
      * @return true if 指定集合中包含指定bean, otherwise false
      */
-    public static boolean containsById(final Collection<?> collection, final Object bean) {
-        for (final Object o : collection) {
+    public static boolean containsById(Collection<?> collection, Object bean) {
+        for (Object o : collection) {
             if (equalsById(bean, o)) {
                 return true;
             }
@@ -213,8 +212,8 @@ public class BeanUtil {
      * @param bean
      *            比较bean
      */
-    public static void removeById(final Collection<?> collection, final Object bean) {
-        for (final Object o : collection) {
+    public static void removeById(Collection<?> collection, Object bean) {
+        for (Object o : collection) {
             if (equalsById(bean, o)) {
                 collection.remove(o);
                 return;
@@ -231,16 +230,16 @@ public class BeanUtil {
      *            id属性值
      * @return true if 指定bean集合中id属性值等于指定id的bean, otherwise false
      */
-    public static Object getById(final Collection<?> collection, final long id) {
+    public static Object getById(Collection<?> collection, long id) {
         try {
-            for (final Object o : collection) {
-                final Long oid = (Long) getPropertyValue(o, "id");
+            for (Object o : collection) {
+                Long oid = (Long) getPropertyValue(o, "id");
                 if (oid != null && oid.longValue() == id) {
                     return o;
                 }
             }
             return null;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -255,22 +254,22 @@ public class BeanUtil {
      * @param excludedProperties
      *            排除的属性集
      */
-    public static void fromBean(final Map<String, Object> map, final Object bean,
-            final String... excludedProperties) {
-        final PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(bean.getClass());
-        for (final PropertyDescriptor pd : pds) {
+    public static void fromBean(Map<String, Object> map, Object bean,
+            String... excludedProperties) {
+        PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(bean.getClass());
+        for (PropertyDescriptor pd : pds) {
             try {
-                final String name = pd.getName();
+                String name = pd.getName();
                 if (!"class".equals(name) && !ArrayUtils.contains(excludedProperties, name)) {
-                    final Method readMethod = pd.getReadMethod();
+                    Method readMethod = pd.getReadMethod();
                     if (readMethod != null) {
-                        final Object value = readMethod.invoke(bean);
+                        Object value = readMethod.invoke(bean);
                         if (value != null) {
                             map.put(name, value);
                         }
                     }
                 }
-            } catch (final Exception e) { // 出现任何异常不做任何处理
+            } catch (Exception e) { // 出现任何异常不做任何处理
             }
         }
     }
@@ -284,8 +283,8 @@ public class BeanUtil {
      *            排除的属性
      * @return Map结果对象
      */
-    public static Map<String, Object> toMap(final Object bean, final String... excludedProperties) {
-        final Map<String, Object> map = new HashMap<>();
+    public static Map<String, Object> toMap(Object bean, String... excludedProperties) {
+        Map<String, Object> map = new HashMap<>();
         fromBean(map, bean, excludedProperties);
         return map;
     }
@@ -300,23 +299,21 @@ public class BeanUtil {
      * @param excludedKeys
      *            排除的关键字
      */
-    public static void fromMap(final Object bean, final Map<String, Object> map,
-            final String... excludedKeys) {
-        for (final Entry<String, Object> entry : map.entrySet()) {
+    public static void fromMap(Object bean, Map<String, Object> map, String... excludedKeys) {
+        for (Entry<String, Object> entry : map.entrySet()) {
             try {
-                final String key = entry.getKey();
+                String key = entry.getKey();
                 if (!"class".equals(key) && !ArrayUtils.contains(excludedKeys, key)) {
-                    final Object value = entry.getValue();
-                    final PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(bean.getClass(),
-                            key);
+                    Object value = entry.getValue();
+                    PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(bean.getClass(), key);
                     if (pd != null) {
-                        final Method writeMethod = pd.getWriteMethod();
+                        Method writeMethod = pd.getWriteMethod();
                         if (writeMethod != null) {
                             writeMethod.invoke(bean, value);
                         }
                     }
                 }
-            } catch (final Exception e) { // 出现任何异常不做任何处理
+            } catch (Exception e) { // 出现任何异常不做任何处理
             }
         }
     }
@@ -336,32 +333,31 @@ public class BeanUtil {
      * @throws IllegalAccessException
      *             如果构造函数无法访问
      */
-    public static <T> T toBean(final Map<String, Object> map, final Class<T> clazz,
-            final String... excludedKeys) throws InstantiationException, IllegalAccessException {
-        final T bean = clazz.newInstance();
+    public static <T> T toBean(Map<String, Object> map, Class<T> clazz, String... excludedKeys)
+            throws InstantiationException, IllegalAccessException {
+        T bean = clazz.newInstance();
         fromMap(bean, map, excludedKeys);
         return bean;
     }
 
     /**
-     * 获取静态属性表达式所表示的静态属性值，静态属性表达式形如：@org.truenewx.core.util.
-     * DateUtil@SHORT_DATE_PATTERN <br/>
+     * 获取静态属性表达式所表示的静态属性值，静态属性表达式形如：@org.truenewx.core.util. DateUtil@SHORT_DATE_PATTERN <br/>
      * 如果表达式错误或所表示的属性为非静态或不可访问 ，则返回null
      *
      * @param propertyExpression
      *            静态属性表达式
      * @return 静态属性值
      */
-    public static Object getStaticPropertyExpressionValue(final String propertyExpression) {
-        final String[] names = propertyExpression.split("@");
+    public static Object getStaticPropertyExpressionValue(String propertyExpression) {
+        String[] names = propertyExpression.split("@");
         if (names.length != 3 || names[0].length() > 0) {
             return null;
         }
         try {
-            final Class<?> clazz = Class.forName(names[1]);
-            final Field field = clazz.getField(names[2]);
+            Class<?> clazz = Class.forName(names[1]);
+            Field field = clazz.getField(names[2]);
             return field.get(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
         }
         return null;
     }
@@ -377,48 +373,47 @@ public class BeanUtil {
      *            属性类型
      * @return true if 指定的bean对象具有指定属性的写方法, otherwise false
      */
-    public static boolean hasWritableProperty(final Object bean, final String propertyName,
-            final Class<?> propertyClass) {
+    public static boolean hasWritableProperty(Object bean, String propertyName,
+            Class<?> propertyClass) {
         try {
-            final String methodName = "set" + StringUtil.firstToUpperCase(propertyName);
+            String methodName = "set" + StringUtil.firstToUpperCase(propertyName);
             bean.getClass().getMethod(methodName, propertyClass);
             return true;
-        } catch (final SecurityException e) {
-        } catch (final NoSuchMethodException e) {
+        } catch (SecurityException e) {
+        } catch (NoSuchMethodException e) {
         }
         return false;
     }
 
     /**
-     * 将指定源对象中的简单属性的值复制到指定目标对象中，如果目标对象中无相应属性则忽略。
-     * 简单属性包括：原始类型，字符串，数字，日期，URI，URL，Locale
+     * 将指定源对象中的简单属性的值复制到指定目标对象中，如果目标对象中无相应属性则忽略。 简单属性包括：原始类型，字符串，数字，日期，URI，URL，Locale
      *
      * @param source
      *            源对象
      * @param target
      *            目标对象
      */
-    public static void copySimpleProperties(final Object source, final Object target) {
-        final PropertyDescriptor[] propertyDescriptors = BeanUtils
+    public static void copySimpleProperties(Object source, Object target) {
+        PropertyDescriptor[] propertyDescriptors = BeanUtils
                 .getPropertyDescriptors(source.getClass());
-        final Class<?> targetClass = target.getClass();
-        for (final PropertyDescriptor pd : propertyDescriptors) {
+        Class<?> targetClass = target.getClass();
+        for (PropertyDescriptor pd : propertyDescriptors) {
             try {
-                if (BeanUtils.isSimpleValueType(pd.getPropertyType())) {
-                    final String name = pd.getDisplayName();
+                if (ClassUtil.isSimpleValueType(pd.getPropertyType())) {
+                    String name = pd.getDisplayName();
                     if (!"class".equals(name)) {
-                        final PropertyDescriptor writePd = BeanUtils
-                                .getPropertyDescriptor(targetClass, name);
+                        PropertyDescriptor writePd = BeanUtils.getPropertyDescriptor(targetClass,
+                                name);
                         if (writePd != null) {
-                            final Method writeMethod = writePd.getWriteMethod();
+                            Method writeMethod = writePd.getWriteMethod();
                             if (writeMethod != null) {
-                                final Object value = pd.getReadMethod().invoke(source);
+                                Object value = pd.getReadMethod().invoke(source);
                                 writeMethod.invoke(target, value);
                             }
                         }
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LoggerFactory.getLogger(BeanUtil.class).error(e.getMessage(), e);
             }
         }

@@ -20,10 +20,10 @@ import org.truenewx.data.validation.rule.TagLimitRule;
 public class TagLimitRuleMapper implements ValidationRuleMapper<TagLimitRule> {
 
     @Override
-    public Map<String, Object> toMap(final TagLimitRule rule, final Locale locale) {
-        final Map<String, Object> result = new HashMap<String, Object>();
-        final Set<String> allowed = rule.getAllowed();
-        final Set<String> forbidden = rule.getForbidden();
+    public Map<String, Object> toMap(TagLimitRule rule, Locale locale) {
+        Map<String, Object> result = new HashMap<>();
+        Set<String> allowed = rule.getAllowed();
+        Set<String> forbidden = rule.getForbidden();
         if (allowed.isEmpty() && forbidden.isEmpty()) { // 不允许所有标签
             result.put("rejectTags", Boolean.TRUE);
         } else {
