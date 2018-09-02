@@ -231,8 +231,8 @@ public class RpcApiController extends RpcControllerSupport {
     }
 
     @RpcMethod(result = @RpcResult(filter = {
-            @RpcResultFilter(type = RpcVariableMeta.class,
-                    includes = { "caption", "typeName", "validation", "items" }),
+            @RpcResultFilter(type = RpcVariableMeta.class, includes = { "caption", "typeName",
+                    "validation", "items" }),
             @RpcResultFilter(type = EnumItem.class, includes = { "key", "caption" }) }))
     public Map<String, RpcVariableMeta> getArgPropertyMetas(String beanId, String methodName,
             int argCount, String argType) {
@@ -249,8 +249,8 @@ public class RpcApiController extends RpcControllerSupport {
         return map;
     }
 
-    @RpcMethod(result = @RpcResult(
-            filter = @RpcResultFilter(type = EnumItem.class, includes = { "key", "caption" })))
+    @RpcMethod(result = @RpcResult(filter = @RpcResultFilter(type = EnumItem.class, includes = {
+            "key", "caption" })))
     public EnumType getArgEnumType(String beanId, String methodName, int argCount, int argIndex) {
         RpcPort port = new RpcPort(beanId, methodName, argCount);
         RpcVariableMeta argMeta = this.server.getArgMeta(port, argIndex);
@@ -281,7 +281,7 @@ public class RpcApiController extends RpcControllerSupport {
         if (StringUtils.isNumeric(argType)) { // 参数类型为数字，则作为参数索引下标处理
             int argIndex = MathUtil.parseInt(argType);
             RpcVariableMeta argMeta = this.server.getArgMeta(port, argIndex);
-            argTypeMeta = argMeta.getType();
+            argTypeMeta = argMeta == null ? null : argMeta.getType();
         } else { // 参数的下级类型会直接指定参数类型，此时直接构建参数的类型元数据
             try {
                 argTypeMeta = new RpcTypeMeta(this.context.getClassLoader().loadClass(argType));
