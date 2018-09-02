@@ -5,8 +5,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -130,15 +132,15 @@ public class DateUtil {
     /**
      * 按照指定格式格式化时间点对象为字符串型日期
      *
-     * @param instant
+     * @param temporal
      *            时间点
      * @param pattern
      *            日期格式
      * @return 字符串型日期
      */
-    public static String format(Instant instant, String pattern) {
+    public static String format(TemporalAccessor temporal, String pattern) {
         return DateTimeFormatter.ofPattern(pattern).withZone(ZoneId.systemDefault())
-                .format(instant);
+                .format(temporal);
     }
 
     /**
@@ -172,6 +174,10 @@ public class DateUtil {
      */
     public static String formatShort(Instant instant) {
         return format(instant, DateUtil.SHORT_DATE_PATTERN);
+    }
+
+    public static String format(LocalDate date) {
+        return format(date, DateUtil.SHORT_DATE_PATTERN);
     }
 
     /**
@@ -294,6 +300,19 @@ public class DateUtil {
         Calendar laterCalendar = setTimeToCalendar(laterDate, 0, 0, 0, 0);
         long dms = laterCalendar.getTimeInMillis() - earlierCalendar.getTimeInMillis();
         return (int) (dms / DateUtil.MS_ONE_DAY);
+    }
+
+    /**
+     * 计算指定两个日期之间的相差天数。如果earlierDate晚于laterDate，则返回负值
+     *
+     * @param earlierDate
+     *            较早日期
+     * @param laterDate
+     *            较晚日期
+     * @return 相差天数
+     */
+    public static int daysBetween(LocalDate earlierDate, LocalDate laterDate) {
+        return (int) (laterDate.toEpochDay() - earlierDate.toEpochDay());
     }
 
     /**
