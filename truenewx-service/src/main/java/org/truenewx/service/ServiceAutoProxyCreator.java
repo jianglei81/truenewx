@@ -34,6 +34,7 @@ public class ServiceAutoProxyCreator extends TransactionalAutoProxyCreator
             this.transactionAttributes = new Properties();
             this.transactionAttributes.put("get*", READ_TRANSACTION_ATTRIBUTE_ABBR);
             this.transactionAttributes.put("find*", READ_TRANSACTION_ATTRIBUTE_ABBR);
+            this.transactionAttributes.put("query*", READ_TRANSACTION_ATTRIBUTE_ABBR);
             this.transactionAttributes.put("load*", READ_TRANSACTION_ATTRIBUTE_ABBR);
             this.transactionAttributes.put("count*", READ_TRANSACTION_ATTRIBUTE_ABBR);
             this.transactionAttributes.put("is*", READ_TRANSACTION_ATTRIBUTE_ABBR);
