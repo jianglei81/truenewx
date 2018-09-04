@@ -10,8 +10,7 @@ import org.springframework.stereotype.Component;
 import org.truenewx.core.i18n.PropertyCaptionResolver;
 import org.truenewx.core.util.CaptionUtil;
 import org.truenewx.core.util.ClassUtil;
-import org.truenewx.data.model.SubmitModel;
-import org.truenewx.data.model.ViewModel;
+import org.truenewx.data.model.TransportModel;
 
 /**
  * 模型属性显示名称解决器
@@ -31,10 +30,8 @@ public class ModelPropertyCaptionResolver implements PropertyCaptionResolver {
         if (caption == null) {
             // 如果从指定类型中无法获取属性显示名称，而指定类型又是提交模型或视图模型，则尝试从关联的实体模型中获取
             Class<?> entityClass = null;
-            if (SubmitModel.class.isAssignableFrom(clazz)) {
-                entityClass = ClassUtil.getActualGenericType(clazz, SubmitModel.class, 0);
-            } else if (ViewModel.class.isAssignableFrom(clazz)) {
-                entityClass = ClassUtil.getActualGenericType(clazz, ViewModel.class, 0);
+            if (TransportModel.class.isAssignableFrom(clazz)) {
+                entityClass = ClassUtil.getActualGenericType(clazz, TransportModel.class, 0);
             }
             if (entityClass != null) {
                 caption = getCaption(entityClass, propertyName, locale);
