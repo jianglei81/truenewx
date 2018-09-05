@@ -28,4 +28,4 @@
   <p>10.基于JUnit和Spring-test的功能更为强大的单元测试框架</p>
   <p>11.各种为开发人员提供便利的工具类</p>
 <h3>联系方式</h3>
-  <p>core@truenewx.org</p>
+  <p>service@truenewx.org</p>
