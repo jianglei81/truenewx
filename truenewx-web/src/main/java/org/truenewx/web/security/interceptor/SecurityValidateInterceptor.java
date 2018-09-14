@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
     /**
      * 请求转发的前缀
      */
-    public static final String FORWARD_PREFIX = "forward:";
+    public static String FORWARD_PREFIX = "forward:";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -51,36 +52,33 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
     private Menu menu;
 
     @Autowired
-    public void setSubjectManager(final SubjectManager subjectManager) {
+    public void setSubjectManager(SubjectManager subjectManager) {
         this.subjectManager = subjectManager;
     }
 
     /**
      *
-     * @param userClass
-     *            要拦截的用户类型，如果整个系统只有一种用户类型，则可以不设置
+     * @param userClass 要拦截的用户类型，如果整个系统只有一种用户类型，则可以不设置
      */
-    public void setUserClass(final Class<?> userClass) {
+    public void setUserClass(Class<?> userClass) {
         this.userClass = userClass;
     }
 
     /**
      *
-     * @param loginUrl
-     *            未登录时试图访问需登录才能访问的资源时，跳转至的登录页面URL，可通过{0}附带上原访问链接
+     * @param loginUrl 未登录时试图访问需登录才能访问的资源时，跳转至的登录页面URL，可通过{0}附带上原访问链接
      */
-    public void setLoginUrl(final String loginUrl) {
+    public void setLoginUrl(String loginUrl) {
         this.loginUrl = loginUrl;
     }
 
-    public void setMenuResolver(final MenuResolver menuResolver) {
+    public void setMenuResolver(MenuResolver menuResolver) {
         this.menu = menuResolver.getFullMenu();
     }
 
-    private Class<?> getUserClass(final HttpServletRequest request,
-            final HttpServletResponse response) {
+    private Class<?> getUserClass(HttpServletRequest request, HttpServletResponse response) {
         if (this.userClass == null) {
-            final Subject subject = this.subjectManager.getSubject(request, response);
+            Subject subject = this.subjectManager.getSubject(request, response);
             if (subject != null) {
                 this.userClass = subject.getUserClass();
             }
@@ -89,22 +87,22 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
     }
 
     @Override
-    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response,
-            final Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+            Object handler) throws Exception {
         // 请求为include请求则忽略当前拦截器
         if (WebUtils.isIncludeRequest(request)) {
             return true;
         }
-        final String url = WebUtil.getRelativeRequestAction(request); // 取不含扩展名的URL
+        String url = WebUtil.getRelativeRequestAction(request); // 取不含扩展名的URL
         if (matches(url)) { // URL匹配才进行校验
             // 校验Accessibility注解限制
             if (handler instanceof HandlerMethod) {
-                final Accessibility accessibility = ((HandlerMethod) handler)
+                Accessibility accessibility = ((HandlerMethod) handler)
                         .getMethodAnnotation(Accessibility.class);
                 // 局域网访问限制校验
                 if (accessibility != null) {
                     if (accessibility.lan()) {
-                        final String ip = WebUtil.getRemoteAddrIp(request);
+                        String ip = WebUtil.getRemoteAddrIp(request);
                         if (!NetUtil.isLanIp(ip)) {
                             this.logger.warn("Forbidden request {} from {}", url, ip);
                             response.sendError(HttpStatus.FORBIDDEN.value()); // 禁止非局域网访问
@@ -118,10 +116,10 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
                 }
             }
             // 校验菜单权限
-            final Class<?> userClass = getUserClass(request, response);
-            final Subject subject = this.subjectManager.getSubject(request, response, userClass);
+            Class<?> userClass = getUserClass(request, response);
+            Subject subject = this.subjectManager.getSubject(request, response, userClass);
             if (subject != null) { // 能取得subject才进行校验
-                final HttpMethod method = HttpMethod.valueOf(request.getMethod());
+                HttpMethod method = HttpMethod.valueOf(request.getMethod());
                 // 配置菜单中当前链接允许匿名访问，则跳过不作限制
                 if (this.menu != null && this.menu.isAnonymous(url, method)) {
                     return true;
@@ -139,15 +137,14 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
         return true;
     }
 
-    protected boolean validateLogin(final Subject subject, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException, IOException {
+    protected boolean validateLogin(Subject subject, HttpServletRequest request,
+            HttpServletResponse response) throws ServletException, IOException {
         if (!subject.isLogined()) {
             // 未登录且不允许匿名访问
-            if (WebUtil.isAjaxRequest(request)) { // AJAX请求未登录时，返回错误状态
+            if (WebUtil.isAjaxRequest(request) || StringUtils.isBlank(this.loginUrl)) { // AJAX请求未登录或未指定登录页面地址时，返回错误状态
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            } else { // 普通请求未登录时，跳转至登录页面
-                final String originalUrl = WebUtil.getRelativeRequestUrlWithQueryString(request,
-                        true);
+            } else { // 普通请求未登录且已指定登录页面地址时，跳转至登录页面
+                String originalUrl = WebUtil.getRelativeRequestUrlWithQueryString(request, true);
                 String loginUrl = MessageFormat.format(this.loginUrl, originalUrl);
                 if (loginUrl.startsWith(FORWARD_PREFIX)) { // 请求转发
                     loginUrl = loginUrl.substring(FORWARD_PREFIX.length());
@@ -161,10 +158,10 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
         return true;
     }
 
-    protected boolean validateAuthority(final String url, final HttpMethod method,
-            final Subject subject, final HttpServletRequest request) throws BusinessException {
+    protected boolean validateAuthority(String url, HttpMethod method, Subject subject,
+            HttpServletRequest request) throws BusinessException {
         if (this.menu != null) {
-            final Authority authority = this.menu.getAuthority(url, method);
+            Authority authority = this.menu.getAuthority(url, method);
             // 此时授权可能为null，为null时将被视为无访问权限，意味着在配置有菜单的系统中，URL访问均应在菜单配置中进行配置
             subject.validateAuthority(authority);
         }
@@ -172,19 +169,19 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
     }
 
     @Override
-    protected boolean matches(final String url) {
+    protected boolean matches(String url) {
         // 始终排除RPC访问
         return !url.startsWith("/rpc/") && super.matches(url);
     }
 
     @Override
-    public void postHandle(final HttpServletRequest request, final HttpServletResponse response,
-            final Object handler, final ModelAndView modelAndView) throws Exception {
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+            ModelAndView modelAndView) throws Exception {
     }
 
     @Override
-    public void afterCompletion(final HttpServletRequest request,
-            final HttpServletResponse response, final Object handler, final Exception ex) {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+            Object handler, Exception ex) {
     }
 
 }
