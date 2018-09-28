@@ -1363,4 +1363,23 @@
         </attribute>
     </tag>
 
+    <tag>
+        <name>formatDate</name>
+        <tag-class>org.truenewx.web.tag.FormatDateTag</tag-class>
+        <body-content>empty</body-content>
+        <description>格式化日期输出</description>
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>需要格式化的日期值</description>
+        </attribute>
+        <attribute>
+            <name>pattern</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>格式</description>
+        </attribute>
+    </tag>
+
 </taglib>
