@@ -26,38 +26,39 @@ public class ResourceBundleNationalRegionSource extends AbstractNationalRegionSo
      */
     private RegionMapParser parser;
 
-    public void setParser(final RegionMapParser parser) {
+    public void setParser(RegionMapParser parser) {
         this.parser = parser;
     }
 
     @Override
-    public void setBasename(final String basename) {
-        this.messagesSource = new ReloadableResourceBundleMessageSource(basename);
+    public void setBasename(String basename) {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasenames(basename);
+        this.messagesSource = messageSource;
     }
 
     /**
      * 构建指定显示区域的当前国家行政区划
      *
-     * @param locale
-     *            显示区域
+     * @param locale 显示区域
      * @return 当前国家行政区划
      */
     @Override
     @Nullable
-    protected Region buildNationalRegion(final Locale locale) {
-        final Map<String, String> messages = this.messagesSource.getMessages(locale);
-        final String nation = getNation();
-        final String nationCaption = messages.get(nation);
+    protected Region buildNationalRegion(Locale locale) {
+        Map<String, String> messages = this.messagesSource.getMessages(locale);
+        String nation = getNation();
+        String nationCaption = messages.get(nation);
         if (nationCaption != null) { // 取得到国家显示名才构建国家级区域选项
-            final Region nationalRegion = new Region(nation, nationCaption);
+            Region nationalRegion = new Region(nation, nationCaption);
             if (this.parser != null) {
-                final Iterable<Region> subs = this.parser.parseAll(messages);
+                Iterable<Region> subs = this.parser.parseAll(messages);
 
-                final Map<String, Region> codeSubsMap = new HashMap<>();
-                final Map<String, Region> captionSubsMap = new HashMap<>();
-                for (final Region sub : subs) {
+                Map<String, Region> codeSubsMap = new HashMap<>();
+                Map<String, Region> captionSubsMap = new HashMap<>();
+                for (Region sub : subs) {
                     codeSubsMap.put(sub.getCode(), sub);
-                    final StringBuffer caption = new StringBuffer(sub.getCaption());
+                    StringBuffer caption = new StringBuffer(sub.getCaption());
                     Region parent = sub.getParent();
                     if (parent == null) { // 所有子选项中未指定父选项的才作为下一级子选项加入国家级选项中
                         nationalRegion.addSub(sub);

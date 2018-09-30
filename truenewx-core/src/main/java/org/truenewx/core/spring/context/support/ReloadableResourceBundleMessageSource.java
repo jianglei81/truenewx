@@ -1,17 +1,18 @@
 package org.truenewx.core.spring.context.support;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.truenewx.core.Strings;
 import org.truenewx.core.spring.context.MessagesSource;
 
 /**
@@ -24,68 +25,72 @@ public class ReloadableResourceBundleMessageSource
         extends org.springframework.context.support.ReloadableResourceBundleMessageSource
         implements MessagesSource {
 
-    private static final String PROPERTIES_SUFFIX = ".properties";
+    private static String PROPERTIES_SUFFIX = ".properties";
     private ResourcePatternResolver resourcePatternResolver;
+    private Locale[] locales;
 
-    @Autowired
-    public void setResourcePatternResolver(final ResourcePatternResolver resourcePatternResolver) {
-        this.resourcePatternResolver = resourcePatternResolver;
+    public ReloadableResourceBundleMessageSource(Locale[] locales) {
+        this.locales = locales;
     }
 
     public ReloadableResourceBundleMessageSource() {
+        this(new Locale[0]);
     }
 
-    /**
-     * 用指定基本名集合构建
-     *
-     * @param basenames
-     *            基本名集合
-     */
-    public ReloadableResourceBundleMessageSource(final String... basenames) {
-        setBasenames(basenames);
+    @Autowired
+    public void setResourcePatternResolver(ResourcePatternResolver resourcePatternResolver) {
+        this.resourcePatternResolver = resourcePatternResolver;
     }
 
     @Override
-    public void setBasenames(final String... basenames) {
-        final List<String> list = new ArrayList<>();
+    public void setBasenames(String... basenames) {
+        Set<String> set = new LinkedHashSet<>();
         for (String basename : basenames) {
             basename = basename.trim();
             if (basename.startsWith(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX)) {
                 try {
-                    final Resource[] resources = this.resourcePatternResolver
+                    Resource[] resources = this.resourcePatternResolver
                             .getResources(basename + PROPERTIES_SUFFIX);
-                    for (final Resource resource : resources) {
+                    for (Resource resource : resources) {
                         String path = resource.getURI().toString();
                         path = path.substring(0, path.length() - PROPERTIES_SUFFIX.length());
-                        list.add(path);
+                        // 去掉路径中可能的Locale后缀
+                        for (Locale locale : this.locales) {
+                            String suffix = Strings.UNDERLINE + locale.toString();
+                            if (path.endsWith(suffix)) {
+                                path = path.substring(0, path.length() - suffix.length());
+                                break;
+                            }
+                        }
+                        set.add(path);
                     }
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     this.logger.error(e.getMessage(), e);
                 }
             } else {
-                list.add(basename);
+                set.add(basename);
             }
         }
-        super.setBasenames(list.toArray(new String[list.size()]));
+        super.setBasenames(set.toArray(new String[set.size()]));
     }
 
     @Override
-    public Map<String, String> getMessages(final Locale locale) {
-        final Map<String, String> messages = new TreeMap<>();
-        final Properties properties = getMergedProperties(locale).getProperties();
-        for (final Entry<Object, Object> entry : properties.entrySet()) {
+    public Map<String, String> getMessages(Locale locale) {
+        Map<String, String> messages = new TreeMap<>();
+        Properties properties = getMergedProperties(locale).getProperties();
+        for (Entry<Object, Object> entry : properties.entrySet()) {
             messages.put(entry.getKey().toString(), entry.getValue().toString());
         }
         return messages;
     }
 
     @Override
-    public Map<String, String> getMessages(final Locale locale, final String prefix,
-            final boolean resultContainsPrefix) {
-        final Map<String, String> messages = new TreeMap<>();
-        final int prefixLength = prefix.length();
-        final Properties properties = getMergedProperties(locale).getProperties();
-        for (final Entry<Object, Object> entry : properties.entrySet()) {
+    public Map<String, String> getMessages(Locale locale, String prefix,
+            boolean resultContainsPrefix) {
+        Map<String, String> messages = new TreeMap<>();
+        int prefixLength = prefix.length();
+        Properties properties = getMergedProperties(locale).getProperties();
+        for (Entry<Object, Object> entry : properties.entrySet()) {
             String key = entry.getKey().toString();
             if (key.startsWith(prefix)) {
                 if (!resultContainsPrefix) {
