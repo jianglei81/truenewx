@@ -337,8 +337,8 @@ function generate() {
     </div>
     <div class="form-group">
         <div class="col-md-10">
-            <div class="alert alert-info bottom-block">请在下框中填入<span id="nationCaption"></span>国家统计局行政区划代码页原始数据 (
-            <a href="http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/" target="_blank">点此查看</a> )</div>
+            <div class="alert alert-info bottom-block">请在下框中填入<span id="nationCaption"></span>国家民政部行政区划代码页原始数据 (
+            <a href="http://www.mca.gov.cn/article/sj/xzqh/" target="_blank">点此查看</a> )</div>
         </div>
     </div>
     <div class="form-group">
