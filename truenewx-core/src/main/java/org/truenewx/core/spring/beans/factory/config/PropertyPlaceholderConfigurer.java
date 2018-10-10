@@ -25,17 +25,17 @@ public class PropertyPlaceholderConfigurer
     private PropertyPlaceholderHelper helper;
     private Object propertiesProvider;
 
-    public void setPropertiesProvider(final Object propertiesProvider) {
+    public void setPropertiesProvider(Object propertiesProvider) {
         this.propertiesProvider = propertiesProvider;
     }
 
     @Override
-    protected void loadProperties(final Properties props) throws IOException {
+    protected void loadProperties(Properties props) throws IOException {
         if (this.propertiesProvider != null) { // 首先尝试加载属性集提供者提供的属性集
             Object result = null;
             try {
                 // 属性集提供者必须具有getProperties()方法
-                final Method method = this.propertiesProvider.getClass().getMethod("getProperties");
+                Method method = this.propertiesProvider.getClass().getMethod("getProperties");
                 result = method.invoke(this.propertiesProvider);
             } catch (NoSuchMethodException | SecurityException | IllegalAccessException
                     | IllegalArgumentException | InvocationTargetException e) {
@@ -43,9 +43,9 @@ public class PropertyPlaceholderConfigurer
             }
             if (result instanceof Map) { // getProperties()方法必须访问Map结果
                 @SuppressWarnings("unchecked")
-                final Map<Object, Object> properties = (Map<Object, Object>) result;
-                for (final Entry<Object, Object> entry : properties.entrySet()) {
-                    final Object value = entry.getValue();
+                Map<Object, Object> properties = (Map<Object, Object>) result;
+                for (Entry<Object, Object> entry : properties.entrySet()) {
+                    Object value = entry.getValue();
                     if (value != null) {
                         props.put(entry.getKey().toString(), value.toString());
                     }
@@ -74,15 +74,14 @@ public class PropertyPlaceholderConfigurer
     }
 
     @Override
-    public String resolvePlaceholder(final String placeholderKey) {
-        final String value = this.props.getProperty(placeholderKey);
-        return resolveStringValue(value);
+    public String resolvePlaceholder(String placeholderKey) {
+        return super.resolvePlaceholder(placeholderKey, this.props);
     }
 
     @Override
     public Iterable<String> getPlaceholderKeys() {
-        final List<String> placeholders = new ArrayList<>(); // Properties的keys已经是Set，key不会重复，故此处用List以提高性能
-        for (final Object key : this.props.keySet()) {
+        List<String> placeholders = new ArrayList<>(); // Properties的keys已经是Set，key不会重复，故此处用List以提高性能
+        for (Object key : this.props.keySet()) {
             if (key instanceof String) {
                 placeholders.add((String) key);
             }
