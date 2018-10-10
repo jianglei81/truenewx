@@ -23,6 +23,7 @@ public class PropertyPlaceholderConfigurer
         implements PlaceholderResolver {
     private Properties props;
     private PropertyPlaceholderHelper helper;
+    private PropertyPlaceholderHelper.PlaceholderResolver resolver;
     private Object propertiesProvider;
 
     public void setPropertiesProvider(Object propertiesProvider) {
@@ -54,6 +55,23 @@ public class PropertyPlaceholderConfigurer
         }
         super.loadProperties(props);
         this.props = props;
+        this.resolver = new PropertyPlaceholderConfigurerResolver(props);
+    }
+
+    private class PropertyPlaceholderConfigurerResolver
+            implements PropertyPlaceholderHelper.PlaceholderResolver {
+
+        private final Properties props;
+
+        private PropertyPlaceholderConfigurerResolver(Properties props) {
+            this.props = props;
+        }
+
+        @Override
+        public String resolvePlaceholder(String placeholderName) {
+            return PropertyPlaceholderConfigurer.this.resolvePlaceholder(placeholderName,
+                    this.props);
+        }
     }
 
     @Override
@@ -68,14 +86,15 @@ public class PropertyPlaceholderConfigurer
                         this.placeholderSuffix, this.valueSeparator,
                         this.ignoreUnresolvablePlaceholders);
             }
-            strVal = this.helper.replacePlaceholders(strVal, this);
+            strVal = this.helper.replacePlaceholders(strVal, this.resolver);
         }
         return (strVal.equals(this.nullValue) ? null : strVal);
     }
 
     @Override
     public String resolvePlaceholder(String placeholderKey) {
-        return super.resolvePlaceholder(placeholderKey, this.props);
+        String value = this.props.getProperty(placeholderKey);
+        return resolveStringValue(value);
     }
 
     @Override
