@@ -7,9 +7,11 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
+import java.time.temporal.Temporal;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -106,8 +108,10 @@ public class DateUtil {
     /**
      * 按照指定格式解析字符串型日期值为日期对象
      *
-     * @param date    字符串型日期
-     * @param pattern 日期格式
+     * @param date
+     *            字符串型日期
+     * @param pattern
+     *            日期格式
      * @return 日期对象
      */
     public static Date parse(String date, String pattern) {
@@ -125,8 +129,10 @@ public class DateUtil {
     /**
      * 按照指定格式格式化日期对象为字符串型日期
      *
-     * @param date    日期对象
-     * @param pattern 日期格式
+     * @param date
+     *            日期对象
+     * @param pattern
+     *            日期格式
      * @return 字符串型日期
      */
     public static String format(Date date, String pattern) {
@@ -140,18 +146,37 @@ public class DateUtil {
     /**
      * 按照指定格式格式化时间点对象为字符串型日期
      *
-     * @param temporal 时间点
-     * @param pattern  日期格式
+     * @param temporal
+     *            时间点
+     * @param pattern
+     *            日期格式
      * @return 字符串型日期
      */
-    public static String format(TemporalAccessor temporal, String pattern) {
+    public static String format(Temporal temporal, String pattern) {
         return DateTimeFormatter.ofPattern(pattern).withZone(DEFAULT_ZONE_ID).format(temporal);
+    }
+
+    public static String format(Temporal temporal) {
+        if (temporal instanceof Instant) {
+            return formatLong((Instant) temporal);
+        } else if (temporal instanceof LocalDateTime) {
+            return format(temporal, LONG_DATE_PATTERN);
+        } else if (temporal instanceof LocalDate) {
+            return format(temporal, SHORT_DATE_PATTERN);
+        } else if (temporal instanceof LocalTime) {
+            return format(temporal, TIME_PATTERN);
+        } else if (temporal instanceof ZonedDateTime) {
+            return ((ZonedDateTime) temporal)
+                    .format(DateTimeFormatter.ofPattern(LONG_DATE_PATTERN));
+        }
+        return temporal.toString();
     }
 
     /**
      * 按照短日期格式(yyyy-MM-dd)解析字符串型日期值为日期对象
      *
-     * @param date 字符串型日期
+     * @param date
+     *            字符串型日期
      * @return 日期对象
      */
     public static Date parseShort(String date) {
@@ -161,7 +186,8 @@ public class DateUtil {
     /**
      * 按照短日期格式(yyyy-MM-dd)格式化日期对象为字符串型日期
      *
-     * @param date 日期对象
+     * @param date
+     *            日期对象
      * @return 字符串型日期
      */
     public static String formatShort(Date date) {
@@ -171,7 +197,8 @@ public class DateUtil {
     /**
      * 按照短日期格式(yyyy-MM-dd)格式化时间点对象为字符串型日期
      *
-     * @param instant 时间点
+     * @param instant
+     *            时间点
      * @return 字符串型日期
      */
     public static String formatShort(Instant instant) {
@@ -185,7 +212,8 @@ public class DateUtil {
     /**
      * 按照长日期格式(yyyy-MM-dd HH:mm:ss)解析字符串型日期值为日期对象
      *
-     * @param date 字符串型日期
+     * @param date
+     *            字符串型日期
      * @return 日期对象
      */
     public static Date parseLong(String date) {
@@ -195,7 +223,8 @@ public class DateUtil {
     /**
      * 按照长日期格式(yyyy-MM-dd HH:mm:ss)转换日期对象为字符串型日期
      *
-     * @param date 日期对象
+     * @param date
+     *            日期对象
      * @return 字符串型日期
      */
     public static String formatLong(Date date) {
@@ -205,7 +234,8 @@ public class DateUtil {
     /**
      * 按照长日期格式(yyyy-MM-dd HH:mm:ss)转换时间点对象为字符串型日期
      *
-     * @param instant 时间点
+     * @param instant
+     *            时间点
      * @return 字符串型日期
      */
     public static String formatLong(Instant instant) {
@@ -215,7 +245,8 @@ public class DateUtil {
     /**
      * 按照长日期格式(yyyyMMddHHmmss)转换日期对象为字符串型日期
      *
-     * @param date 日期对象
+     * @param date
+     *            日期对象
      * @return 字符串型日期
      */
     public static String formatLongNoDelimiter(Date date) {
@@ -225,7 +256,8 @@ public class DateUtil {
     /**
      * 按照长日期格式(yyyyMMddHHmmss)转换时间点对象为字符串型日期
      *
-     * @param instant 时间点
+     * @param instant
+     *            时间点
      * @return 字符串型日期
      */
     public static String formatLongNoDelimiter(Instant instant) {
@@ -235,7 +267,8 @@ public class DateUtil {
     /**
      * 获取指定时间的日历对象
      *
-     * @param date 时间
+     * @param date
+     *            时间
      * @return 日历对象
      */
     public static Calendar getCalendar(Date date) {
@@ -250,8 +283,10 @@ public class DateUtil {
     /**
      * 计算指定两个时间之间的相差年份数。如果earlierDate晚于laterDate，则返回负值
      *
-     * @param earlierDate 较早时间
-     * @param laterDate   较晚时间
+     * @param earlierDate
+     *            较早时间
+     * @param laterDate
+     *            较晚时间
      * @return 相差年份数
      */
     public static int yearsBetween(Date earlierDate, Date laterDate) {
@@ -265,8 +300,10 @@ public class DateUtil {
     /**
      * 计算指定两个时间之间的相差月份数。如果earlierDate晚于laterDate，则返回负值
      *
-     * @param earlierDate 较早时间
-     * @param laterDate   较晚时间
+     * @param earlierDate
+     *            较早时间
+     * @param laterDate
+     *            较晚时间
      * @return 相差月份数
      */
     public static int monthsBetween(Date earlierDate, Date laterDate) {
@@ -281,8 +318,10 @@ public class DateUtil {
     /**
      * 计算指定两个时间之间的相差天数。如果earlierDate晚于laterDate，则返回负值
      *
-     * @param earlierDate 较早时间
-     * @param laterDate   较晚时间
+     * @param earlierDate
+     *            较早时间
+     * @param laterDate
+     *            较晚时间
      * @return 相差天数
      */
     public static int daysBetween(Date earlierDate, Date laterDate) {
@@ -295,8 +334,10 @@ public class DateUtil {
     /**
      * 计算指定两个日期之间的相差天数。如果earlierDate晚于laterDate，则返回负值
      *
-     * @param earlierDate 较早日期
-     * @param laterDate   较晚日期
+     * @param earlierDate
+     *            较早日期
+     * @param laterDate
+     *            较晚日期
      * @return 相差天数
      */
     public static int daysBetween(LocalDate earlierDate, LocalDate laterDate) {
@@ -306,8 +347,10 @@ public class DateUtil {
     /**
      * 计算指定两个时间之间的相差小时之差。如果earlierDate晚于laterDate，则返回负值
      *
-     * @param earlierDate 较早时间
-     * @param laterDate   较晚时间
+     * @param earlierDate
+     *            较早时间
+     * @param laterDate
+     *            较晚时间
      * @return 小时之差
      */
     public static int hoursBetween(Date earlierDate, Date laterDate) {
@@ -320,8 +363,10 @@ public class DateUtil {
     /**
      * 计算指定两个时间之间的相差分钟数。如果earlierDate晚于laterDate，则返回负值
      *
-     * @param earlierDate 较早时间
-     * @param laterDate   较晚时间
+     * @param earlierDate
+     *            较早时间
+     * @param laterDate
+     *            较晚时间
      * @return 分钟差
      */
     public static int minutesBetween(Date earlierDate, Date laterDate) {
@@ -334,8 +379,10 @@ public class DateUtil {
     /**
      * 计算指定两个时间之间的相差秒数。如果earlierDate晚于laterDate，则返回负值
      *
-     * @param earlierDate 较早时间
-     * @param laterDate   较晚时间
+     * @param earlierDate
+     *            较早时间
+     * @param laterDate
+     *            较晚时间
      * @return 秒差
      */
     public static long secondsBetween(Date earlierDate, Date laterDate) {
@@ -348,13 +395,20 @@ public class DateUtil {
     /**
      * 创建指定值的日期
      *
-     * @param year        年
-     * @param month       月
-     * @param day         日
-     * @param hour        时
-     * @param minute      分
-     * @param second      秒
-     * @param millisecond 毫秒
+     * @param year
+     *            年
+     * @param month
+     *            月
+     * @param day
+     *            日
+     * @param hour
+     *            时
+     * @param minute
+     *            分
+     * @param second
+     *            秒
+     * @param millisecond
+     *            毫秒
      * @return 日期
      */
     public static Date createDate(int year, int month, int day, int hour, int minute, int second,
@@ -373,8 +427,10 @@ public class DateUtil {
     /**
      * 获取指定日期加上指定年数后的日期值。若年数为负，则实际进行减操作
      *
-     * @param date  原日期
-     * @param years 年数
+     * @param date
+     *            原日期
+     * @param years
+     *            年数
      * @return 计算后的新日期
      */
     public static Date addYears(Date date, int years) {
@@ -393,8 +449,10 @@ public class DateUtil {
     /**
      * 获取指定日期加上指定月数后的日期值。若月数为负，则实际进行减操作。
      *
-     * @param date 原日期
-     * @param days 月数
+     * @param date
+     *            原日期
+     * @param days
+     *            月数
      * @return 计算后的新日期
      */
     public static Date addMonths(Date date, int months) {
@@ -413,8 +471,10 @@ public class DateUtil {
     /**
      * 获取指定日期加上指定天数后的日期值。若天数为负，则实际进行减操作。
      *
-     * @param date 原日期
-     * @param days 天数
+     * @param date
+     *            原日期
+     * @param days
+     *            天数
      * @return 计算后的新日期
      */
     public static Date addDays(Date date, int days) {
@@ -433,8 +493,10 @@ public class DateUtil {
     /**
      * 获取指定日期加上指定小时数后的日期值。若小时数为负，则实际进行减操作。
      *
-     * @param date  原日期
-     * @param hours 小时数
+     * @param date
+     *            原日期
+     * @param hours
+     *            小时数
      * @return 计算后的新日期
      */
     public static Date addHours(Date date, int hours) {
@@ -449,8 +511,10 @@ public class DateUtil {
     /**
      * 获取指定日期加上指定分钟数后的日期值。若分钟数为负，则实际进行减操作。
      *
-     * @param date  原日期
-     * @param hours 分钟数
+     * @param date
+     *            原日期
+     * @param hours
+     *            分钟数
      * @return 计算后的新日期
      */
     public static Date addMinutes(Date date, int minutes) {
@@ -465,8 +529,10 @@ public class DateUtil {
     /**
      * 获取指定日期加上指定秒数后的日期值。若秒数为负，则实际进行减操作。
      *
-     * @param date    原日期
-     * @param seconds 秒数
+     * @param date
+     *            原日期
+     * @param seconds
+     *            秒数
      * @return 计算后的新日期
      */
     public static Date addSeconds(Date date, int seconds) {
@@ -481,10 +547,14 @@ public class DateUtil {
     /**
      * 为指定日期设置年月日，返回新日期
      *
-     * @param date  原日期
-     * @param year  年
-     * @param month 月
-     * @param day   日
+     * @param date
+     *            原日期
+     * @param year
+     *            年
+     * @param month
+     *            月
+     * @param day
+     *            日
      * @return 新日期
      */
     public static Date setDate(Date date, int year, int month, int day) {
@@ -498,11 +568,16 @@ public class DateUtil {
     /**
      * 为指定日期设置时分秒毫秒，返回新日期
      *
-     * @param date        原日期
-     * @param hour        时
-     * @param minute      分
-     * @param second      秒
-     * @param millisecond 毫秒
+     * @param date
+     *            原日期
+     * @param hour
+     *            时
+     * @param minute
+     *            分
+     * @param second
+     *            秒
+     * @param millisecond
+     *            毫秒
      * @return 新日期
      */
     public static Date setTime(Date date, int hour, int minute, int second, int millisecond) {
@@ -513,11 +588,16 @@ public class DateUtil {
     /**
      * 为指定时间点设置时分秒纳秒，返回新日期
      *
-     * @param instant      原时间点
-     * @param hour         时
-     * @param minute       分
-     * @param second       秒
-     * @param nanoOfSecond 纳秒
+     * @param instant
+     *            原时间点
+     * @param hour
+     *            时
+     * @param minute
+     *            分
+     * @param second
+     *            秒
+     * @param nanoOfSecond
+     *            纳秒
      * @return 新时间点
      */
     public static Instant setTime(Instant instant, int hour, int minute, int second,
@@ -552,7 +632,8 @@ public class DateUtil {
     /**
      * 获取指定日期集合中最早的日期
      *
-     * @param dates 日期集合
+     * @param dates
+     *            日期集合
      * @return 最早的日期
      */
     public static Date earliest(Date... dates) {
@@ -570,7 +651,8 @@ public class DateUtil {
     /**
      * 获取指定日期集合中最晚的日期
      *
-     * @param dates 日期集合
+     * @param dates
+     *            日期集合
      * @return 最晚的日期
      */
     public static Date latest(Date... dates) {
@@ -600,7 +682,8 @@ public class DateUtil {
     /**
      * 判断指定日期是否周末
      *
-     * @param date 日期
+     * @param date
+     *            日期
      * @return 是否周末
      */
     public static boolean isWeekend(Date date) {
