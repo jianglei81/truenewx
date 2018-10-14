@@ -12,6 +12,7 @@ import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 
 import org.truenewx.core.util.DateUtil;
+import org.truenewx.core.util.TemporalUtil;
 
 /**
  * 格式化日期输出标签
@@ -44,22 +45,22 @@ public class FormatDateTag extends SimpleTagSupport {
             if (this.pattern == null) {
                 this.pattern = DateUtil.LONG_DATE_PATTERN;
             }
-            result = DateUtil.format((Instant) this.value, this.pattern);
+            result = TemporalUtil.format((Instant) this.value, this.pattern);
         } else if (this.value instanceof LocalDate) {
             if (this.pattern == null) {
                 this.pattern = DateUtil.SHORT_DATE_PATTERN;
             }
-            result = DateUtil.format((LocalDate) this.value, this.pattern);
+            result = TemporalUtil.format((LocalDate) this.value, this.pattern);
         } else if (this.value instanceof LocalTime) {
             if (this.pattern == null) {
                 this.pattern = DateUtil.TIME_PATTERN;
             }
-            result = DateUtil.format((LocalTime) this.value, this.pattern);
+            result = TemporalUtil.format((LocalTime) this.value, this.pattern);
         } else if (this.value instanceof LocalDateTime) {
             if (this.pattern == null) {
                 this.pattern = DateUtil.LONG_DATE_PATTERN;
             }
-            result = DateUtil.format((LocalDateTime) this.value, this.pattern);
+            result = TemporalUtil.format((LocalDateTime) this.value, this.pattern);
         }
         if (result != null) {
             JspWriter out = getJspContext().getOut();
