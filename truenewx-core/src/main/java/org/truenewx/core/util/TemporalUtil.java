@@ -23,14 +23,23 @@ public class TemporalUtil {
     }
 
     public static Instant toInstant(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return null;
+        }
         return dateTime.atZone(TemporalUtil.DEFAULT_ZONE_ID).toInstant();
     }
 
     public static Instant toInstant(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
         return date.atStartOfDay(TemporalUtil.DEFAULT_ZONE_ID).toInstant();
     }
 
     public static LocalDateTime toLocalDateTime(Instant instant) {
+        if (instant == null) {
+            return null;
+        }
         return LocalDateTime.ofInstant(instant, TemporalUtil.DEFAULT_ZONE_ID);
     }
 
