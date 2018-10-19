@@ -36,6 +36,13 @@ public class TemporalUtil {
         return date.atStartOfDay(TemporalUtil.DEFAULT_ZONE_ID).toInstant();
     }
 
+    public static LocalDate toLocalDate(Instant instant) {
+        if (instant == null) {
+            return null;
+        }
+        return instant.atZone(DEFAULT_ZONE_ID).toLocalDate();
+    }
+
     public static LocalDateTime toLocalDateTime(Instant instant) {
         if (instant == null) {
             return null;
