@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.truenewx.core.Strings;
+import org.truenewx.core.exception.HandleableException;
 import org.truenewx.web.exception.annotation.HandleableExceptionMessage;
 import org.truenewx.web.rpc.serializer.RpcSerializer;
 
@@ -36,7 +37,7 @@ public class RpcServerController {
     @RequestMapping(value = "/methods/{beanIdString}", method = RequestMethod.GET)
     @HandleableExceptionMessage
     @ResponseBody
-    public String methodNames(@PathVariable("beanIdString") String beanIdString) throws Exception {
+    public String methodNames(@PathVariable("beanIdString") String beanIdString) {
         if (beanIdString.contains(Strings.COMMA)) { // 带逗号的beanId分割后作为多个beanId处理
             String[] beanIds = beanIdString.split(Strings.COMMA);
             Map<String, Collection<String>> methodNameMap = new HashMap<>();
@@ -51,19 +52,27 @@ public class RpcServerController {
         }
     }
 
-    @RequestMapping(value = "/invoke/{beanId}/{methodName}",
-            method = { RequestMethod.POST, RequestMethod.GET })
+    @RequestMapping(value = "/invoke/{beanId}/{methodName}", method = { RequestMethod.POST,
+            RequestMethod.GET })
     @HandleableExceptionMessage
     @ResponseBody
     public String invoke(@PathVariable("beanId") String beanId,
             @PathVariable("methodName") String methodName,
             @RequestParam(value = "args", required = false) String argString,
-            HttpServletRequest request, HttpServletResponse response) throws Throwable {
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         response.setHeader("Timestamp-Before", String.valueOf(System.currentTimeMillis()));
-        RpcInvokeResult result = this.server.invoke(beanId, methodName, argString, request,
-                response);
-        response.setHeader("Timestamp-After", String.valueOf(System.currentTimeMillis()));
-        return this.serializer.serializeBean(result.getValue(), result.getFilters());
+        try {
+            RpcInvokeResult result = this.server.invoke(beanId, methodName, argString, request,
+                    response);
+            response.setHeader("Timestamp-After", String.valueOf(System.currentTimeMillis()));
+            return this.serializer.serializeBean(result.getValue(), result.getFilters());
+        } catch (HandleableException e) {
+            throw e;
+        } catch (Throwable e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            e.printStackTrace(response.getWriter());
+            return null;
+        }
     }
 
 }

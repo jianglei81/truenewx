@@ -122,7 +122,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
     }
 
     @Override
-    public Collection<String> methods(String beanId) throws Exception {
+    public Collection<String> methods(String beanId) {
         return getMeta(beanId).getMethodNames();
     }
 

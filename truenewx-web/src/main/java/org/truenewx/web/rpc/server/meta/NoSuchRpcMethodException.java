@@ -9,7 +9,7 @@ import org.truenewx.core.Strings;
  * @author jianglei
  * @since JDK 1.8
  */
-public class NoSuchRpcMethodException extends NoSuchMethodException {
+public class NoSuchRpcMethodException extends RpcException {
 
     private static final long serialVersionUID = -4679521829522243856L;
 
