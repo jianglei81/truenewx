@@ -65,10 +65,6 @@ public class QueryResult<R> implements Iterable<R> {
         return this.paging;
     }
 
-    public boolean isEmpty() {
-        return this.records.isEmpty();
-    }
-
     @Override
     public Iterator<R> iterator() {
         return this.records.iterator();

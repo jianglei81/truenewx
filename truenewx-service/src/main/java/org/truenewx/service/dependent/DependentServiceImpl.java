@@ -16,7 +16,7 @@ import org.truenewx.data.query.QueryParameter;
 import org.truenewx.data.query.QueryResult;
 
 /**
- * 依赖着服务实现
+ * 依赖者服务实现
  *
  * @author jianglei
  * @since JDK 1.8
@@ -31,13 +31,13 @@ public class DependentServiceImpl implements DependentService, ContextInitialize
     private Map<Class<?>, Set<DependentDao<?>>> dependentDaoMap = new HashMap<>();
 
     @Override
-    public void afterInitialized(final ApplicationContext context) throws Exception {
+    public void afterInitialized(ApplicationContext context) throws Exception {
         @SuppressWarnings("rawtypes")
-        final Map<String, DependentDao> daos = context.getBeansOfType(DependentDao.class);
-        for (final DependentDao<?> dao : daos.values()) {
-            final Class<?>[] dependedClasses = dao.getDependedClasses();
+        Map<String, DependentDao> daos = context.getBeansOfType(DependentDao.class);
+        for (DependentDao<?> dao : daos.values()) {
+            Class<?>[] dependedClasses = dao.getDependedClasses();
             if (dependedClasses != null) {
-                for (final Class<?> dependedClass : dependedClasses) {
+                for (Class<?> dependedClass : dependedClasses) {
                     Set<DependentDao<?>> daoSet = this.dependentDaoMap.get(dependedClass);
                     if (daoSet == null) {
                         daoSet = new HashSet<>();
@@ -50,31 +50,29 @@ public class DependentServiceImpl implements DependentService, ContextInitialize
     }
 
     @Override
-    public Map<Class<?>, QueryResult<?>> find(final Class<?> dependedClass,
-                    final Serializable dependedKey, final QueryParameter parameter,
-                    final boolean recursive) {
-        final Map<Class<?>, QueryResult<?>> result = new HashMap<>();
+    public Map<Class<?>, QueryResult<?>> find(Class<?> dependedClass, Serializable dependedKey,
+            QueryParameter parameter, boolean recursive) {
+        Map<Class<?>, QueryResult<?>> result = new HashMap<>();
         find(dependedClass, dependedKey, parameter, recursive,
-                        this.dependentDaoMap.get(dependedClass), result);
+                this.dependentDaoMap.get(dependedClass), result);
         return result;
     }
 
-    private void find(final Class<?> entityClass, final Serializable key,
-                    final QueryParameter parameter, final boolean recursive,
-                    final Set<DependentDao<?>> dependentDaos,
-                    final Map<Class<?>, QueryResult<?>> result) {
+    private void find(Class<?> entityClass, Serializable key, QueryParameter parameter,
+            boolean recursive, Set<DependentDao<?>> dependentDaos,
+            Map<Class<?>, QueryResult<?>> result) {
         if (dependentDaos != null) {
-            for (final DependentDao<?> dependentDao : dependentDaos) {
+            for (DependentDao<?> dependentDao : dependentDaos) {
                 // 计算直接依赖实体的数量
-                final QueryResult<?> qr = dependentDao.find(entityClass, key, parameter);
-                if (!qr.isEmpty()) {
-                    final Class<?> dependentClass = dependentDao.getEntityClass();
+                QueryResult<?> qr = dependentDao.find(entityClass, key, parameter);
+                if (qr.getRecords().size() > 0) {
+                    Class<?> dependentClass = dependentDao.getEntityClass();
                     result.put(dependentClass, qr);
 
                     // 直接依赖实体数量为0时不再需要递归计算间接依赖实体的数量
                     if (recursive && qr.getPaging().getTotal() != 0) {
                         find(entityClass, key, parameter, recursive,
-                                        this.dependentDaoMap.get(dependentClass), result);
+                                this.dependentDaoMap.get(dependentClass), result);
                     }
                 }
             }
@@ -82,41 +80,40 @@ public class DependentServiceImpl implements DependentService, ContextInitialize
     }
 
     @Override
-    public Map<Class<?>, Integer> delete(final Class<?> dependedClass,
-                    final Serializable dependedKey) throws BusinessException {
-        final Map<Class<?>, Integer> result = new HashMap<>();
+    public Map<Class<?>, Integer> delete(Class<?> dependedClass, Serializable dependedKey)
+            throws BusinessException {
+        Map<Class<?>, Integer> result = new HashMap<>();
         delete(dependedClass, dependedKey, this.dependentDaoMap.get(dependedClass), result);
         return result;
     }
 
-    private void delete(final Class<?> dependedClass, final Serializable dependedKey,
-                    final Set<DependentDao<?>> dependentDaos, final Map<Class<?>, Integer> result)
-                    throws BusinessException {
+    private void delete(Class<?> dependedClass, Serializable dependedKey,
+            Set<DependentDao<?>> dependentDaos, Map<Class<?>, Integer> result)
+            throws BusinessException {
         if (dependentDaos != null) {
-            for (final DependentDao<?> dependentDao : dependentDaos) {
+            for (DependentDao<?> dependentDao : dependentDaos) {
                 try {
                     if (dependentDao.requiresPreDelete(dependedClass)) {
                         // 递归删除间接依赖实体
                         delete(dependedClass, dependedKey,
-                                        this.dependentDaoMap.get(dependentDao.getEntityClass()),
-                                        result);
+                                this.dependentDaoMap.get(dependentDao.getEntityClass()), result);
                         // 删除直接依赖实体
-                        final int count = dependentDao.delete(dependedClass, dependedKey);
+                        int count = dependentDao.delete(dependedClass, dependedKey);
                         if (count >= 0) { // 数量小于0视为无效
                             result.put(dependentDao.getEntityClass(), count);
                         }
                     }
-                } catch (final UnsupportedOperationException e) {
-                    final String entityCaption = getCaption(dependedClass);
-                    final String dependentCaption = getCaption(dependentDao.getEntityClass());
+                } catch (UnsupportedOperationException e) {
+                    String entityCaption = getCaption(dependedClass);
+                    String dependentCaption = getCaption(dependentDao.getEntityClass());
                     throw new BusinessException(ERROR_UNDELETABLE, entityCaption, dependentCaption);
                 }
             }
         }
     }
 
-    private String getCaption(final Class<?> entityClass) {
-        final Caption caption = entityClass.getAnnotation(Caption.class);
+    private String getCaption(Class<?> entityClass) {
+        Caption caption = entityClass.getAnnotation(Caption.class);
         if (caption != null) {
             return caption.value();
         }
