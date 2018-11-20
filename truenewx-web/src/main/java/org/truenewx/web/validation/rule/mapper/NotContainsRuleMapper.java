@@ -26,8 +26,10 @@ public class NotContainsRuleMapper implements ValidationRuleMapper<NotContainsRu
             String notString = StringUtils.join(rule.getValues(), Strings.SPACE);
             result.put("notContains", HtmlUtils.htmlEscape(notString));
         }
-        if (rule.isNotContainsHtmlChars()) {
+        if (rule.isHtml()) {
             result.put("notContainsHtmlChars", Boolean.TRUE);
+        } else if (rule.isAngleBracket()) { // HTML字符包含了尖括号，仅在不限制HTML字符时才检查尖括号限制
+            result.put("notContainsAngleBracket", Boolean.TRUE);
         }
         return result;
     }

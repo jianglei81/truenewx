@@ -1,6 +1,5 @@
 package org.truenewx.data.validation.constraint.validator;
 
-import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,18 +17,21 @@ import org.truenewx.data.validation.constraint.NotContainsSqlChars;
  * @since JDK 1.8
  */
 public class NotContainsSpecialCharsValidator
-    extends AbstractNotContainsValidator<NotContainsSpecialChars> {
+        extends AbstractNotContainsValidator<NotContainsSpecialChars> {
 
     @Override
-    public void initialize(final NotContainsSpecialChars annotation) {
-        final Class<? extends Annotation> annotationType = annotation.annotationType();
-        final Set<String> values = new HashSet<>();
-        CollectionUtil.addAll(values, annotationType.getAnnotation(NotContainsHtmlChars.class)
-            .annotationType().getAnnotation(NotContains.class).value());
-        CollectionUtil.addAll(values, annotationType.getAnnotation(NotContainsSqlChars.class)
-            .annotationType().getAnnotation(NotContains.class).value());
+    public void initialize(NotContainsSpecialChars annotation) {
+        Set<String> values = new HashSet<>();
         if (annotation.comma()) {
             values.add(Strings.COMMA);
+        }
+        if (annotation.html()) {
+            CollectionUtil.addAll(values,
+                    NotContainsHtmlChars.class.getAnnotation(NotContains.class).value());
+        }
+        if (annotation.sql()) {
+            CollectionUtil.addAll(values,
+                    NotContainsSqlChars.class.getAnnotation(NotContains.class).value());
         }
         setValues(values.toArray(new String[values.size()]));
     }

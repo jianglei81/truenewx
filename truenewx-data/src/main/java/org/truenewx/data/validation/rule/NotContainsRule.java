@@ -16,7 +16,9 @@ public class NotContainsRule extends ValidationRule {
      * 不能包含的字符串集
      */
     private Set<String> values = new LinkedHashSet<>();
-    private boolean notContainsHtmlChars;
+    // 尖括号和HTML字符会破坏数据格式，故用特殊的布尔值表示许可，由客户端做特殊判断
+    private boolean angleBracket;
+    private boolean html;
 
     public Iterable<String> getValues() {
         return this.values;
@@ -32,18 +34,25 @@ public class NotContainsRule extends ValidationRule {
     /**
      * 添加不能包含的字符串集
      *
-     * @param values
-     *            不能包含的字符串集
+     * @param values 不能包含的字符串集
      */
-    public void addValues(final String... values) {
+    public void addValues(String... values) {
         CollectionUtil.addAll(this.values, values);
     }
 
-    public boolean isNotContainsHtmlChars() {
-        return this.notContainsHtmlChars;
+    public boolean isAngleBracket() {
+        return this.angleBracket;
     }
 
-    public void setNotContainsHtmlChars(final boolean notContainsHtmlChars) {
-        this.notContainsHtmlChars = notContainsHtmlChars;
+    public void setAngleBracket(boolean angleBracket) {
+        this.angleBracket = angleBracket;
+    }
+
+    public boolean isHtml() {
+        return this.html;
+    }
+
+    public void setHtml(boolean html) {
+        this.html = html;
     }
 }

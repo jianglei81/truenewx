@@ -22,8 +22,6 @@ import org.truenewx.data.validation.constraint.validator.NotContainsSpecialChars
 @Documented
 @Target(FIELD)
 @Retention(RUNTIME)
-@NotContainsHtmlChars
-@NotContainsSqlChars
 @ReportAsSingleViolation
 @Constraint(validatedBy = NotContainsSpecialCharsValidator.class)
 public @interface NotContainsSpecialChars {
@@ -34,6 +32,18 @@ public @interface NotContainsSpecialChars {
      * @return 能否包含逗号
      */
     boolean comma() default false;
+
+    /**
+     *
+     * @return 能否包含HTML关键字符，默认为false
+     */
+    boolean html() default false;
+
+    /**
+     *
+     * @return 能否包含SQL关键字符，默认为true
+     */
+    boolean sql() default true;
 
     String message() default NotContains.DEFAULT_MESSAGE;
 
