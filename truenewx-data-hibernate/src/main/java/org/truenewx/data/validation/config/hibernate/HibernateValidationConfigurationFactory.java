@@ -102,8 +102,10 @@ public class HibernateValidationConfigurationFactory
     /**
      * 从指定传输模型类对应的实体类中添加校验规则到指定校验配置中
      *
-     * @param configuration  校验配置
-     * @param transportClass 传输模型类
+     * @param configuration
+     *            校验配置
+     * @param transportClass
+     *            传输模型类
      */
     private void addEntityClassRulesFromTransportClass(ValidationConfiguration configuration,
             Class<? extends TransportModel<?>> transportClass) {
@@ -140,8 +142,10 @@ public class HibernateValidationConfigurationFactory
     /**
      * 从指定实体类对应的持久化配置中添加校验规则到指定校验配置中
      *
-     * @param configuration 校验配置
-     * @param entityClass   实体类
+     * @param configuration
+     *            校验配置
+     * @param entityClass
+     *            实体类
      */
     private void addEntityClassRulesFromPersistentConfig(ValidationConfiguration configuration,
             Class<? extends Entity> entityClass) {
@@ -156,9 +160,12 @@ public class HibernateValidationConfigurationFactory
     /**
      * 向指定校验设置中添加指定实体类型中指定属性的规则
      *
-     * @param configuration 校验配置
-     * @param entityClass   实体类型
-     * @param property      属性
+     * @param configuration
+     *            校验配置
+     * @param entityClass
+     *            实体类型
+     * @param property
+     *            属性
      */
     @SuppressWarnings("unchecked")
     private void addRuleByProperty(ValidationConfiguration configuration,
@@ -235,8 +242,10 @@ public class HibernateValidationConfigurationFactory
     /**
      * 从指定类的校验约束注解中添加校验规则到指定校验配置中
      *
-     * @param configuration 校验配置
-     * @param clazz         类
+     * @param configuration
+     *            校验配置
+     * @param clazz
+     *            类
      */
     private void addRulesByAnnotation(ValidationConfiguration configuration, Class<?> clazz) {
         List<Field> fields = ClassUtil.getSimplePropertyField(clazz);
@@ -273,7 +282,9 @@ public class HibernateValidationConfigurationFactory
                 ValidationRule rule = configuration.getRule(propertyName, ruleClass);
                 if (rule == null) {
                     rule = builder.create(annotation);
-                    configuration.addRule(propertyName, rule);
+                    if (rule != null && !rule.isEmpty()) {
+                        configuration.addRule(propertyName, rule);
+                    }
                 } else {
                     builder.update(annotation, rule);
                 }

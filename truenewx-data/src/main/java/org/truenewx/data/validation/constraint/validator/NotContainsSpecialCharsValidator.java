@@ -22,14 +22,14 @@ public class NotContainsSpecialCharsValidator
     @Override
     public void initialize(NotContainsSpecialChars annotation) {
         Set<String> values = new HashSet<>();
-        if (annotation.comma()) {
+        if (!annotation.comma()) {
             values.add(Strings.COMMA);
         }
-        if (annotation.html()) {
+        if (!annotation.html()) {
             CollectionUtil.addAll(values,
                     NotContainsHtmlChars.class.getAnnotation(NotContains.class).value());
         }
-        if (annotation.sql()) {
+        if (!annotation.sql()) {
             CollectionUtil.addAll(values,
                     NotContainsSqlChars.class.getAnnotation(NotContains.class).value());
         }

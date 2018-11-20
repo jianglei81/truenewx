@@ -23,16 +23,21 @@ public class TagLimitRule extends ValidationRule {
         return Collections.unmodifiableSet(this.forbidden);
     }
 
-    public void addAllowed(final String... allowed) {
-        for (final String tag : allowed) {
+    public void addAllowed(String... allowed) {
+        for (String tag : allowed) {
             this.allowed.add(tag.toLowerCase());
         }
     }
 
-    public void addForbidden(final String... forbidden) {
-        for (final String tag : forbidden) {
+    public void addForbidden(String... forbidden) {
+        for (String tag : forbidden) {
             this.forbidden.add(tag.toLowerCase());
         }
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.allowed.isEmpty() && this.forbidden.isEmpty();
     }
 
 }

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 /**
  * 十进制数规则
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -35,7 +35,7 @@ public class DecimalRule extends RangeRule<BigDecimal> {
         return this.precision;
     }
 
-    public void setPrecision(final int precision) {
+    public void setPrecision(int precision) {
         this.precision = precision;
     }
 
@@ -43,7 +43,13 @@ public class DecimalRule extends RangeRule<BigDecimal> {
         return this.scale;
     }
 
-    public void setScale(final int scale) {
+    public void setScale(int scale) {
         this.scale = scale;
     }
+
+    @Override
+    public boolean isEmpty() {
+        return super.isEmpty() && this.precision == 0 && this.scale == 0;
+    }
+
 }

@@ -8,7 +8,7 @@ import org.truenewx.data.validation.rule.LengthRule;
 
 /**
  * 字符串长度规则的构建器
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -21,14 +21,14 @@ public class LengthRuleBuilder implements ValidationRuleBuilder<LengthRule> {
     }
 
     @Override
-    public void update(final Annotation annotation, final LengthRule rule) {
+    public void update(Annotation annotation, LengthRule rule) {
         if (annotation.annotationType() == Length.class) {
-            final Length length = (Length) annotation;
-            final int min = length.min();
+            Length length = (Length) annotation;
+            int min = length.min();
             if (min > rule.getMin()) {
                 rule.setMin(min);
             }
-            final int max = length.max();
+            int max = length.max();
             if (max < rule.getMax()) {
                 rule.setMax(max);
             }
@@ -36,9 +36,9 @@ public class LengthRuleBuilder implements ValidationRuleBuilder<LengthRule> {
     }
 
     @Override
-    public LengthRule create(final Annotation annotation) {
+    public LengthRule create(Annotation annotation) {
         if (annotation.annotationType() == Length.class) {
-            final Length length = (Length) annotation;
+            Length length = (Length) annotation;
             return new LengthRule(length.min(), length.max());
         }
         return null;

@@ -7,18 +7,25 @@ import java.util.Set;
 
 /**
  * 标识规则
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
 public class MarkRule extends ValidationRule {
+
     private Set<Class<? extends Annotation>> annotationTypes = new HashSet<>();
 
-    public MarkRule(final Class<? extends Annotation> annotationType) {
+    public MarkRule(Class<? extends Annotation> annotationType) {
         this.annotationTypes.add(annotationType);
     }
 
     public Collection<Class<? extends Annotation>> getAnnotationTypes() {
         return this.annotationTypes;
     }
+
+    @Override
+    public boolean isEmpty() {
+        return this.annotationTypes.isEmpty();
+    }
+
 }
