@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -66,7 +67,7 @@ public class RpcServerController {
                     response);
             response.setHeader("Timestamp-After", String.valueOf(System.currentTimeMillis()));
             return this.serializer.serializeBean(result.getValue(), result.getFilters());
-        } catch (HandleableException e) {
+        } catch (HandleableException | ConstraintViolationException e) {
             throw e;
         } catch (Throwable e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
