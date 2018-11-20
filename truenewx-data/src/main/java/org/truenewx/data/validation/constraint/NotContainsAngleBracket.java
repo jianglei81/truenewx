@@ -27,7 +27,7 @@ import org.truenewx.data.validation.constraint.validator.NotContainsAngleBracket
 @Constraint(validatedBy = NotContainsAngleBracketValidator.class)
 public @interface NotContainsAngleBracket {
 
-    String message() default "{org.truenewx.data.validation.constraint.NotContains.message}";
+    String message() default NotContains.DEFAULT_MESSAGE;
 
     Class<?>[] groups() default {};
 

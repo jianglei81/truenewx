@@ -30,12 +30,12 @@ public @interface NotContainsSpecialChars {
 
     /**
      * 逗号有时会作为存储分隔符，成为不能包含的特殊字符
-     * 
+     *
      * @return 能否包含逗号
      */
     boolean comma() default false;
 
-    String message() default "{org.truenewx.data.validation.constraint.NotContains.message}";
+    String message() default NotContains.DEFAULT_MESSAGE;
 
     Class<?>[] groups() default {};
 

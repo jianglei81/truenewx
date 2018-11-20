@@ -23,6 +23,8 @@ import org.truenewx.data.validation.constraint.validator.TagLimitValidator;
 @Constraint(validatedBy = TagLimitValidator.class)
 public @interface TagLimit {
 
+    public static final String DEFAULT_MESSAGE = "{org.truenewx.data.validation.constraint.TagLimit.message}";
+
     /**
      * 允许的标签名称清单
      *
@@ -37,7 +39,7 @@ public @interface TagLimit {
      */
     String[] forbidden() default {};
 
-    String message() default "{org.truenewx.data.validation.constraint.TagLimit.message}";
+    String message() default DEFAULT_MESSAGE;
 
     Class<?>[] groups() default {};
 
