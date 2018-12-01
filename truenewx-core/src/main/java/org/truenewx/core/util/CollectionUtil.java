@@ -92,6 +92,26 @@ public class CollectionUtil {
     }
 
     /**
+     * 判断指定的两个集合中的元素是否有一个包含在另一个集合中，两个集合参数满足交换律规则
+     *
+     * @param iterable1 集合1
+     * @param iterable2 集合2
+     * @return 指定的两个集合中的元素是否有一个包含在另一个集合中
+     */
+    public static <T> boolean containsOneOf(Iterable<T> iterable1, Iterable<T> iterable2) {
+        if (iterable1 != null && iterable2 != null) {
+            for (T element1 : iterable1) {
+                for (T element2 : iterable2) {
+                    if (Objects.equals(element1, element2)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * 将指定数据中的所有元素添加到指定集合中
      *
      * @param collection 集合

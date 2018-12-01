@@ -23,6 +23,7 @@ import org.truenewx.core.functor.algorithm.impl.AlgoParseString;
 import org.truenewx.core.functor.impl.FuncFindClass;
 import org.truenewx.core.util.ClassUtil;
 import org.truenewx.core.util.CollectionUtil;
+import org.truenewx.core.util.StringUtil;
 import org.truenewx.web.http.HttpLink;
 import org.truenewx.web.http.HttpResource;
 import org.truenewx.web.menu.model.ActableMenuItem;
@@ -93,8 +94,7 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
     /**
      * 获取菜单项
      *
-     * @param element
-     *            元素
+     * @param element       元素
      * @param parentOptions
      * @return items 菜单项集合
      *
@@ -156,6 +156,12 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
         }
         String role = element.attributeValue("role");
         Authority authority = new Authority(role, permission);
+
+        String belongs = element.attributeValue("belongs");
+        if (StringUtils.isNotBlank(belongs)) {
+            authority.getBelongs().addAll(StringUtil.splitToSet(belongs, Strings.COMMA, true));
+        }
+
         String caption = element.attributeValue("caption");
         if (caption != null) {
             authority.setCaption(caption);
@@ -167,8 +173,7 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
     /**
      * 获取菜单说明
      *
-     * @param element
-     *            元素
+     * @param element 元素
      * @return captions 获取菜单说明集合
      *
      * @author jianglei
@@ -186,8 +191,7 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
     /**
      * 获取可见环境集合
      *
-     * @param element
-     *            元素
+     * @param element 元素
      * @return 可见环境集合
      *
      * @author jianglei
@@ -205,8 +209,7 @@ public class XmlMenuParser implements MenuParser, ResourceLoaderAware {
     /**
      * 获取Options
      *
-     * @param element
-     *            元素
+     * @param element       元素
      * @param parentOptions
      *
      * @return options
