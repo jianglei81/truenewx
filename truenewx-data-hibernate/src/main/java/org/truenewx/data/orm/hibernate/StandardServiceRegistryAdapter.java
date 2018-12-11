@@ -14,7 +14,7 @@ public class StandardServiceRegistryAdapter implements StandardServiceRegistry {
 
     private ServiceRegistry target;
 
-    public StandardServiceRegistryAdapter(final ServiceRegistry serviceRegistry) {
+    public StandardServiceRegistryAdapter( ServiceRegistry serviceRegistry) {
         this.target = serviceRegistry;
     }
 
@@ -24,13 +24,18 @@ public class StandardServiceRegistryAdapter implements StandardServiceRegistry {
     }
 
     @Override
-    public <R extends Service> R getService(final Class<R> serviceRole) {
+    public <R extends Service> R getService( Class<R> serviceRole) {
         return this.target.getService(serviceRole);
     }
 
     @Override
-    public <R extends Service> R requireService(final Class<R> serviceRole) {
+    public <R extends Service> R requireService( Class<R> serviceRole) {
         return this.target.requireService(serviceRole);
+    }
+
+    @Override
+    public void close() {
+        this.target.close();
     }
 
 }
