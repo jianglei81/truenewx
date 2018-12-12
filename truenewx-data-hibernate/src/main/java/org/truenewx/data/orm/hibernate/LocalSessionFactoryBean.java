@@ -92,7 +92,6 @@ public class LocalSessionFactoryBean
         if (sessionFactory != null) {
             ServiceRegistry sr = ((SessionFactoryImplementor) sessionFactory).getServiceRegistry();
             StandardServiceRegistry ssr = new StandardServiceRegistryAdapter(sr);
-            @SuppressWarnings("deprecation")
             Metadata metadata = getMetadataSources().getMetadataBuilder(ssr).build();
             LocalSessionFactory lsf = new LocalSessionFactory(this.schema, metadata,
                     sessionFactory);
