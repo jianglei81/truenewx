@@ -78,6 +78,9 @@ public abstract class ItemTagSupport extends UiTagSupport {
     protected void resolveItems(Iterable<?> items) throws IOException {
         if (this.emptyItem) {
             resolveItem(this.emptyItemValue, this.emptyItemText);
+            if (this.separator != null) { // 有分隔符，则在空选项后添加分隔符
+                print(this.separator);
+            }
         }
         if (items != null) {
             int i = 0;
@@ -125,8 +128,7 @@ public abstract class ItemTagSupport extends UiTagSupport {
     /**
      * 判断指定取值是否当前值
      *
-     * @param value
-     *            取值
+     * @param value 取值
      * @return 指定取值是否当前值
      */
     protected boolean isCurrentValue(Object value) {
