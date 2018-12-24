@@ -22,20 +22,30 @@ import org.truenewx.data.validation.constraint.validator.NotContainsSpecialChars
 @Documented
 @Target(FIELD)
 @Retention(RUNTIME)
-@NotContainsHtmlChars
-@NotContainsSqlChars
 @ReportAsSingleViolation
 @Constraint(validatedBy = NotContainsSpecialCharsValidator.class)
 public @interface NotContainsSpecialChars {
 
     /**
      * 逗号有时会作为存储分隔符，成为不能包含的特殊字符
-     * 
-     * @return 能否包含逗号
+     *
+     * @return 能否包含逗号，默认为true
      */
-    boolean comma() default false;
+    boolean comma() default true;
 
-    String message() default "{org.truenewx.data.validation.constraint.NotContains.message}";
+    /**
+     *
+     * @return 能否包含HTML关键字符，默认为false
+     */
+    boolean html() default false;
+
+    /**
+     *
+     * @return 能否包含SQL关键字符，默认为true
+     */
+    boolean sql() default true;
+
+    String message() default NotContains.DEFAULT_MESSAGE;
 
     Class<?>[] groups() default {};
 

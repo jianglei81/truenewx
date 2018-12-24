@@ -40,47 +40,45 @@ public class LocalSessionFactoryBean
     private boolean defaultNamingStrategy = true;
 
     /**
-     * @param schema
-     *            模式
+     * @param schema 模式
      */
-    public void setSchema(final String schema) {
+    public void setSchema(String schema) {
         this.schema = schema;
     }
 
     @Autowired
-    public void setSessionFactoryRegistry(
-            final LocalSessionFactoryRegistry sessionFactoryRegistry) {
+    public void setSessionFactoryRegistry(LocalSessionFactoryRegistry sessionFactoryRegistry) {
         this.sessionFactoryRegistry = sessionFactoryRegistry;
     }
 
     @Override
-    public void setApplicationContext(final ApplicationContext context) throws BeansException {
+    public void setApplicationContext(ApplicationContext context) throws BeansException {
         this.context = context;
     }
 
     @Override
-    public void setPhysicalNamingStrategy(final PhysicalNamingStrategy physicalNamingStrategy) {
+    public void setPhysicalNamingStrategy(PhysicalNamingStrategy physicalNamingStrategy) {
         super.setPhysicalNamingStrategy(physicalNamingStrategy);
         this.defaultNamingStrategy = false;
     }
 
     @Override
-    protected SessionFactory buildSessionFactory(final LocalSessionFactoryBuilder sfb) {
+    protected SessionFactory buildSessionFactory(LocalSessionFactoryBuilder sfb) {
         if (this.defaultNamingStrategy) { // 默认添加多表名映射命名策略
-            final Properties properties = sfb.getProperties();
-            final Dialect dialect = Dialect.getDialect(properties);
-            final TableExistsPredicate predicate = getTableExistsPredicate(dialect);
-            final DataSource dataSource = (DataSource) properties.get(AvailableSettings.DATASOURCE);
+            Properties properties = sfb.getProperties();
+            Dialect dialect = Dialect.getDialect(properties);
+            TableExistsPredicate predicate = getTableExistsPredicate(dialect);
+            DataSource dataSource = (DataSource) properties.get(AvailableSettings.DATASOURCE);
             sfb.setPhysicalNamingStrategy(new MultiTableNamingStrategy(dataSource, predicate));
         }
 
         return super.buildSessionFactory(sfb);
     }
 
-    private TableExistsPredicate getTableExistsPredicate(final Dialect dialect) {
-        final Map<String, TableExistsPredicate> predicates = this.context
+    private TableExistsPredicate getTableExistsPredicate(Dialect dialect) {
+        Map<String, TableExistsPredicate> predicates = this.context
                 .getBeansOfType(TableExistsPredicate.class);
-        for (final TableExistsPredicate predicate : predicates.values()) {
+        for (TableExistsPredicate predicate : predicates.values()) {
             if (predicate.getDialectClass().isAssignableFrom(dialect.getClass())) {
                 return predicate;
             }
@@ -90,13 +88,12 @@ public class LocalSessionFactoryBean
 
     @Override
     public SessionFactory getObject() {
-        final SessionFactory sessionFactory = super.getObject();
+        SessionFactory sessionFactory = super.getObject();
         if (sessionFactory != null) {
-            final ServiceRegistry sr = ((SessionFactoryImplementor) sessionFactory)
-                    .getServiceRegistry();
-            final StandardServiceRegistry ssr = new StandardServiceRegistryAdapter(sr);
-            final Metadata metadata = getMetadataSources().getMetadataBuilder(ssr).build();
-            final LocalSessionFactory lsf = new LocalSessionFactory(this.schema, metadata,
+            ServiceRegistry sr = ((SessionFactoryImplementor) sessionFactory).getServiceRegistry();
+            StandardServiceRegistry ssr = new StandardServiceRegistryAdapter(sr);
+            Metadata metadata = getMetadataSources().getMetadataBuilder(ssr).build();
+            LocalSessionFactory lsf = new LocalSessionFactory(this.schema, metadata,
                     sessionFactory);
             this.sessionFactoryRegistry.register(lsf);
         }

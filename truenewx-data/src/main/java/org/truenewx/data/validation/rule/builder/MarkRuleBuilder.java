@@ -29,9 +29,9 @@ public class MarkRuleBuilder implements ValidationRuleBuilder<MarkRule> {
     }
 
     @Override
-    public void update(final Annotation annotation, final MarkRule rule) {
-        final Class<? extends Annotation> annotationType = annotation.annotationType();
-        final Collection<Class<? extends Annotation>> annotationTypes = rule.getAnnotationTypes();
+    public void update(Annotation annotation, MarkRule rule) {
+        Class<? extends Annotation> annotationType = annotation.annotationType();
+        Collection<Class<? extends Annotation>> annotationTypes = rule.getAnnotationTypes();
         if (annotationType == NotBlank.class) {
             // 覆盖不能为空和不能为null
             annotationTypes.remove(NotEmpty.class);
@@ -54,7 +54,7 @@ public class MarkRuleBuilder implements ValidationRuleBuilder<MarkRule> {
     }
 
     @Override
-    public MarkRule create(final Annotation annotation) {
+    public MarkRule create(Annotation annotation) {
         return new MarkRule(annotation.annotationType());
     }
 

@@ -2,7 +2,7 @@ package org.truenewx.data.validation.rule;
 
 /**
  * 校验规则
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -18,5 +18,12 @@ public abstract class ValidationRule {
         // 一组校验规则中，同一种规则最多只能有一个
         return obj != null && getClass() == obj.getClass();
     }
+
+    /**
+     * 判断当前规则是否为空
+     *
+     * @return 当前规则是否为空
+     */
+    public abstract boolean isEmpty();
 
 }

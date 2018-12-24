@@ -24,10 +24,8 @@ public interface RpcServer {
      * @param beanId
      *            bean id
      * @return 指定bean的所有RPC方法名清单
-     * @throws Exception
-     *             如果获取过程中出现错误
      */
-    Collection<String> methods(String beanId) throws Exception;
+    Collection<String> methods(String beanId);
 
     /**
      * 执行指定RPC bean的指定方法

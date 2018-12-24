@@ -4,19 +4,19 @@
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
-        <dependent-module archiveName="truenewx-web-2.1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/truenewx-web/truenewx-web">
+        <dependent-module archiveName="truenewx-web-2.2.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/truenewx-web/truenewx-web">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="truenewx-service-2.1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/truenewx-service/truenewx-service">
+        <dependent-module archiveName="truenewx-service-2.2.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/truenewx-service/truenewx-service">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="truenewx-data-hibernate-2.1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/truenewx-data-hibernate/truenewx-data-hibernate">
+        <dependent-module archiveName="truenewx-data-hibernate-2.2.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/truenewx-data-hibernate/truenewx-data-hibernate">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="truenewx-data-2.1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/truenewx-data/truenewx-data">
+        <dependent-module archiveName="truenewx-data-2.2.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/truenewx-data/truenewx-data">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="truenewx-core-2.1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/truenewx-core/truenewx-core">
+        <dependent-module archiveName="truenewx-core-2.2.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/truenewx-core/truenewx-core">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="java-output-path" value="/truenewx-web-res/target/classes"/>

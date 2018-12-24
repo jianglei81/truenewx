@@ -28,6 +28,8 @@ public class NotContainsRuleMapper implements ValidationRuleMapper<NotContainsRu
         }
         if (rule.isNotContainsHtmlChars()) {
             result.put("notContainsHtmlChars", Boolean.TRUE);
+        } else if (rule.isNotContainsAngleBracket()) { // HTML字符包含了尖括号，仅在不限制HTML字符时才检查尖括号限制
+            result.put("notContainsAngleBracket", Boolean.TRUE);
         }
         return result;
     }

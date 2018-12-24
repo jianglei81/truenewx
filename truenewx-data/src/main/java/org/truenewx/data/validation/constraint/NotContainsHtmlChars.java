@@ -30,7 +30,7 @@ import org.truenewx.data.validation.constraint.validator.NotContainsHtmlCharsVal
 @Constraint(validatedBy = NotContainsHtmlCharsValidator.class)
 public @interface NotContainsHtmlChars {
 
-    String message() default "{org.truenewx.data.validation.constraint.NotContains.message}";
+    String message() default NotContains.DEFAULT_MESSAGE;
 
     Class<?>[] groups() default {};
 

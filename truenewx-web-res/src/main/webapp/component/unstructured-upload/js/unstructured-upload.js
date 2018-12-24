@@ -113,7 +113,14 @@
             $.each(this.options.events, function(name, handler) {
                 var specialEvents = [ "ready", "beforeFileQueued", "fileQueued", "filesQueued",
                         "fileDequeued", "uploadAccept", "error" ];
-                if (!specialEvents.includes(name)) {
+                var ifSpecialEvent = false;
+                for (var i = 0; i < specialEvents.length; i++) {
+                    if (name === specialEvents[i]) {
+                        ifSpecialEvent = true;
+                        break;
+                    }
+                }
+                if (!ifSpecialEvent) {
                     _wu.on(name, handler);
                 }
             });
@@ -303,10 +310,21 @@
                 var wuFiles = [];
                 $.each(metadatas, function(i, metadata) {
                     if (metadata) {
-                        var blobFile = new File([ "files" ], metadata.filename, {
-                            type : metadata.mimeType,
-                            lastModified : metadata.lastModifiedTime
-                        });
+                        var blobFile;
+                        if (!!window.ActiveXObject || "ActiveXObject" in window) {
+                            var source = {};
+                            source.name = metadata.filename;
+                            source.type = metadata.mimeType;
+                            source.lastModified = metadata.lastModifiedTime;
+                            blobFile = source;
+
+                        } else {
+                            blobFile = new File([ "files" ], metadata.filename, {
+                                type : metadata.mimeType,
+                                lastModified : metadata.lastModifiedTime
+                            });
+                        }
+
                         var runtimeForRuid = new WebUploader.Runtime.Runtime();
                         var wuFile = new WebUploader.File(new WebUploader.Lib.File(WebUploader
                                 .guid("rt_"), blobFile));

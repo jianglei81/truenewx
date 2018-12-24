@@ -30,7 +30,7 @@ import org.truenewx.data.validation.constraint.validator.NotContainsSqlCharsVali
 @Constraint(validatedBy = NotContainsSqlCharsValidator.class)
 public @interface NotContainsSqlChars {
 
-    String message() default "{org.truenewx.data.validation.constraint.NotContains.message}";
+    String message() default NotContains.DEFAULT_MESSAGE;
 
     Class<?>[] groups() default {};
 

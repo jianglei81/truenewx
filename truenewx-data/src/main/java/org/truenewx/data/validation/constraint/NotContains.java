@@ -27,12 +27,15 @@ import org.truenewx.data.validation.constraint.validator.NotContainsValidator;
 @Inherited
 @Constraint(validatedBy = NotContainsValidator.class)
 public @interface NotContains {
+
+    public static final String DEFAULT_MESSAGE = "{org.truenewx.data.validation.constraint.NotContains.message}";
+
     /**
      * @return 不能包含的字符串集，其中如有空格会被忽略
      */
     String[] value();
 
-    String message() default "{org.truenewx.data.validation.constraint.NotContains.message}";
+    String message() default DEFAULT_MESSAGE;
 
     Class<?>[] groups() default {};
 

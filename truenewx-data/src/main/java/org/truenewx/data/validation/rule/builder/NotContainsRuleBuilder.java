@@ -3,7 +3,10 @@ package org.truenewx.data.validation.rule.builder;
 import java.lang.annotation.Annotation;
 
 import org.springframework.stereotype.Component;
+import org.truenewx.core.Strings;
 import org.truenewx.data.validation.constraint.NotContains;
+import org.truenewx.data.validation.constraint.NotContainsAngleBracket;
+import org.truenewx.data.validation.constraint.NotContainsHtmlChars;
 import org.truenewx.data.validation.constraint.NotContainsSpecialChars;
 import org.truenewx.data.validation.constraint.NotContainsSqlChars;
 import org.truenewx.data.validation.rule.NotContainsRule;
@@ -19,43 +22,47 @@ public class NotContainsRuleBuilder implements ValidationRuleBuilder<NotContains
     @Override
     public Class<?>[] getConstraintTypes() {
         return new Class<?>[] { NotContains.class, NotContainsSqlChars.class,
+                NotContainsAngleBracket.class, NotContainsHtmlChars.class,
                 NotContainsSpecialChars.class };
     }
 
     @Override
-    public void update(final Annotation annotation, final NotContainsRule rule) {
-        final NotContains notContains = getNotContainsAnnotation(annotation);
+    public void update(Annotation annotation, NotContainsRule rule) {
+        NotContains notContains = getNotContainsAnnotation(annotation);
         if (notContains != null) {
             rule.addValues(notContains.value());
-            if (annotation instanceof NotContainsSpecialChars) {
-                rule.setNotContainsHtmlChars(true);
+        }
+        if (annotation instanceof NotContainsAngleBracket) {
+            rule.setNotContainsAngleBracket(true);
+        } else if (annotation instanceof NotContainsHtmlChars) {
+            rule.setNotContainsHtmlChars(true);
+        } else if (annotation instanceof NotContainsSpecialChars) {
+            NotContainsSpecialChars notContainsSpecialChars = (NotContainsSpecialChars) annotation;
+            if (!notContainsSpecialChars.comma()) {
+                rule.addValues(Strings.COMMA);
             }
+            rule.setNotContainsHtmlChars(!notContainsSpecialChars.html());
         }
     }
 
-    private NotContains getNotContainsAnnotation(final Annotation annotation) {
+    private NotContains getNotContainsAnnotation(Annotation annotation) {
         if (annotation instanceof NotContains) {
             return (NotContains) annotation;
         } else if (annotation instanceof NotContainsSpecialChars) {
-            return annotation.annotationType().getAnnotation(NotContainsSqlChars.class)
-                    .annotationType().getAnnotation(NotContains.class);
+            if (!((NotContainsSpecialChars) annotation).sql()) {
+                return NotContainsSqlChars.class.getAnnotation(NotContains.class);
+            }
+            return null;
         } else {
             return annotation.annotationType().getAnnotation(NotContains.class);
         }
     }
 
     @Override
-    public NotContainsRule create(final Annotation annotation) {
-        final NotContains notContains = getNotContainsAnnotation(annotation);
-        if (notContains != null) {
-            final NotContainsRule rule = new NotContainsRule();
-            rule.addValues(notContains.value());
-            if (annotation instanceof NotContainsSpecialChars) {
-                rule.setNotContainsHtmlChars(true);
-            }
-            return rule;
-        }
-        return null;
+    public NotContainsRule create(Annotation annotation) {
+        NotContainsRule rule = new NotContainsRule();
+        update(annotation, rule);
+        return rule;
     }
 
 }

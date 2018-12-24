@@ -9,18 +9,18 @@ import org.truenewx.core.Strings;
  * @author jianglei
  * @since JDK 1.8
  */
-public class DuplicatedRpcMethodException extends ReflectiveOperationException {
+public class DuplicatedRpcMethodException extends RpcException {
 
     private static final long serialVersionUID = -8714547397267622760L;
 
     public DuplicatedRpcMethodException(final Class<?> clazz, final String methodName,
-                    final Integer argCount) {
+            Integer argCount) {
         super(StringUtils.join(clazz.getSimpleName(), Strings.DOT, methodName, "(",
-                        getArgExpression(argCount), ") method, maybe wrong number of arguments"));
+                getArgExpression(argCount), ") method, maybe wrong number of arguments"));
     }
 
-    private static String getArgExpression(final Integer argCount) {
-        final StringBuffer result = new StringBuffer();
+    private static String getArgExpression(Integer argCount) {
+        StringBuffer result = new StringBuffer();
         if (argCount != null) {
             for (int i = 0; i < argCount; i++) {
                 result.append(Strings.ASTERISK).append(Strings.COMMA).append(Strings.SPACE);

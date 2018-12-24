@@ -207,22 +207,22 @@ public class HibernateValidationConfigurationFactory
                     }
                     int precision = column.getPrecision();
                     int scale = column.getScale();
-                    if (propertyClass == long.class) {
+                    if (propertyClass == long.class || propertyClass == Long.class) {
                         if (precision > 20) {
                             precision = 20;
                         }
                         scale = 0;
-                    } else if (propertyClass == int.class) {
+                    } else if (propertyClass == int.class || propertyClass == Integer.class) {
                         if (precision > 11) {
                             precision = 11;
                         }
                         scale = 0;
-                    } else if (propertyClass == short.class) {
+                    } else if (propertyClass == short.class || propertyClass == Short.class) {
                         if (precision > 5) {
                             precision = 5;
                         }
                         scale = 0;
-                    } else if (propertyClass == byte.class) {
+                    } else if (propertyClass == byte.class || propertyClass == Byte.class) {
                         if (precision > 3) {
                             precision = 3;
                         }
@@ -282,7 +282,9 @@ public class HibernateValidationConfigurationFactory
                 ValidationRule rule = configuration.getRule(propertyName, ruleClass);
                 if (rule == null) {
                     rule = builder.create(annotation);
-                    configuration.addRule(propertyName, rule);
+                    if (rule != null && !rule.isEmpty()) {
+                        configuration.addRule(propertyName, rule);
+                    }
                 } else {
                     builder.update(annotation, rule);
                 }

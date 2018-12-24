@@ -33,8 +33,8 @@ public class DecimalRuleBuilder implements ValidationRuleBuilder<DecimalRule> {
     }
 
     @Override
-    public void update(final Annotation annotation, final DecimalRule rule) {
-        final Class<? extends Annotation> annoClass = annotation.annotationType();
+    public void update(Annotation annotation, DecimalRule rule) {
+        Class<? extends Annotation> annoClass = annotation.annotationType();
         if (annoClass == Range.class) {
             updateRule(rule, (Range) annotation);
         } else if (annoClass == Digits.class) {
@@ -50,133 +50,75 @@ public class DecimalRuleBuilder implements ValidationRuleBuilder<DecimalRule> {
         }
     }
 
-    private void updateRule(final DecimalRule rule, final DecimalMax dm) {
+    private DecimalRule updateRule(DecimalRule rule, DecimalMax dm) {
         try {
-            final BigDecimal max = new BigDecimal(dm.value());
+            BigDecimal max = new BigDecimal(dm.value());
             if (max.compareTo(rule.getMax()) < 0) {
                 rule.setMax(max);
             }
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             this.logger.error(e.getMessage(), e);
         }
+        return rule;
     }
 
-    private void updateRule(final DecimalRule rule, final DecimalMin dm) {
+    private DecimalRule updateRule(DecimalRule rule, DecimalMin dm) {
         try {
-            final BigDecimal min = new BigDecimal(dm.value());
+            BigDecimal min = new BigDecimal(dm.value());
             if (min.compareTo(rule.getMin()) > 0) {
                 rule.setMin(min);
             }
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             this.logger.error(e.getMessage(), e);
         }
+        return rule;
     }
 
-    private void updateRule(final DecimalRule rule, final Max max) {
-        final BigDecimal maxValue = BigDecimal.valueOf(max.value());
+    private DecimalRule updateRule(DecimalRule rule, Max max) {
+        BigDecimal maxValue = BigDecimal.valueOf(max.value());
         if (maxValue.compareTo(rule.getMax()) < 0) {
             rule.setMax(maxValue);
         }
+        return rule;
     }
 
-    private void updateRule(final DecimalRule rule, final Min min) {
-        final BigDecimal minValue = BigDecimal.valueOf(min.value());
+    private DecimalRule updateRule(DecimalRule rule, Min min) {
+        BigDecimal minValue = BigDecimal.valueOf(min.value());
         if (minValue.compareTo(rule.getMin()) > 0) {
             rule.setMin(minValue);
         }
+        return rule;
     }
 
-    private void updateRule(final DecimalRule rule, final Digits digits) {
+    private DecimalRule updateRule(DecimalRule rule, Digits digits) {
         int scale = digits.fraction();
         if (scale < rule.getScale()) {
             rule.setScale(scale);
         }
         scale = rule.getScale();
-        final int precision = digits.integer() + (scale < 0 ? 0 : scale);
+        int precision = digits.integer() + (scale < 0 ? 0 : scale);
         if (precision < rule.getPrecision()) {
             rule.setPrecision(precision);
         }
+        return rule;
     }
 
-    private void updateRule(final DecimalRule rule, final Range range) {
-        final BigDecimal min = BigDecimal.valueOf(range.min());
+    private DecimalRule updateRule(DecimalRule rule, Range range) {
+        BigDecimal min = BigDecimal.valueOf(range.min());
         if (min.compareTo(rule.getMin()) > 0) {
             rule.setMin(min);
         }
-        final BigDecimal max = BigDecimal.valueOf(range.max());
+        BigDecimal max = BigDecimal.valueOf(range.max());
         if (max.compareTo(rule.getMax()) < 0) {
             rule.setMax(max);
         }
+        return rule;
     }
 
     @Override
-    public DecimalRule create(final Annotation annotation) {
-        final Class<? extends Annotation> annoClass = annotation.annotationType();
-        if (annoClass == Range.class) {
-            return createRule((Range) annotation);
-        } else if (annoClass == Digits.class) {
-            return createRule((Digits) annotation);
-        } else if (annoClass == Min.class) {
-            return createRule((Min) annotation);
-        } else if (annoClass == Max.class) {
-            return createRule((Max) annotation);
-        } else if (annoClass == DecimalMin.class) {
-            return createRule((DecimalMin) annotation);
-        } else if (annoClass == DecimalMax.class) {
-            return createRule((DecimalMax) annotation);
-        }
-        return null;
-    }
-
-    private DecimalRule createRule(final DecimalMax dm) {
-        final DecimalRule rule = new DecimalRule();
-        try {
-            final BigDecimal max = new BigDecimal(dm.value());
-            if (max.compareTo(rule.getMax()) < 0) {
-                rule.setMax(max);
-            }
-            return rule;
-        } catch (final NumberFormatException e) {
-            this.logger.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    private DecimalRule createRule(final DecimalMin dm) {
-        final DecimalRule rule = new DecimalRule();
-        try {
-            final BigDecimal min = new BigDecimal(dm.value());
-            if (min.compareTo(rule.getMin()) > 0) {
-                rule.setMin(min);
-            }
-            return rule;
-        } catch (final NumberFormatException e) {
-            this.logger.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    private DecimalRule createRule(final Max max) {
-        final DecimalRule rule = new DecimalRule();
-        updateRule(rule, max);
-        return rule;
-    }
-
-    private DecimalRule createRule(final Min min) {
-        final DecimalRule rule = new DecimalRule();
-        updateRule(rule, min);
-        return rule;
-    }
-
-    private DecimalRule createRule(final Digits digits) {
-        final DecimalRule rule = new DecimalRule();
-        updateRule(rule, digits);
-        return rule;
-    }
-
-    private DecimalRule createRule(final Range range) {
-        final DecimalRule rule = new DecimalRule();
-        updateRule(rule, range);
+    public DecimalRule create(Annotation annotation) {
+        DecimalRule rule = new DecimalRule();
+        update(annotation, rule);
         return rule;
     }
 

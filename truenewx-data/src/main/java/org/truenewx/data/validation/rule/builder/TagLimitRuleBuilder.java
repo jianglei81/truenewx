@@ -21,24 +21,19 @@ public class TagLimitRuleBuilder implements ValidationRuleBuilder<TagLimitRule> 
     }
 
     @Override
-    public void update(final Annotation annotation, final TagLimitRule rule) {
+    public void update(Annotation annotation, TagLimitRule rule) {
         if (annotation instanceof TagLimit) {
-            final TagLimit tagLimit = (TagLimit) annotation;
+            TagLimit tagLimit = (TagLimit) annotation;
             rule.addAllowed(tagLimit.allowed());
             rule.addForbidden(tagLimit.forbidden());
         }
     }
 
     @Override
-    public TagLimitRule create(final Annotation annotation) {
-        if (annotation instanceof TagLimit) {
-            final TagLimit tagLimit = (TagLimit) annotation;
-            final TagLimitRule rule = new TagLimitRule();
-            rule.addAllowed(tagLimit.allowed());
-            rule.addForbidden(tagLimit.forbidden());
-            return rule;
-        }
-        return null;
+    public TagLimitRule create(Annotation annotation) {
+        TagLimitRule rule = new TagLimitRule();
+        update(annotation, rule);
+        return rule;
     }
 
 }

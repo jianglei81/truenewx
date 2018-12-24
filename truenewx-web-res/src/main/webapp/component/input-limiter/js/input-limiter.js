@@ -11,7 +11,7 @@ $.tnx.namespace("$.tnx.component");
     $.extend($.tnx.component, {
         InputLimiter : {
             functions : {
-                int : function() {
+                integer : function() {
                     var value = $.tnx.component.InputLimiter.replaceValue.call(this, /[^-0-9]/g);
                     this.value = $.tnx.component.InputLimiter.limitFirstMinus(value);
                 },
@@ -20,12 +20,12 @@ $.tnx.namespace("$.tnx.component");
                     value = $.tnx.component.InputLimiter.limitFirstMinus(value);
                     this.value = $.tnx.component.InputLimiter.limitOneDot(value);
                 },
-                nonnegativeInt : function() {
-                    var value = $.tnx.component.InputLimiter.replaceValue.call(this, /[^-0-9]/g);
+                nonnegativeInteger : function() {
+                    var value = $.tnx.component.InputLimiter.replaceValue.call(this, /[^0-9]/g);
                     this.value = $.tnx.component.InputLimiter.limitMinus(value);
                 },
                 nonnegativeNumber : function() {
-                    var value = $.tnx.component.InputLimiter.replaceValue.call(this, /[^-0-9.]/g);
+                    var value = $.tnx.component.InputLimiter.replaceValue.call(this, /[^0-9.]/g);
                     value = $.tnx.component.InputLimiter.limitMinus(value);
                     this.value = $.tnx.component.InputLimiter.limitOneDot(value);
                 }
@@ -112,11 +112,11 @@ $.tnx.namespace("$.tnx.component");
                     }
                 }
                 if (validation) {
-                    if (validation.int) {
+                    if (validation.integer) {
                         if (validation.minValue != undefined && validation.minValue >= 0) {
-                            options.type = "nonnegativeInt";
+                            options.type = "nonnegativeInteger";
                         } else {
-                            options.type = "int";
+                            options.type = "integer";
                         }
                     } else if (validation.number) {
                         if (validation.minValue != undefined && validation.minValue >= 0) {

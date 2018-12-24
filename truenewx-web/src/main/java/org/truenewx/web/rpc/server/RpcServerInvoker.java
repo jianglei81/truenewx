@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -122,22 +123,18 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
     }
 
     @Override
-    public Collection<String> methods(String beanId) throws Exception {
+    public Collection<String> methods(String beanId) {
         return getMeta(beanId).getMethodNames();
     }
 
     /**
      * 执行指定RPC类的指定方法
      *
-     * @param beanId
-     *            类名
-     * @param methodName
-     *            方法名
-     * @param args
-     *            参数集
+     * @param beanId     类名
+     * @param methodName 方法名
+     * @param args       参数集
      * @return 序列化后的字符串形式的执行结果
-     * @throws Exception
-     *             如果执行过程中出现错误
+     * @throws Exception 如果执行过程中出现错误
      */
     @Override
     public RpcInvokeResult invoke(String beanId, String methodName, String argString,
@@ -211,7 +208,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
             RpcResult rpcResult = method.getAnnotation(RpcMethod.class).result();
             RpcResultFilter[] resultFilters = rpcResult.filter();
             return new RpcInvokeResult(result, resultFilters);
-        } catch (HandleableException e) {
+        } catch (HandleableException | ConstraintViolationException e) {
             throw e;
         } catch (Exception e) {
             Throwable cause = e.getCause();
