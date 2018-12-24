@@ -97,7 +97,7 @@
                 });
             }
             if (selectedValues instanceof Array) {
-                return selectedValues.includes(value);
+                return selectedValues.findIndex(value)>-1
             }
             return false;
         },
@@ -152,7 +152,7 @@
             $option = this._getOptionObj($option);
             var theme = this.options.theme;
             $option.attr("theme", theme);
-            if (!this.themes.includes(theme)) {
+            if (!this.themes.findIndex(theme)>-1) {
                 $option.css({
                     borderColor : theme,
                     backgroundColor : theme
@@ -163,7 +163,7 @@
             $option = this._getOptionObj($option);
             var theme = $option.attr("theme");
             $option.removeAttr("theme");
-            if (!this.themes.includes(theme)) {
+            if (!this.themes.findIndex(theme)>-1) {
                 $option.css({
                     borderColor : "#d7d7d7",
                     backgroundColor : "#f3f3f3"
