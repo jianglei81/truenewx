@@ -14,7 +14,7 @@ public class QueryParameterImpl extends MultiQueryOrder implements QueryParamete
     /**
      * 页大小
      */
-    private int pageSize;
+    private int pageSize = 20;
     /**
      * 页码
      */
@@ -31,7 +31,7 @@ public class QueryParameterImpl extends MultiQueryOrder implements QueryParamete
     public QueryParameterImpl() {
     }
 
-    public QueryParameterImpl(final int pageSize, final int pageNo) {
+    public QueryParameterImpl(int pageSize, int pageNo) {
         this.pageSize = pageSize;
         this.pageNo = pageNo;
     }
@@ -41,20 +41,8 @@ public class QueryParameterImpl extends MultiQueryOrder implements QueryParamete
         return this.pageSize;
     }
 
-    public void setPageSize(final int pageSize) {
+    public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
-    }
-
-    /**
-     * 如果当前页大小未设定，则设定为指定页大小默认值
-     *
-     * @param pageSize
-     *            页大小默认值
-     */
-    public void setPageSizeDefault(final int pageSize) {
-        if (this.pageSize <= 0) {
-            this.pageSize = pageSize;
-        }
     }
 
     @Override
@@ -62,19 +50,8 @@ public class QueryParameterImpl extends MultiQueryOrder implements QueryParamete
         return this.pageNo;
     }
 
-    public void setPageNo(final int pageNo) {
+    public void setPageNo(int pageNo) {
         this.pageNo = pageNo;
-    }
-
-    @Override
-    public Map<String, Object> getAll() {
-        return BeanUtil.toMap(this, "pageSize", "pageNo", "totalable", "listable", "orders",
-                "orderString", "orderFieldNames", "all");
-    }
-
-    public final void setPaging(final int pageSize, final int pageNo) {
-        setPageSize(pageSize);
-        setPageNo(pageNo);
     }
 
     @Override
@@ -82,7 +59,7 @@ public class QueryParameterImpl extends MultiQueryOrder implements QueryParamete
         return this.totalable;
     }
 
-    public void setTotalable(final boolean totalable) {
+    public void setTotalable(boolean totalable) {
         this.totalable = totalable;
     }
 
@@ -91,8 +68,30 @@ public class QueryParameterImpl extends MultiQueryOrder implements QueryParamete
         return this.listable;
     }
 
-    public void setListable(final boolean listable) {
+    public void setListable(boolean listable) {
         this.listable = listable;
+    }
+
+    /**
+     * 如果当前页大小未设定，则设定为指定页大小默认值
+     *
+     * @param pageSize 页大小默认值
+     */
+    public void setPageSizeDefault(int pageSize) {
+        if (this.pageSize <= 0) {
+            this.pageSize = pageSize;
+        }
+    }
+
+    @Override
+    public Map<String, Object> getAll() {
+        return BeanUtil.toMap(this, "pageSize", "pageNo", "totalable", "listable", "orders",
+                "orderString", "orderFieldNames", "all");
+    }
+
+    public void setPaging(int pageSize, int pageNo) {
+        setPageSize(pageSize);
+        setPageNo(pageNo);
     }
 
 }
