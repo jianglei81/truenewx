@@ -13,7 +13,8 @@
 }
 
 .label-options>span {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
 }
 
 .label-options .option:before {

@@ -13,7 +13,8 @@
 }
 
 .label-options>span {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
 }
 
 .label-options .option:before {
@@ -30,17 +31,17 @@
 
 .label-options .option:before, .label-options .option[icon='plus']:before {
     content: "\e661";
-    margin-right: 7.766px;
+    margin-right: 12.766px;
 }
 
 .label-options .option[icon='ok']:before, .label-options .option[theme]:before {
     content: "\e60d";
-    margin-right: 5px;
+    margin-right: 10px;
 }
 
 .label-options .option[icon='user']:before {
     content: "\e608";
-    margin-right: 7.766px;
+    margin-right: 12.766px;
 }
 
 .label-options .option[theme='primary'] {
