@@ -76,6 +76,10 @@ public class Strings {
      */
     public static final String PERCENT = "%";
     /**
+     * 问号
+     */
+    public static final String QUESTION = "?";
+    /**
      * 减号
      */
     public static final String MINUS = "-";
