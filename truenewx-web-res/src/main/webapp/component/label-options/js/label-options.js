@@ -1,8 +1,8 @@
 /**
  * label-options.js v1.0.0
- *
+ * 
  * Depends on: jquery.js
- *
+ * 
  * 标签型选项的选择器
  */
 (function($) {
@@ -30,7 +30,7 @@
                 child = $(child);
                 child.addClass("option");
                 _this.bindOptionEventHandler(child);
-                var value = child.attr("data-" + _this.options.valueProperty);
+                var value = _this.getOptionValue(child);
                 if (_this.requiresSelect(value)) {
                     _this.selectOption(child);
                 }
@@ -97,7 +97,7 @@
                 });
             }
             if (selectedValues instanceof Array) {
-                return selectedValues.findIndex(value)>-1
+                return selectedValues.findIndex(value + "") >= 0;
             }
             return false;
         },
@@ -130,10 +130,17 @@
         bindOptionEventHandler : function($option) {
             var _this = this;
             $option.click(function() {
+                var value = _this.getOptionValue($option);
                 if ($option.attr("theme")) {
                     _this.unselectOption($option);
+                    if (typeof (_this.options.onSelectOption) == "function") {
+                        _this.options.onSelectOption.call($option, value, false);
+                    }
                 } else {
                     _this.selectOption($option);
+                    if (typeof (_this.options.onSelectOption) == "function") {
+                        _this.options.onSelectOption.call($option, value, true);
+                    }
                 }
             });
         },
@@ -152,7 +159,7 @@
             $option = this._getOptionObj($option);
             var theme = this.options.theme;
             $option.attr("theme", theme);
-            if (!(this.themes.findIndex(theme)>-1)) {
+            if (!(this.themes.findIndex(theme) > -1)) {
                 $option.css({
                     borderColor : theme,
                     backgroundColor : theme
@@ -163,7 +170,7 @@
             $option = this._getOptionObj($option);
             var theme = $option.attr("theme");
             $option.removeAttr("theme");
-            if (!(this.themes.findIndex(theme)>-1)) {
+            if (!(this.themes.findIndex(theme) > -1)) {
                 $option.css({
                     borderColor : "#d7d7d7",
                     backgroundColor : "#f3f3f3"
@@ -177,10 +184,7 @@
                     function() {
                         var $option = $(this);
                         var option = {};
-                        var value = $option.attr("data-" + _this.options.valueProperty);
-                        if (type == "int") {
-                            value = parseInt(value);
-                        }
+                        var value = _this.getOptionValue($option, type);
                         option[_this.options.valueProperty] = value;
                         option[_this.options.textProperty] = $option.text();
                         if (_this.options.indexProperty) {
@@ -196,13 +200,17 @@
             var values = [];
             $("[theme]", this.element).each(function() {
                 var $option = $(this);
-                var value = $option.attr("data-" + _this.options.valueProperty);
-                if (type == "int") {
-                    value = parseInt(value);
-                }
+                var value = _this.getOptionValue($option, type);
                 values.push(value);
             });
             return values;
+        },
+        getOptionValue : function($option, type) {
+            var value = $option.attr("data-" + this.options.valueProperty);
+            if (type == "int") {
+                value = parseInt(value);
+            }
+            return value;
         },
         filter : function(condition) {
             if (condition) {
@@ -303,6 +311,8 @@
         selectedValues : [], // 初始选中的值清单
         filterInput : undefined, // 过滤输入器，可以是jQuery对象，DOM元素，或者字符串型的选择器
         onRendered : function() { // 渲染完之后的事件处理函数
+        },
+        onSelectOption : function(value, selected) { // 一个选项被选择/反选之后的事件处理函数
         }
     };
 
