@@ -14,7 +14,7 @@ public class QueryParameterImpl extends MultiQueryOrder implements QueryParamete
     /**
      * 页大小
      */
-    private int pageSize = 20;
+    private int pageSize; // 不应设定初始值，应由调用者通过setPageSizeDefault()方法在未指定页大小时才设定默认值
     /**
      * 页码
      */
