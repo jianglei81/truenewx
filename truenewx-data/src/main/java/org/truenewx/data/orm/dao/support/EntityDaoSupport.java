@@ -85,9 +85,9 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
     private QueryResult<T> query(String entityName, CharSequence ql, Map<String, Object> params,
             int pageSize, int pageNo, boolean totalable, boolean listable, QueryOrder order) {
         int total;
-        if (pageSize > 0 && totalable) { // 分页查询时需要获取总数才获取总数
+        if ((pageSize > 0 || !listable) && totalable) { // 需分页查询且需要获取总数时，才获取总数
             total = getDataAccessTemplate(entityName).count("select count(*) " + ql, params);
-        } else { // 不分页查询无需获取总数
+        } else { // 无需分页查询或无需获取总数时，总数为未知总数
             total = Paging.UNKNOWN_TOTAL;
         }
 
