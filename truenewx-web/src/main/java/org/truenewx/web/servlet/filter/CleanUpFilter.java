@@ -47,23 +47,22 @@ public class CleanUpFilter implements Filter {
     private boolean cookSessionId = false;
 
     @Override
-    public void init(final FilterConfig filterConfig) throws ServletException {
-        final String contextPathAttributeName = filterConfig
-                .getInitParameter("contextPathAttributeName");
+    public void init(FilterConfig filterConfig) throws ServletException {
+        String contextPathAttributeName = filterConfig.getInitParameter("contextPathAttributeName");
         if (StringUtils.isNotBlank(contextPathAttributeName)) {
             this.contextPathAttributeName = contextPathAttributeName;
         }
 
         this.profile = filterConfig.getServletContext().getInitParameter("spring.profiles.active");
 
-        final String attributes = filterConfig.getInitParameter("attributes");
+        String attributes = filterConfig.getInitParameter("attributes");
         if (StringUtils.isNotBlank(attributes)) {
-            final String[] attributePairs = attributes.split(Strings.COMMA);
-            final PlaceholderResolver placeholderResolver = getPlaceholderResolver(filterConfig);
-            for (final String attributePair : attributePairs) {
-                final int index = attributePair.indexOf(Strings.EQUAL);
+            String[] attributePairs = attributes.split(Strings.COMMA);
+            PlaceholderResolver placeholderResolver = getPlaceholderResolver(filterConfig);
+            for (String attributePair : attributePairs) {
+                int index = attributePair.indexOf(Strings.EQUAL);
                 if (index > 0 && attributePair.length() > index + 1) {
-                    final String name = attributePair.substring(0, index);
+                    String name = attributePair.substring(0, index);
                     String value = attributePair.substring(index + 1);
                     if (placeholderResolver != null) {
                         value = placeholderResolver.resolveStringValue(value);
@@ -77,21 +76,21 @@ public class CleanUpFilter implements Filter {
         }
     }
 
-    private PlaceholderResolver getPlaceholderResolver(final FilterConfig filterConfig) {
-        final ApplicationContext context = WebApplicationContextUtils
+    private PlaceholderResolver getPlaceholderResolver(FilterConfig filterConfig) {
+        ApplicationContext context = WebApplicationContextUtils
                 .getWebApplicationContext(filterConfig.getServletContext());
         if (context != null) {
             try {
                 return context.getBean(PlaceholderResolver.class);
-            } catch (final BeansException e) {
+            } catch (BeansException e) {
             }
         }
         return null;
     }
 
     @Override
-    public void doFilter(final ServletRequest req, final ServletResponse resp,
-            final FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
+            throws IOException, ServletException {
         // 预处理request和response
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) resp;
@@ -101,22 +100,22 @@ public class CleanUpFilter implements Filter {
         response = new SessionIdResponseWrapper(request, response);
 
         // 生成简单的相对访问根路径属性
-        final String contextPath = request.getContextPath();
+        String contextPath = request.getContextPath();
         request.setAttribute(this.contextPathAttributeName, contextPath);
         // 生成环境属性
         if (this.profile != null) {
             request.setAttribute("profile", this.profile);
         }
         // 生成配置的属性
-        for (final Entry<String, String> entry : this.attributes.entrySet()) {
+        for (Entry<String, String> entry : this.attributes.entrySet()) {
             request.setAttribute(entry.getKey(), entry.getValue());
         }
 
         try {
             chain.doFilter(request, response);
-        } catch (final Throwable e) {
-            final String url = WebUtil.getRelativeRequestUrlWithQueryString(request, false);
-            this.logger.error("An exception happended on {}", url);
+        } catch (Throwable e) {
+            String url = WebUtil.getRelativeRequestUrlWithQueryString(request, false);
+            this.logger.error("An exception happended on {}: {}", url, e.getMessage());
             throw e;
         }
     }
