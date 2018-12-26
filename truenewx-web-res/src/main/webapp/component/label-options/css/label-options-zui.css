@@ -4,7 +4,7 @@
 .label-options .option {
     border: 1px solid #d7d7d7;
     background-color: #f3f3f3;
-    font-family: "Glyphicons Halflings";
+    font-family: ZenIcon;
     cursor: pointer;
     padding: 10px 15px;
     border-radius: 5px;
@@ -18,7 +18,6 @@
 
 .label-options .option:before {
     color: #aaa;
-    margin-right: 8px;
 }
 
 .label-options .option[theme] {
@@ -29,26 +28,27 @@
     color: #fff;
 }
 
-.label-options .option:before, 
-.label-options .option[icon='plus']:before {
-    content: "\002b";
+.label-options .option:before, .label-options .option[icon='plus']:before {
+    content: "\e661";
+    margin-right: 7.766px;
 }
 
-.label-options .option[icon='ok']:before, 
-.label-options .option[theme]:before {
-    content: "\e013";
+.label-options .option[icon='ok']:before, .label-options .option[theme]:before {
+    content: "\e60d";
+    margin-right: 5px;
 }
 
 .label-options .option[icon='user']:before {
-    content: "\e008";
+    content: "\e608";
+    margin-right: 7.766px;
 }
 
 .label-options .option[theme='primary'] {
-    border-color: #337ab7;
-    background-color: #337ab7;
+    border-color: #3280fc;
+    background-color: #3280fc;
 }
 
 .label-options .option[theme='info'] {
-    border-color: #5bc0de;
-    background-color: #5bc0de;
+    border-color: #03b8cf;
+    background-color: #03b8cf;
 }

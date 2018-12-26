@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>标签型选择器</title>
-<link href="css/label-options.css" rel="stylesheet">
+<link href="css/label-options-bootstrap.css" rel="stylesheet">
 <script src="js/label-options.js" type="text/javascript"></script>
 <script type="text/javascript" language="javascript">
     $(function() {
