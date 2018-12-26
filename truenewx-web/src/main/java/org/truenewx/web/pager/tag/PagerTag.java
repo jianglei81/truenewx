@@ -14,7 +14,7 @@ import org.truenewx.web.pager.functor.AlgoPagerOutput;
 
 /**
  * 分页标签
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -68,56 +68,54 @@ public class PagerTag extends TagSupport {
     private boolean showCount = true;
 
     /**
-     * @param pageNoSpan
-     *            按钮个数
+     * 跳转页面的方法名
+     */
+    private String toPage;
+
+    /**
+     * @param pageNoSpan 按钮个数
      */
     public void setPageNoSpan(final int pageNoSpan) {
         this.pageNoSpan = pageNoSpan;
     }
 
     /**
-     * @param pageNoInputtable
-     *            是否显示页码输入框
+     * @param pageNoInputtable 是否显示页码输入框
      */
     public void setPageNoInputtable(final boolean pageNoInputtable) {
         this.pageNoInputtable = pageNoInputtable;
     }
 
     /**
-     * @param goText
-     *            跳转按钮文本
+     * @param goText 跳转按钮文本
      */
     public void setGoText(final String goText) {
         this.goText = goText;
     }
 
     /**
-     * @param value
-     *            分页信息
+     * @param value 分页信息
      */
     public void setValue(final Paging value) {
         this.value = value;
     }
 
     /**
-     * @param align
-     *            对齐方式
+     * @param align 对齐方式
      */
     public void setAlign(final String align) {
         this.align = align;
     }
 
     /**
-     * @param pageSizeOptions
-     *            每页显示数选项集
+     * @param pageSizeOptions 每页显示数选项集
      */
     public void setPageSizeOptions(final String pageSizeOptions) {
         this.pageSizeOptions = pageSizeOptions;
     }
 
     /**
-     * @param tempHref
-     *            连接模板
+     * @param tempHref 连接模板
      */
     public void setTempHref(final String tempHref) {
         this.tempHref = tempHref;
@@ -125,7 +123,7 @@ public class PagerTag extends TagSupport {
 
     /**
      * @return 附加样式
-     * 
+     *
      * @author jianglei
      */
     public String getClassName() {
@@ -133,9 +131,8 @@ public class PagerTag extends TagSupport {
     }
 
     /**
-     * @param className
-     *            附加样式
-     * 
+     * @param className 附加样式
+     *
      * @author jianglei
      */
     public void setClassName(final String className) {
@@ -144,7 +141,7 @@ public class PagerTag extends TagSupport {
 
     /**
      * @return 是否显示总记录条数
-     * 
+     *
      * @author jianglei
      */
     public boolean isShowCount() {
@@ -152,13 +149,20 @@ public class PagerTag extends TagSupport {
     }
 
     /**
-     * @param showCount
-     *            是否显示总记录条数
-     * 
+     * @param showCount 是否显示总记录条数
+     *
      * @author jianglei
      */
     public void setShowCount(final boolean showCount) {
         this.showCount = showCount;
+    }
+
+    /**
+     *
+     * @param toPage 跳转页面的方法名
+     */
+    public void setToPage(String toPage) {
+        this.toPage = toPage;
     }
 
     @Override
@@ -174,6 +178,7 @@ public class PagerTag extends TagSupport {
         params.put("paging", this.value);
         params.put("className", this.className);
         params.put("showCount", this.showCount);
+        params.put("toPage", this.toPage);
         AlgoPagerOutput.visit((HttpServletRequest) this.pageContext.getRequest(), out, params);
         return Tag.EVAL_PAGE;
     }

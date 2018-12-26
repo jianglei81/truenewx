@@ -1103,6 +1103,12 @@
             <rtexprvalue>false</rtexprvalue>
             <description>是否显示总记录条数</description>
         </attribute>
+        <attribute>
+            <name>toPage</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>页面跳转的方法名，在不采用默认方式跳转时指定</description>
+        </attribute>
     </tag>
 
     <tag>
