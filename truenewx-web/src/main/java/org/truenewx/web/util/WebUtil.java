@@ -52,13 +52,10 @@ public class WebUtil {
     }
 
     /**
-     * 直接重定向至指定URL。请求将被重置，POST请求参数将丢失，浏览器地址栏显示的URL将更改为指定URL。
-     * URL如果为绝对路径，则必须以http://或https://开头
+     * 直接重定向至指定URL。请求将被重置，POST请求参数将丢失，浏览器地址栏显示的URL将更改为指定URL。 URL如果为绝对路径，则必须以http://或https://开头
      *
-     * @param url
-     *            URL
-     * @throws IOException
-     *             如果重定向时出现IO错误
+     * @param url URL
+     * @throws IOException 如果重定向时出现IO错误
      */
     public static void redirect(HttpServletRequest request, HttpServletResponse response,
             String url) throws IOException {
@@ -79,10 +76,8 @@ public class WebUtil {
     /**
      * 获取指定request请求中的所有参数的map集合
      *
-     * @param request
-     *            请求
-     * @param excludedParameterNames
-     *            排除的参数名
+     * @param request                请求
+     * @param excludedParameterNames 排除的参数名
      * @return 指定request请求中的所有参数的map集合
      */
     public static Map<String, Object> getRequestParameterMap(ServletRequest request,
@@ -104,10 +99,8 @@ public class WebUtil {
     /**
      * 获取指定URL去掉web项目根路径之后的相对路径URL
      *
-     * @param request
-     *            请求
-     * @param url
-     *            URL
+     * @param request 请求
+     * @param url     URL
      * @return 相对于web项目的URL
      */
     public static String getRelativeUrl(HttpServletRequest request, String url) {
@@ -121,8 +114,7 @@ public class WebUtil {
     /**
      * 获取相对于web项目的请求URL，不包含请求参数串
      *
-     * @param request
-     *            请求
+     * @param request 请求
      * @return 相对于web项目的请求URL
      */
     public static String getRelativeRequestUrl(HttpServletRequest request) {
@@ -132,12 +124,9 @@ public class WebUtil {
     /**
      * 获取相对于web项目的包含请求参数串的请求URL
      *
-     * @param request
-     *            请求
-     * @param encode
-     *            是否进行字符转码
-     * @param ignoredParameterNames
-     *            不包含在参数串中的参数名清单
+     * @param request               请求
+     * @param encode                是否进行字符转码
+     * @param ignoredParameterNames 不包含在参数串中的参数名清单
      * @return 相对于web项目的请求URL
      */
     public static String getRelativeRequestUrlWithQueryString(HttpServletRequest request,
@@ -206,30 +195,37 @@ public class WebUtil {
     /**
      * 获取相对于web项目的请求action。action即请求url中去掉参数和请求后缀之后的部分
      *
-     * @param request
-     *            请求
+     * @param request 请求
      * @return 相对于web项目的请求action
      */
     public static String getRelativeRequestAction(HttpServletRequest request) {
-        String action = getRelativeRequestUrl(request);
-        int index = action.indexOf("?");
+        String url = getRelativeRequestUrl(request);
+        return getAction(url);
+    }
+
+    /**
+     * 从指定URL中截取请求action部分，即请求url中去掉参数和请求后缀之后的部分
+     *
+     * @param url 请求url
+     * @return 请求action
+     */
+    public static String getAction(String url) {
+        int index = url.indexOf("?");
         if (index >= 0) {
-            action = action.substring(0, index);
+            url = url.substring(0, index);
         }
-        index = action.lastIndexOf(".");
+        index = url.lastIndexOf(".");
         if (index >= 0) {
-            action = action.substring(0, index);
+            url = url.substring(0, index);
         }
-        return action;
+        return url;
     }
 
     /**
      * 获取相对于web项目的前一个请求的URL
      *
-     * @param request
-     *            请求
-     * @param containsQueryString
-     *            是否需要包含请求参数
+     * @param request             请求
+     * @param containsQueryString 是否需要包含请求参数
      * @return 前一个请求的URL
      * @author jianglei
      */
@@ -259,10 +255,8 @@ public class WebUtil {
     /**
      * 从指定ServletContext的属性中获取占位符对应值，替换指定字符串中的占位符，返回新的字符串
      *
-     * @param s
-     *            要替换占位符的字符串
-     * @param servletContext
-     *            the ServletContext
+     * @param s              要替换占位符的字符串
+     * @param servletContext the ServletContext
      * @return 替换后的新字符串
      */
     public static String replacePlaceholderFromServletContext(String s,
@@ -337,8 +331,7 @@ public class WebUtil {
     /**
      * 从指定HTTP请求中获取访问的主机地址（域名[:端口]）
      *
-     * @param request
-     *            指定HTTP请求
+     * @param request 指定HTTP请求
      * @return 访问的主机地址
      */
     public static String getHost(HttpServletRequest request) {
@@ -349,8 +342,7 @@ public class WebUtil {
     /**
      * 从指定HTTP请求中获取访问的主机地址（协议://域名[:端口]）
      *
-     * @param request
-     *            指定请求
+     * @param request 指定请求
      * @return 访问的主机地址含协议
      */
     public static String getProtocolAndHost(HttpServletRequest request) {
@@ -365,10 +357,8 @@ public class WebUtil {
     /**
      * 从指定HTTP请求中获取访问的子域名。如果访问的URL为IP或非标准分段域名，则返回null
      *
-     * @param request
-     *            HTTP请求
-     * @param topDomainLevel
-     *            顶级域名级数，默认为2，个别情况可能大于2，小于2时将被视为2
+     * @param request        HTTP请求
+     * @param topDomainLevel 顶级域名级数，默认为2，个别情况可能大于2，小于2时将被视为2
      * @return 子域名
      */
     public static String getSubDomain(HttpServletRequest request, int topDomainLevel) {
@@ -379,8 +369,7 @@ public class WebUtil {
     /**
      * 从HTTP响应对象中获取图片输出流，该输出流专用于向浏览器客户端输出图片，其它情况请避免使用
      *
-     * @param response
-     *            HTTP响应对象
+     * @param response HTTP响应对象
      * @return 图片输出流，如果出现IO错误则返回null
      */
     public static ServletOutputStream getImageOutputStream(HttpServletResponse response) {
@@ -400,8 +389,7 @@ public class WebUtil {
      * 标准化相对URL地址。所谓标准URL即：所有斜杠均为/，以/开头，不以/结尾<br/>
      * 注意：本方法只能正确处理相对URL地址，绝对路径URL无法正确处理
      *
-     * @param url
-     *            URL
+     * @param url URL
      * @return 标准化后的URL
      */
     public static String standardizeRelativeUrl(String url) {
@@ -421,10 +409,8 @@ public class WebUtil {
     /**
      * 读取指定相对于WEB上下文的文件的二进制内容
      *
-     * @param context
-     *            web上下文
-     * @param relativePath
-     *            相对于WEB上下文的文件路径
+     * @param context      web上下文
+     * @param relativePath 相对于WEB上下文的文件路径
      * @return 指定相对于WEB上下文的文件的二进制内容
      */
     public static byte[] readWebContextFile(ServletContext context, String relativePath) {
@@ -449,10 +435,8 @@ public class WebUtil {
     /**
      * 解码指定参数
      *
-     * @param request
-     *            HTTP请求
-     * @param param
-     *            解码前参数
+     * @param request HTTP请求
+     * @param param   解码前参数
      * @return 解码后参数
      */
     public static String decodeParameter(HttpServletRequest request, String param) {
@@ -474,8 +458,7 @@ public class WebUtil {
      * 根据名字获取cookie
      *
      * @param request
-     * @param name
-     *            cookie名称
+     * @param name    cookie名称
      * @return cookie对象
      */
     public static Cookie getCookie(HttpServletRequest request, String name) {
@@ -517,16 +500,11 @@ public class WebUtil {
     /**
      * 创建Cookie对象
      *
-     * @param name
-     *            名称
-     * @param value
-     *            值
-     * @param maxAge
-     *            有效时间，单位：秒
-     * @param httpOnly
-     *            是否禁止客户端javascript访问
-     * @param path
-     *            路径
+     * @param name     名称
+     * @param value    值
+     * @param maxAge   有效时间，单位：秒
+     * @param httpOnly 是否禁止客户端javascript访问
+     * @param path     路径
      * @return Cookie对象
      */
     public static Cookie createCookie(String name, String value, int maxAge, boolean httpOnly,
@@ -541,16 +519,11 @@ public class WebUtil {
     /**
      * 创建Cookie对象
      *
-     * @param name
-     *            名称
-     * @param value
-     *            值
-     * @param maxAge
-     *            有效时间，单位：秒
-     * @param httpOnly
-     *            是否禁止客户端javascript访问
-     * @param request
-     *            请求
+     * @param name     名称
+     * @param value    值
+     * @param maxAge   有效时间，单位：秒
+     * @param httpOnly 是否禁止客户端javascript访问
+     * @param request  请求
      * @return Cookie对象
      */
     public static Cookie createCookie(String name, String value, int maxAge, boolean httpOnly,
@@ -565,16 +538,11 @@ public class WebUtil {
     /**
      * 添加cookie
      *
-     * @param request
-     *            请求
-     * @param response
-     *            响应
-     * @param cookieName
-     *            cookie名称
-     * @param cookieValue
-     *            cookie值
-     * @param maxAge
-     *            有效时间，单位：秒
+     * @param request     请求
+     * @param response    响应
+     * @param cookieName  cookie名称
+     * @param cookieValue cookie值
+     * @param maxAge      有效时间，单位：秒
      *
      * @author jianglei
      */
@@ -587,14 +555,10 @@ public class WebUtil {
     /**
      * 添加有效期最大的cookie
      *
-     * @param request
-     *            请求
-     * @param response
-     *            响应
-     * @param cookieName
-     *            cookie名称
-     * @param cookieValue
-     *            cookie值
+     * @param request     请求
+     * @param response    响应
+     * @param cookieName  cookie名称
+     * @param cookieValue cookie值
      * @author jianglei
      */
     public static void addCookie(HttpServletRequest request, HttpServletResponse response,
@@ -605,12 +569,9 @@ public class WebUtil {
     /**
      * 移除cookie
      *
-     * @param response
-     *            响应
-     * @param name
-     *            cookie名称
-     * @param path
-     *            cookie路径
+     * @param response 响应
+     * @param name     cookie名称
+     * @param path     cookie路径
      *
      * @author jianglei
      */
@@ -624,8 +585,7 @@ public class WebUtil {
     /**
      * 获取include方式的请求URI，如果不是include方式，则返回null
      *
-     * @param request
-     *            请求
+     * @param request 请求
      * @return include方式的请求URI
      *
      * @author jianglei
@@ -637,8 +597,7 @@ public class WebUtil {
     /**
      * 判断指定请求是否AJAX请求
      *
-     * @param request
-     *            HTTP请求
+     * @param request HTTP请求
      * @return 是否AJAX请求
      */
     public static boolean isAjaxRequest(HttpServletRequest request) {
@@ -677,10 +636,8 @@ public class WebUtil {
     /**
      * 标准化指定URL中的协议，确保返回的URL包含协议，如果指定URL未包含协议，则返回包含有指定默认协议的URL
      *
-     * @param url
-     *            URL
-     * @param defaultProtocol
-     *            默认协议，如："http"
+     * @param url             URL
+     * @param defaultProtocol 默认协议，如："http"
      * @return 包含有协议的URL，如果输入的URL为相对路径，则原样返回
      */
     public static String standardizeUrlProtocol(String url, String defaultProtocol) {
@@ -701,8 +658,7 @@ public class WebUtil {
     /**
      * 标准化指定URL，当该URL不包含协议时，返回包含HTTP协议的URL
      *
-     * @param url
-     *            URL
+     * @param url URL
      * @return 包含有协议（默认为HTTP协议）的URL
      */
     public static String standardizeHttpUrl(String url) {
@@ -712,8 +668,7 @@ public class WebUtil {
     /**
      * 将request中的所有参数都复制到属性集中
      *
-     * @param request
-     *            请求
+     * @param request 请求
      */
     public static void copyParameters2Attributes(HttpServletRequest request) {
         Enumeration<String> names = request.getParameterNames();

@@ -93,7 +93,7 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
         if (WebUtils.isIncludeRequest(request)) {
             return true;
         }
-        String url = WebUtil.getRelativeRequestAction(request); // 取不含扩展名的URL
+        String url = WebUtil.getRelativeRequestUrl(request); // 取包含扩展名的URL
         if (matches(url)) { // URL匹配才进行校验
             // 校验Accessibility注解限制
             if (handler instanceof HandlerMethod) {
@@ -119,9 +119,10 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
             Class<?> userClass = getUserClass(request, response);
             Subject subject = this.subjectManager.getSubject(request, response, userClass);
             if (subject != null) { // 能取得subject才进行校验
+                String action = WebUtil.getAction(url); // 截取去掉后缀和请求参数后的剩余部分
                 HttpMethod method = HttpMethod.valueOf(request.getMethod());
                 // 配置菜单中当前链接允许匿名访问，则跳过不作限制
-                if (this.menu != null && this.menu.isAnonymous(url, method)) {
+                if (this.menu != null && this.menu.isAnonymous(action, method)) {
                     return true;
                 }
                 // 登录校验
@@ -129,7 +130,7 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
                     return false;
                 }
                 // 授权校验
-                if (!validateAuthority(url, method, subject, request)) {
+                if (!validateAuthority(action, method, subject, request)) {
                     return false;
                 }
             }
