@@ -1,8 +1,8 @@
 /**
  * label-options.js v1.0.0
- * 
+ *
  * Depends on: jquery.js
- * 
+ *
  * 标签型选项的选择器
  */
 (function($) {
@@ -97,7 +97,7 @@
                 });
             }
             if (selectedValues instanceof Array) {
-                return selectedValues.findIndex(value + "") >= 0;
+                return selectedValues.findIndex(value) >= 0;
             }
             return false;
         },
@@ -133,14 +133,8 @@
                 var value = _this.getOptionValue($option);
                 if ($option.attr("theme")) {
                     _this.unselectOption($option);
-                    if (typeof (_this.options.onSelectOption) == "function") {
-                        _this.options.onSelectOption.call($option, value, false);
-                    }
                 } else {
                     _this.selectOption($option);
-                    if (typeof (_this.options.onSelectOption) == "function") {
-                        _this.options.onSelectOption.call($option, value, true);
-                    }
                 }
             });
         },
@@ -159,23 +153,53 @@
             $option = this._getOptionObj($option);
             var theme = this.options.theme;
             $option.attr("theme", theme);
-            if (!(this.themes.findIndex(theme) > -1)) {
+            if (!(this.themes.findIndex(theme) >= 0)) {
                 $option.css({
                     borderColor : theme,
                     backgroundColor : theme
                 });
             }
+            if (typeof (this.options.onSelectOption) == "function") {
+                var value = this.getOptionValue($option);
+                this.options.onSelectOption.call($option, value, true);
+            }
+        },
+        selectAll : function(type) {
+            var _this = this;
+            var values = [];
+            $(".option:not([theme]):visible", this.element).each(function() {
+                var $option = $(this);
+                _this.selectOption($option);
+                var value = _this.getOptionValue($option, type);
+                values.push(value);
+            });
+            return values;
         },
         unselectOption : function($option) {
             $option = this._getOptionObj($option);
             var theme = $option.attr("theme");
             $option.removeAttr("theme");
-            if (!(this.themes.findIndex(theme) > -1)) {
+            if (!(this.themes.findIndex(theme) >= 0)) {
                 $option.css({
                     borderColor : "#d7d7d7",
                     backgroundColor : "#f3f3f3"
                 });
             }
+            if (typeof (this.options.onSelectOption) == "function") {
+                var value = this.getOptionValue($option);
+                this.options.onSelectOption.call($option, value, false);
+            }
+        },
+        unselectAll : function(type) {
+            var _this = this;
+            var values = [];
+            $(".option[theme]:visible", this.element).each(function() {
+                var $option = $(this);
+                _this.unselectOption($option);
+                var value = _this.getOptionValue($option, type);
+                values.push(value);
+            });
+            return values;
         },
         getSelectedData : function(type) {
             var _this = this;
@@ -267,6 +291,9 @@
                 return labelOptions.selectOption($option);
             }
         },
+        selectAll : function(type) {
+            return $(this).data("labelOptions").selectAll(type);
+        },
         unselect : function($option) {
             var labelOptions = $(this).data("labelOptions");
             if ($option instanceof Array) {
@@ -276,6 +303,9 @@
             } else {
                 return labelOptions.unselectOption($option);
             }
+        },
+        unselectAll : function(type) {
+            return $(this).data("labelOptions").unselectAll(type);
         },
         getSelected : function(type) {
             return $(this).data("labelOptions").getSelectedData(type);
