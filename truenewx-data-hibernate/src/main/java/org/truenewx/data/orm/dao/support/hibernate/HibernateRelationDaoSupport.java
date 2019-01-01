@@ -27,19 +27,19 @@ public abstract class HibernateRelationDaoSupport<T extends Relation<L, R>, L ex
 
     @Override
     @SuppressWarnings("unchecked")
-    public T find(final L leftId, final R rightId) {
+    public T find(L leftId, R rightId) {
         if (leftId != null && rightId != null) {
-            final Serializable id = buildId(leftId, rightId);
-            final String entityName = getEntityName();
+            Serializable id = buildId(leftId, rightId);
+            String entityName = getEntityName();
             if (id != null) {
                 return (T) getHibernateTemplate().getSession().get(entityName, id);
             }
-            final Binate<String, String> binate = getIdProperty();
+            Binate<String, String> binate = getIdProperty();
             if (binate != null) {
-                final StringBuffer hql = new StringBuffer("from ").append(entityName)
+                StringBuffer hql = new StringBuffer("from ").append(entityName)
                         .append(" r where r.").append(binate.getLeft()).append("=:leftId and r.")
                         .append(binate.getRight()).append("=:rightId");
-                final Map<String, Object> params = new HashMap<>();
+                Map<String, Object> params = new HashMap<>();
                 params.put("leftId", leftId);
                 params.put("rightId", rightId);
                 return getHibernateTemplate().first(hql, params);
@@ -49,19 +49,19 @@ public abstract class HibernateRelationDaoSupport<T extends Relation<L, R>, L ex
     }
 
     @Override
-    public boolean exists(final L leftId, final R rightId) {
+    public boolean exists(L leftId, R rightId) {
         if (leftId != null && rightId != null) {
-            final Serializable id = buildId(leftId, rightId);
-            final String entityName = getEntityName();
+            Serializable id = buildId(leftId, rightId);
+            String entityName = getEntityName();
             if (id != null) {
                 return getHibernateTemplate().getSession().get(entityName, id) != null;
             }
-            final Binate<String, String> binate = getIdProperty();
+            Binate<String, String> binate = getIdProperty();
             if (binate != null) {
-                final StringBuffer hql = new StringBuffer("select count(*) from ")
-                        .append(entityName).append(" r where r.").append(binate.getLeft())
-                        .append("=:leftId and r.").append(binate.getRight()).append("=:rightId");
-                final Map<String, Object> params = new HashMap<>();
+                StringBuffer hql = new StringBuffer("select count(*) from ").append(entityName)
+                        .append(" r where r.").append(binate.getLeft()).append("=:leftId and r.")
+                        .append(binate.getRight()).append("=:rightId");
+                Map<String, Object> params = new HashMap<>();
                 params.put("leftId", leftId);
                 params.put("rightId", rightId);
                 return getHibernateTemplate().count(hql, params) > 0;
@@ -80,7 +80,7 @@ public abstract class HibernateRelationDaoSupport<T extends Relation<L, R>, L ex
      *            右标识
      * @return 单个标识对象
      */
-    protected Serializable buildId(final L leftId, final R rightId) {
+    protected Serializable buildId(L leftId, R rightId) {
         return null;
     }
 
@@ -91,12 +91,12 @@ public abstract class HibernateRelationDaoSupport<T extends Relation<L, R>, L ex
      * @return 标识属性对
      */
     protected Binate<String, String> getIdProperty() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @SuppressWarnings("unchecked")
-    protected final T get(final L leftId, final R rightId, final LockOptions lockOption) {
-        final Serializable id = buildId(leftId, rightId);
+    protected T get(L leftId, R rightId, LockOptions lockOption) {
+        Serializable id = buildId(leftId, rightId);
         if (id != null) {
             return (T) getHibernateTemplate().getSession().get(getEntityName(), id, lockOption);
         }
@@ -104,19 +104,18 @@ public abstract class HibernateRelationDaoSupport<T extends Relation<L, R>, L ex
     }
 
     @Override
-    public T increaseNumber(final L leftId, final R rightId, final String propertyName,
-            final Number step) {
-        final Number maxValue = getNumberPropertyMaxValue(propertyName);
+    public T increaseNumber(L leftId, R rightId, String propertyName, Number step) {
+        Number maxValue = getNumberPropertyMaxValue(propertyName);
         if (maxValue != null && step.doubleValue() != 0) { // 属性为数值类型且增量不为0时才处理
-            final Binate<String, String> idProperty = getIdProperty();
-            final String leftIdProperty = idProperty.getLeft();
-            final String rightIdProperty = idProperty.getRight();
+            Binate<String, String> idProperty = getIdProperty();
+            String leftIdProperty = idProperty.getLeft();
+            String rightIdProperty = idProperty.getRight();
             StringBuffer hql = new StringBuffer("update ").append(getEntityName()).append(" set ")
                     .append(propertyName).append(Strings.EQUAL).append(propertyName)
                     .append(Strings.PLUS).append(":step where ").append(leftIdProperty)
                     .append("=:leftId and ").append(rightIdProperty).append("=:rightId and ")
                     .append(propertyName + "+:step<=:maxValue");
-            final Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = new HashMap<>();
             params.put("leftId", leftId);
             params.put("rightId", rightId);
             params.put("step", step);
@@ -133,10 +132,10 @@ public abstract class HibernateRelationDaoSupport<T extends Relation<L, R>, L ex
                 }
             }
             // 更新字段后需刷新实体
-            final T realtion = find(leftId, rightId);
+            T realtion = find(leftId, rightId);
             try {
                 refresh(realtion);
-            } catch (final Exception e) { // 忽略刷新失败
+            } catch (Exception e) { // 忽略刷新失败
                 this.logger.error(e.getMessage(), e);
             }
             ensurePropertyMinNumber(realtion, propertyName, step);
