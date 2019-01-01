@@ -53,6 +53,13 @@ public class TemporalUtil {
         return LocalDateTime.ofInstant(instant, TemporalUtil.DEFAULT_ZONE_ID);
     }
 
+    public static LocalDateTime toLocalDateTime(LocalDate date, LocalTime time) {
+        if (date == null || time == null) {
+            return null;
+        }
+        return LocalDateTime.of(date, time);
+    }
+
     /**
      * 按照指定格式格式化时间点对象为字符串型日期
      *
