@@ -155,7 +155,15 @@
 
     $.fn.editableSelector = function(method) {
         if (typeof method === "object" || method == undefined) {
-            return new EditableSelector(this, method);
+        		if ($(this).length > 1) {
+        			var selectors = new Array();
+        			$(this).each(function () {
+        				selectors.push(new EditableSelector(this, method));
+        			});
+        			return selectors;
+        		} else {
+        			return new EditableSelector(this, method);
+        		}
         } else {
             return $.error("Method " + method + " does not exist in component: EditableSelector");
         }
