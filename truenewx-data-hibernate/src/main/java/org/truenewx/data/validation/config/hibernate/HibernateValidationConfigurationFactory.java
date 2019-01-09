@@ -102,10 +102,8 @@ public class HibernateValidationConfigurationFactory
     /**
      * 从指定传输模型类对应的实体类中添加校验规则到指定校验配置中
      *
-     * @param configuration
-     *            校验配置
-     * @param transportClass
-     *            传输模型类
+     * @param configuration  校验配置
+     * @param transportClass 传输模型类
      */
     private void addEntityClassRulesFromTransportClass(ValidationConfiguration configuration,
             Class<? extends TransportModel<?>> transportClass) {
@@ -142,10 +140,8 @@ public class HibernateValidationConfigurationFactory
     /**
      * 从指定实体类对应的持久化配置中添加校验规则到指定校验配置中
      *
-     * @param configuration
-     *            校验配置
-     * @param entityClass
-     *            实体类
+     * @param configuration 校验配置
+     * @param entityClass   实体类
      */
     private void addEntityClassRulesFromPersistentConfig(ValidationConfiguration configuration,
             Class<? extends Entity> entityClass) {
@@ -160,12 +156,9 @@ public class HibernateValidationConfigurationFactory
     /**
      * 向指定校验设置中添加指定实体类型中指定属性的规则
      *
-     * @param configuration
-     *            校验配置
-     * @param entityClass
-     *            实体类型
-     * @param property
-     *            属性
+     * @param configuration 校验配置
+     * @param entityClass   实体类型
+     * @param property      属性
      */
     @SuppressWarnings("unchecked")
     private void addRuleByProperty(ValidationConfiguration configuration,
@@ -242,10 +235,8 @@ public class HibernateValidationConfigurationFactory
     /**
      * 从指定类的校验约束注解中添加校验规则到指定校验配置中
      *
-     * @param configuration
-     *            校验配置
-     * @param clazz
-     *            类
+     * @param configuration 校验配置
+     * @param clazz         类
      */
     private void addRulesByAnnotation(ValidationConfiguration configuration, Class<?> clazz) {
         List<Field> fields = ClassUtil.getSimplePropertyField(clazz);
@@ -260,8 +251,9 @@ public class HibernateValidationConfigurationFactory
         for (Annotation annotation : field.getAnnotations()) {
             addRuleByPropertyAnnotation(configuration, propertyName, annotation);
         }
-        // 再尝试在属性的getter方法上找约束注解生成规则，这意味着getter方法上的约束注解优先级更高
-        Method method = ClassUtil.findPropertyMethod(field.getDeclaringClass(), propertyName, true);
+        // 再尝试在属性的setter方法上找约束注解生成规则，这意味着setter方法上的约束注解优先级更高
+        Method method = ClassUtil.findPropertyMethod(field.getDeclaringClass(), propertyName,
+                false);
         if (method != null) {
             for (Annotation annotation : method.getAnnotations()) {
                 addRuleByPropertyAnnotation(configuration, propertyName, annotation);
