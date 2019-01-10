@@ -36,10 +36,12 @@ public class DecimalRuleMapper implements ValidationRuleMapper<DecimalRule> {
         BigDecimal min = rule.getMin();
         if (min != null && min.compareTo(DecimalRule.MIN_DECIMAL) > 0) {
             result.put("minValue", min);
+            result.put("inclusiveMin", rule.isInclusiveMin());
         }
         BigDecimal max = rule.getMax();
         if (max != null && max.compareTo(DecimalRule.MAX_DECIMAL) < 0) {
             result.put("maxValue", max);
+            result.put("inclusiveMax", rule.isInclusiveMax());
         }
         return result;
     }

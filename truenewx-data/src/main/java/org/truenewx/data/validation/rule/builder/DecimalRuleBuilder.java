@@ -55,6 +55,7 @@ public class DecimalRuleBuilder implements ValidationRuleBuilder<DecimalRule> {
             BigDecimal max = new BigDecimal(dm.value());
             if (max.compareTo(rule.getMax()) < 0) {
                 rule.setMax(max);
+                rule.setInclusiveMax(dm.inclusive());
             }
         } catch (NumberFormatException e) {
             this.logger.error(e.getMessage(), e);
@@ -67,6 +68,7 @@ public class DecimalRuleBuilder implements ValidationRuleBuilder<DecimalRule> {
             BigDecimal min = new BigDecimal(dm.value());
             if (min.compareTo(rule.getMin()) > 0) {
                 rule.setMin(min);
+                rule.setInclusiveMin(dm.inclusive());
             }
         } catch (NumberFormatException e) {
             this.logger.error(e.getMessage(), e);

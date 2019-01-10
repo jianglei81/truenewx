@@ -5,13 +5,14 @@ package org.truenewx.data.validation.rule;
  *
  * @author jianglei
  * @since JDK 1.8
- * @param <T>
- *            值类型
+ * @param <T> 值类型
  */
 public abstract class RangeRule<T> extends ValidationRule {
 
     private T min;
     private T max;
+    private boolean inclusiveMin = true;
+    private boolean inclusiveMax = true;
 
     public RangeRule(T min, T max) {
         this.min = min;
@@ -32,6 +33,22 @@ public abstract class RangeRule<T> extends ValidationRule {
 
     public void setMax(T max) {
         this.max = max;
+    }
+
+    public boolean isInclusiveMin() {
+        return this.inclusiveMin;
+    }
+
+    public void setInclusiveMin(boolean inclusiveMin) {
+        this.inclusiveMin = inclusiveMin;
+    }
+
+    public boolean isInclusiveMax() {
+        return this.inclusiveMax;
+    }
+
+    public void setInclusiveMax(boolean inclusiveMax) {
+        this.inclusiveMax = inclusiveMax;
     }
 
     @Override
