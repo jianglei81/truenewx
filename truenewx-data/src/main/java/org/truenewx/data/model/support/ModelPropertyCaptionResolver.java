@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 import org.truenewx.core.i18n.PropertyCaptionResolver;
 import org.truenewx.core.util.CaptionUtil;
 import org.truenewx.core.util.ClassUtil;
+import org.truenewx.data.model.Entity;
 import org.truenewx.data.model.TransportModel;
+import org.truenewx.data.validation.config.annotation.InheritConstraint;
 
 /**
  * 模型属性显示名称解决器
@@ -35,6 +37,20 @@ public class ModelPropertyCaptionResolver implements PropertyCaptionResolver {
             }
             if (entityClass != null) {
                 caption = getCaption(entityClass, propertyName, locale);
+            }
+            // 如果从关联实体模型中仍然无法获取，则尝试从@InheritConstraint注解的关联实体和属性上获取
+            if (caption == null) {
+                InheritConstraint ic = ClassUtil.findAnnotation(clazz, propertyName,
+                        InheritConstraint.class);
+                if (ic != null) {
+                    if (StringUtils.isNotBlank(ic.value())) {
+                        propertyName = ic.value();
+                    }
+                    if (ic.type() != Entity.class) {
+                        entityClass = ic.type();
+                    }
+                    caption = getCaption(entityClass, propertyName, locale);
+                }
             }
         }
         return caption;
