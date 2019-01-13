@@ -17,7 +17,7 @@ import org.truenewx.data.model.Entity;
  * @since JDK 1.8
  */
 @Documented
-@Target({ ElementType.FIELD })
+@Target({ ElementType.FIELD, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface InheritConstraint {
