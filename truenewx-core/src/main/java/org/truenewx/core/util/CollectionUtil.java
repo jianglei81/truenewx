@@ -205,4 +205,32 @@ public class CollectionUtil {
         }
         return map;
     }
+
+    public static <K, V> Map<K, V> clone(Map<K, V> map) {
+        if (map == null) {
+            return null;
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            Map<K, V> result = map.getClass().newInstance();
+            result.putAll(map);
+            return result;
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> Collection<T> clone(Collection<T> collection) {
+        if (collection == null) {
+            return null;
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            Collection<T> result = collection.getClass().newInstance();
+            result.addAll(collection);
+            return result;
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

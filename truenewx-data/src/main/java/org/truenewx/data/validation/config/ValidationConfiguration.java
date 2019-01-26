@@ -12,7 +12,7 @@ import org.truenewx.data.validation.rule.ValidationRule;
 
 /**
  * 校验设置
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -28,7 +28,7 @@ public class ValidationConfiguration {
 
     public ValidationConfiguration(final Class<? extends Model> modelClass) {
         this.modelClass = modelClass;
-        this.ruleMapping = new HashMap<String, Set<ValidationRule>>();
+        this.ruleMapping = new HashMap<>();
     }
 
     public Class<? extends Model> getModelClass() {
@@ -36,7 +36,7 @@ public class ValidationConfiguration {
     }
 
     public synchronized void addRule(final String propertyName,
-                    @Nullable final ValidationRule rule) {
+            @Nullable final ValidationRule rule) {
         if (rule != null) {
             getRules(propertyName).add(rule);
         }
@@ -45,7 +45,7 @@ public class ValidationConfiguration {
     public synchronized Set<ValidationRule> getRules(final String propertyName) {
         Set<ValidationRule> rules = this.ruleMapping.get(propertyName);
         if (rules == null) {
-            rules = new LinkedHashSet<ValidationRule>(); // 保持规则加入的顺序
+            rules = new LinkedHashSet<>(); // 保持规则加入的顺序
             this.ruleMapping.put(propertyName, rules);
         }
         return rules;
@@ -53,7 +53,7 @@ public class ValidationConfiguration {
 
     @SuppressWarnings("unchecked")
     public synchronized <R extends ValidationRule> R getRule(final String propertyName,
-                    final Class<R> ruleClass) {
+            final Class<R> ruleClass) {
         final Set<ValidationRule> rules = getRules(propertyName);
         for (final ValidationRule rule : rules) {
             if (rule.getClass() == ruleClass) {
@@ -65,5 +65,14 @@ public class ValidationConfiguration {
 
     public Set<String> getPropertyNames() {
         return this.ruleMapping.keySet();
+    }
+
+    public void copy(String sourcePropertyName, String targetPropertyName) {
+        Set<ValidationRule> rules = this.ruleMapping.get(sourcePropertyName);
+        if (rules != null) {
+            this.ruleMapping.put(targetPropertyName, rules);
+        } else {
+            this.ruleMapping.remove(targetPropertyName);
+        }
     }
 }

@@ -40,6 +40,7 @@ import org.truenewx.core.util.NetUtil;
 import org.truenewx.core.util.PropertyMeta;
 import org.truenewx.data.annotation.ComponentType;
 import org.truenewx.data.model.Model;
+import org.truenewx.data.validation.config.annotation.ValidationAlias;
 import org.truenewx.web.rpc.RpcPort;
 import org.truenewx.web.rpc.serializer.RpcSerializer;
 import org.truenewx.web.rpc.server.annotation.RpcController;
@@ -369,6 +370,17 @@ public class RpcApiController extends RpcControllerSupport {
                 }
             }
             metas.add(meta);
+
+            propertyMeta.getAnnotations().forEach(annotation -> {
+                if (annotation instanceof ValidationAlias) {
+                    String alias = ((ValidationAlias) annotation).value();
+                    if (StringUtils.isNotBlank(alias)) {
+                        RpcVariableMeta aliasMeta = meta.clone();
+                        aliasMeta.setName(alias);
+                        metas.add(aliasMeta);
+                    }
+                }
+            });
         }
         return metas;
     }

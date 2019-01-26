@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.truenewx.core.enums.support.EnumItem;
+import org.truenewx.core.util.CollectionUtil;
 
 /**
  * RPC变量（包括方法参数和类的属性）元数据
@@ -11,7 +12,7 @@ import org.truenewx.core.enums.support.EnumItem;
  * @author jianglei
  * @since JDK 1.8
  */
-public class RpcVariableMeta {
+public class RpcVariableMeta implements Cloneable {
 
     private RpcTypeMeta type;
     private String name;
@@ -61,6 +62,16 @@ public class RpcVariableMeta {
 
     public void setItems(Collection<EnumItem> items) {
         this.items = items;
+    }
+
+    @Override
+    public RpcVariableMeta clone() {
+        RpcVariableMeta meta = new RpcVariableMeta(this.type.getType());
+        meta.name = this.name;
+        meta.caption = this.caption;
+        meta.validation = CollectionUtil.clone(this.validation);
+        meta.items = CollectionUtil.clone(this.items);
+        return meta;
     }
 
 }
