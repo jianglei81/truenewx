@@ -29,7 +29,7 @@ public class Base64xEncrypter implements KeyEncrypter {
         return Base64Encrypter.INSTANCE.encrypt(calculate(temp, key));
     }
 
-    public String decrypt(String encryptedText, final String key) throws Exception {
+    public String decrypt(String encryptedText, final Object key) {
         encryptedText = calculate(Base64Encrypter.INSTANCE.decrypt(encryptedText), key);
         if (encryptedText == null) {
             return null;
