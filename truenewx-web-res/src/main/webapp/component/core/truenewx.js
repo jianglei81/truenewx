@@ -351,6 +351,13 @@ $.tnx = {
         this.siteContext = siteContext;
         this.initMessages($.tnx, locale);
     },
+    getFullSiteContext : function() {
+        var root = window.location.protocol + "//" + window.location.hostname;
+        if (window.location.port != 80 && window.location.port != 443) {
+            root += ":" + window.location.port;
+        }
+        return root + this.siteContext;
+    },
     initMessages : function(component, locale, context, path, callback) {
         component.locale = component.locale || "zh_CN"; // 组件的默认语言区域一律为简体中文
         locale = locale || $.tnx.locale;
