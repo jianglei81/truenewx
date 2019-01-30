@@ -10,7 +10,7 @@ import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
 import org.truenewx.data.query.Paging;
-import org.truenewx.web.pager.functor.AlgoPagerOutput;
+import org.truenewx.web.pager.PagerUtil;
 
 /**
  * 分页标签
@@ -20,7 +20,7 @@ import org.truenewx.web.pager.functor.AlgoPagerOutput;
  */
 public class PagerTag extends TagSupport {
 
-    private static final long serialVersionUID = -8236304660577964951L;
+    private static final long serialVersionUID = -8236304660577964952L;
 
     /**
      * 分页信息
@@ -73,51 +73,58 @@ public class PagerTag extends TagSupport {
     private String toPage;
 
     /**
-     * @param pageNoSpan 按钮个数
+     * @param pageNoSpan
+     *            按钮个数
      */
-    public void setPageNoSpan(final int pageNoSpan) {
+    public void setPageNoSpan(int pageNoSpan) {
         this.pageNoSpan = pageNoSpan;
     }
 
     /**
-     * @param pageNoInputtable 是否显示页码输入框
+     * @param pageNoInputtable
+     *            是否显示页码输入框
      */
-    public void setPageNoInputtable(final boolean pageNoInputtable) {
+    public void setPageNoInputtable(boolean pageNoInputtable) {
         this.pageNoInputtable = pageNoInputtable;
     }
 
     /**
-     * @param goText 跳转按钮文本
+     * @param goText
+     *            跳转按钮文本
      */
-    public void setGoText(final String goText) {
+    public void setGoText(String goText) {
         this.goText = goText;
     }
 
     /**
-     * @param value 分页信息
+     * @param value
+     *            分页信息
      */
-    public void setValue(final Paging value) {
+    public void setValue(Paging value) {
         this.value = value;
     }
 
     /**
-     * @param align 对齐方式
+     * @param align
+     *            对齐方式
      */
-    public void setAlign(final String align) {
+    public void setAlign(String align) {
         this.align = align;
     }
 
     /**
-     * @param pageSizeOptions 每页显示数选项集
+     * @param pageSizeOptions
+     *            每页显示数选项集
      */
-    public void setPageSizeOptions(final String pageSizeOptions) {
+    public void setPageSizeOptions(String pageSizeOptions) {
         this.pageSizeOptions = pageSizeOptions;
     }
 
     /**
-     * @param tempHref 连接模板
+     * @param tempHref
+     *            连接模板
      */
-    public void setTempHref(final String tempHref) {
+    public void setTempHref(String tempHref) {
         this.tempHref = tempHref;
     }
 
@@ -131,11 +138,12 @@ public class PagerTag extends TagSupport {
     }
 
     /**
-     * @param className 附加样式
+     * @param className
+     *            附加样式
      *
      * @author jianglei
      */
-    public void setClassName(final String className) {
+    public void setClassName(String className) {
         this.className = className;
     }
 
@@ -149,17 +157,19 @@ public class PagerTag extends TagSupport {
     }
 
     /**
-     * @param showCount 是否显示总记录条数
+     * @param showCount
+     *            是否显示总记录条数
      *
      * @author jianglei
      */
-    public void setShowCount(final boolean showCount) {
+    public void setShowCount(boolean showCount) {
         this.showCount = showCount;
     }
 
     /**
      *
-     * @param toPage 跳转页面的方法名
+     * @param toPage
+     *            跳转页面的方法名
      */
     public void setToPage(String toPage) {
         this.toPage = toPage;
@@ -167,8 +177,8 @@ public class PagerTag extends TagSupport {
 
     @Override
     public int doEndTag() throws JspException {
-        final JspWriter out = this.pageContext.getOut();
-        final Map<String, Object> params = new HashMap<>();
+        JspWriter out = this.pageContext.getOut();
+        Map<String, Object> params = new HashMap<>();
         params.put("align", this.align);
         params.put("goText", this.goText);
         params.put("tempHref", this.tempHref);
@@ -179,7 +189,7 @@ public class PagerTag extends TagSupport {
         params.put("className", this.className);
         params.put("showCount", this.showCount);
         params.put("toPage", this.toPage);
-        AlgoPagerOutput.visit((HttpServletRequest) this.pageContext.getRequest(), out, params);
+        PagerUtil.output((HttpServletRequest) this.pageContext.getRequest(), out, params);
         return Tag.EVAL_PAGE;
     }
 

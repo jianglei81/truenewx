@@ -748,7 +748,7 @@ $.tnx.pager = {
         $("#pageSize").val(pageSize);
         if ($.cookie) {
             var url = $.String.getRelativeUrl($.tnx.siteContext);
-            var key = url + "#pageSize";
+            var key = url.replace(/\//g, "_") + "_pageSize";
             $.cookie(key, pageSize);
         }
         $("#pageNo").val(1);

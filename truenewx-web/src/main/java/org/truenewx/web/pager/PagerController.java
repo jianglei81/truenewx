@@ -12,25 +12,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
-import org.truenewx.web.pager.functor.AlgoPagerOutput;
 import org.truenewx.web.spring.servlet.mvc.SimpleController;
 
 @Controller
 public class PagerController extends SimpleController {
 
     @RequestMapping(value = "/pager")
-    public ModelAndView index(final HttpServletRequest request,
-            final HttpServletResponse response) {
+    public ModelAndView index(HttpServletRequest request, HttpServletResponse response) {
         try {
-            final Map<String, Object> params = new HashMap<>();
-            final Enumeration<String> names = request.getParameterNames();
+            Map<String, Object> params = new HashMap<>();
+            Enumeration<String> names = request.getParameterNames();
             while (names.hasMoreElements()) {
-                final String name = names.nextElement();
+                String name = names.nextElement();
                 params.put(name, request.getParameter(name));
             }
-            AlgoPagerOutput.visit(request, response.getWriter(), params);
+            PagerUtil.output(request, response.getWriter(), params);
             return null;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
         }
         return null;

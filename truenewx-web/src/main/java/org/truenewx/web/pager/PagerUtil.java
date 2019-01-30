@@ -1,4 +1,4 @@
-package org.truenewx.web.pager.functor;
+package org.truenewx.web.pager;
 
 import java.io.File;
 import java.io.Writer;
@@ -8,37 +8,52 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.truenewx.core.Strings;
-import org.truenewx.core.functor.algorithm.Algorithm;
 import org.truenewx.core.util.IOUtil;
 import org.truenewx.core.util.MathUtil;
 import org.truenewx.data.query.Paging;
+import org.truenewx.web.spring.context.SpringWebContext;
+import org.truenewx.web.util.WebUtil;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 /**
- * 算法：输出分页模板内容
- * 
+ * 分页工具类
+ *
  * @author jianglei
  * @since JDK 1.8
  */
-public class AlgoPagerOutput implements Algorithm {
-    public static final void visit(final HttpServletRequest request, final Writer out,
-                    final Map<String, Object> params) {
+public class PagerUtil {
+
+    private PagerUtil() {
+    }
+
+    public static int getPageSize(HttpServletRequest request, int defaultPageSize) {
+        String url = WebUtil.getRelativeRequestUrl(request);
+        String cookieName = url.replace('/', '_') + "_pageSize";
+        String value = WebUtil.getCookieValue(request, cookieName);
+        return MathUtil.parseInt(value, defaultPageSize);
+    }
+
+    public static int getPageSize(int defaultPageSize) {
+        return getPageSize(SpringWebContext.getRequest(), defaultPageSize);
+    }
+
+    public static void output(HttpServletRequest request, Writer out, Map<String, Object> params) {
         Paging paging = null;
         if (params.get("paging") != null) {
             paging = (Paging) params.get("paging");
         } else if (params.get("total") != null && params.get("pageSize") != null
-                        && params.get("pageNo") != null) {
+                && params.get("pageNo") != null) {
             paging = new Paging(MathUtil.parseInt(params.get("pageSize").toString()),
-                            MathUtil.parseInt(params.get("pageNo").toString()),
-                            MathUtil.parseInt(params.get("total").toString()));
+                    MathUtil.parseInt(params.get("pageNo").toString()),
+                    MathUtil.parseInt(params.get("total").toString()));
         }
         if (paging != null && paging.isPageable()) {
             boolean pageNoInputtable = false;
             if (params.get("pageNoInputtable") != null) {
                 pageNoInputtable = BooleanUtils
-                                .toBoolean(params.get("pageNoInputtable").toString());
+                        .toBoolean(params.get("pageNoInputtable").toString());
             }
             String goText = "";
             if (params.get("goText") != null) {
@@ -72,20 +87,18 @@ public class AlgoPagerOutput implements Algorithm {
             params.put("startPage", getStartPage(paging, pageNoSpan));
             params.put("endPage", getEndPage(paging, pageNoSpan));
 
-            final Configuration config = new Configuration();
+            Configuration config = new Configuration();
             try {
                 // 在pager目录中找文件
-                final String baseDir = request.getSession().getServletContext()
-                                .getRealPath("pager");
-                final File templateFile = IOUtil.findI18nFileByDir(baseDir, "pager", "ftl",
-                                request.getLocale());
+                String baseDir = request.getSession().getServletContext().getRealPath("pager");
+                File templateFile = IOUtil.findI18nFileByDir(baseDir, "pager", "ftl",
+                        request.getLocale());
                 if (templateFile != null) {
                     config.setDirectoryForTemplateLoading(templateFile.getParentFile());
-                    final Template t = config.getTemplate(templateFile.getName(),
-                                    Strings.ENCODING_UTF8);
+                    Template t = config.getTemplate(templateFile.getName(), Strings.ENCODING_UTF8);
                     t.process(params, out);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
@@ -93,19 +106,19 @@ public class AlgoPagerOutput implements Algorithm {
 
     /**
      * 获得开始页码
-     * 
+     *
      * @return 开始页码
      */
-    private static int getStartPage(final Paging paging, final int pageNoSpan) {
-        final int total = paging.getTotal();
-        final int pageNo = paging.getPageNo();
+    private static int getStartPage(Paging paging, int pageNoSpan) {
+        int total = paging.getTotal();
+        int pageNo = paging.getPageNo();
         if (total < 0) {
             if (pageNo <= pageNoSpan) {
                 return 1;
             }
             return pageNo - pageNoSpan;
         } else {
-            final int pageCount = paging.getPageCount();
+            int pageCount = paging.getPageCount();
             if (pageCount <= 0 || pageCount <= pageNoSpan * 2 + 1 || pageNo - pageNoSpan <= 0) {
                 return 1;
             } else if (pageCount - pageNoSpan <= pageNo && pageNo - pageNoSpan - 1 <= 0) {
@@ -117,14 +130,14 @@ public class AlgoPagerOutput implements Algorithm {
 
     /**
      * 获得结束页码
-     * 
+     *
      * @return 结束页码
      */
-    private static int getEndPage(final Paging paging, final int pageNoSpan) {
-        final int total = paging.getTotal();
-        final int pageNo = paging.getPageNo();
-        final int pageCount = paging.getPageCount();
-        final int endPage = pageNo + pageNoSpan;
+    private static int getEndPage(Paging paging, int pageNoSpan) {
+        int total = paging.getTotal();
+        int pageNo = paging.getPageNo();
+        int pageCount = paging.getPageCount();
+        int endPage = pageNo + pageNoSpan;
         if (!paging.isMorePage()) {
             return pageNo;
         } else if (total > 0 && endPage > pageCount) {
@@ -134,5 +147,4 @@ public class AlgoPagerOutput implements Algorithm {
         }
         return endPage;
     }
-
 }
