@@ -109,13 +109,19 @@
                 var $option = $("<" + optionTag + "></" + optionTag + ">");
                 $option.attr("data-" + this.options.valueProperty,
                         option[this.options.valueProperty]);
+                if (this.options.defaultIcon) {
+                    $option.attr("icon", this.options.defaultIcon);
+                }
                 if (this.options.indexProperty) {
                     $option.attr("data-" + this.options.indexProperty,
                             option[this.options.indexProperty]);
                 }
-                $option.text(option[this.options.textProperty]);
+                $option.html(option[this.options.textProperty]);
                 $option.addClass("option");
                 this.element.append($option);
+                if (option.selected == true) {
+                    this.selectOption($option);
+                }
                 return $option;
             }
         },
@@ -159,6 +165,9 @@
                     backgroundColor : theme
                 });
             }
+            if (this.options.selectedIcon) {
+                $option.attr("icon", this.options.selectedIcon);
+            }
             if (typeof (this.options.onSelectOption) == "function") {
                 var value = this.getOptionValue($option);
                 this.options.onSelectOption.call($option, value, true);
@@ -184,6 +193,11 @@
                     borderColor : "#d7d7d7",
                     backgroundColor : "#f3f3f3"
                 });
+            }
+            if (this.options.defaultIcon) {
+                $option.attr("icon", this.options.defaultIcon);
+            } else {
+                $option.removeAttr("icon");
             }
             if (typeof (this.options.onSelectOption) == "function") {
                 var value = this.getOptionValue($option);

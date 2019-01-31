@@ -4,7 +4,7 @@
 .label-options .option {
     border: 1px solid #d7d7d7;
     background-color: #f3f3f3;
-    font-family: "Glyphicons Halflings";
+    font-family: "Glyphicons Halflings", sans-serif;
     cursor: pointer;
     padding: 10px 15px;
     border-radius: 5px;
@@ -40,6 +40,10 @@
 
 .label-options .option[icon='user']:before {
     content: "\e008";
+}
+
+.label-options .option[icon='print']:before {
+    content: "\e045";
 }
 
 .label-options .option[theme='primary'] {
