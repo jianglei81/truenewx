@@ -1,38 +1,24 @@
 package org.truenewx.web.security.login;
 
+import org.truenewx.data.user.UsernamePassword;
+
 /**
  * 用户名+密码形式的登录Token，类似Shiro中的UsernamePasswordToken
  *
  * @author jianglei
  * @since JDK 1.8
  */
-public class UsernamePasswordToken implements RememberMeLoginToken, HostLoginToken {
-
-    private String username;
-
-    private String password;
+public class UsernamePasswordToken extends UsernamePassword
+        implements RememberMeLoginToken, HostLoginToken {
 
     private boolean rememberMe;
-
     private String host;
 
-    public UsernamePasswordToken() {
+    public UsernamePasswordToken(String username, String password) {
+        super(username, password);
     }
 
-    public UsernamePasswordToken(final String username, final String password) {
-        this.username = username;
-        this.password = password;
-    }
-
-    public String getUsername() {
-        return this.username;
-    }
-
-    public String getPassword() {
-        return this.password;
-    }
-
-    public void setHost(final String host) {
+    public void setHost(String host) {
         this.host = host;
     }
 
@@ -41,7 +27,7 @@ public class UsernamePasswordToken implements RememberMeLoginToken, HostLoginTok
         return this.host;
     }
 
-    public void setRememberMe(final boolean rememberMe) {
+    public void setRememberMe(boolean rememberMe) {
         this.rememberMe = rememberMe;
     }
 
