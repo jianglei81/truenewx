@@ -16,14 +16,15 @@ import org.slf4j.LoggerFactory;
  * @author jianglei
  *
  */
-public class Base64Encrypter implements Encrypter {
+public class Base64Encrypter implements BidirectionalEncrypter {
+
     public final static Base64Encrypter INSTANCE = new Base64Encrypter();
 
     private Base64Encrypter() {
     }
 
     @Override
-    public String encrypt(final Object source) {
+    public String encrypt(Object source) {
         byte[] data;
         try {
             if (source instanceof File) {
@@ -37,15 +38,16 @@ public class Base64Encrypter implements Encrypter {
             } else {
                 data = source.toString().getBytes();
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
             return null;
         }
         return Base64.encodeBase64String(data).replaceAll("\n", "");
     }
 
-    public String decrypt(final String encryptedText) {
-        final byte[] bytes = Base64.decodeBase64(encryptedText);
+    @Override
+    public String decrypt(String encryptedText) {
+        byte[] bytes = Base64.decodeBase64(encryptedText);
         return bytes == null ? null : new String(bytes);
     }
 }

@@ -2,7 +2,7 @@ package org.truenewx.core.encrypt;
 
 import java.util.Random;
 
-public class Base64xEncrypter implements KeyEncrypter {
+public class Base64xEncrypter implements KeyBidirectionalEncrypter {
 
     public final static Base64xEncrypter INSTANCE = new Base64xEncrypter();
 
@@ -10,7 +10,7 @@ public class Base64xEncrypter implements KeyEncrypter {
     }
 
     @Override
-    public String encrypt(final Object source, final Object key) {
+    public String encrypt(Object source, Object key) {
         String random = String.valueOf(new Random().nextInt(32000));
         String encryptText = Md5Encrypter.encrypt32(random);
         int j = 0;
@@ -29,7 +29,8 @@ public class Base64xEncrypter implements KeyEncrypter {
         return Base64Encrypter.INSTANCE.encrypt(calculate(temp, key));
     }
 
-    public String decrypt(String encryptedText, final Object key) {
+    @Override
+    public String decrypt(String encryptedText, Object key) {
         encryptedText = calculate(Base64Encrypter.INSTANCE.decrypt(encryptedText), key);
         if (encryptedText == null) {
             return null;
@@ -42,7 +43,7 @@ public class Base64xEncrypter implements KeyEncrypter {
         return text;
     }
 
-    private static String calculate(final String text, final Object key) {
+    private static String calculate(String text, Object key) {
         if (text == null) {
             return null;
         }
