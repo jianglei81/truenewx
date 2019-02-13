@@ -349,6 +349,15 @@ $.tnx = {
     setContext : function(context, siteContext, locale) {
         this.context = context;
         this.siteContext = siteContext;
+        if (locale) { // 最多只允许一个下划线，多余的部分去掉
+            var index = locale.indexOf("_");
+            if (index > 0) {
+                index = locale.indexOf("_", index + 1);
+                if (index > 0) {
+                    locale = locale.substr(0, index);
+                }
+            }
+        }
         this.initMessages($.tnx, locale);
     },
     getFullSiteContext : function() {
