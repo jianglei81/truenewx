@@ -46,6 +46,10 @@
     content: "\e045";
 }
 
+.label-options .option[icon='remove']:before {
+    content: "\e014";
+}
+
 .label-options .option[theme='primary'] {
     border-color: #337ab7;
     background-color: #337ab7;
@@ -54,4 +58,9 @@
 .label-options .option[theme='info'] {
     border-color: #5bc0de;
     background-color: #5bc0de;
+}
+
+.label-options .option[theme='info'] {
+    border-color: #f0ad4e;
+    background-color: #f0ad4e;
 }

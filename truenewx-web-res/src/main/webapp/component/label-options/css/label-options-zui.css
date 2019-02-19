@@ -50,6 +50,11 @@
     margin-right: 12.766px;
 }
 
+.label-options .option[icon='remove']:before {
+    content: "\d7";
+    margin-right: 12.766px;
+}
+
 .label-options .option[theme='primary'] {
     border-color: #3280fc;
     background-color: #3280fc;
@@ -58,4 +63,9 @@
 .label-options .option[theme='info'] {
     border-color: #03b8cf;
     background-color: #03b8cf;
+}
+
+.label-options .option[theme='warning'] {
+    border-color: #df8f0e;
+    background-color: #df8f0e;
 }
