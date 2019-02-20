@@ -17,4 +17,8 @@ public abstract class DataAccessTemplate extends DataQueryTemplate {
 
     public abstract int update(CharSequence ul, List<?> params);
 
+    public final int update(CharSequence ul) {
+        return update(ul, (Map<String, ?>) null);
+    }
+
 }
