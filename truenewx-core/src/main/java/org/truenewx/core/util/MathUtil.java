@@ -30,8 +30,8 @@ public class MathUtil {
      *            最大值（不包含）
      * @return 随机双精度浮点数
      */
-    public static double randomDouble(final double min, final double max) {
-        final double d = Math.random();
+    public static double randomDouble(double min, double max) {
+        double d = Math.random();
         return min + (max - min) * d;
     }
 
@@ -44,7 +44,7 @@ public class MathUtil {
      *            最大值（不包含）
      * @return 随机字节数
      */
-    public static byte randomByte(final byte min, final byte max) {
+    public static byte randomByte(byte min, byte max) {
         return (byte) randomDouble(min, max);
     }
 
@@ -57,7 +57,7 @@ public class MathUtil {
      *            最大值（不包含）
      * @return 随机整数
      */
-    public static int randomInt(final int min, final int max) {
+    public static int randomInt(int min, int max) {
         return (int) randomDouble(min, max);
     }
 
@@ -70,7 +70,7 @@ public class MathUtil {
      *            最大值（不包含）
      * @return 随机长整数
      */
-    public static long randomLong(final long min, final long max) {
+    public static long randomLong(long min, long max) {
         return (long) randomDouble(min, max);
     }
 
@@ -81,7 +81,7 @@ public class MathUtil {
      *            中奖几率
      * @return true if 中奖, otherwise false
      */
-    public static boolean drawLottery(final double probability) {
+    public static boolean drawLottery(double probability) {
         return randomDouble(0, 1) < probability;
     }
 
@@ -92,7 +92,7 @@ public class MathUtil {
      *            字符串
      * @return 转换后的十进制数字
      */
-    public static BigDecimal parseDecimal(final String s) {
+    public static BigDecimal parseDecimal(String s) {
         return parseDecimal(s, null);
     }
 
@@ -105,13 +105,13 @@ public class MathUtil {
      *            默认值
      * @return 转换后的十进制数字
      */
-    public static BigDecimal parseDecimal(final String s, final BigDecimal defaultValue) {
+    public static BigDecimal parseDecimal(String s, BigDecimal defaultValue) {
         if (StringUtils.isBlank(s)) {
             return defaultValue;
         }
         try {
             return new BigDecimal(s);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return defaultValue;
         }
     }
@@ -123,7 +123,7 @@ public class MathUtil {
      *            字符串
      * @return 转换后的长整型数字
      */
-    public static long parseLong(final String s) {
+    public static long parseLong(String s) {
         return parseLong(s, 0);
     }
 
@@ -136,13 +136,13 @@ public class MathUtil {
      *            默认值
      * @return 转换后的长整型数字
      */
-    public static long parseLong(final String s, final long defaultValue) {
+    public static long parseLong(String s, long defaultValue) {
         if (StringUtils.isBlank(s)) {
             return defaultValue;
         }
         try {
             return Long.parseLong(s);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return defaultValue;
         }
     }
@@ -156,10 +156,10 @@ public class MathUtil {
      *            分隔符
      * @return 长整数数组
      */
-    public static long[] parseLongArray(final String s, final String separator) {
+    public static long[] parseLongArray(String s, String separator) {
         if (StringUtils.isNotBlank(s)) {
-            final String[] array = s.split(separator);
-            final long[] result = new long[array.length];
+            String[] array = s.split(separator);
+            long[] result = new long[array.length];
             for (int i = 0; i < array.length; i++) {
                 result[i] = parseLong(array[i]);
             }
@@ -177,14 +177,14 @@ public class MathUtil {
      *            分隔符
      * @return 长整数数组
      */
-    public static Long[] parseLongObjectArray(final String s, final String separator) {
+    public static Long[] parseLongObjectArray(String s, String separator) {
         if (StringUtils.isNotBlank(s)) {
-            final String[] array = s.split(separator);
-            final Long[] result = new Long[array.length];
+            String[] array = s.split(separator);
+            Long[] result = new Long[array.length];
             for (int i = 0; i < array.length; i++) {
                 try {
                     result[i] = Long.valueOf(array[i]);
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     result[i] = null; // 无法解析时结果为null
                 }
             }
@@ -200,7 +200,7 @@ public class MathUtil {
      *            字符串
      * @return 转换后的整型数字
      */
-    public static int parseInt(final String s) {
+    public static int parseInt(String s) {
         return parseInt(s, 0);
     }
 
@@ -213,14 +213,25 @@ public class MathUtil {
      *            默认值
      * @return 转换后的整型数字
      */
-    public static int parseInt(final String s, final int defaultValue) {
+    public static int parseInt(String s, int defaultValue) {
         if (StringUtils.isBlank(s)) {
             return defaultValue;
         }
         try {
             return Integer.parseInt(s);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return defaultValue;
+        }
+    }
+
+    public static Integer parseInteger(String s) {
+        if (StringUtils.isBlank(s)) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(s);
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 
@@ -233,10 +244,10 @@ public class MathUtil {
      *            分隔符
      * @return 整数数组
      */
-    public static int[] parseIntArray(final String s, final String separator) {
+    public static int[] parseIntArray(String s, String separator) {
         if (StringUtils.isNotBlank(s)) {
-            final String[] array = s.split(separator);
-            final int[] result = new int[array.length];
+            String[] array = s.split(separator);
+            int[] result = new int[array.length];
             for (int i = 0; i < array.length; i++) {
                 result[i] = parseInt(array[i]);
             }
@@ -254,14 +265,14 @@ public class MathUtil {
      *            分隔符
      * @return 整数对象数组
      */
-    public static Integer[] parseIntegerArray(final String s, final String separator) {
+    public static Integer[] parseIntegerArray(String s, String separator) {
         if (StringUtils.isNotBlank(s)) {
-            final String[] array = s.split(separator);
-            final Integer[] result = new Integer[array.length];
+            String[] array = s.split(separator);
+            Integer[] result = new Integer[array.length];
             for (int i = 0; i < array.length; i++) {
                 try {
                     result[i] = Integer.valueOf(array[i]);
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     result[i] = null; // 解析错误则对应位置为null
                 }
             }
@@ -283,12 +294,12 @@ public class MathUtil {
      *            是否转换为百分比
      * @return 格式化后的字符串
      */
-    public static String formatNumber(final Object number, final int minScale, final int maxScale,
-            final boolean toPercent) {
+    public static String formatNumber(Object number, int minScale, int maxScale,
+            boolean toPercent) {
         if (number == null) {
             return "";
         }
-        final NumberFormat format = toPercent ? NumberFormat.getPercentInstance()
+        NumberFormat format = toPercent ? NumberFormat.getPercentInstance()
                 : NumberFormat.getNumberInstance();
         format.setGroupingUsed(false);
         format.setMinimumFractionDigits(minScale);
@@ -304,7 +315,7 @@ public class MathUtil {
      * @return 最大值
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Number> T maxValue(final Class<T> type) {
+    public static <T extends Number> T maxValue(Class<T> type) {
         if (type == Long.class) {
             return (T) Long.valueOf(Long.MAX_VALUE);
         } else if (type == Integer.class) {
@@ -324,24 +335,23 @@ public class MathUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Number> T maxValue(final Class<T> type, final int precision,
-            final int scale) {
-        final T typeMaxValue = maxValue(type);
+    public static <T extends Number> T maxValue(Class<T> type, int precision, int scale) {
+        T typeMaxValue = maxValue(type);
         if (typeMaxValue != null) {
             if (precision == 0) {
                 return typeMaxValue;
             }
-            final BigDecimal typeMaxDecimal = new BigDecimal(typeMaxValue.doubleValue());
+            BigDecimal typeMaxDecimal = new BigDecimal(typeMaxValue.doubleValue());
             // 各数值类型的最大值均为整数，转换为朴素字符串形式后，字符串长度即为最大值长度
-            final int maxLength = typeMaxDecimal.toPlainString().length();
+            int maxLength = typeMaxDecimal.toPlainString().length();
             // 最大值都不是最大长度下的最大值（即999...999），所以实际允许的整数部分长度必须小于上述最大值长度
-            final int intLength = precision - scale;
+            int intLength = precision - scale;
             // 也就意味着整数部分长度如果大于等于上述最大值长度，则数值类型最大值即为结果
             if (intLength >= maxLength) {
                 return typeMaxValue;
             }
             // 否则，整数部分和小数部分全为9即为结果
-            final BigDecimal max = BigDecimal.TEN.pow(intLength)
+            BigDecimal max = BigDecimal.TEN.pow(intLength)
                     .subtract(BigDecimal.ONE.divide(BigDecimal.TEN.pow(scale)))
                     .setScale(scale, RoundingMode.HALF_UP);
             if (type == Long.class) {
@@ -363,7 +373,7 @@ public class MathUtil {
         return null;
     }
 
-    public static int minValueIndexOf(final double[] array) {
+    public static int minValueIndexOf(double[] array) {
         double min = Double.MAX_VALUE;
         int index = -1;
         for (int i = 0; i < array.length; i++) {
@@ -375,7 +385,7 @@ public class MathUtil {
         return index;
     }
 
-    public static int maxValueIndexOf(final double[] array) {
+    public static int maxValueIndexOf(double[] array) {
         double max = Double.MIN_VALUE;
         int index = -1;
         for (int i = 0; i < array.length; i++) {
@@ -387,7 +397,7 @@ public class MathUtil {
         return index;
     }
 
-    public static int minValueIndexOf(final Number[] array) {
+    public static int minValueIndexOf(Number[] array) {
         double min = Double.MAX_VALUE;
         int index = -1;
         for (int i = 0; i < array.length; i++) {
@@ -399,7 +409,7 @@ public class MathUtil {
         return index;
     }
 
-    public static int maxValueIndexOf(final Number[] array) {
+    public static int maxValueIndexOf(Number[] array) {
         double max = Double.MIN_VALUE;
         int index = -1;
         for (int i = 0; i < array.length; i++) {
@@ -411,8 +421,8 @@ public class MathUtil {
         return index;
     }
 
-    public static byte[] int2Bytes(final int value) {
-        final byte[] bytes = new byte[4];
+    public static byte[] int2Bytes(int value) {
+        byte[] bytes = new byte[4];
         bytes[0] = (byte) ((value >> 24) & 0xFF);
         bytes[1] = (byte) ((value >> 16) & 0xFF);
         bytes[2] = (byte) ((value >> 8) & 0xFF);
@@ -420,7 +430,7 @@ public class MathUtil {
         return bytes;
     }
 
-    public static int bytes2Int(final byte[] bytes, final int offset) {
+    public static int bytes2Int(byte[] bytes, int offset) {
         return (((bytes[offset] & 0xFF) << 24) | ((bytes[offset + 1] & 0xFF) << 16)
                 | ((bytes[offset + 2] & 0xFF) << 8) | (bytes[offset + 3] & 0xFF));
     }
