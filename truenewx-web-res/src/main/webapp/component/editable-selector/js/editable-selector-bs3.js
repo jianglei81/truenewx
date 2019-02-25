@@ -26,6 +26,8 @@
             var div = $("<div></div>").addClass("input-group");
             var textElement = this._buildTextElement();
             div.append(textElement);
+            textElement.blur(this.options.onTextBlur);
+
             var valueElement = this._buildValueElement();
             div.append(valueElement);
 
@@ -38,6 +40,7 @@
             var ul = $("<ul></ul>").addClass("dropdown-menu dropdown-menu-right").attr("role",
                     "menu").css("overflow", "auto");
             inputGroupBtn.append(ul);
+            var _this = this;
             $("option", this.element).each(function(index, option) {
                 var li = $("<li></li>");
                 var value = option.value;
@@ -49,6 +52,9 @@
                 li.click(function() {
                     textElement.val(text);
                     valueElement.val(value);
+                    if (typeof (_this.options.onSelectedOption) == "function") {
+                        _this.options.onSelectedOption.call(div, value, text);
+                    }
                 });
                 ul.append(li);
                 if (option.is(":selected")) {
@@ -78,11 +84,11 @@
                         var open = false;
                         $("li", ul).each(function(index, li) {
                             li = $(li);
-                            li.show();
+                            li.removeClass("hidden");
                             if ($("a", li).text().indexOf(text) >= 0) { // 输入值匹配
                                 open = true;
                             } else {
-                                li.hide();
+                                li.addClass("hidden");
                             }
                         });
                         if (open) {
@@ -91,9 +97,8 @@
                     }
                 });
 
-                inputGroupBtn.on('show.bs.dropdown', function() {
-                    ul.outerWidth(textElement.outerWidth() + inputGroupBtn.outerWidth());
-                    $("li", ul).show();
+                btn.click(function() {
+                    $("li", ul).removeClass("hidden");
                 });
             }
 
@@ -155,15 +160,15 @@
 
     $.fn.editableSelector = function(method) {
         if (typeof method === "object" || method == undefined) {
-        		if ($(this).length > 1) {
-        			var selectors = new Array();
-        			$(this).each(function () {
-        				selectors.push(new EditableSelector(this, method));
-        			});
-        			return selectors;
-        		} else {
-        			return new EditableSelector(this, method);
-        		}
+            if ($(this).length > 1) {
+                var selectors = new Array();
+                $(this).each(function() {
+                    selectors.push(new EditableSelector(this, method));
+                });
+                return selectors;
+            } else {
+                return new EditableSelector(this, method);
+            }
         } else {
             return $.error("Method " + method + " does not exist in component: EditableSelector");
         }
@@ -177,7 +182,10 @@
             cssClass : undefined,
             style : undefined,
             validation : undefined
-        }
+        },
+        onTextBlur : undefined, // 文本框内容变更的事件处理函数
+        // 选项被选择后的事件处理函数
+        onSelectedOption : undefined
     };
 
 })(jQuery);
