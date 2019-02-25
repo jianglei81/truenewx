@@ -26,15 +26,19 @@
         render : function() {
             this.element.addClass("label-options");
             var _this = this;
-            $.each(this.element.children(), function(index, child) {
-                child = $(child);
-                child.addClass("option");
-                _this.bindOptionEventHandler(child);
-                var value = _this.getOptionValue(child);
-                if (_this.requiresSelect(value)) {
-                    _this.selectOption(child);
-                }
-            });
+            if (this.options.clean) {
+                this.element.html("");
+            } else {
+                $.each(this.element.children(), function(index, child) {
+                    child = $(child);
+                    child.addClass("option");
+                    _this.bindOptionEventHandler(child);
+                    var value = _this.getOptionValue(child);
+                    if (_this.requiresSelect(value)) {
+                        _this.selectOption(child);
+                    }
+                });
+            }
             if (this.options.data instanceof Array) {
                 $.each(this.options.data, function(index, option) {
                     _this.addOption(option);
@@ -352,6 +356,7 @@
         buildOption : undefined, // 自定义选项构建函数
         optionTag : undefined,
         data : [], // 加入的数据清单
+        clean : false, // 是否清除容器中已有的选项，默认不清除
         selectedValues : [], // 初始选中的值清单
         filterInput : undefined, // 过滤输入器，可以是jQuery对象，DOM元素，或者字符串型的选择器
         onRendered : function() { // 渲染完之后的事件处理函数
