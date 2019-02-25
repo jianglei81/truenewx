@@ -26,7 +26,6 @@
             var div = $("<div></div>").addClass("input-group");
             var textElement = this._buildTextElement();
             div.append(textElement);
-            textElement.blur(this.options.onTextBlur);
 
             var valueElement = this._buildValueElement();
             div.append(valueElement);
@@ -70,10 +69,16 @@
                     var li = $(lis[i]);
                     if (text == li.find("a").text()) {
                         valueElement.val(li.attr("value"));
+                        if (typeof (_this.options.onTextBlur) == "function") {
+                            _this.options.onTextBlur.call(textElement);
+                        }
                         return;
                     }
                 }
                 valueElement.val("");
+                if (typeof (_this.options.onTextBlur) == "function") {
+                    _this.options.onTextBlur.call(textElement);
+                }
             });
 
             if (this.options.typeahead) {

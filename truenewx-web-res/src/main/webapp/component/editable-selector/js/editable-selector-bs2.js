@@ -23,13 +23,13 @@
             this.options = $.extend({}, $.fn.editableSelector.defaults, domOptions, options);
         },
         render : function() {
-            var div = $("<div></div>").addClass("input-append");//input-group
+            var div = $("<div></div>").addClass("input-append");// input-group
             var textElement = this._buildTextElement();
             div.append(textElement);
             var valueElement = this._buildValueElement();
             div.append(valueElement);
 
-            var inputGroupBtn = $("<div></div>").addClass("btn-group");//input-group-btn
+            var inputGroupBtn = $("<div></div>").addClass("btn-group");// input-group-btn
             div.append(inputGroupBtn);
             var btn = $("<button type=\"button\"></button>").addClass(
                     "btn btn-default dropdown-toggle").attr("data-toggle", "dropdown");
@@ -38,31 +38,26 @@
             var ul = $("<ul></ul>").addClass("dropdown-menu dropdown-menu-right").attr("role",
                     "menu").css("overflow", "auto");
             inputGroupBtn.append(ul);
-            _this=this;
+            _this = this;
             $("option", this.element).each(function(index, option) {
                 var $li = $("<li></li>");
                 var value = option.value;
                 $li.attr("val", value);
-                
+
                 option = $(option);
                 var text = option.text();
                 $li.append($("<a href=\"javascript:void(0)\"></a>").append(text));
                 $li.click(function() {
                     textElement.val(text);
                     valueElement.val(value);
-                    
+                    if (typeof (_this.options.onSelectedOption) == "function") {
+                        _this.options.onSelectedOption.call(div, value, text);
+                    }
                 });
-                var afterSelect = _this.options.afterSelect;
-                if (typeof afterSelect == "function") {
-                    $li.on('click', function() {
-                        afterSelect(true);
-                    });
-                }
                 ul.append($li);
                 if (option.is(":selected")) {
                     $li.trigger("click");
                 }
-               
             });
 
             // 绑定文本输入框内容改变时的事件处理
@@ -73,10 +68,16 @@
                     var li = $(lis[i]);
                     if (text == li.find("a").text()) {
                         valueElement.val(li.attr("val"));
+                        if (typeof (_this.options.onTextBlur) == "function") {
+                            _this.options.onTextBlur.call(textElement);
+                        }
                         return;
                     }
                 }
                 valueElement.val("");
+                if (typeof (_this.options.onTextBlur) == "function") {
+                    _this.options.onTextBlur.call(textElement);
+                }
             });
 
             if (this.options.typeahead) {
@@ -87,23 +88,21 @@
                         var open = false;
                         $("li", ul).each(function(index, li) {
                             li = $(li);
-                            li.show();
+                            li.removeClass("hidden");
                             if ($("a", li).text().indexOf(text) >= 0) { // 输入值匹配
                                 open = true;
                             } else {
-                                li.hide();
+                                li.addClass("hidden");
                             }
                         });
                         if (open) {
                             inputGroupBtn.addClass("open");
-                            ul.outerWidth(textElement.outerWidth() + inputGroupBtn.outerWidth());//bs2
                         }
                     }
                 });
 
-                inputGroupBtn.on('click', function() {
-                    ul.outerWidth(textElement.outerWidth() + inputGroupBtn.outerWidth());
-                    $("li", ul).show();
+                btn.click(function() {
+                    $("li", ul).removeClass("hidden");
                 });
             }
 
@@ -168,14 +167,14 @@
     $.fn.editableSelector = function(method) {
         if (typeof method === "object" || method == undefined) {
             if ($(this).length > 1) {
-	    			var selectors = new Array();
-	    			$(this).each(function () {
-	    				selectors.push(new EditableSelector(this, method));
-	    			});
-	    			return selectors;
-	    		} else {
-	    			return new EditableSelector(this, method);
-	    		}
+                var selectors = new Array();
+                $(this).each(function() {
+                    selectors.push(new EditableSelector(this, method));
+                });
+                return selectors;
+            } else {
+                return new EditableSelector(this, method);
+            }
         } else {
             return $.error("Method " + method + " does not exist in component: EditableSelector");
         }
@@ -189,9 +188,11 @@
             cssClass : undefined,
             style : undefined,
             validation : undefined,
-            placeholder: undefined
+            placeholder : undefined
         },
-        afterSelect:undefined //点击选择后事件
+        onTextBlur : undefined, // 文本框内容变更的事件处理函数
+        // 选项被选择后的事件处理函数
+        onSelectedOption : undefined
     };
 
 })(jQuery);
