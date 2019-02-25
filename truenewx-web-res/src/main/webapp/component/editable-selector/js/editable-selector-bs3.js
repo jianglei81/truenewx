@@ -108,6 +108,7 @@
             }
 
             this.element.replaceWith(div);
+            this.container = div;
 
             var size = this.options.rows || parseInt(this.element.attr("rows")) || 10; // 默认最多显示10行
             var rowObj = $("li:first a:first", ul);
@@ -119,6 +120,8 @@
             if (maxHeight < ul.height()) {
                 ul.css("maxHeight", maxHeight);
             }
+
+            this.container.data("editableSelector", this);
         },
         /**
          * 构建文本输入框元素
@@ -160,11 +163,26 @@
             var valueElement = $("<input type=\"hidden\" />");
             valueElement.attr("name", this.element.attr("name")); // 隐藏的值域名称默认为下拉框名称
             return valueElement;
+        },
+        setValue : function(value, text) {
+            if (text == undefined) {
+                text = value;
+            }
+            $("[type='hidden'][name]", this.container).val(value);
+            $("[type='text'][name]", this.container).val(text);
+        }
+    };
+
+    var methods = {
+        setValue : function(value, text) {
+            $(this).data("editableSelector").setValue(value, text);
         }
     };
 
     $.fn.editableSelector = function(method) {
-        if (typeof method === "object" || method == undefined) {
+        if (methods[method]) {
+            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+        } else if (typeof method === "object" || method == undefined) {
             if ($(this).length > 1) {
                 var selectors = new Array();
                 $(this).each(function() {
