@@ -51,7 +51,7 @@
                     textElement.val(text);
                     valueElement.val(value);
                     if (typeof (_this.options.onSelectedOption) == "function") {
-                        _this.options.onSelectedOption.call(div, value, text);
+                        _this.options.onSelectedOption.call(li, value, text);
                     }
                 });
                 ul.append($li);
