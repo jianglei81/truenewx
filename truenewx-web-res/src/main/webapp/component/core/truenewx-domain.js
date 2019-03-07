@@ -1,6 +1,6 @@
 /**
  * truenewx-domain.js v1.1.0
- * 
+ *
  * Depends on: truenewx.js
  */
 $.tnx.domain = {
@@ -344,6 +344,7 @@ $.tnx.domain.site = {
         // 默认站点js文件夹相对域名的路径
         js : $.tnx.siteContext + "/assets/js"
     },
+    requiredClass : "required", // 默认的必填字段样式
     components : {}, // 组件名称-相关js文件相对域名路径清单的映射集
     Controller : $.tnx.domain.Controller.extend({
         init : function() {
@@ -401,7 +402,7 @@ $.tnx.domain.site = {
     },
     /**
      * 用模态窗体打开指定URL
-     * 
+     *
      * @param url
      *            URL
      * @param params

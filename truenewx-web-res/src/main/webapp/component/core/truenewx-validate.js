@@ -1,6 +1,6 @@
 /**
  * truenewx-validate.js v1.0.0
- * 
+ *
  * Depends on: truenewx.js
  */
 // 为避免一行过宽导致整个文档格式缩进过多，单独设置Email的正则表达式
@@ -286,7 +286,7 @@ $.tnx.Validator = Class.extend({
     },
     /**
      * 扩展校验
-     * 
+     *
      * @param name
      *            校验名
      * @param message
@@ -664,27 +664,17 @@ $.tnx.Validator = Class.extend({
             return validator.validateForm(this);
         });
 
-        var validatableFields = $(
-                "input[validation],textarea[validation],[contenteditable='true'][validation]",
-                formObj);
-
-        validatableFields.focusout(function() {
-            var fieldObj = $(this);
-            if (validator.getFieldErrorObj(fieldObj)) { // 字段存在对应错误消息显示对象，则进行字段校验
-                validator.validateField(fieldObj);
-            }
-        });
-
-        $.each(validatableFields, function() {
-            var fieldObj = $(this);
-            validator.renderField(fieldObj);
-        });
+        $("input[validation],textarea[validation],[contenteditable='true'][validation]", formObj)
+                .each(function() {
+                    var fieldObj = $(this);
+                    validator.renderField(fieldObj);
+                });
 
         formObj.attr("validate", "false"); // 避免重复初始化
     },
     /**
      * 渲染字段
-     * 
+     *
      * @param fiieldObj
      *            字段对象
      * @param validation
@@ -699,6 +689,14 @@ $.tnx.Validator = Class.extend({
                     var requriedTag = this.getRequiredTag(fieldObj);
                     this.appendRequiredTag(fieldObj, requriedTag, requiredClass);
                 }
+            }
+
+            // 字段存在对应错误消息显示对象，则失去焦点时进行字段校验
+            if (this.getFieldErrorObj(fieldObj)) {
+                var validator = this;
+                fieldObj.focusout(function() {
+                    validator.validateField(fieldObj);
+                });
             }
         }
     },

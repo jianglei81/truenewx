@@ -170,12 +170,25 @@
             }
             $("[type='hidden'][name]", this.container).val(value);
             $("[type='text'][name]", this.container).val(text);
+        },
+        getValue : function(text) {
+            var lis = $("li", this.container);
+            for (var i = 0; i < lis.length; i++) {
+                var li = $(lis[i]);
+                if ($("a", li).text() == text) {
+                    return li.attr("value");
+                }
+            }
+            return undefined;
         }
     };
 
     var methods = {
         setValue : function(value, text) {
             $(this).data("editableSelector").setValue(value, text);
+        },
+        getValue : function(text) {
+            $(this).data("editableSelector").getValue(text);
         }
     };
 
