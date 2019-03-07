@@ -1,8 +1,8 @@
 /**
  * editable-selector.js v1.0.0
- *
+ * 
  * Depends on: jquery.js
- *
+ * 
  * 可编辑的下拉菜单选择器组件
  */
 (function($) {
@@ -70,14 +70,20 @@
                     if (text == li.find("a").text()) {
                         valueElement.val(li.attr("value"));
                         if (typeof (_this.options.onTextBlur) == "function") {
-                            _this.options.onTextBlur.call(textElement);
+                            _this.options.onTextBlur.call(textElement, value);
                         }
                         return;
                     }
                 }
-                valueElement.val("");
-                if (typeof (_this.options.onTextBlur) == "function") {
-                    _this.options.onTextBlur.call(textElement);
+                // 文本内容没有匹配的值
+                if (text && _this.options.allowNonOption) { // 文本内容非空时，允许非选项，则值置为空
+                    valueElement.val("");
+                    if (typeof (_this.options.onTextBlur) == "function") {
+                        _this.options.onTextBlur.call(textElement, valueElement.val());
+                    }
+                } else { // 否则，恢复为原来的选项
+                    _this.setValue(valueElement.val());
+                    // 恢复选项不触发文本框修改事件处理
                 }
             });
 
@@ -125,7 +131,7 @@
         },
         /**
          * 构建文本输入框元素
-         *
+         * 
          * @param element
          *            原始下拉菜单元素
          * @returns 构建好的文本输入框元素
@@ -154,7 +160,7 @@
         },
         /**
          * 构建值元素
-         *
+         * 
          * @param element
          *            原始下拉菜单元素
          * @returns 构建好的值元素
@@ -164,28 +170,31 @@
             valueElement.attr("name", this.element.attr("name")); // 隐藏的值域名称默认为下拉框名称
             return valueElement;
         },
-        setValue : function(value, text) {
-            if (text == undefined) {
-                text = value;
-            }
+        setValue : function(value) {
             $("[type='hidden'][name]", this.container).val(value);
+            var li = $("li[value='" + value + "']", this.container);
+            var text = li.find("a").text();
             $("[type='text'][name]", this.container).val(text);
         },
         getValue : function(text) {
-            var lis = $("li", this.container);
-            for (var i = 0; i < lis.length; i++) {
-                var li = $(lis[i]);
-                if ($("a", li).text() == text) {
-                    return li.attr("value");
+            if (text) {
+                var lis = $("li", this.container);
+                for (var i = 0; i < lis.length; i++) {
+                    var li = $(lis[i]);
+                    if ($("a", li).text() == text) {
+                        return li.attr("value");
+                    }
                 }
+            } else {
+                return $("[type='hidden'][name]", this.container).val();
             }
             return undefined;
         }
     };
 
     var methods = {
-        setValue : function(value, text) {
-            $(this).data("editableSelector").setValue(value, text);
+        setValue : function(value) {
+            $(this).data("editableSelector").setValue(value);
         },
         getValue : function(text) {
             $(this).data("editableSelector").getValue(text);
@@ -219,6 +228,7 @@
             style : undefined,
             validation : undefined
         },
+        allowNonOption : true, // 是否允许非选项，即编辑的文本输入框内容不与任何选项匹配，此时取值为空字符串
         onTextBlur : undefined, // 文本框内容变更的事件处理函数
         // 选项被选择后的事件处理函数
         onSelectedOption : undefined
