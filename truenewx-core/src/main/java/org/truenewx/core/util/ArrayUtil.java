@@ -19,13 +19,11 @@ public class ArrayUtil {
     /**
      * 从指定对象数组中获取指定索引下标处的对象，如果指定数组为空或长度不够，则返回null
      *
-     * @param array
-     *            对象数组
-     * @param index
-     *            索引下标
+     * @param array 对象数组
+     * @param index 索引下标
      * @return 指定索引下标处的对象
      */
-    public static <T> T get(final T[] array, final int index) {
+    public static <T> T get(T[] array, int index) {
         if (array == null || index < 0 || array.length <= index) {
             return null;
         }
@@ -35,15 +33,12 @@ public class ArrayUtil {
     /**
      * 从指定整型数组中获取指定索引下标处的整数，如果指定数组为空或长度不够，则返回指定默认值
      *
-     * @param array
-     *            整型数组
-     * @param index
-     *            索引下标
-     * @param defaultValue
-     *            默认值
+     * @param array        整型数组
+     * @param index        索引下标
+     * @param defaultValue 默认值
      * @return 指定索引下标处的整数值
      */
-    public static int get(final int[] array, final int index, final int defaultValue) {
+    public static int get(int[] array, int index, int defaultValue) {
         if (array == null || index < 0 || array.length <= index) {
             return defaultValue;
         }
@@ -53,15 +48,12 @@ public class ArrayUtil {
     /**
      * 从指定长整型数组中获取指定索引下标处的长整数，如果指定数组为空或长度不够，则返回指定默认值
      *
-     * @param array
-     *            长整型数组
-     * @param index
-     *            索引下标
-     * @param defaultValue
-     *            默认值
+     * @param array        长整型数组
+     * @param index        索引下标
+     * @param defaultValue 默认值
      * @return 指定索引下标处的长整数值
      */
-    public static long get(final long[] array, final int index, final long defaultValue) {
+    public static long get(long[] array, int index, long defaultValue) {
         if (array == null || index < 0 || array.length <= index) {
             return defaultValue;
         }
@@ -71,89 +63,112 @@ public class ArrayUtil {
     /**
      * 将string数组转换成int数组
      *
-     * @param stringArray
-     *            字符串数组
+     * @param stringArray 字符串数组
      * @return int数组
      */
-    public static int[] toIntArray(final String[] stringArray) {
+    public static int[] toIntArray(String[] stringArray) {
         if (stringArray == null) {
             return null;
         }
-        final int len = stringArray.length;
-        final int[] intArray = new int[len];
-        for (int i = 0; i < len; i++) {
+        int length = stringArray.length;
+        int[] intArray = new int[length];
+        for (int i = 0; i < length; i++) {
             intArray[i] = MathUtil.parseInt(stringArray[i]);
         }
         return intArray;
     }
 
-    public static Set<Integer> toSet(final int[] array) {
+    public static Integer[] toIntegerArray(int[] intArray) {
+        if (intArray == null) {
+            return null;
+        }
+        int length = intArray.length;
+        Integer[] integerArray = new Integer[length];
+        for (int i = 0; i < length; i++) {
+            integerArray[i] = intArray[i];
+        }
+        return integerArray;
+    }
+
+    public static Long[] toLongArray(long[] longArray) {
+        if (longArray == null) {
+            return null;
+        }
+        int length = longArray.length;
+        Long[] result = new Long[length];
+        for (int i = 0; i < length; i++) {
+            result[i] = longArray[i];
+        }
+        return result;
+    }
+
+    public static Set<Integer> toSet(int[] array) {
         if (array == null) {
             return null;
         }
-        final Set<Integer> set = new HashSet<>();
-        for (final int i : array) {
+        Set<Integer> set = new HashSet<>();
+        for (int i : array) {
             set.add(i);
         }
         return set;
     }
 
-    public static Set<Long> toSet(final long[] array) {
+    public static Set<Long> toSet(long[] array) {
         if (array == null) {
             return null;
         }
-        final Set<Long> set = new HashSet<>();
-        for (final long l : array) {
+        Set<Long> set = new HashSet<>();
+        for (long l : array) {
             set.add(l);
         }
         return set;
     }
 
-    public static <T> Set<T> toSet(final T[] array) {
+    public static <T> Set<T> toSet(T[] array) {
         if (array == null) {
             return null;
         }
-        final Set<T> set = new HashSet<>();
-        for (final T obj : array) {
+        Set<T> set = new HashSet<>();
+        for (T obj : array) {
             set.add(obj);
         }
         return set;
     }
 
-    public static List<Integer> toList(final int[] array) {
+    public static List<Integer> toList(int[] array) {
         if (array == null) {
             return null;
         }
-        final List<Integer> list = new ArrayList<>();
-        for (final int i : array) {
+        List<Integer> list = new ArrayList<>();
+        for (int i : array) {
             list.add(i);
         }
         return list;
     }
 
-    public static List<Long> toList(final long[] array) {
+    public static List<Long> toList(long[] array) {
         if (array == null) {
             return null;
         }
-        final List<Long> list = new ArrayList<>();
-        for (final long i : array) {
+        List<Long> list = new ArrayList<>();
+        for (long i : array) {
             list.add(i);
         }
         return list;
     }
 
-    public static <T> List<T> toList(final T[] array) {
+    public static <T> List<T> toList(T[] array) {
         if (array == null) {
             return null;
         }
-        final List<T> list = new ArrayList<>();
-        for (final T obj : array) {
+        List<T> list = new ArrayList<>();
+        for (T obj : array) {
             list.add(obj);
         }
         return list;
     }
 
-    public static void toLowerCase(final String[] array) {
+    public static void toLowerCase(String[] array) {
         if (array != null) {
             for (int i = 0; i < array.length; i++) {
                 if (array[i] != null) {
@@ -163,7 +178,7 @@ public class ArrayUtil {
         }
     }
 
-    public static void toUpperCase(final String[] array) {
+    public static void toUpperCase(String[] array) {
         if (array != null) {
             for (int i = 0; i < array.length; i++) {
                 if (array[i] != null) {
@@ -173,7 +188,7 @@ public class ArrayUtil {
         }
     }
 
-    public static void trim(final String[] array) {
+    public static void trim(String[] array) {
         if (array != null) {
             for (int i = 0; i < array.length; i++) {
                 if (array[i] != null) {

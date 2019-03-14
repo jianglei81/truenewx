@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
+import org.truenewx.core.util.ArrayUtil;
 import org.truenewx.data.query.Comparison;
 import org.truenewx.data.query.QueryOrder;
 
@@ -24,8 +25,7 @@ public class OqlUtil {
      * 根据指定查询排序序列构建order by子句<br/>
      * 如果无排序设置，则返回""，否则返回以空格开头的形如：" order by ..."的order by子句
      *
-     * @param orders
-     *            查询排序序列
+     * @param orders 查询排序序列
      * @return order by子句
      */
     public static String buildOrderString(Iterable<Entry<String, Boolean>> orders) {
@@ -66,14 +66,10 @@ public class OqlUtil {
     /**
      * 构建OR条件子句
      *
-     * @param params
-     *            查询参数映射集，相关查询参数会写入该映射集中
-     * @param fieldName
-     *            字段名
-     * @param fieldParamValues
-     *            字段参数值
-     * @param comparison
-     *            条件比较符
+     * @param params           查询参数映射集，相关查询参数会写入该映射集中
+     * @param fieldName        字段名
+     * @param fieldParamValues 字段参数值
+     * @param comparison       条件比较符
      * @return OR条件子句
      *
      * @author jianglei
@@ -129,14 +125,10 @@ public class OqlUtil {
     /**
      * 构建OR条件子句
      *
-     * @param params
-     *            查询参数映射集，相关查询参数会写入该映射集中
-     * @param fieldName
-     *            字段名
-     * @param fieldParamValues
-     *            字段参数值
-     * @param comparison
-     *            条件比较符
+     * @param params           查询参数映射集，相关查询参数会写入该映射集中
+     * @param fieldName        字段名
+     * @param fieldParamValues 字段参数值
+     * @param comparison       条件比较符
      * @return OR条件子句
      *
      * @author jianglei
@@ -189,13 +181,23 @@ public class OqlUtil {
         return condition.toString();
     }
 
+    public static String buildOrConditionString(Map<String, Object> params, String fieldName,
+            int[] fieldParamValues, Comparison comparison) {
+        return buildOrConditionString(params, fieldName, ArrayUtil.toIntegerArray(fieldParamValues),
+                comparison);
+    }
+
+    public static String buildOrConditionString(Map<String, Object> params, String fieldName,
+            long[] fieldParamValues, Comparison comparison) {
+        return buildOrConditionString(params, fieldName, ArrayUtil.toLongArray(fieldParamValues),
+                comparison);
+    }
+
     /**
      * 构建指定字段的为null条件子句
      *
-     * @param fieldName
-     *            字段名
-     * @param ifNull
-     *            是否为null，其值本身为null表示忽略该字段条件
+     * @param fieldName 字段名
+     * @param ifNull    是否为null，其值本身为null表示忽略该字段条件
      * @return 条件子句
      */
     public static String buildNullConditionString(String fieldName, Boolean ifNull) {
