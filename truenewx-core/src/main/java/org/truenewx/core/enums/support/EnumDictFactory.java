@@ -63,13 +63,13 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     }
 
     @Override
-    public EnumType getEnumType(final String type, final Locale locale) {
+    public EnumType getEnumType(String type, Locale locale) {
         return getEnumType(type, null, locale);
     }
 
     @Override
-    public EnumType getEnumType(final String type, final String subtype, final Locale locale) {
-        final EnumDict dict = getEnumDict(locale);
+    public EnumType getEnumType(String type, String subtype, Locale locale) {
+        EnumDict dict = getEnumDict(locale);
         EnumType result = dict.getType(type, subtype);
         if (result == null) { // 枚举字典里没有该枚举类型，则尝试构建枚举类型
             result = buildEnumType(type, subtype, locale);
@@ -79,11 +79,10 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     }
 
     @Override
-    public String getText(final String type, final String subtype, final String key,
-            final Locale locale, final String... keys) {
-        final EnumType enumType = getEnumType(type, subtype, locale);
+    public String getText(String type, String subtype, String key, Locale locale, String... keys) {
+        EnumType enumType = getEnumType(type, subtype, locale);
         if (enumType != null) { // 尝试构建不成功时item可能为null
-            final EnumItem item = enumType.getItem(key, keys);
+            EnumItem item = enumType.getItem(key, keys);
             if (item != null) {
                 return item.getCaption();
             }
@@ -92,15 +91,14 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     }
 
     @Override
-    public String getText(final String type, final String key, final Locale locale,
-            final String... keys) {
+    public String getText(String type, String key, Locale locale, String... keys) {
         return getText(type, null, key, locale, keys);
     }
 
     @Override
-    public String getText(final Enum<?> enumConstant, final Locale locale) {
-        final Class<?> enumClass = enumConstant.getClass();
-        final String typeName = FuncBuildDefaultEnumType.INSTANCE.getEnumTypeName(enumClass);
+    public String getText(Enum<?> enumConstant, Locale locale) {
+        Class<?> enumClass = enumConstant.getClass();
+        String typeName = FuncBuildDefaultEnumType.INSTANCE.getEnumTypeName(enumClass);
         return getText(typeName, enumConstant.name(), locale);
     }
 
@@ -116,21 +114,20 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
      * @return 枚举类型
      */
     @SuppressWarnings("unchecked")
-    private EnumType buildEnumType(final String type, final String subtype, Locale locale) {
-        final Locale defaultLocale = Locale.getDefault();
+    private EnumType buildEnumType(String type, String subtype, Locale locale) {
         if (locale == null) {
-            locale = defaultLocale;
+            locale = Locale.getDefault();
         }
         try {
-            final Class<?> clazz;
+            Class<?> clazz;
             if (BOOLEAN_ENUM_TYPE.equalsIgnoreCase(type)) {
                 clazz = BooleanEnum.class;
             } else {
                 clazz = this.resourcePatternResolver.getClassLoader().loadClass(type);
             }
             if (clazz.isEnum()) { // 忽略非枚举
-                final Class<Enum<?>> enumClass = (Class<Enum<?>>) clazz;
-                final SAXReader reader = new SAXReader();
+                Class<Enum<?>> enumClass = (Class<Enum<?>>) clazz;
+                SAXReader reader = new SAXReader();
                 // 依次尝试从各级国际化配置文件中取枚举类型
                 EnumType enumType = readEnumType(reader, enumClass, subtype, locale);
                 // 配置文件中没有，且没有指定子类型，且为默认区域，则从枚举类中构建默认枚举类型
@@ -141,13 +138,12 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
             } else {
                 this.logger.warn("{} is not an enum class, so didn't build from it", type);
             }
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             // type如果不是一个有效的类名，则尝试从枚举配置文件中构建
-            final SAXReader reader = new SAXReader();
-            final String basename = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "META-INF/"
+            SAXReader reader = new SAXReader();
+            String basename = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "META-INF/"
                     + EnumDictFactory.CONFIG_FILE_BASE_NAME;
-            final Resource resource = IOUtil.findI18nResource(basename, locale,
-                    CONFIG_FILE_EXTENSION);
+            Resource resource = IOUtil.findI18nResource(basename, locale, CONFIG_FILE_EXTENSION);
             return readEnumType(reader, resource, type, subtype);
         }
         return null;
@@ -166,8 +162,8 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
      *            区域
      * @return 枚举类型
      */
-    private EnumType readEnumType(final SAXReader reader, final Class<Enum<?>> enumClass,
-            final String subtype, final Locale locale) {
+    private EnumType readEnumType(SAXReader reader, Class<Enum<?>> enumClass, String subtype,
+            Locale locale) {
         String basename = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + ClassUtils
                 .addResourcePathToPackagePath(enumClass, EnumDictFactory.CONFIG_FILE_BASE_NAME);
         Resource resource = IOUtil.findI18nResource(basename, locale, CONFIG_FILE_EXTENSION);
@@ -198,24 +194,24 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
      *            枚举子类型名
      * @return 枚举类型
      */
-    private EnumType readEnumType(final SAXReader reader, final Resource resource,
-            final String type, final String subtype) {
+    private EnumType readEnumType(SAXReader reader, Resource resource, String type,
+            String subtype) {
         if (resource != null) {
             try {
-                final Document doc = reader.read(resource.getInputStream());
+                Document doc = reader.read(resource.getInputStream());
                 @SuppressWarnings("unchecked")
-                final List<Element> typeElements = doc.getRootElement().elements("type");
-                for (final Element typeElement : typeElements) {
-                    final String typeName = typeElement.attributeValue("name");
-                    final String typeSubname = typeElement.attributeValue("subname");
+                List<Element> typeElements = doc.getRootElement().elements("type");
+                for (Element typeElement : typeElements) {
+                    String typeName = typeElement.attributeValue("name");
+                    String typeSubname = typeElement.attributeValue("subname");
                     if (type.equals(typeName) && StringUtils.equals(subtype, typeSubname)) {
-                        final String typeCaption = typeElement.attributeValue("caption");
-                        final EnumType enumType = new EnumType(typeName, typeSubname, typeCaption);
+                        String typeCaption = typeElement.attributeValue("caption");
+                        EnumType enumType = new EnumType(typeName, typeSubname, typeCaption);
                         addEnumItemsToEnumType(enumType, typeElement);
                         return enumType;
                     }
                 }
-            } catch (final DocumentException | IOException e) {
+            } catch (DocumentException | IOException e) {
                 this.logger.error(e.getMessage(), e);
             }
         }
@@ -223,13 +219,13 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     }
 
     @SuppressWarnings("unchecked")
-    private void addEnumItemsToEnumType(final EnumType enumSubType, final Element typeElement) {
-        final List<Element> itemElements = typeElement.elements("item");
+    private void addEnumItemsToEnumType(EnumType enumSubType, Element typeElement) {
+        List<Element> itemElements = typeElement.elements("item");
         for (int i = 0; i < itemElements.size(); i++) {
-            final Element itemElement = itemElements.get(i);
-            final String key = itemElement.attributeValue("key");
-            final String caption = itemElement.attributeValue("caption");
-            final EnumItem item = new EnumItem(i, key, caption);
+            Element itemElement = itemElements.get(i);
+            String key = itemElement.attributeValue("key");
+            String caption = itemElement.attributeValue("caption");
+            EnumItem item = new EnumItem(i, key, caption);
             addChildrenToItem(itemElement, item);
             enumSubType.addItem(item);
         }
@@ -244,13 +240,13 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
      *            枚举项
      */
     @SuppressWarnings("unchecked")
-    private void addChildrenToItem(final Element itemElement, final EnumItem item) {
-        final List<Element> childElements = itemElement.elements("item");
+    private void addChildrenToItem(Element itemElement, EnumItem item) {
+        List<Element> childElements = itemElement.elements("item");
         for (int i = 0; i < childElements.size(); i++) {
-            final Element childElement = childElements.get(i);
-            final String key = childElement.attributeValue("key");
-            final String caption = childElement.attributeValue("caption");
-            final EnumItem child = new EnumItem(i, key, caption);
+            Element childElement = childElements.get(i);
+            String key = childElement.attributeValue("key");
+            String caption = childElement.attributeValue("caption");
+            EnumItem child = new EnumItem(i, key, caption);
             addChildrenToItem(childElement, child);
             item.addChild(child);
         }
@@ -264,31 +260,29 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
      * @throws IOException
      *             如果配置文件读取出错
      */
-    public void setLocationPattern(final String locationPattern) throws IOException {
-        final String[] locations = locationPattern.split(Strings.COMMA);
-        final SAXReader reader = new SAXReader();
-        for (final String location : locations) {
-            final Resource[] resources = this.resourcePatternResolver.getResources(location);
-            for (final Resource resource : resources) {
+    public void setLocationPattern(String locationPattern) throws IOException {
+        String[] locations = locationPattern.split(Strings.COMMA);
+        SAXReader reader = new SAXReader();
+        for (String location : locations) {
+            Resource[] resources = this.resourcePatternResolver.getResources(location);
+            for (Resource resource : resources) {
                 if (resource.exists()) {
                     try {
-                        final Document doc = reader.read(resource.getInputStream());
+                        Document doc = reader.read(resource.getInputStream());
                         @SuppressWarnings("unchecked")
-                        final List<Element> typeElements = doc.getRootElement().elements("type");
-                        final String resourceName = FilenameUtils
-                                .getBaseName(resource.getFilename());
-                        final Locale locale = getLocale(resourceName);
-                        final EnumDict dict = getEnumDict(locale);
-                        for (final Element typeElement : typeElements) {
-                            final String typeName = typeElement.attributeValue("name");
-                            final String typeSubname = typeElement.attributeValue("subname");
-                            final String typeCaption = typeElement.attributeValue("caption");
-                            final EnumType enumType = new EnumType(typeName, typeSubname,
-                                    typeCaption);
+                        List<Element> typeElements = doc.getRootElement().elements("type");
+                        String resourceName = FilenameUtils.getBaseName(resource.getFilename());
+                        Locale locale = getLocale(resourceName);
+                        EnumDict dict = getEnumDict(locale);
+                        for (Element typeElement : typeElements) {
+                            String typeName = typeElement.attributeValue("name");
+                            String typeSubname = typeElement.attributeValue("subname");
+                            String typeCaption = typeElement.attributeValue("caption");
+                            EnumType enumType = new EnumType(typeName, typeSubname, typeCaption);
                             addEnumItemsToEnumType(enumType, typeElement);
                             dict.addType(enumType);
                         }
-                    } catch (final DocumentException | IOException e) {
+                    } catch (DocumentException | IOException e) {
                         this.logger.error(e.getMessage(), e);
                     } // 单个配置文件异常不影响对其它配置文件的读取
                 }
@@ -303,10 +297,10 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
      *            资源
      * @return 区域
      */
-    private Locale getLocale(final String resourceName) {
+    private Locale getLocale(String resourceName) {
         // 根据资源名称确定区域，要求资源名称以类似_zh_CN样式结尾，且有其它开头
-        final String[] names = resourceName.split(Strings.UNDERLINE);
-        final int length = names.length;
+        String[] names = resourceName.split(Strings.UNDERLINE);
+        int length = names.length;
         if (length > 2) { // 含有至少两个下划线，含有语言和国别
             return new Locale(names[length - 2], names[length - 1]);
         } else if (length == 2) { // 含一个下划线，含有语言
@@ -317,12 +311,12 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     }
 
     @Override
-    public void afterInitialized(final ApplicationContext context) throws Exception {
+    public void afterInitialized(ApplicationContext context) throws Exception {
         // 从Spring容器中找出所有EnumType，加入对应区域的枚举字典中
-        final Map<String, EnumType> enumTypeMap = context.getBeansOfType(EnumType.class);
-        for (final Entry<String, EnumType> entry : enumTypeMap.entrySet()) {
-            final Locale locale = getLocale(entry.getKey());
-            final EnumDict dict = getEnumDict(locale);
+        Map<String, EnumType> enumTypeMap = context.getBeansOfType(EnumType.class);
+        for (Entry<String, EnumType> entry : enumTypeMap.entrySet()) {
+            Locale locale = getLocale(entry.getKey());
+            EnumDict dict = getEnumDict(locale);
             dict.addType(entry.getValue());
         }
     }
