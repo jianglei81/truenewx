@@ -27,8 +27,8 @@ public class StringArrayMapType extends ArrayMapType {
             SharedSessionContractImplementor session, Object owner)
             throws HibernateException, SQLException {
         String value = rs.getString(names[0]);
-        if (StringUtils.isNotBlank(value)) {
-            return value.split(Strings.COMMA);
+        if (value != null) {
+            return StringUtils.split(value, (Strings.COMMA));
         }
         return null;
     }

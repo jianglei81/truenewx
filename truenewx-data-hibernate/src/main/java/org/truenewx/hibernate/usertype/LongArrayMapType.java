@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.truenewx.core.Strings;
@@ -24,13 +25,13 @@ public class LongArrayMapType extends ArrayMapType {
     }
 
     @Override
-    public Object nullSafeGet(final ResultSet rs, final String[] names,
-                    final SharedSessionContractImplementor session, final Object owner)
-                    throws HibernateException, SQLException {
-        final String value = rs.getString(names[0]);
+    public Object nullSafeGet(ResultSet rs, String[] names,
+            SharedSessionContractImplementor session, Object owner)
+            throws HibernateException, SQLException {
+        String value = rs.getString(names[0]);
         if (value != null) {
-            final String[] array = value.split(Strings.COMMA);
-            final long[] result = new long[array.length];
+            String[] array = StringUtils.split(value, (Strings.COMMA));
+            long[] result = new long[array.length];
             for (int i = 0; i < array.length; i++) {
                 result[i] = MathUtil.parseLong(array[i]);
             }
@@ -40,10 +41,10 @@ public class LongArrayMapType extends ArrayMapType {
     }
 
     @Override
-    public void nullSafeSet(final PreparedStatement st, final Object value, final int index,
-                    final SharedSessionContractImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Object value, int index,
+            SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value != null) {
-            final long[] array = (long[]) value;
+            long[] array = (long[]) value;
             if (this.size > 0 && array.length > this.size) {
                 throw getSizeException();
             }
@@ -54,12 +55,12 @@ public class LongArrayMapType extends ArrayMapType {
     }
 
     @Override
-    public Object deepCopy(final Object value) throws HibernateException {
+    public Object deepCopy(Object value) throws HibernateException {
         if (value == null) {
             return null;
         }
-        final long[] array = (long[]) value;
-        final long[] result = new long[array.length];
+        long[] array = (long[]) value;
+        long[] result = new long[array.length];
         System.arraycopy(array, 0, result, 0, array.length);
         return result;
     }

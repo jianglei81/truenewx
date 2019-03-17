@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.truenewx.core.Strings;
@@ -27,9 +28,9 @@ public class DateArrayMapType extends ArrayMapType {
     private FuncFormatDate funcFormatDate;
 
     @Override
-    public void setParameterValues(final Properties parameters) {
+    public void setParameterValues(Properties parameters) {
         super.setParameterValues(parameters);
-        final String pattern = parameters.getProperty("pattern", DateUtil.LONG_DATE_PATTERN);
+        String pattern = parameters.getProperty("pattern", DateUtil.LONG_DATE_PATTERN);
         this.funcParseDate = new FuncParseDate(pattern);
         this.funcFormatDate = new FuncFormatDate(pattern);
     }
@@ -40,13 +41,13 @@ public class DateArrayMapType extends ArrayMapType {
     }
 
     @Override
-    public Object nullSafeGet(final ResultSet rs, final String[] names,
-            final SharedSessionContractImplementor session, final Object owner)
+    public Object nullSafeGet(ResultSet rs, String[] names,
+            SharedSessionContractImplementor session, Object owner)
             throws HibernateException, SQLException {
-        final String value = rs.getString(names[0]);
+        String value = rs.getString(names[0]);
         if (value != null) {
-            final String[] array = value.split(Strings.COMMA);
-            final Date[] result = new Date[array.length];
+            String[] array = StringUtils.split(value, (Strings.COMMA));
+            Date[] result = new Date[array.length];
             for (int i = 0; i < array.length; i++) {
                 result[i] = DateUtil.parse(array[i], this.funcFormatDate.getPattern());
             }
@@ -56,11 +57,10 @@ public class DateArrayMapType extends ArrayMapType {
     }
 
     @Override
-    public void nullSafeSet(final PreparedStatement st, final Object value, final int index,
-            final SharedSessionContractImplementor session)
-            throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Object value, int index,
+            SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value != null) {
-            final Date[] array = (Date[]) value;
+            Date[] array = (Date[]) value;
             if (this.size > 0 && array.length > this.size) {
                 throw getSizeException();
             }
