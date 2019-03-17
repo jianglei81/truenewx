@@ -46,7 +46,7 @@ public class DateArrayMapType extends ArrayMapType {
             throws HibernateException, SQLException {
         String value = rs.getString(names[0]);
         if (value != null) {
-            String[] array = StringUtils.split(value, (Strings.COMMA));
+            String[] array = StringUtils.split(value, Strings.COMMA);
             Date[] result = new Date[array.length];
             for (int i = 0; i < array.length; i++) {
                 result[i] = DateUtil.parse(array[i], this.funcFormatDate.getPattern());

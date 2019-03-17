@@ -30,7 +30,7 @@ public class IntArrayMapType extends ArrayMapType {
             throws HibernateException, SQLException {
         String value = rs.getString(names[0]);
         if (value != null) {
-            String[] array = StringUtils.split(value, (Strings.COMMA));
+            String[] array = StringUtils.split(value, Strings.COMMA);
             int[] result = new int[array.length];
             for (int i = 0; i < array.length; i++) {
                 result[i] = MathUtil.parseInt(array[i]);

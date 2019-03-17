@@ -28,7 +28,7 @@ public class StringArrayMapType extends ArrayMapType {
             throws HibernateException, SQLException {
         String value = rs.getString(names[0]);
         if (value != null) {
-            return StringUtils.split(value, (Strings.COMMA));
+            return StringUtils.split(value, Strings.COMMA);
         }
         return null;
     }

@@ -30,7 +30,7 @@ public class LongArrayMapType extends ArrayMapType {
             throws HibernateException, SQLException {
         String value = rs.getString(names[0]);
         if (value != null) {
-            String[] array = StringUtils.split(value, (Strings.COMMA));
+            String[] array = StringUtils.split(value, Strings.COMMA);
             long[] result = new long[array.length];
             for (int i = 0; i < array.length; i++) {
                 result[i] = MathUtil.parseLong(array[i]);
