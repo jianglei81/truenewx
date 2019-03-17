@@ -2,7 +2,7 @@ package org.truenewx.data.query;
 
 /**
  * 比较操作符
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -10,51 +10,61 @@ public enum Comparison {
     /**
      * 等于
      */
-    EQUAL,
+    EQUAL(false),
     /**
      * 不等于
      */
-    NOT_EQUAL,
+    NOT_EQUAL(true),
     /**
      * like
      */
-    LIKE,
+    LIKE(false),
     /**
      * not like
      */
-    NOT_LIKE,
+    NOT_LIKE(true),
     /**
      * in
      */
-    IN,
+    IN(false),
     /**
      * not in
      */
-    NOT_IN,
+    NOT_IN(true),
     /**
      * 大于
      */
-    GREATER,
+    GREATER(false),
     /**
      * 大于等于
      */
-    GREATER_EQUAL,
+    GREATER_EQUAL(false),
     /**
      * 小于
      */
-    LESS,
+    LESS(false),
     /**
      * 小于等于
      */
-    LESS_EQUAL,
+    LESS_EQUAL(false),
     /**
      * 为空
      */
-    IS_NULL,
+    IS_NULL(false),
     /**
      * 不为空
      */
-    NOT_NULL;
+    NOT_NULL(true);
+
+    private Comparison(boolean not) {
+        this.not = not;
+    }
+
+    private boolean not;
+
+    public boolean isNot() {
+        return this.not;
+    }
 
     /**
      * @return 是否一元比较符
@@ -72,7 +82,7 @@ public enum Comparison {
 
     /**
      * 获取在查询语言中的字符串形式.
-     * 
+     *
      * @return 在查询语言中的字符串形式
      */
     public String toQlString() {

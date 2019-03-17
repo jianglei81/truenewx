@@ -82,7 +82,7 @@ public class OqlUtil {
                 comparison = Comparison.EQUAL;
             }
             // 等于和不等于在参数个数大于5后使用IN/NOT IN代替
-            if ((comparison != Comparison.EQUAL || comparison != Comparison.NOT_EQUAL)
+            if ((comparison == Comparison.EQUAL || comparison == Comparison.NOT_EQUAL)
                     && fieldParamValues.size() > 5) {
                 condition.append(fieldName);
                 if (comparison == Comparison.EQUAL) {
@@ -95,7 +95,7 @@ public class OqlUtil {
                         .append(Strings.RIGHT_BRACKET);
                 params.put(paramName, fieldParamValues);
             } else {
-                String junction = " or ";
+                String junction = comparison.isNot() ? " and " : " or ";
                 int i = 0;
                 for (Object fieldParamValue : fieldParamValues) {
                     condition.append(junction).append(fieldName);
@@ -154,7 +154,7 @@ public class OqlUtil {
                         .append(Strings.RIGHT_BRACKET);
                 params.put(paramName, fieldParamValues);
             } else {
-                String junction = " or ";
+                String junction = comparison.isNot() ? " and " : " or ";
                 int i = 0;
                 for (Object fieldParamValue : fieldParamValues) {
                     condition.append(junction).append(fieldName);
