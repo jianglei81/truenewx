@@ -105,12 +105,9 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 构建指定枚举类型，包括其所有子类型
      *
-     * @param type
-     *            枚举类型名称
-     * @param subtype
-     *            子枚举类型名称
-     * @param locale
-     *            地区
+     * @param type    枚举类型名称
+     * @param subtype 子枚举类型名称
+     * @param locale  地区
      * @return 枚举类型
      */
     @SuppressWarnings("unchecked")
@@ -152,14 +149,10 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 从指定枚举类对应的区域配置文件中读取内容并构建枚举类型
      *
-     * @param reader
-     *            XML读取器
-     * @param enumClass
-     *            枚举类
-     * @param subtype
-     *            枚举子类型名
-     * @param locale
-     *            区域
+     * @param reader    XML读取器
+     * @param enumClass 枚举类
+     * @param subtype   枚举子类型名
+     * @param locale    区域
      * @return 枚举类型
      */
     private EnumType readEnumType(SAXReader reader, Class<Enum<?>> enumClass, String subtype,
@@ -184,14 +177,10 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
      * 从指定文件中读取内容并构建枚举类型<br/>
      * 如果指定配置文件不存在，或文件中没有指定的枚举类型，则返回null
      *
-     * @param reader
-     *            XML读取器
-     * @param resource
-     *            配置文件
-     * @param type
-     *            枚举类型名
-     * @param subtype
-     *            枚举子类型名
+     * @param reader   XML读取器
+     * @param resource 配置文件
+     * @param type     枚举类型名
+     * @param subtype  枚举子类型名
      * @return 枚举类型
      */
     private EnumType readEnumType(SAXReader reader, Resource resource, String type,
@@ -207,7 +196,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
                     if (type.equals(typeName) && StringUtils.equals(subtype, typeSubname)) {
                         String typeCaption = typeElement.attributeValue("caption");
                         EnumType enumType = new EnumType(typeName, typeSubname, typeCaption);
-                        addEnumItemsToEnumType(enumType, typeElement);
+                        addEnumItemsToEnumType(typeElement, enumType);
                         return enumType;
                     }
                 }
@@ -219,46 +208,44 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     }
 
     @SuppressWarnings("unchecked")
-    private void addEnumItemsToEnumType(EnumType enumSubType, Element typeElement) {
+    private void addEnumItemsToEnumType(Element typeElement, EnumType enumType) {
         List<Element> itemElements = typeElement.elements("item");
         for (int i = 0; i < itemElements.size(); i++) {
             Element itemElement = itemElements.get(i);
-            String key = itemElement.attributeValue("key");
-            String caption = itemElement.attributeValue("caption");
-            EnumItem item = new EnumItem(i, key, caption);
-            addChildrenToItem(itemElement, item);
-            enumSubType.addItem(item);
+            EnumItem item = buildEnumItem(itemElement, i);
+            enumType.addItem(item);
         }
+    }
+
+    private EnumItem buildEnumItem(Element itemElement, int ordinal) {
+        String key = itemElement.attributeValue("key");
+        String caption = itemElement.attributeValue("caption");
+        EnumItem item = new EnumItem(ordinal, key, caption);
+        addChildrenToEnumItem(itemElement, item);
+        return item;
     }
 
     /**
      * 解析指定枚举项元素中的子枚举项加入指定枚举项中
      *
-     * @param itemElement
-     *            枚举项元素
-     * @param item
-     *            枚举项
+     * @param itemElement 枚举项元素
+     * @param enumItem    枚举项
      */
     @SuppressWarnings("unchecked")
-    private void addChildrenToItem(Element itemElement, EnumItem item) {
+    private void addChildrenToEnumItem(Element itemElement, EnumItem enumItem) {
         List<Element> childElements = itemElement.elements("item");
         for (int i = 0; i < childElements.size(); i++) {
             Element childElement = childElements.get(i);
-            String key = childElement.attributeValue("key");
-            String caption = childElement.attributeValue("caption");
-            EnumItem child = new EnumItem(i, key, caption);
-            addChildrenToItem(childElement, child);
-            item.addChild(child);
+            EnumItem child = buildEnumItem(childElement, i);
+            enumItem.addChild(child);
         }
     }
 
     /**
      * 设置配置文件路径样式
      *
-     * @param locationPattern
-     *            配置文件路径样式，可用逗号分隔多个
-     * @throws IOException
-     *             如果配置文件读取出错
+     * @param locationPattern 配置文件路径样式，可用逗号分隔多个
+     * @throws IOException 如果配置文件读取出错
      */
     public void setLocationPattern(String locationPattern) throws IOException {
         String[] locations = locationPattern.split(Strings.COMMA);
@@ -279,7 +266,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
                             String typeSubname = typeElement.attributeValue("subname");
                             String typeCaption = typeElement.attributeValue("caption");
                             EnumType enumType = new EnumType(typeName, typeSubname, typeCaption);
-                            addEnumItemsToEnumType(enumType, typeElement);
+                            addEnumItemsToEnumType(typeElement, enumType);
                             dict.addType(enumType);
                         }
                     } catch (DocumentException | IOException e) {
@@ -293,8 +280,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 从资源信息中确定区域
      *
-     * @param resource
-     *            资源
+     * @param resource 资源
      * @return 区域
      */
     private Locale getLocale(String resourceName) {
