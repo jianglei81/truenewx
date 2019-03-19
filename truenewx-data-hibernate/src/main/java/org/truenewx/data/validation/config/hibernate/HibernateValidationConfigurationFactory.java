@@ -17,6 +17,7 @@ import javax.validation.Constraint;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.mapping.Column;
+import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Property;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.beans.BeanUtils;
@@ -104,8 +105,10 @@ public class HibernateValidationConfigurationFactory
     /**
      * 从指定传输模型类对应的实体类中添加校验规则到指定校验配置中
      *
-     * @param configuration  校验配置
-     * @param transportClass 传输模型类
+     * @param configuration
+     *            校验配置
+     * @param transportClass
+     *            传输模型类
      */
     private void addEntityClassRulesFromTransportClass(ValidationConfiguration configuration,
             Class<? extends TransportModel<?>> transportClass) {
@@ -142,13 +145,18 @@ public class HibernateValidationConfigurationFactory
     /**
      * 从指定实体类对应的持久化配置中添加校验规则到指定校验配置中
      *
-     * @param configuration 校验配置
-     * @param entityClass   实体类
+     * @param configuration
+     *            校验配置
+     * @param entityClass
+     *            实体类
      */
     private void addEntityClassRulesFromPersistentConfig(ValidationConfiguration configuration,
             Class<? extends Entity> entityClass) {
-        Iterator<Property> properties = this.sessionFactoryRegistry.getClassProperties(entityClass);
-        if (properties != null) {
+        PersistentClass persistentClass = this.sessionFactoryRegistry
+                .getPersistentClass(entityClass);
+        if (persistentClass != null) {
+            @SuppressWarnings("unchecked")
+            Iterator<Property> properties = persistentClass.getPropertyIterator();
             while (properties.hasNext()) {
                 addRuleByProperty(configuration, entityClass, properties.next(), null);
             }
@@ -158,90 +166,106 @@ public class HibernateValidationConfigurationFactory
     /**
      * 向指定校验设置中添加指定类型中指定属性的规则
      *
-     * @param configuration 校验配置
-     * @param clazz         类型
-     * @param property      属性
-     * @param prefix        属性规则名前缀
+     * @param configuration
+     *            校验配置
+     * @param clazz
+     *            类型
+     * @param property
+     *            属性
+     * @param propertyNamePrefix
+     *            属性名前缀
      */
-    @SuppressWarnings("unchecked")
     private void addRuleByProperty(ValidationConfiguration configuration, Class<?> clazz,
-            Property property, String prefix) {
-        if (StringUtils.isBlank(prefix)) { // 前缀默认为空
-            prefix = Strings.EMPTY;
-        }
+            Property property, String propertyNamePrefix) {
         String propertyName = property.getName();
-        PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(clazz, propertyName);
-        if (pd != null) {
-            Class<?> propertyClass = pd.getPropertyType();
-            // 只处理字符串型、数值、日期型
-            if (CharSequence.class.isAssignableFrom(propertyClass)
-                    || Number.class.isAssignableFrom(propertyClass)
-                    || (propertyClass.isPrimitive() && propertyClass != boolean.class)
-                    || Date.class.isAssignableFrom(propertyClass)
-                    || Temporal.class.isAssignableFrom(propertyClass)) {
-                Iterator<Column> columns = property.getColumnIterator();
-                // 只支持对应且仅对应一个物理字段的
-                if (!columns.hasNext()) {
-                    return;
+        PropertyDescriptor propertyDescriptor = BeanUtils.getPropertyDescriptor(clazz,
+                propertyName);
+        if (propertyDescriptor != null) {
+            addRuleByProperty(configuration, property, propertyDescriptor, propertyNamePrefix);
+        }
+    }
+
+    private void addRuleByProperty(ValidationConfiguration configuration, Property property,
+            PropertyDescriptor propertyDescriptor, String propertyNamePrefix) {
+        if (StringUtils.isBlank(propertyNamePrefix)) { // 前缀默认为空
+            propertyNamePrefix = Strings.EMPTY;
+        }
+        String propertyName = propertyDescriptor.getName();
+        Class<?> propertyClass = propertyDescriptor.getPropertyType();
+        // 只处理字符串型、数值、日期型
+        if (CharSequence.class.isAssignableFrom(propertyClass)
+                || Number.class.isAssignableFrom(propertyClass)
+                || (propertyClass.isPrimitive() && propertyClass != boolean.class)
+                || Date.class.isAssignableFrom(propertyClass)
+                || Temporal.class.isAssignableFrom(propertyClass)) {
+            @SuppressWarnings("unchecked")
+            Iterator<Column> columns = property.getColumnIterator();
+            // 只支持对应且仅对应一个物理字段的
+            if (!columns.hasNext()) {
+                return;
+            }
+            Column column = columns.next();
+            if (columns.hasNext()) {
+                return;
+            }
+            propertyName = propertyNamePrefix + propertyName;
+            if (CharSequence.class.isAssignableFrom(propertyClass)) { // 字符串型
+                int maxLength = column.getLength();
+                if (maxLength > 0) { // 长度大于0才有效
+                    LengthRule rule = new LengthRule();
+                    rule.setMax(maxLength);
+                    configuration.addRule(propertyName, rule);
                 }
-                Column column = columns.next();
-                if (columns.hasNext()) {
-                    return;
+            } else if (Date.class.isAssignableFrom(propertyClass)
+                    || Temporal.class.isAssignableFrom(propertyClass)) { // 日期型
+                if (!column.isNullable()) { // 不允许为null的日期型，添加不允许为空白的约束
+                    configuration.addRule(propertyName, new MarkRule(NotBlank.class));
                 }
-                String ruleName = prefix + propertyName;
-                if (CharSequence.class.isAssignableFrom(propertyClass)) { // 字符串型
-                    int maxLength = column.getLength();
-                    if (maxLength > 0) { // 长度大于0才有效
-                        LengthRule rule = new LengthRule();
-                        rule.setMax(maxLength);
-                        configuration.addRule(ruleName, rule);
-                    }
-                } else if (Date.class.isAssignableFrom(propertyClass)
-                        || Temporal.class.isAssignableFrom(propertyClass)) { // 日期型
-                    if (!column.isNullable()) { // 不允许为null的日期型，添加不允许为空白的约束
-                        configuration.addRule(ruleName, new MarkRule(NotBlank.class));
-                    }
-                } else { // 数值型
-                    if (!column.isNullable()) { // 不允许为null的数值型，添加不允许为空白的约束
-                        configuration.addRule(ruleName, new MarkRule(NotBlank.class));
-                    }
-                    int precision = column.getPrecision();
-                    int scale = column.getScale();
-                    if (propertyClass == long.class || propertyClass == Long.class) {
-                        if (precision > 20) {
-                            precision = 20;
-                        }
-                        scale = 0;
-                    } else if (propertyClass == int.class || propertyClass == Integer.class) {
-                        if (precision > 11) {
-                            precision = 11;
-                        }
-                        scale = 0;
-                    } else if (propertyClass == short.class || propertyClass == Short.class) {
-                        if (precision > 5) {
-                            precision = 5;
-                        }
-                        scale = 0;
-                    } else if (propertyClass == byte.class || propertyClass == Byte.class) {
-                        if (precision > 3) {
-                            precision = 3;
-                        }
-                        scale = 0;
-                    }
-                    if (scale >= 0 && precision > scale) { // 精度大于等于0且长度大于精度才有效，不支持负精度
-                        DecimalRule rule = new DecimalRule();
-                        rule.setPrecision(precision);
-                        rule.setScale(scale);
-                        configuration.addRule(ruleName, rule);
-                    }
+            } else { // 数值型
+                if (!column.isNullable()) { // 不允许为null的数值型，添加不允许为空白的约束
+                    configuration.addRule(propertyName, new MarkRule(NotBlank.class));
                 }
-            } else if (ValueModel.class.isAssignableFrom(propertyClass)) {
-                Iterator<Property> properties = property.getPersistentClass().getPropertyIterator();
-                if (properties != null) {
-                    prefix += propertyName + Strings.DOT;
-                    while (properties.hasNext()) {
-                        addRuleByProperty(configuration, propertyClass, properties.next(), prefix);
+                int precision = column.getPrecision();
+                int scale = column.getScale();
+                if (propertyClass == long.class || propertyClass == Long.class) {
+                    if (precision > 20) {
+                        precision = 20;
                     }
+                    scale = 0;
+                } else if (propertyClass == int.class || propertyClass == Integer.class) {
+                    if (precision > 11) {
+                        precision = 11;
+                    }
+                    scale = 0;
+                } else if (propertyClass == short.class || propertyClass == Short.class) {
+                    if (precision > 5) {
+                        precision = 5;
+                    }
+                    scale = 0;
+                } else if (propertyClass == byte.class || propertyClass == Byte.class) {
+                    if (precision > 3) {
+                        precision = 3;
+                    }
+                    scale = 0;
+                }
+                if (scale >= 0 && precision > scale) { // 精度大于等于0且长度大于精度才有效，不支持负精度
+                    DecimalRule rule = new DecimalRule();
+                    rule.setPrecision(precision);
+                    rule.setScale(scale);
+                    configuration.addRule(propertyName, rule);
+                }
+            }
+        } else if (ValueModel.class.isAssignableFrom(propertyClass)) {
+            PersistentClass persistentClass = property.getPersistentClass();
+            propertyNamePrefix += propertyName + Strings.DOT;
+            PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(propertyClass);
+            for (PropertyDescriptor pd : pds) {
+                // 必须同时有读方法和写方法才视为有效属性
+                if (pd.getReadMethod() != null && pd.getWriteMethod() != null) {
+                    String propertyPath = propertyNamePrefix + pd.getName();
+                    Property referencedProperty = persistentClass
+                            .getReferencedProperty(propertyPath);
+                    addRuleByProperty(configuration, referencedProperty, pd, propertyNamePrefix);
                 }
             }
         }
@@ -250,8 +274,10 @@ public class HibernateValidationConfigurationFactory
     /**
      * 从指定类的校验约束注解中添加校验规则到指定校验配置中
      *
-     * @param configuration 校验配置
-     * @param clazz         类
+     * @param configuration
+     *            校验配置
+     * @param clazz
+     *            类
      */
     private void addRulesByAnnotation(ValidationConfiguration configuration, Class<?> clazz) {
         List<Field> fields = ClassUtil.getSimplePropertyField(clazz);
