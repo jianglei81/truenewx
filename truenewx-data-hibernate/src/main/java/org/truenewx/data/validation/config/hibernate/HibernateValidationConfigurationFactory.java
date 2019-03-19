@@ -23,11 +23,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
+import org.truenewx.core.Strings;
 import org.truenewx.core.spring.beans.ContextInitializedBean;
 import org.truenewx.core.util.ClassUtil;
 import org.truenewx.data.model.Entity;
 import org.truenewx.data.model.Model;
 import org.truenewx.data.model.TransportModel;
+import org.truenewx.data.model.ValueModel;
 import org.truenewx.data.orm.hibernate.LocalSessionFactoryRegistry;
 import org.truenewx.data.validation.config.ValidationConfiguration;
 import org.truenewx.data.validation.config.ValidationConfigurationFactory;
@@ -148,23 +150,27 @@ public class HibernateValidationConfigurationFactory
         Iterator<Property> properties = this.sessionFactoryRegistry.getClassProperties(entityClass);
         if (properties != null) {
             while (properties.hasNext()) {
-                addRuleByProperty(configuration, entityClass, properties.next());
+                addRuleByProperty(configuration, entityClass, properties.next(), null);
             }
         }
     }
 
     /**
-     * 向指定校验设置中添加指定实体类型中指定属性的规则
+     * 向指定校验设置中添加指定类型中指定属性的规则
      *
      * @param configuration 校验配置
-     * @param entityClass   实体类型
+     * @param clazz         类型
      * @param property      属性
+     * @param prefix        属性规则名前缀
      */
     @SuppressWarnings("unchecked")
-    private void addRuleByProperty(ValidationConfiguration configuration,
-            Class<? extends Entity> entityClass, Property property) {
+    private void addRuleByProperty(ValidationConfiguration configuration, Class<?> clazz,
+            Property property, String prefix) {
+        if (StringUtils.isBlank(prefix)) { // 前缀默认为空
+            prefix = Strings.EMPTY;
+        }
         String propertyName = property.getName();
-        PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(entityClass, propertyName);
+        PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(clazz, propertyName);
         if (pd != null) {
             Class<?> propertyClass = pd.getPropertyType();
             // 只处理字符串型、数值、日期型
@@ -182,21 +188,22 @@ public class HibernateValidationConfigurationFactory
                 if (columns.hasNext()) {
                     return;
                 }
+                String ruleName = prefix + propertyName;
                 if (CharSequence.class.isAssignableFrom(propertyClass)) { // 字符串型
                     int maxLength = column.getLength();
                     if (maxLength > 0) { // 长度大于0才有效
                         LengthRule rule = new LengthRule();
                         rule.setMax(maxLength);
-                        configuration.addRule(propertyName, rule);
+                        configuration.addRule(ruleName, rule);
                     }
                 } else if (Date.class.isAssignableFrom(propertyClass)
                         || Temporal.class.isAssignableFrom(propertyClass)) { // 日期型
                     if (!column.isNullable()) { // 不允许为null的日期型，添加不允许为空白的约束
-                        configuration.addRule(propertyName, new MarkRule(NotBlank.class));
+                        configuration.addRule(ruleName, new MarkRule(NotBlank.class));
                     }
                 } else { // 数值型
                     if (!column.isNullable()) { // 不允许为null的数值型，添加不允许为空白的约束
-                        configuration.addRule(propertyName, new MarkRule(NotBlank.class));
+                        configuration.addRule(ruleName, new MarkRule(NotBlank.class));
                     }
                     int precision = column.getPrecision();
                     int scale = column.getScale();
@@ -225,7 +232,15 @@ public class HibernateValidationConfigurationFactory
                         DecimalRule rule = new DecimalRule();
                         rule.setPrecision(precision);
                         rule.setScale(scale);
-                        configuration.addRule(propertyName, rule);
+                        configuration.addRule(ruleName, rule);
+                    }
+                }
+            } else if (ValueModel.class.isAssignableFrom(propertyClass)) {
+                Iterator<Property> properties = property.getPersistentClass().getPropertyIterator();
+                if (properties != null) {
+                    prefix += propertyName + Strings.DOT;
+                    while (properties.hasNext()) {
+                        addRuleByProperty(configuration, propertyClass, properties.next(), prefix);
                     }
                 }
             }
