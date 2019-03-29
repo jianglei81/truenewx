@@ -41,33 +41,28 @@ public class UnityUtil {
      */
     public static <T extends Unity<K>, K extends Serializable> boolean containsId(
             Collection<T> unities, K id) {
-        if (unities != null) {
-            for (Unity<K> unity : unities) {
-                if (unity.getId().equals(id)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return indexOfId(unities, id) >= 0;
     }
 
     /**
-     * 根据单体id比较，判断指定单体集合中是否包含指定单体
+     * 获取指定单体id在指定单体集合中的位置索引下标
      *
      * @param unities 单体集合
-     * @param unity   单体
-     * @return 指定单体集合中是否包含指定单体
+     * @param id      单体id
+     * @return 指定单体id在指定单体集合中的位置索引下标，如果没找到则返回-1
      */
-    public static <T extends Unity<K>, K extends Serializable> boolean containsById(
-            Collection<T> unities, T unity) {
+    public static <T extends Unity<K>, K extends Serializable> int indexOfId(Collection<T> unities,
+            K id) {
         if (unities != null) {
-            for (Unity<K> u : unities) {
-                if (u.getId().equals(unity.getId())) {
-                    return true;
+            int i = 0;
+            for (Unity<K> unity : unities) {
+                if (unity.getId().equals(id)) {
+                    return i;
                 }
+                i++;
             }
         }
-        return false;
+        return -1;
     }
 
     /**
