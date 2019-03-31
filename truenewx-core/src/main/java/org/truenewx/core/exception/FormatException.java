@@ -1,6 +1,8 @@
 package org.truenewx.core.exception;
 
 import org.springframework.util.Assert;
+import org.truenewx.core.functor.impl.FuncHashCode;
+import org.truenewx.core.functor.impl.PredEqual;
 import org.truenewx.core.util.ClassUtil;
 
 /**
@@ -46,5 +48,24 @@ public class FormatException extends SingleException {
         }
         String fullPropertyPath = ClassUtil.getFullPropertyPath(this.beanClass, property);
         return fullPropertyPath.equals(property);
+    }
+
+    @Override
+    public int hashCode() {
+        Object[] array = { this.beanClass, this.violationMessage };
+        return FuncHashCode.INSTANCE.apply(array);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        FormatException other = (FormatException) obj;
+        return PredEqual.INSTANCE.apply(this.beanClass, other.beanClass)
+                && PredEqual.INSTANCE.apply(this.violationMessage, other.violationMessage);
     }
 }

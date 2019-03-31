@@ -1,6 +1,8 @@
 package org.truenewx.core.exception;
 
 import org.apache.commons.lang3.StringUtils;
+import org.truenewx.core.functor.impl.FuncHashCode;
+import org.truenewx.core.functor.impl.PredEqual;
 
 /**
  * 业务异常，可以绑定属性，默认未绑定属性
@@ -32,8 +34,7 @@ public class BusinessException extends SingleException {
     /**
      * 与指定属性绑定
      *
-     * @param property
-     *            绑定的属性
+     * @param property 绑定的属性
      * @return 当前异常对象自身
      */
     public BusinessException bind(final String property) {
@@ -48,6 +49,25 @@ public class BusinessException extends SingleException {
      */
     public boolean isBoundProperty() {
         return StringUtils.isNotBlank(this.property);
+    }
+
+    @Override
+    public int hashCode() {
+        Object[] array = { this.code, this.args };
+        return FuncHashCode.INSTANCE.apply(array);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        BusinessException other = (BusinessException) obj;
+        return PredEqual.INSTANCE.apply(this.code, other.code)
+                && PredEqual.INSTANCE.apply(this.args, other.args);
     }
 
 }
