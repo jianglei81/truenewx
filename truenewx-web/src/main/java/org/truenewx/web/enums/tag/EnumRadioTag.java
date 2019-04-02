@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
+import org.truenewx.core.util.CollectionUtil;
 import org.truenewx.web.enums.tagext.EnumItemTagSupport;
 
 /**
@@ -46,7 +47,20 @@ public class EnumRadioTag extends EnumItemTagSupport {
         if (isCurrentValue(value)) {
             print(" checked=\"checked\"");
         }
-        print("/>", text, Strings.ENTER);
+        print("> ", text, Strings.ENTER);
+    }
+
+    @Override
+    protected boolean isCurrentValue(Object value) {
+        // 当前值为空，则将第一个选项的值视为当前值
+        if (this.value == null
+                || (this.value instanceof String && StringUtils.isBlank((String) this.value))) {
+            Object firstItem = CollectionUtil.get(getItems(), 0);
+            if (firstItem != null) {
+                return getItemValue(firstItem).equals(value);
+            }
+        }
+        return super.isCurrentValue(value);
     }
 
 }

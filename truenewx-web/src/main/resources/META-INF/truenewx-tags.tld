@@ -565,6 +565,7 @@
             <name>id</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
+            <description>无用，待废弃</description>
         </attribute>
         <attribute>
             <name>name</name>

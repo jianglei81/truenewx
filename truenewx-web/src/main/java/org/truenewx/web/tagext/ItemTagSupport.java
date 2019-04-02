@@ -64,6 +64,10 @@ public abstract class ItemTagSupport extends UiTagSupport {
 
     @Override
     public void doTag() throws JspException, IOException {
+        resolveItems(getItems());
+    }
+
+    protected final Iterable<?> getItems() {
         Iterable<?> items = null;
         if (this.items instanceof Map<?, ?>) {
             items = ((Map<?, ?>) this.items).entrySet();
@@ -72,7 +76,7 @@ public abstract class ItemTagSupport extends UiTagSupport {
         } else if (this.items instanceof Object[]) {
             items = Arrays.asList((Object[]) this.items);
         }
-        resolveItems(items);
+        return items;
     }
 
     protected void resolveItems(Iterable<?> items) throws IOException {
