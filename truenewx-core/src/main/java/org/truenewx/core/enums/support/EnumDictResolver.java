@@ -34,4 +34,6 @@ public interface EnumDictResolver extends TextResolver {
      */
     EnumType getEnumType(String type, String subtype, Locale locale);
 
+    EnumItem getEnumItem(Enum<?> enumConstant, Locale locale);
+
 }

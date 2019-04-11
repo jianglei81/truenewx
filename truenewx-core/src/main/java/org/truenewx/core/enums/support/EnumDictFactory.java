@@ -78,16 +78,26 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
         return result;
     }
 
-    @Override
-    public String getText(String type, String subtype, String key, Locale locale, String... keys) {
+    private EnumItem getEnumItem(String type, String subtype, String key, Locale locale,
+            String... keys) {
         EnumType enumType = getEnumType(type, subtype, locale);
         if (enumType != null) { // 尝试构建不成功时item可能为null
-            EnumItem item = enumType.getItem(key, keys);
-            if (item != null) {
-                return item.getCaption();
-            }
+            return enumType.getItem(key, keys);
         }
         return null;
+    }
+
+    @Override
+    public EnumItem getEnumItem(Enum<?> enumConstant, Locale locale) {
+        Class<?> enumClass = enumConstant.getClass();
+        String typeName = FuncBuildDefaultEnumType.INSTANCE.getEnumTypeName(enumClass);
+        return getEnumItem(typeName, null, enumConstant.name(), locale);
+    }
+
+    @Override
+    public String getText(String type, String subtype, String key, Locale locale, String... keys) {
+        EnumItem item = getEnumItem(type, subtype, key, locale, keys);
+        return item == null ? null : item.getCaption();
     }
 
     @Override
@@ -105,9 +115,12 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 构建指定枚举类型，包括其所有子类型
      *
-     * @param type    枚举类型名称
-     * @param subtype 子枚举类型名称
-     * @param locale  地区
+     * @param type
+     *            枚举类型名称
+     * @param subtype
+     *            子枚举类型名称
+     * @param locale
+     *            地区
      * @return 枚举类型
      */
     @SuppressWarnings("unchecked")
@@ -149,10 +162,14 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 从指定枚举类对应的区域配置文件中读取内容并构建枚举类型
      *
-     * @param reader    XML读取器
-     * @param enumClass 枚举类
-     * @param subtype   枚举子类型名
-     * @param locale    区域
+     * @param reader
+     *            XML读取器
+     * @param enumClass
+     *            枚举类
+     * @param subtype
+     *            枚举子类型名
+     * @param locale
+     *            区域
      * @return 枚举类型
      */
     private EnumType readEnumType(SAXReader reader, Class<Enum<?>> enumClass, String subtype,
@@ -177,10 +194,14 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
      * 从指定文件中读取内容并构建枚举类型<br/>
      * 如果指定配置文件不存在，或文件中没有指定的枚举类型，则返回null
      *
-     * @param reader   XML读取器
-     * @param resource 配置文件
-     * @param type     枚举类型名
-     * @param subtype  枚举子类型名
+     * @param reader
+     *            XML读取器
+     * @param resource
+     *            配置文件
+     * @param type
+     *            枚举类型名
+     * @param subtype
+     *            枚举子类型名
      * @return 枚举类型
      */
     private EnumType readEnumType(SAXReader reader, Resource resource, String type,
@@ -228,8 +249,10 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 解析指定枚举项元素中的子枚举项加入指定枚举项中
      *
-     * @param itemElement 枚举项元素
-     * @param enumItem    枚举项
+     * @param itemElement
+     *            枚举项元素
+     * @param enumItem
+     *            枚举项
      */
     @SuppressWarnings("unchecked")
     private void addChildrenToEnumItem(Element itemElement, EnumItem enumItem) {
@@ -244,8 +267,10 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 设置配置文件路径样式
      *
-     * @param locationPattern 配置文件路径样式，可用逗号分隔多个
-     * @throws IOException 如果配置文件读取出错
+     * @param locationPattern
+     *            配置文件路径样式，可用逗号分隔多个
+     * @throws IOException
+     *             如果配置文件读取出错
      */
     public void setLocationPattern(String locationPattern) throws IOException {
         String[] locations = locationPattern.split(Strings.COMMA);
@@ -280,7 +305,8 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 从资源信息中确定区域
      *
-     * @param resource 资源
+     * @param resource
+     *            资源
      * @return 区域
      */
     private Locale getLocale(String resourceName) {
