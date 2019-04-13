@@ -35,12 +35,12 @@ public final class HibernateTemplate extends DataAccessTemplate {
     private boolean sqlMode;
 
     @Autowired(required = false)
-    public void setSessionFactory(final SessionFactory sessionFactory) {
+    public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 
     public HibernateTemplate toSqlMode() {
-        final HibernateTemplate ht = new HibernateTemplate();
+        HibernateTemplate ht = new HibernateTemplate();
         ht.sessionFactory = this.sessionFactory;
         ht.sqlMode = true;
         return ht;
@@ -59,92 +59,89 @@ public final class HibernateTemplate extends DataAccessTemplate {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> Query<T> createQuery(final CharSequence ql) {
-        final Session session = getSession();
+    private <T> Query<T> createQuery(CharSequence hql) {
+        Session session = getSession();
         if (this.sqlMode) {
-            return session.createNativeQuery(ql.toString());
+            return session.createNativeQuery(hql.toString());
         }
-        return session.createQuery(ql.toString());
+        return session.createQuery(hql.toString());
     }
 
     @Override
-    public <T> List<T> list(final CharSequence ql, final String paramName, final Object paramValue,
-            final int pageSize, final int pageNo) {
-        final Query<T> query = createQuery(ql);
+    public <T> List<T> list(CharSequence hql, String paramName, Object paramValue, int pageSize,
+            int pageNo) {
+        Query<T> query = createQuery(hql);
         applyParamToQuery(query, paramName, paramValue);
         applyPagingToQuery(query, pageSize, pageNo, false);
         return query.list();
     }
 
     @Override
-    public <T> List<T> list(final CharSequence ql, final Map<String, ?> params, final int pageSize,
-            final int pageNo) {
-        final Query<T> query = createQuery(ql);
+    public <T> List<T> list(CharSequence hql, Map<String, ?> params, int pageSize, int pageNo) {
+        Query<T> query = createQuery(hql);
         applyParamsToQuery(query, params);
         applyPagingToQuery(query, pageSize, pageNo, false);
         return query.list();
     }
 
     @Override
-    public <T> List<T> list(final CharSequence ql, final List<?> params, final int pageSize,
-            final int pageNo) {
-        final Query<T> query = createQuery(ql);
+    public <T> List<T> list(CharSequence hql, List<?> params, int pageSize, int pageNo) {
+        Query<T> query = createQuery(hql);
         applyParamsToQuery(query, params);
         applyPagingToQuery(query, pageSize, pageNo, false);
         return query.list();
     }
 
     @Override
-    public <T> List<T> listWithOneMore(final CharSequence ql, final String paramName,
-            final Object paramValue, final int pageSize, final int pageNo) {
-        final Query<T> query = createQuery(ql);
+    public <T> List<T> listWithOneMore(CharSequence hql, String paramName, Object paramValue,
+            int pageSize, int pageNo) {
+        Query<T> query = createQuery(hql);
         applyParamToQuery(query, paramName, paramValue);
         applyPagingToQuery(query, pageSize, pageNo, true);
         return query.list();
     }
 
     @Override
-    public <T> List<T> listWithOneMore(final CharSequence ql, final Map<String, ?> params,
-            final int pageSize, final int pageNo) {
-        final Query<T> query = createQuery(ql);
+    public <T> List<T> listWithOneMore(CharSequence hql, Map<String, ?> params, int pageSize,
+            int pageNo) {
+        Query<T> query = createQuery(hql);
         applyParamsToQuery(query, params);
         applyPagingToQuery(query, pageSize, pageNo, true);
         return query.list();
     }
 
     @Override
-    public <T> List<T> listWithOneMore(final CharSequence ql, final List<?> params,
-            final int pageSize, final int pageNo) {
-        final Query<T> query = createQuery(ql);
+    public <T> List<T> listWithOneMore(CharSequence hql, List<?> params, int pageSize, int pageNo) {
+        Query<T> query = createQuery(hql);
         applyParamsToQuery(query, params);
         applyPagingToQuery(query, pageSize, pageNo, true);
         return query.list();
     }
 
     @Override
-    public int update(final CharSequence ul, final String paramName, final Object paramValue) {
-        final Query<?> query = createQuery(ul);
+    public int update(CharSequence hql, String paramName, Object paramValue) {
+        Query<?> query = createQuery(hql);
         applyParamToQuery(query, paramName, paramValue);
         return query.executeUpdate();
     }
 
     @Override
-    public int update(final CharSequence ul, final Map<String, ?> params) {
-        final Query<?> query = createQuery(ul);
+    public int update(CharSequence hql, Map<String, ?> params) {
+        Query<?> query = createQuery(hql);
         applyParamsToQuery(query, params);
         return query.executeUpdate();
     }
 
     @Override
-    public int update(final CharSequence ul, final List<?> params) {
-        final Query<?> query = createQuery(ul);
+    public int update(CharSequence hql, List<?> params) {
+        Query<?> query = createQuery(hql);
         applyParamsToQuery(query, params);
         return query.executeUpdate();
     }
 
-    public void applyParamsToQuery(final Query<?> query, final Map<String, ?> params) {
+    public void applyParamsToQuery(Query<?> query, Map<String, ?> params) {
         if (params != null) {
-            for (final Entry<String, ?> entry : params.entrySet()) {
+            for (Entry<String, ?> entry : params.entrySet()) {
                 applyParamToQuery(query, entry.getKey(), entry.getValue());
             }
         }
@@ -160,26 +157,26 @@ public final class HibernateTemplate extends DataAccessTemplate {
      * @param value
      *            参数值，除常见类型外，还支持Collection、数组、枚举
      */
-    public void applyParamToQuery(final Query<?> query, final String name, final Object value) {
+    public void applyParamToQuery(Query<?> query, String name, Object value) {
         if (value instanceof Collection) {
             query.setParameterList(name, (Collection<?>) value);
         } else if (value instanceof Object[]) { // 对象数组
             query.setParameterList(name, (Object[]) value);
         } else if (value != null) {
-            final Class<? extends Object> clazz = value.getClass();
+            Class<? extends Object> clazz = value.getClass();
             if (clazz.isArray()) { // 基础数据数组
-                final Collection<Object> collection = new ArrayList<>();
-                final int length = Array.getLength(value);
+                Collection<Object> collection = new ArrayList<>();
+                int length = Array.getLength(value);
                 for (int i = 0; i < length; i++) {
                     collection.add(Array.get(value, i));
                 }
                 query.setParameterList(name, collection);
             } else if (clazz.isEnum()) {
-                final Enum<?> enumConstant = (Enum<?>) value;
-                final Field field = Enums.getField(enumConstant);
-                final EnumValue ev = field.getAnnotation(EnumValue.class);
+                Enum<?> enumConstant = (Enum<?>) value;
+                Field field = Enums.getField(enumConstant);
+                EnumValue ev = field.getAnnotation(EnumValue.class);
                 if (ev != null) { // 含有@EnumValue注解的枚举参数值，需通过自定义类型转换
-                    final Properties parameters = new Properties();
+                    Properties parameters = new Properties();
                     parameters.put(EnumValueMapType.PARAMETER_CLASS, clazz.getName());
                     query.setParameter(name, value, customType(EnumValueMapType.class, parameters));
                 }
@@ -191,7 +188,7 @@ public final class HibernateTemplate extends DataAccessTemplate {
         }
     }
 
-    public void applyParamsToQuery(final Query<?> query, final List<?> params) {
+    public void applyParamsToQuery(Query<?> query, List<?> params) {
         if (params != null) {
             for (int i = 0; i < params.size(); i++) {
                 applyParamToQuery(query, i, params.get(i));
@@ -199,15 +196,15 @@ public final class HibernateTemplate extends DataAccessTemplate {
         }
     }
 
-    public void applyParamToQuery(final Query<?> query, final int position, final Object value) {
+    public void applyParamToQuery(Query<?> query, int position, Object value) {
         if (value != null) {
-            final Class<? extends Object> clazz = value.getClass();
+            Class<? extends Object> clazz = value.getClass();
             if (clazz.isEnum()) {
-                final Enum<?> enumConstant = (Enum<?>) value;
-                final Field field = Enums.getField(enumConstant);
-                final EnumValue ev = field.getAnnotation(EnumValue.class);
+                Enum<?> enumConstant = (Enum<?>) value;
+                Field field = Enums.getField(enumConstant);
+                EnumValue ev = field.getAnnotation(EnumValue.class);
                 if (ev != null) { // 含有@EnumValue注解的枚举参数值，需通过自定义类型转换
-                    final Properties parameters = new Properties();
+                    Properties parameters = new Properties();
                     parameters.put(EnumValueMapType.PARAMETER_CLASS, clazz.getName());
                     query.setParameter(position, value,
                             customType(EnumValueMapType.class, parameters));
@@ -220,8 +217,7 @@ public final class HibernateTemplate extends DataAccessTemplate {
         }
     }
 
-    public void applyPagingToQuery(final Query<?> query, final int pageSize, int pageNo,
-            final boolean oneMore) {
+    public void applyPagingToQuery(Query<?> query, int pageSize, int pageNo, boolean oneMore) {
         if (pageSize > 0) { // 用页大小判断是否分页查询
             if (pageNo <= 0) { // 页码最小为1
                 pageNo = 1;
@@ -236,8 +232,8 @@ public final class HibernateTemplate extends DataAccessTemplate {
      *
      * 详见：{@link org.hibernate.TypeHelper#custom(Class, Properties)}
      */
-    public Type customType(final Class<?> userTypeClass, final Properties properties) {
-        final TypeHelper typeHelper = getSessionFactory().getTypeHelper();
+    public Type customType(Class<?> userTypeClass, Properties properties) {
+        TypeHelper typeHelper = getSessionFactory().getTypeHelper();
         return typeHelper.custom(userTypeClass, properties);
     }
 }
