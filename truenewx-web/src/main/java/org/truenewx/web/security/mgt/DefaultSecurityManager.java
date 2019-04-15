@@ -137,9 +137,12 @@ public class DefaultSecurityManager implements SecurityManager, ContextInitializ
                 // 登录用户保存至会话
                 session.setAttribute(realm.getUserSessionName(), loginInfo.getUser());
                 // 保存cookie
-                for (Cookie cookie : loginInfo.getCookies()) {
-                    cookie.setPath(request.getContextPath()); // 统一路径以便于删除
-                    subject.getServletResponse().addCookie(cookie);
+                Iterable<Cookie> cookies = loginInfo.getCookies();
+                if (cookies != null) {
+                    for (Cookie cookie : cookies) {
+                        cookie.setPath(request.getContextPath()); // 统一路径以便于删除
+                        subject.getServletResponse().addCookie(cookie);
+                    }
                 }
             }
         }
