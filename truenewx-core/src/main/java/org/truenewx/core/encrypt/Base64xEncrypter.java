@@ -2,6 +2,8 @@ package org.truenewx.core.encrypt;
 
 import java.util.Random;
 
+import org.truenewx.core.util.EncryptUtil;
+
 public class Base64xEncrypter implements KeyBidirectionalEncrypter {
 
     public final static Base64xEncrypter INSTANCE = new Base64xEncrypter();
@@ -12,7 +14,7 @@ public class Base64xEncrypter implements KeyBidirectionalEncrypter {
     @Override
     public String encrypt(Object source, Object key) {
         String random = String.valueOf(new Random().nextInt(32000));
-        String encryptText = Md5Encrypter.encrypt32(random);
+        String encryptText = EncryptUtil.encryptByMd5(random);
         int j = 0;
         String temp = "";
         char encryptTextArray[] = encryptText.toCharArray();
@@ -26,12 +28,12 @@ public class Base64xEncrypter implements KeyBidirectionalEncrypter {
             char c4 = encryptTextArray[j - 1];
             temp += c4 + "" + c3;
         }
-        return Base64Encrypter.INSTANCE.encrypt(calculate(temp, key));
+        return EncryptUtil.encryptByBase64(calculate(temp, key));
     }
 
     @Override
     public String decrypt(String encryptedText, Object key) {
-        encryptedText = calculate(Base64Encrypter.INSTANCE.decrypt(encryptedText), key);
+        encryptedText = calculate(EncryptUtil.decryptByBase64(encryptedText), key);
         if (encryptedText == null) {
             return null;
         }
@@ -47,7 +49,7 @@ public class Base64xEncrypter implements KeyBidirectionalEncrypter {
         if (text == null) {
             return null;
         }
-        String keyString = Md5Encrypter.encrypt32(key);
+        String keyString = EncryptUtil.encryptByMd5(key);
         int j = 0;
         String temp = "";
         char encryptKeyChar[] = keyString.toCharArray();

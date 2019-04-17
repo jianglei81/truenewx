@@ -1,5 +1,7 @@
 package org.truenewx.core.encrypt;
 
+import org.truenewx.core.util.EncryptUtil;
+
 /**
  * SHA1加密器
  *
@@ -10,7 +12,7 @@ public class Sha1Encrypter implements Encrypter {
 
     @Override
     public String encrypt(Object source) {
-        return EncryptUtil.sha1(source);
+        return EncryptUtil.encryptBySha1(source);
     }
 
 }

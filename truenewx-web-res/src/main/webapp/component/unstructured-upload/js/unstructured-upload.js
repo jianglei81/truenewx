@@ -146,6 +146,9 @@
                         }
                     }
                 }
+                if (_this.options.events.beforeFileQueued) {
+                    return _this.options.events.beforeFileQueued(file);
+                }
                 return true;
             });
 

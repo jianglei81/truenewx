@@ -1,14 +1,6 @@
 package org.truenewx.core.encrypt;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.LoggerFactory;
+import org.truenewx.core.util.EncryptUtil;
 
 /**
  * BASE64可逆算法加密器
@@ -25,29 +17,11 @@ public class Base64Encrypter implements BidirectionalEncrypter {
 
     @Override
     public String encrypt(Object source) {
-        byte[] data;
-        try {
-            if (source instanceof File) {
-                data = FileUtils.readFileToByteArray((File) source);
-            } else if (source instanceof InputStream) {
-                data = IOUtils.toByteArray((InputStream) source);
-            } else if (source instanceof Reader) {
-                data = IOUtils.toByteArray((Reader) source);
-            } else if (source instanceof byte[]) {
-                data = (byte[]) source;
-            } else {
-                data = source.toString().getBytes();
-            }
-        } catch (IOException e) {
-            LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
-            return null;
-        }
-        return Base64.encodeBase64String(data).replaceAll("\n", "");
+        return EncryptUtil.encryptByBase64(source);
     }
 
     @Override
     public String decrypt(String encryptedText) {
-        byte[] bytes = Base64.decodeBase64(encryptedText);
-        return bytes == null ? null : new String(bytes);
+        return EncryptUtil.decryptByBase64(encryptedText);
     }
 }

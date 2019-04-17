@@ -16,7 +16,7 @@ import javax.servlet.jsp.JspException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
-import org.truenewx.core.encrypt.Md5Encrypter;
+import org.truenewx.core.util.EncryptUtil;
 import org.truenewx.core.util.IOUtil;
 import org.truenewx.web.tagext.UiTagSupport;
 
@@ -120,7 +120,7 @@ public class QrCodeTag extends UiTagSupport {
             // 读取保存路径
             final String baseDir = getPageContext().getSession().getServletContext()
                     .getRealPath(IOUtil.FILE_SEPARATOR);
-            final String md5 = Md5Encrypter.encrypt32(this.value);
+            final String md5 = EncryptUtil.encryptByMd5(this.value);
             final String dir = IOUtil.FILE_SEPARATOR + md5.substring(0, 1) + IOUtil.FILE_SEPARATOR
                     + md5.substring(1, 2) + IOUtil.FILE_SEPARATOR + md5.substring(2, 3)
                     + IOUtil.FILE_SEPARATOR;
