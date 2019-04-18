@@ -8,7 +8,7 @@ import org.truenewx.core.spring.beans.ContextInitializedBean;
 
 /**
  * 函数：获取当前profile
- * 
+ *
  * @author jianglei
  * @since JDK 1.8
  */
@@ -23,13 +23,18 @@ public class FuncProfile extends NullaryFunction<String> implements ContextIniti
      */
     public static FuncProfile INSTANCE = null;
 
+    public static String getProfile(ApplicationContext context) {
+        String[] profiles = context.getEnvironment().getActiveProfiles();
+        if (profiles.length > 0) {
+            return profiles[0];
+        }
+        return Strings.EMPTY;
+    }
+
     @Override
-    public void afterInitialized(final ApplicationContext context) throws Exception {
+    public void afterInitialized(ApplicationContext context) throws Exception {
         if (INSTANCE == null) {
-            final String[] profiles = context.getEnvironment().getActiveProfiles();
-            if (profiles.length > 0) {
-                PROFILE = profiles[0];
-            }
+            PROFILE = getProfile(context);
             INSTANCE = context.getBean(FuncProfile.class);
         }
     }
