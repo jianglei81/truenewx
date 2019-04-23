@@ -31,7 +31,7 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
     private Object controller;
     private List<RpcMethodMeta> methodMetas;
 
-    public RpcControllerMeta(final String beanId, final Object controller) {
+    public RpcControllerMeta(String beanId, Object controller) {
         checkNotNull(beanId);
         checkNotNull(controller);
         this.beanId = beanId;
@@ -47,19 +47,18 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
     }
 
     public String getCaption() {
-        final RpcController rpcController = this.controller.getClass()
-                .getAnnotation(RpcController.class);
+        RpcController rpcController = this.controller.getClass().getAnnotation(RpcController.class);
         return rpcController == null ? null : rpcController.caption();
     }
 
     public String getModule() {
-        final Class<?> beanClass = this.controller.getClass();
-        final RpcController rpcController = beanClass.getAnnotation(RpcController.class);
+        Class<?> beanClass = this.controller.getClass();
+        RpcController rpcController = beanClass.getAnnotation(RpcController.class);
         if (rpcController != null) {
             String module = rpcController.module();
             if (StringUtils.isBlank(module)) {
-                final String packageName = beanClass.getPackage().getName();
-                final int index = packageName.indexOf(ROOT_PACKAGE_SUFFIX);
+                String packageName = beanClass.getPackage().getName();
+                int index = packageName.indexOf(ROOT_PACKAGE_SUFFIX);
                 if (index > 0) {
                     module = packageName.substring(index + ROOT_PACKAGE_SUFFIX.length());
                     if (StringUtils.isBlank(module)) { // 正好位于根包下，则视为默认模块
@@ -77,7 +76,7 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
     }
 
     @Override
-    public int compareTo(final RpcControllerMeta other) {
+    public int compareTo(RpcControllerMeta other) {
         return this.beanId.compareTo(other.beanId);
     }
 
@@ -94,11 +93,11 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
                     Method[] methods;
                     try {
                         methods = this.controller.getClass().getMethods();
-                    } catch (final SecurityException e) {
+                    } catch (SecurityException e) {
                         methods = new Method[0];
                     }
                     // 从所有方法中查找
-                    for (final Method method : methods) {
+                    for (Method method : methods) {
                         if (isRpcMethod(method)) {
                             this.methodMetas.add(new RpcMethodMeta(method));
                         }
@@ -117,16 +116,16 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
      *            方法
      * @return 是否有效的RPC方法
      */
-    private boolean isRpcMethod(final Method method) {
+    private boolean isRpcMethod(Method method) {
         return method.getAnnotation(RpcMethod.class) != null && !method.isVarArgs()
                 && !method.isBridge() && Modifier.isPublic(method.getModifiers())
                 && !Modifier.isStatic(method.getModifiers());
     }
 
     public Set<String> getMethodNames() {
-        final Set<String> methodNames = new HashSet<>();
-        final Collection<RpcMethodMeta> methods = getMethodMetas();
-        for (final RpcMethodMeta method : methods) {
+        Set<String> methodNames = new HashSet<>();
+        Collection<RpcMethodMeta> methods = getMethodMetas();
+        for (RpcMethodMeta method : methods) {
             methodNames.add(method.getName());
         }
         return methodNames;
@@ -139,19 +138,24 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
      *            方法名称
      * @param argCount
      *            参数个数，为null时不限参数个数
+     * @param version
+     *            版本号
      * @return 方法
      * @throws DuplicatedRpcMethodException
      *             如果存在多个这种方法
      * @throws NoSuchRpcMethodException
      *             如果不存在这种方法
      */
-    public Method getMethod(final String methodName, final Integer argCount)
+    public Method getMethod(String methodName, Integer argCount, String version)
             throws DuplicatedRpcMethodException, NoSuchRpcMethodException {
         Method result = null;
-        for (final RpcMethodMeta methodMeta : getMethodMetas()) {
-            final Method method = methodMeta.getMethod();
+        for (RpcMethodMeta methodMeta : getMethodMetas()) {
+            Method method = methodMeta.getMethod();
+            String methodVersion = methodMeta.getVersion();
             if (method.getName().equals(methodName)
-                    && (argCount == null || method.getParameterTypes().length == argCount)) {
+                    && (argCount == null || method.getParameterTypes().length == argCount)
+                    && (StringUtils.isBlank(version) || StringUtils.isBlank(methodVersion)
+                            || version.equals(methodVersion))) {
                 if (result != null) {
                     throw new DuplicatedRpcMethodException(this.controller.getClass(), methodName,
                             argCount);
@@ -174,8 +178,8 @@ public class RpcControllerMeta implements Comparable<RpcControllerMeta> {
      *            参数个数
      * @return 匹配的方法元数据
      */
-    public RpcMethodMeta getMethodMeta(final String methodName, final int argCount) {
-        for (final RpcMethodMeta methodMeta : getMethodMetas()) {
+    public RpcMethodMeta getMethodMeta(String methodName, int argCount) {
+        for (RpcMethodMeta methodMeta : getMethodMetas()) {
             if (methodMeta.getName().equals(methodName)
                     && methodMeta.getArgMetas().size() == argCount) {
                 return methodMeta;

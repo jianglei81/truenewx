@@ -130,11 +130,15 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
     /**
      * 执行指定RPC类的指定方法
      *
-     * @param beanId     类名
-     * @param methodName 方法名
-     * @param args       参数集
+     * @param beanId
+     *            类名
+     * @param methodName
+     *            方法名
+     * @param args
+     *            参数集
      * @return 序列化后的字符串形式的执行结果
-     * @throws Exception 如果执行过程中出现错误
+     * @throws Exception
+     *             如果执行过程中出现错误
      */
     @Override
     public RpcInvokeResult invoke(String beanId, String methodName, String argString,
@@ -143,8 +147,9 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
         RpcControllerMeta meta = getMeta(beanId);
         Method method;
         Object[] args;
+        String version = getVersion(request);
         if (argString == null) { // Map形式的参数集
-            method = meta.getMethod(methodName, null);
+            method = meta.getMethod(methodName, null, version);
             Class<?>[] declaredArgTypes = method.getParameterTypes();
             RpcArg[] rpcArgs = method.getAnnotation(RpcMethod.class).args();
             args = new Object[declaredArgTypes.length];
@@ -168,7 +173,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
             }
         } else { // 数组形式的参数集
             args = this.serializer.deserializeArray(argString);
-            method = meta.getMethod(methodName, args.length);
+            method = meta.getMethod(methodName, args.length, version);
             Class<?>[] declaredArgTypes = method.getParameterTypes(); // 声明参数类型集
             RpcArg[] rpcArgs = method.getAnnotation(RpcMethod.class).args();
             for (int i = 0; i < declaredArgTypes.length; i++) {
@@ -218,6 +223,14 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
             }
             throw e;
         }
+    }
+
+    private String getVersion(HttpServletRequest request) {
+        String version = request.getParameter("version");
+        if (version == null) {
+            version = request.getHeader("version");
+        }
+        return version;
     }
 
     private boolean validate(String beanId, Method method, HttpServletRequest request,
@@ -385,7 +398,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
     public String getEnumSubType(RpcPort port, Class<? extends Enum<?>> enumClass) {
         RpcControllerMeta meta = getMeta(port.getBeanId());
         try {
-            Method method = meta.getMethod(port.getMethodName(), port.getArgCount());
+            Method method = meta.getMethod(port.getMethodName(), port.getArgCount(), null);
             RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
             if (rpcMethod != null) {
                 for (RpcEnum rpcEnum : rpcMethod.enums()) {
@@ -403,7 +416,7 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
     public RpcResultFilter getResultFilter(RpcPort port, Class<?> resultType) {
         RpcControllerMeta meta = getMeta(port.getBeanId());
         try {
-            Method method = meta.getMethod(port.getMethodName(), port.getArgCount());
+            Method method = meta.getMethod(port.getMethodName(), port.getArgCount(), null);
             RpcMethod rpcMethod = method.getAnnotation(RpcMethod.class);
             if (rpcMethod != null) {
                 RpcResultFilter[] filters = rpcMethod.result().filter();

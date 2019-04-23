@@ -22,7 +22,7 @@ public class RpcMethodMeta implements Comparable<RpcMethodMeta> {
     private Method method;
     private List<RpcVariableMeta> argMetas;
 
-    public RpcMethodMeta(final Method method) {
+    public RpcMethodMeta(Method method) {
         Assert.notNull(method, "method must be not null");
         this.method = method;
     }
@@ -36,7 +36,7 @@ public class RpcMethodMeta implements Comparable<RpcMethodMeta> {
     }
 
     @Override
-    public int compareTo(final RpcMethodMeta other) {
+    public int compareTo(RpcMethodMeta other) {
         return this.method.getName().compareTo(other.method.getName());
     }
 
@@ -44,18 +44,18 @@ public class RpcMethodMeta implements Comparable<RpcMethodMeta> {
         if (this.argMetas == null) {
             synchronized (this.method) {
                 if (this.argMetas == null) {
-                    final RpcMethod rpcMethod = this.method.getAnnotation(RpcMethod.class);
+                    RpcMethod rpcMethod = this.method.getAnnotation(RpcMethod.class);
                     if (rpcMethod != null) {
                         this.argMetas = new ArrayList<>();
-                        final Class<?>[] argTypes = this.method.getParameterTypes();
-                        final RpcArg[] rpcArgs = rpcMethod.args();
+                        Class<?>[] argTypes = this.method.getParameterTypes();
+                        RpcArg[] rpcArgs = rpcMethod.args();
                         for (int i = 0; i < argTypes.length; i++) {
-                            final RpcVariableMeta argMeta = new RpcVariableMeta(argTypes[i]);
-                            final RpcArg rpcArg = ArrayUtil.get(rpcArgs, i);
+                            RpcVariableMeta argMeta = new RpcVariableMeta(argTypes[i]);
+                            RpcArg rpcArg = ArrayUtil.get(rpcArgs, i);
                             if (rpcArg != null) {
                                 argMeta.setName(rpcArg.name());
                                 argMeta.setCaption(rpcArg.caption());
-                                final RpcTypeMeta argTypeMeta = argMeta.getType();
+                                RpcTypeMeta argTypeMeta = argMeta.getType();
                                 argTypeMeta.setIncludes(rpcArg.includes());
                                 argTypeMeta.setExcludes(rpcArg.excludes());
                                 argTypeMeta.setComponentType(rpcArg.componentType());
@@ -70,10 +70,10 @@ public class RpcMethodMeta implements Comparable<RpcMethodMeta> {
     }
 
     public RpcTypeMeta getResultType() {
-        final RpcTypeMeta typeMeta = new RpcTypeMeta(this.method.getReturnType());
-        final RpcMethod rpcMethod = this.method.getAnnotation(RpcMethod.class);
+        RpcTypeMeta typeMeta = new RpcTypeMeta(this.method.getReturnType());
+        RpcMethod rpcMethod = this.method.getAnnotation(RpcMethod.class);
         if (rpcMethod != null) {
-            final RpcResult rpcResult = rpcMethod.result();
+            RpcResult rpcResult = rpcMethod.result();
             typeMeta.setComponentType(rpcResult.componentType());
             typeMeta.setCaption(rpcResult.caption());
         }
@@ -81,17 +81,17 @@ public class RpcMethodMeta implements Comparable<RpcMethodMeta> {
     }
 
     public boolean isAnonymous() {
-        final Accessibility accessibility = this.method.getAnnotation(Accessibility.class);
+        Accessibility accessibility = this.method.getAnnotation(Accessibility.class);
         return accessibility != null && accessibility.anonymous();
     }
 
     public boolean isLan() {
-        final Accessibility accessibility = this.method.getAnnotation(Accessibility.class);
+        Accessibility accessibility = this.method.getAnnotation(Accessibility.class);
         return accessibility != null && accessibility.lan();
     }
 
     public String getCaption() {
-        final RpcMethod rpcMethod = this.method.getAnnotation(RpcMethod.class);
+        RpcMethod rpcMethod = this.method.getAnnotation(RpcMethod.class);
         if (rpcMethod != null) {
             return rpcMethod.caption();
         }
@@ -106,20 +106,28 @@ public class RpcMethodMeta implements Comparable<RpcMethodMeta> {
         return this.method.getAnnotation(Deprecated.class) != null;
     }
 
+    public String getVersion() {
+        RpcMethod rpcMethod = this.method.getAnnotation(RpcMethod.class);
+        if (rpcMethod != null) {
+            return rpcMethod.version();
+        }
+        return null;
+    }
+
     @Override
     public int hashCode() {
         return this.method.hashCode();
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final RpcMethodMeta other = (RpcMethodMeta) obj;
+        RpcMethodMeta other = (RpcMethodMeta) obj;
         return this.method.equals(other.method);
     }
 

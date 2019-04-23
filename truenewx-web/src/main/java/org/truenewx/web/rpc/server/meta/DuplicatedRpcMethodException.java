@@ -13,8 +13,7 @@ public class DuplicatedRpcMethodException extends RpcException {
 
     private static final long serialVersionUID = -8714547397267622760L;
 
-    public DuplicatedRpcMethodException(final Class<?> clazz, final String methodName,
-            Integer argCount) {
+    public DuplicatedRpcMethodException(Class<?> clazz, String methodName, Integer argCount) {
         super(StringUtils.join(clazz.getSimpleName(), Strings.DOT, methodName, "(",
                 getArgExpression(argCount), ") method, maybe wrong number of arguments"));
     }

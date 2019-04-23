@@ -42,4 +42,11 @@ public @interface RpcMethod {
      * @return 枚举限定
      */
     RpcEnum[] enums() default {};
+
+    /**
+     *
+     * @return 适用的版本号，为空表示适用所有版本
+     */
+    String version() default Strings.EMPTY;
+
 }

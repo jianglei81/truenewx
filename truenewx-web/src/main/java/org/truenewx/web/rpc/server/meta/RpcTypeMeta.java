@@ -28,7 +28,7 @@ public class RpcTypeMeta {
     private String[] excludes;
     private RpcTypeMeta componentType;
 
-    public RpcTypeMeta(final Class<?> type) {
+    public RpcTypeMeta(Class<?> type) {
         Assert.notNull(type, "type must be not null");
         if (Date.class.isAssignableFrom(type)) {
             this.type = Long.class;
@@ -68,7 +68,7 @@ public class RpcTypeMeta {
         return this.caption;
     }
 
-    public void setCaption(final String caption) {
+    public void setCaption(String caption) {
         this.caption = caption;
     }
 
@@ -76,7 +76,7 @@ public class RpcTypeMeta {
         return this.includes;
     }
 
-    public void setIncludes(final String[] includes) {
+    public void setIncludes(String[] includes) {
         this.includes = includes;
     }
 
@@ -84,7 +84,7 @@ public class RpcTypeMeta {
         return this.excludes;
     }
 
-    public void setExcludes(final String[] excludes) {
+    public void setExcludes(String[] excludes) {
         this.excludes = excludes;
     }
 
@@ -92,7 +92,7 @@ public class RpcTypeMeta {
         return this.componentType;
     }
 
-    public void setComponentType(final Class<?> componentType) {
+    public void setComponentType(Class<?> componentType) {
         if (isIterable() || isMap()) { // 主类型为集合或Map时，元素类型才可设置
             this.componentType = new RpcTypeMeta(componentType);
         }
