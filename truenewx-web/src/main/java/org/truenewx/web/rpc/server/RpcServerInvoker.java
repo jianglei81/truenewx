@@ -130,15 +130,11 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
     /**
      * 执行指定RPC类的指定方法
      *
-     * @param beanId
-     *            类名
-     * @param methodName
-     *            方法名
-     * @param args
-     *            参数集
+     * @param beanId     类名
+     * @param methodName 方法名
+     * @param args       参数集
      * @return 序列化后的字符串形式的执行结果
-     * @throws Exception
-     *             如果执行过程中出现错误
+     * @throws Exception 如果执行过程中出现错误
      */
     @Override
     public RpcInvokeResult invoke(String beanId, String methodName, String argString,
@@ -226,9 +222,9 @@ public class RpcServerInvoker implements RpcServer, ApplicationContextAware {
     }
 
     private String getVersion(HttpServletRequest request) {
-        String version = request.getParameter("version");
+        String version = request.getHeader("version");
         if (version == null) {
-            version = request.getHeader("version");
+            version = request.getParameter("version");
         }
         return version;
     }
