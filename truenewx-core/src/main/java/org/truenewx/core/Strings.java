@@ -106,13 +106,16 @@ public class Strings {
      * 字符编码：UTF-8
      */
     public static final String ENCODING_UTF8 = "UTF-8";
+
     /**
      * 字符编码：GBK
      */
     public static final String ENCODING_GBK = "GBK";
+
     /**
      * 默认字符编码
      */
+    @Deprecated
     public static final String DEFAULT_ENCODING = Strings.ENCODING_UTF8;
 
     /**

@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.truenewx.core.Strings;
 import org.truenewx.core.exception.AjaxException;
 import org.truenewx.core.tuple.Binate;
-import org.truenewx.core.util.ClientRequestSupport;
+import org.truenewx.core.util.HttpClientUtil;
 import org.truenewx.web.rpc.serializer.RpcSerializer;
 import org.truenewx.web.spring.servlet.handler.HandledError;
 
@@ -20,13 +20,13 @@ import org.truenewx.web.spring.servlet.handler.HandledError;
  * @author jianglei
  * @since JDK 1.8
  */
-public class RpcClientInvoker extends ClientRequestSupport implements RpcClient {
+public class RpcClientInvoker implements RpcClient {
+
     private String serverUrlRoot;
     private RpcSerializer serializer;
 
     /**
-     * @param serverUrlRoot
-     *            服务端URL根路径
+     * @param serverUrlRoot 服务端URL根路径
      */
     public RpcClientInvoker(String serverUrlRoot) {
         this.serverUrlRoot = serverUrlRoot;
@@ -65,15 +65,13 @@ public class RpcClientInvoker extends ClientRequestSupport implements RpcClient 
     /**
      * 获取指定URI的响应内容
      *
-     * @param request
-     *            请求
+     * @param request 请求
      * @return 响应内容
-     * @throws Exception
-     *             如果响应中有错误
+     * @throws Exception 如果响应中有错误
      */
     @SuppressWarnings("unchecked")
     private String requestContent(String url, Map<String, Object> params) throws Exception {
-        Binate<Integer, String> response = request(url, params);
+        Binate<Integer, String> response = HttpClientUtil.requestByPost(url, params);
         int statusCode = response.getLeft();
         String content = response.getRight();
         switch (statusCode) {

@@ -24,10 +24,8 @@ public class MathUtil {
     /**
      * 获取随机双精度浮点数
      *
-     * @param min
-     *            最小值
-     * @param max
-     *            最大值（不包含）
+     * @param min 最小值
+     * @param max 最大值（不包含）
      * @return 随机双精度浮点数
      */
     public static double randomDouble(double min, double max) {
@@ -38,10 +36,8 @@ public class MathUtil {
     /**
      * 获取随机字节数
      *
-     * @param min
-     *            最小值
-     * @param max
-     *            最大值（不包含）
+     * @param min 最小值
+     * @param max 最大值（不包含）
      * @return 随机字节数
      */
     public static byte randomByte(byte min, byte max) {
@@ -51,10 +47,8 @@ public class MathUtil {
     /**
      * 获取随机整数
      *
-     * @param min
-     *            最小值
-     * @param max
-     *            最大值（不包含）
+     * @param min 最小值
+     * @param max 最大值（不包含）
      * @return 随机整数
      */
     public static int randomInt(int min, int max) {
@@ -64,10 +58,8 @@ public class MathUtil {
     /**
      * 获取随机长整数
      *
-     * @param min
-     *            最小值
-     * @param max
-     *            最大值（不包含）
+     * @param min 最小值
+     * @param max 最大值（不包含）
      * @return 随机长整数
      */
     public static long randomLong(long min, long max) {
@@ -77,8 +69,7 @@ public class MathUtil {
     /**
      * 以指定中奖几率抽奖，返回是否中奖
      *
-     * @param probability
-     *            中奖几率
+     * @param probability 中奖几率
      * @return true if 中奖, otherwise false
      */
     public static boolean drawLottery(double probability) {
@@ -88,8 +79,7 @@ public class MathUtil {
     /**
      * 解析转换指定字符串为十进制数字，如果字符串不是合法的十进制数字格式，则返回null
      *
-     * @param s
-     *            字符串
+     * @param s 字符串
      * @return 转换后的十进制数字
      */
     public static BigDecimal parseDecimal(String s) {
@@ -99,10 +89,8 @@ public class MathUtil {
     /**
      * 解析转换指定字符串为十进制数字，如果字符串不是十进制数字格式，则返回指定默认值
      *
-     * @param s
-     *            字符串
-     * @param defaultValue
-     *            默认值
+     * @param s            字符串
+     * @param defaultValue 默认值
      * @return 转换后的十进制数字
      */
     public static BigDecimal parseDecimal(String s, BigDecimal defaultValue) {
@@ -119,8 +107,7 @@ public class MathUtil {
     /**
      * 解析转换指定字符串为长整型数字，如果字符串不是长整型数字格式，则返回0
      *
-     * @param s
-     *            字符串
+     * @param s 字符串
      * @return 转换后的长整型数字
      */
     public static long parseLong(String s) {
@@ -130,10 +117,8 @@ public class MathUtil {
     /**
      * 解析转换指定字符串为长整型数字，如果字符串不是整型数字格式，则返回指定默认值
      *
-     * @param s
-     *            字符串
-     * @param defaultValue
-     *            默认值
+     * @param s            字符串
+     * @param defaultValue 默认值
      * @return 转换后的长整型数字
      */
     public static long parseLong(String s, long defaultValue) {
@@ -150,10 +135,8 @@ public class MathUtil {
     /**
      * 以指定分隔符拆分指定字符串，并解析为长整数数组
      *
-     * @param s
-     *            字符串
-     * @param separator
-     *            分隔符
+     * @param s         字符串
+     * @param separator 分隔符
      * @return 长整数数组
      */
     public static long[] parseLongArray(String s, String separator) {
@@ -171,10 +154,8 @@ public class MathUtil {
     /**
      * 以指定分隔符拆分指定字符串，并解析为长整数对象数组
      *
-     * @param s
-     *            字符串
-     * @param separator
-     *            分隔符
+     * @param s         字符串
+     * @param separator 分隔符
      * @return 长整数数组
      */
     public static Long[] parseLongObjectArray(String s, String separator) {
@@ -196,8 +177,7 @@ public class MathUtil {
     /**
      * 解析转换指定字符串为整型数字，如果字符串不是整型数字格式，则返回0
      *
-     * @param s
-     *            字符串
+     * @param s 字符串
      * @return 转换后的整型数字
      */
     public static int parseInt(String s) {
@@ -207,10 +187,8 @@ public class MathUtil {
     /**
      * 解析转换指定字符串为整型数字，如果字符串不是整型数字格式，则返回指定默认值
      *
-     * @param s
-     *            字符串
-     * @param defaultValue
-     *            默认值
+     * @param s            字符串
+     * @param defaultValue 默认值
      * @return 转换后的整型数字
      */
     public static int parseInt(String s, int defaultValue) {
@@ -238,10 +216,8 @@ public class MathUtil {
     /**
      * 以指定分隔符拆分指定字符串，并解析为整数数组
      *
-     * @param s
-     *            字符串
-     * @param separator
-     *            分隔符
+     * @param s         字符串
+     * @param separator 分隔符
      * @return 整数数组
      */
     public static int[] parseIntArray(String s, String separator) {
@@ -259,10 +235,8 @@ public class MathUtil {
     /**
      * 以指定分隔符拆分指定字符串，并解析为整数对象数组
      *
-     * @param s
-     *            字符串
-     * @param separator
-     *            分隔符
+     * @param s         字符串
+     * @param separator 分隔符
      * @return 整数对象数组
      */
     public static Integer[] parseIntegerArray(String s, String separator) {
@@ -284,14 +258,10 @@ public class MathUtil {
     /**
      * 格式化指定数字对象
      *
-     * @param number
-     *            数字对象
-     * @param minScale
-     *            最小精度
-     * @param maxScale
-     *            最大精度
-     * @param toPercent
-     *            是否转换为百分比
+     * @param number    数字对象
+     * @param minScale  最小精度
+     * @param maxScale  最大精度
+     * @param toPercent 是否转换为百分比
      * @return 格式化后的字符串
      */
     public static String formatNumber(Object number, int minScale, int maxScale,
@@ -310,8 +280,7 @@ public class MathUtil {
     /**
      * 获取指定数值类型的最大值
      *
-     * @param type
-     *            数值类型
+     * @param type 数值类型
      * @return 最大值
      */
     @SuppressWarnings("unchecked")
@@ -433,6 +402,18 @@ public class MathUtil {
     public static int bytes2Int(byte[] bytes, int offset) {
         return (((bytes[offset] & 0xFF) << 24) | ((bytes[offset + 1] & 0xFF) << 16)
                 | ((bytes[offset + 2] & 0xFF) << 8) | (bytes[offset + 3] & 0xFF));
+    }
+
+    public static int hex2Int(String hex) {
+        return hex2Int(hex, 0);
+    }
+
+    public static int hex2Int(String hex, int defaultValue) {
+        try {
+            return Integer.parseInt(hex, 16);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
 }
