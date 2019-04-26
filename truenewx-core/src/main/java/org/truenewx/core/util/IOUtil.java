@@ -4,12 +4,10 @@ import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,14 +19,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +42,7 @@ import org.truenewx.core.Strings;
  * @since JDK 1.8
  */
 public class IOUtil {
+
     private IOUtil() {
     }
 
@@ -60,12 +55,9 @@ public class IOUtil {
     /**
      * 将指定输入流中的数据全部写入指定输出流中。除读写操作，本方法不对输入流和输出流做任何其它操作。
      *
-     * @param in
-     *            输入流
-     * @param out
-     *            输出流
-     * @throws IOException
-     *             如果读写过程中出现错误
+     * @param in 输入流
+     * @param out 输出流
+     * @throws IOException 如果读写过程中出现错误
      */
     public static void writeAll(final InputStream in, final OutputStream out) throws IOException {
         final byte[] b = new byte[1024];
@@ -95,11 +87,9 @@ public class IOUtil {
     /**
      * 以非阻塞方式，读取指定字节输入流中的数据为字符串
      *
-     * @param in
-     *            字节输入流
+     * @param in 字节输入流
      * @return 结果字符串
-     * @throws IOException
-     *             如果读取过程中出现错误
+     * @throws IOException 如果读取过程中出现错误
      */
     public static String readUnblocklyToString(final InputStream in) throws IOException {
         return readUnblocklyToString(new BufferedReader(new InputStreamReader(in)));
@@ -108,13 +98,10 @@ public class IOUtil {
     /**
      * 以非阻塞方式，以指定字符集读取指定字节输入流中的数据为字符串
      *
-     * @param in
-     *            字节输入流
-     * @param charsetName
-     *            字符集
+     * @param in 字节输入流
+     * @param charsetName 字符集
      * @return 结果字符串
-     * @throws IOException
-     *             如果读取过程中出现错误
+     * @throws IOException 如果读取过程中出现错误
      */
     public static String readUnblocklyToString(final InputStream in, final String charsetName)
             throws IOException {
@@ -124,11 +111,9 @@ public class IOUtil {
     /**
      * 以非阻塞方式，读取指定字符输入流中的数据为字符串。如果对字符集有要求，请先将字符输入流的字符集设置好
      *
-     * @param reader
-     *            字符输入流
+     * @param reader 字符输入流
      * @return 结果字符串
-     * @throws IOException
-     *             如果读取过程中出现错误
+     * @throws IOException 如果读取过程中出现错误
      */
     public static String readUnblocklyToString(final Reader reader) throws IOException {
         String s = "";
@@ -142,10 +127,8 @@ public class IOUtil {
     /**
      * 执行指定命令行指令，如果等待毫秒数大于0，则当前线程等待指定毫秒数之后返回，
      *
-     * @param command
-     *            命令行指令
-     * @param waitInterval
-     *            等待毫秒数
+     * @param command 命令行指令
+     * @param waitInterval 等待毫秒数
      */
     public static String executeCommand(final String command) {
         String result = "";
@@ -162,10 +145,8 @@ public class IOUtil {
     /**
      * 创建指定文件到本地文件系统，如果该文件已存在则不创建
      *
-     * @param file
-     *            文件
-     * @throws IOException
-     *             如果创建文件时出现错误
+     * @param file 文件
+     * @throws IOException 如果创建文件时出现错误
      */
     public static void createFile(final File file) throws IOException {
         if (!file.exists()) {
@@ -180,8 +161,7 @@ public class IOUtil {
     /**
      * 创建指定目录到本地文件系统，如果该目录已存在则不创建
      *
-     * @param dir
-     *            目录
+     * @param dir 目录
      */
     public static void createDirectory(final File dir) {
         if (!dir.exists()) {
@@ -192,12 +172,9 @@ public class IOUtil {
     /**
      * 替换指定文件指定内容
      *
-     * @param filePath
-     *            被修改文件路径
-     * @param regex
-     *            被替换内容
-     * @param replacement
-     *            替换内容
+     * @param filePath 被修改文件路径
+     * @param regex 被替换内容
+     * @param replacement 替换内容
      */
     public static void replaceFileContent(final String filePath, final String regex,
             final String replacement) {
@@ -240,43 +217,11 @@ public class IOUtil {
     }
 
     /**
-     * 截取指定输入流中图片的指定矩形区域范围内的内容
-     *
-     * @param imageInput
-     *            图片输入流，如果该输入流中的数据不是图片，将抛出IOException
-     * @param x
-     *            截取矩形区域相对于图片的x轴坐标
-     * @param y
-     *            截取矩形区域相对于图片的y轴坐标
-     * @param width
-     *            截取矩形区域的宽度
-     * @param height
-     *            截取矩形区域的高度
-     * @return 截取得到的图片数据
-     * @throws IOException
-     *             如果截取过程中出现IO错误
-     */
-    public static byte[] shootImage(final InputStream imageInput, final int x, final int y,
-            final int width, final int height) throws IOException {
-        BufferedImage image = ImageIO.read(imageInput);
-        image = image.getSubimage(x, y, width, height);
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ImageIO.write(image, "jpg", out);
-        out.flush();
-        final byte[] b = out.toByteArray();
-        out.close();
-        return b;
-    }
-
-    /**
      * 查找与指定区域匹配的国际化的资源
      *
-     * @param basename
-     *            文件基本名
-     * @param locale
-     *            区域
-     * @param extension
-     *            文件扩展名
+     * @param basename 文件基本名
+     * @param locale 区域
+     * @param extension 文件扩展名
      * @return 与指定区域匹配的国际化的资源，如果找不到则返回null
      */
     public static Resource findI18nResource(String basename, final Locale locale,
@@ -321,14 +266,10 @@ public class IOUtil {
     /**
      * 查找与指定目录下区域匹配的国际化的文件
      *
-     * @param baseDir
-     *            目录
-     * @param basename
-     *            文件基本名称 aa，不含扩展名
-     * @param locale
-     *            区域
-     * @param extension
-     *            文件扩展名，句点包含与否均可
+     * @param baseDir 目录
+     * @param basename 文件基本名称 aa，不含扩展名
+     * @param locale 区域
+     * @param extension 文件扩展名，句点包含与否均可
      * @return 找到的文件，如果没找到则返回null
      */
     public static File findI18nFileByDir(final String baseDir, final String basename,
@@ -365,12 +306,9 @@ public class IOUtil {
     /**
      * 递归查找文件
      *
-     * @param baseDirName
-     *            查找的文件夹路径
-     * @param targetFileName
-     *            需要查找的文件名
-     * @param fileList
-     *            查找到的文件集合
+     * @param baseDirName 查找的文件夹路径
+     * @param targetFileName 需要查找的文件名
+     * @param fileList 查找到的文件集合
      */
     public static void findFiles(final String baseDirName, final String targetFileName,
             final List<File> fileList) {
@@ -399,10 +337,8 @@ public class IOUtil {
     /**
      * 通配符匹配
      *
-     * @param pattern
-     *            通配符模式
-     * @param str
-     *            待匹配的字符串
+     * @param pattern 通配符模式
+     * @param str 待匹配的字符串
      * @return 匹配成功则返回true，否则返回false
      */
     private static boolean wildcardMatch(final String pattern, final String str) {
@@ -448,8 +384,7 @@ public class IOUtil {
     /**
      * 检核图片是否合法
      *
-     * @param image
-     *            图片
+     * @param image 图片
      */
     private static void checkImage(final Image image) {
         waitForImage(image);
@@ -466,8 +401,7 @@ public class IOUtil {
     /**
      * 等待图片装载
      *
-     * @param image
-     *            图片
+     * @param image 图片
      */
     private static void waitForImage(final Image image) {
         try {
@@ -482,13 +416,10 @@ public class IOUtil {
     /**
      * 缩放图片
      *
-     * @param in
-     *            原图片输入流
-     * @param width
-     *            缩放目标宽度
+     * @param in 原图片输入流
+     * @param width 缩放目标宽度
      * @return 缩放后得到的图片
-     * @throws IOException
-     *             缩放异常(原文件损坏或指定缩放大小错误)
+     * @throws IOException 缩放异常(原文件损坏或指定缩放大小错误)
      */
     public static BufferedImage zoomImage(final InputStream in, final int width)
             throws IOException {
@@ -510,12 +441,9 @@ public class IOUtil {
     /**
      * 缩放图片
      *
-     * @param image
-     *            原图片
-     * @param width
-     *            缩放目标宽度
+     * @param image 原图片
+     * @param width 缩放目标宽度
      * @return 缩放后得到的图片
-     *
      * @author jianglei
      */
     public static BufferedImage zoomImage(final Image image, int width) {
@@ -553,16 +481,11 @@ public class IOUtil {
     /**
      * 保存图片
      *
-     * @param image
-     *            图片
-     * @param dirsPath
-     *            存储位置
-     * @param fileName
-     *            文件名
-     * @param extension
-     *            后缀名
-     * @throws IOException
-     *             系统没有写入权限
+     * @param image 图片
+     * @param dirsPath 存储位置
+     * @param fileName 文件名
+     * @param extension 后缀名
+     * @throws IOException 系统没有写入权限
      */
     public static void saveImage(final BufferedImage image, final String dir, final String fileName,
             final String extension) throws IOException {
@@ -589,16 +512,11 @@ public class IOUtil {
     /**
      * 保存图片
      *
-     * @param bytes
-     *            图片字节数组
-     * @param dirPath
-     *            存储位置
-     * @param fileName
-     *            文件名
-     * @param extension
-     *            后缀名
-     * @throws IOException
-     *             系统没有写入权限
+     * @param bytes 图片字节数组
+     * @param dirPath 存储位置
+     * @param fileName 文件名
+     * @param extension 后缀名
+     * @throws IOException 系统没有写入权限
      */
     public static void saveImage(final byte[] bytes, final String dirPath, final String fileName,
             final String extension) throws IOException {
@@ -626,21 +544,5 @@ public class IOUtil {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageIO.write(image, formatName, os);
         return os.toByteArray();
-    }
-
-    public static BufferedImage cropImage(final BufferedImage image, final String formatName,
-            final int x, final int y, final int width, final int height) throws IOException {
-        final Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName(formatName);
-        if (!readers.hasNext()) {
-            return null;
-        }
-        final ImageReader reader = readers.next();
-        final ByteArrayInputStream in = new ByteArrayInputStream(imageToBytes(image, formatName));
-        final ImageInputStream iis = ImageIO.createImageInputStream(in);
-        reader.setInput(iis, true);
-        final ImageReadParam param = reader.getDefaultReadParam();
-        final Rectangle rect = new Rectangle(x, y, width, height);
-        param.setSourceRegion(rect);
-        return reader.read(0, param);
     }
 }
