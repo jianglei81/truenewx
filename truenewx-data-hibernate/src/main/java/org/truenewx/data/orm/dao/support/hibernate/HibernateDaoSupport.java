@@ -17,8 +17,7 @@ import org.truenewx.data.query.QueryResult;
  *
  * @author jianglei
  * @since JDK 1.8
- * @param <T>
- *            数据实体类型
+ * @param <T> 数据实体类型
  */
 public abstract class HibernateDaoSupport<T extends Entity> extends HibernateEntityDaoSupport<T>
         implements Dao<T> {
@@ -31,43 +30,56 @@ public abstract class HibernateDaoSupport<T extends Entity> extends HibernateEnt
         return getTableName(getEntityName());
     }
 
-    protected final Class<?> getPropertyClass(final String propertyName) {
-        return getPropertyClass(getEntityName(), propertyName);
-    }
-
-    protected final Column getColumn(final String propertyName) {
+    protected final Column getColumn(String propertyName) {
         return getColumn(getEntityName(), propertyName);
     }
 
-    protected final Number getNumberPropertyMaxValue(final String propertyName) {
-        final Class<?> propertyClass = getPropertyClass(propertyName);
-        if (Number.class.isAssignableFrom(propertyClass)) {
+    @Override
+    protected Number getNumberPropertyMinValue(String propertyName) {
+        Number minValue = super.getNumberPropertyMinValue(propertyName);
+        if (minValue == null) {
+            Class<?> propertyClass = getPropertyClass(propertyName);
             @SuppressWarnings("unchecked")
-            final Class<? extends Number> type = (Class<? extends Number>) propertyClass;
-            final Column column = getColumn(propertyName);
-            final int precision = column.getPrecision();
-            final int scale = column.getScale();
-            return MathUtil.maxValue(type, precision, scale);
+            Class<? extends Number> type = (Class<? extends Number>) propertyClass;
+            Column column = getColumn(propertyName);
+            int precision = column.getPrecision();
+            int scale = column.getScale();
+            minValue = MathUtil.minValue(type, precision, scale);
         }
-        return null;
+        return minValue;
     }
 
     @Override
-    public void delete(final T entity) {
+    protected Number getNumberPropertyMaxValue(String propertyName) {
+        Number maxValue = super.getNumberPropertyMaxValue(propertyName);
+        if (maxValue == null) {
+            Class<?> propertyClass = getPropertyClass(propertyName);
+            @SuppressWarnings("unchecked")
+            Class<? extends Number> type = (Class<? extends Number>) propertyClass;
+            Column column = getColumn(propertyName);
+            int precision = column.getPrecision();
+            int scale = column.getScale();
+            maxValue = MathUtil.maxValue(type, precision, scale);
+        }
+        return maxValue;
+    }
+
+    @Override
+    public final void delete(T entity) {
         if (entity != null) {
             getHibernateTemplate().getSession().delete(getEntityName(), entity);
         }
     }
 
     @Override
-    public void save(final T entity) {
+    public final void save(T entity) {
         if (entity != null) {
             getHibernateTemplate().getSession().saveOrUpdate(getEntityName(), entity);
         }
     }
 
     @Override
-    public final void refresh(final T entity) {
+    public final void refresh(T entity) {
         if (entity != null) {
             getHibernateTemplate().getSession().refresh(getEntityName(), entity);
         }
@@ -93,7 +105,7 @@ public abstract class HibernateDaoSupport<T extends Entity> extends HibernateEnt
     }
 
     @Override
-    public List<T> find(final Map<String, ?> params, final String... fuzzyNames) {
+    public List<T> find(Map<String, ?> params, String... fuzzyNames) {
         return find(getEntityName(), params, fuzzyNames);
     }
 
@@ -104,12 +116,12 @@ public abstract class HibernateDaoSupport<T extends Entity> extends HibernateEnt
 
     // 以下是对DependentDao的支持
 
-    public QueryResult<T> find(final Class<?> dependedClass, final Serializable dependedKey,
-            final QueryParameter parameter) {
+    public QueryResult<T> find(Class<?> dependedClass, Serializable dependedKey,
+            QueryParameter parameter) {
         return find(getEntityName(), dependedClass, dependedKey, parameter);
     }
 
-    public int delete(final Class<?> dependedClass, final Serializable dependedKey) {
+    public int delete(Class<?> dependedClass, Serializable dependedKey) {
         return delete(getEntityName(), dependedClass, dependedKey);
     }
 }

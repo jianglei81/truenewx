@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.mapping.Column;
+import org.truenewx.core.util.MathUtil;
 import org.truenewx.data.model.SlicedEntity;
 import org.truenewx.data.orm.dao.SlicedDao;
 import org.truenewx.data.orm.hibernate.HibernateTemplate;
@@ -22,8 +24,36 @@ import org.truenewx.data.query.QueryResult;
 public abstract class HibernateSlicedDaoSupoort<T extends SlicedEntity<S>, S extends Serializable>
         extends HibernateEntityDaoSupport<T> implements SlicedDao<T, S> {
 
-    protected HibernateTemplate getHibernateTemplate(String entityName) {
+    protected final HibernateTemplate getHibernateTemplate(String entityName) {
         return getDataAccessTemplate(entityName);
+    }
+
+    protected Number getNumberPropertyMinValue(String entityName, String propertyName) {
+        Number minValue = super.getNumberPropertyMinValue(propertyName);
+        if (minValue == null) {
+            Class<?> propertyClass = getPropertyClass(propertyName);
+            @SuppressWarnings("unchecked")
+            Class<? extends Number> type = (Class<? extends Number>) propertyClass;
+            Column column = getColumn(entityName, propertyName);
+            int precision = column.getPrecision();
+            int scale = column.getScale();
+            minValue = MathUtil.minValue(type, precision, scale);
+        }
+        return minValue;
+    }
+
+    protected Number getNumberPropertyMaxValue(String entityName, String propertyName) {
+        Number maxValue = super.getNumberPropertyMaxValue(propertyName);
+        if (maxValue == null) {
+            Class<?> propertyClass = getPropertyClass(propertyName);
+            @SuppressWarnings("unchecked")
+            Class<? extends Number> type = (Class<? extends Number>) propertyClass;
+            Column column = getColumn(entityName, propertyName);
+            int precision = column.getPrecision();
+            int scale = column.getScale();
+            maxValue = MathUtil.maxValue(type, precision, scale);
+        }
+        return maxValue;
     }
 
     @Override

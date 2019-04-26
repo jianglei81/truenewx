@@ -277,6 +277,65 @@ public class MathUtil {
         return format.format(number);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T extends Number> T minValue(Class<T> type) {
+        if (type == Long.class) {
+            return (T) Long.valueOf(Long.MIN_VALUE);
+        } else if (type == Integer.class) {
+            return (T) Integer.valueOf(Integer.MIN_VALUE);
+        } else if (type == Short.class) {
+            return (T) Short.valueOf(Short.MIN_VALUE);
+        } else if (type == Byte.class) {
+            return (T) Byte.valueOf(Byte.MIN_VALUE);
+        } else if (type == Double.class) {
+            return (T) Double.valueOf(Double.MIN_VALUE);
+        } else if (type == Float.class) {
+            return (T) Float.valueOf(Float.MIN_VALUE);
+        } else if (type == BigDecimal.class) {
+            return (T) new BigDecimal(Double.MIN_VALUE);
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Number> T minValue(Class<T> type, int precision, int scale) {
+        T typeMinValue = minValue(type);
+        if (typeMinValue != null) {
+            if (precision == 0) {
+                return typeMinValue;
+            }
+            BigDecimal typeMinDecimal = new BigDecimal(typeMinValue.doubleValue()); // 负值
+            // 各数值类型的最小值均为整数，转换为朴素字符串形式后，字符串长度-1即为最小值长度
+            int minLength = typeMinDecimal.toPlainString().length() - 1; // 负值带有负号
+            // 最小值都不是最大长度下的最大值（即-999...999），所以实际允许的整数部分长度必须小于上述最小值长度
+            int intLength = precision - scale;
+            // 也就意味着整数部分长度如果大于等于上述最小值长度，则数值类型最小值即为结果
+            if (intLength >= minLength) {
+                return typeMinValue;
+            }
+            // 否则，整数部分和小数部分全为9，取负号，即为结果
+            BigDecimal min = BigDecimal.TEN.pow(intLength)
+                    .subtract(BigDecimal.ONE.divide(BigDecimal.TEN.pow(scale)))
+                    .setScale(scale, RoundingMode.HALF_UP).negate();
+            if (type == Long.class) {
+                return (T) Long.valueOf(min.longValue());
+            } else if (type == Integer.class) {
+                return (T) Integer.valueOf(min.intValue());
+            } else if (type == Short.class) {
+                return (T) Short.valueOf(min.shortValue());
+            } else if (type == Byte.class) {
+                return (T) Byte.valueOf(min.byteValue());
+            } else if (type == Double.class) {
+                return (T) Double.valueOf(min.doubleValue());
+            } else if (type == Float.class) {
+                return (T) Float.valueOf(min.floatValue());
+            } else if (type == BigDecimal.class) {
+                return (T) min;
+            }
+        }
+        return null;
+    }
+
     /**
      * 获取指定数值类型的最大值
      *

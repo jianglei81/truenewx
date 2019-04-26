@@ -13,14 +13,10 @@ import org.truenewx.data.orm.dao.SlicedRelationDao;
  *
  * @author jianglei
  * @since JDK 1.8
- * @param <T>
- *            关系类型
- * @param <L>
- *            左标识类型
- * @param <R>
- *            右标识类型
- * @param <S>
- *            切分者类型
+ * @param <T> 关系类型
+ * @param <L> 左标识类型
+ * @param <R> 右标识类型
+ * @param <S> 切分者类型
  */
 public abstract class HibernateSlicedRelationDaoSupport<T extends SlicedRelation<L, R, S>, L extends Serializable, R extends Serializable, S extends Serializable>
         extends HibernateSlicedDaoSupoort<T, S> implements SlicedRelationDao<T, L, R, S> {
@@ -73,13 +69,12 @@ public abstract class HibernateSlicedRelationDaoSupport<T extends SlicedRelation
     /**
      * 用左右标识构建单个标识对象
      *
-     * @param leftId
-     *            左标识
-     * @param rightId
-     *            右标识
+     * @param leftId  左标识
+     * @param rightId 右标识
      * @return 单个标识对象
      */
-    protected Serializable buildId(final L leftId, final R rightId) {
+    @Deprecated
+    private Serializable buildId(final L leftId, final R rightId) {
         return null;
     }
 

@@ -1,6 +1,7 @@
 package org.truenewx.data.orm.dao.support;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,11 @@ public abstract class EntityDaoSupport<T> implements EntityDao<T> {
     }
 
     protected abstract DataAccessTemplate getDataAccessTemplate(String entityName);
+
+    protected Class<?> getPropertyClass(String propertyName) {
+        Field field = ClassUtil.findField(getEntityClass(), propertyName);
+        return field == null ? null : field.getType();
+    }
 
     protected List<T> find(String entityName, Map<String, ?> params, String... fuzzyNames) {
         StringBuffer hql = new StringBuffer("from ").append(entityName);

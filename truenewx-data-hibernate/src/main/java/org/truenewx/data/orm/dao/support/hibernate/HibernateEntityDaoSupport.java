@@ -1,9 +1,15 @@
 package org.truenewx.data.orm.dao.support.hibernate;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 import org.hibernate.mapping.Column;
-import org.hibernate.type.Type;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.truenewx.core.util.BeanUtil;
+import org.truenewx.core.util.ClassUtil;
+import org.truenewx.core.util.MathUtil;
 import org.truenewx.data.orm.dao.support.EntityDaoSupport;
 import org.truenewx.data.orm.hibernate.HibernateTemplate;
 import org.truenewx.data.orm.hibernate.HibernateTemplateFactory;
@@ -14,59 +20,78 @@ import org.truenewx.data.orm.hibernate.LocalSessionFactoryRegistry;
  *
  * @author jianglei
  * @since JDK 1.8
- * @param <T>
- *            数据实体类型
+ * @param <T> 数据实体类型
  */
 public abstract class HibernateEntityDaoSupport<T> extends EntityDaoSupport<T> {
+
     @Autowired
     private LocalSessionFactoryRegistry sessionFactoryRegistry;
     @Autowired
     private HibernateTemplateFactory hibernateTemplateFactory;
 
     @Override
-    protected final HibernateTemplate getDataAccessTemplate(final String entityName) {
+    protected final HibernateTemplate getDataAccessTemplate(String entityName) {
         return this.hibernateTemplateFactory.getHibernateTemplate(entityName);
     }
 
-    protected final String getTableName(final String entityName) {
+    protected final String getTableName(String entityName) {
         return this.sessionFactoryRegistry.getTableName(entityName);
     }
 
-    protected final Class<?> getPropertyClass(final String entityName, final String propertyName) {
-        final Type type = this.sessionFactoryRegistry.getPropertyType(entityName, propertyName);
-        return type == null ? null : type.getReturnedClass();
-    }
-
-    protected final Column getColumn(final String entityName, final String propertyName) {
+    protected final Column getColumn(String entityName, String propertyName) {
         return this.sessionFactoryRegistry.getColumn(entityName, propertyName);
     }
 
-    /**
-     * 确保指定实体指定属性的最小数值
-     *
-     * @param entity
-     *            实体
-     * @param propertyName
-     *            属性名
-     * @param step
-     *            属性数值增量
-     *
-     * @author jianglei
-     */
-    protected final void ensurePropertyMinNumber(final T entity, final String propertyName,
-            final Number step) {
-        final Number propertyValue = BeanUtil.getPropertyValue(entity, propertyName);
-        // 此时的属性值必定为非空的数值
-        if (step.doubleValue() > 0) { // 增量大于0，则属性值必须大于等于增量值
-            if (propertyValue.doubleValue() < step.doubleValue()) {
-                BeanUtil.setPropertyValue(entity, propertyName, step);
-                save(entity);
+    protected Number getNumberPropertyMinValue(String propertyName) {
+        Class<?> propertyClass = getPropertyClass(propertyName);
+        if (Number.class.isAssignableFrom(propertyClass)) {
+            Number minValue = null;
+
+            Min min = ClassUtil.findAnnotation(getEntityClass(), propertyName, Min.class);
+            if (min != null) {
+                minValue = min.value();
+            } else {
+                DecimalMin decimalMin = ClassUtil.findAnnotation(getEntityClass(), propertyName,
+                        DecimalMin.class);
+                if (decimalMin != null) {
+                    minValue = MathUtil.parseDecimal(decimalMin.value(), null);
+                } else {
+                    Range range = ClassUtil.findAnnotation(getEntityClass(), propertyName,
+                            Range.class);
+                    if (range != null) {
+                        minValue = range.min();
+                    }
+                }
             }
-        } else { // 如果增量小于0，则属性值至少应等于0，如果允许属性值小于0，则不应调用本方法
-            if (propertyValue.doubleValue() < 0) {
-                BeanUtil.setPropertyValue(entity, propertyName, 0);
-                save(entity);
-            }
+            return minValue;
         }
+        return null;
     }
+
+    protected Number getNumberPropertyMaxValue(String propertyName) {
+        Class<?> propertyClass = getPropertyClass(propertyName);
+        if (Number.class.isAssignableFrom(propertyClass)) {
+            Number maxValue = null;
+
+            Max max = ClassUtil.findAnnotation(getEntityClass(), propertyName, Max.class);
+            if (max != null) {
+                maxValue = max.value();
+            } else {
+                DecimalMax decimalMax = ClassUtil.findAnnotation(getEntityClass(), propertyName,
+                        DecimalMax.class);
+                if (decimalMax != null) {
+                    maxValue = MathUtil.parseDecimal(decimalMax.value(), null);
+                } else {
+                    Range range = ClassUtil.findAnnotation(getEntityClass(), propertyName,
+                            Range.class);
+                    if (range != null) {
+                        maxValue = range.max();
+                    }
+                }
+            }
+            return maxValue;
+        }
+        return null;
+    }
+
 }

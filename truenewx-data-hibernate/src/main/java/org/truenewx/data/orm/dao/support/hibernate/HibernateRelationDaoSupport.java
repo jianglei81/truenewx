@@ -15,12 +15,9 @@ import org.truenewx.data.orm.dao.RelationDao;
  *
  * @author jianglei
  * @since JDK 1.8
- * @param <T>
- *            类型
- * @param <L>
- *            左标识类型
- * @param <R>
- *            右标识类型
+ * @param <T> 类型
+ * @param <L> 左标识类型
+ * @param <R> 右标识类型
  */
 public abstract class HibernateRelationDaoSupport<T extends Relation<L, R>, L extends Serializable, R extends Serializable>
         extends HibernateDaoSupport<T> implements RelationDao<T, L, R> {
@@ -74,13 +71,12 @@ public abstract class HibernateRelationDaoSupport<T extends Relation<L, R>, L ex
      * 用左右标识构建单个标识对象<br/>
      * 当左右标识均为当前实体下的直接属性字段时，子类应该覆写该方法
      *
-     * @param leftId
-     *            左标识
-     * @param rightId
-     *            右标识
+     * @param leftId  左标识
+     * @param rightId 右标识
      * @return 单个标识对象
      */
-    protected Serializable buildId(L leftId, R rightId) {
+    @Deprecated
+    private Serializable buildId(L leftId, R rightId) {
         return null;
     }
 
@@ -105,41 +101,41 @@ public abstract class HibernateRelationDaoSupport<T extends Relation<L, R>, L ex
 
     @Override
     public T increaseNumber(L leftId, R rightId, String propertyName, Number step) {
-        Number maxValue = getNumberPropertyMaxValue(propertyName);
-        if (maxValue != null && step.doubleValue() != 0) { // 属性为数值类型且增量不为0时才处理
+        double stepValue = step.doubleValue();
+        if (stepValue != 0) { // 增量不为0时才处理
+            String entityName = getEntityName();
             Binate<String, String> idProperty = getIdProperty();
             String leftIdProperty = idProperty.getLeft();
             String rightIdProperty = idProperty.getRight();
-            StringBuffer hql = new StringBuffer("update ").append(getEntityName()).append(" set ")
+            StringBuffer hql = new StringBuffer("update ").append(entityName).append(" set ")
                     .append(propertyName).append(Strings.EQUAL).append(propertyName)
-                    .append(Strings.PLUS).append(":step where ").append(leftIdProperty)
-                    .append("=:leftId and ").append(rightIdProperty).append("=:rightId and ")
-                    .append(propertyName + "+:step<=:maxValue");
+                    .append("+:step where ").append(leftIdProperty).append(Strings.EQUAL)
+                    .append("=:leftId and ").append(rightIdProperty).append("=:rightId and ");
             Map<String, Object> params = new HashMap<>();
             params.put("leftId", leftId);
             params.put("rightId", rightId);
             params.put("step", step);
-            params.put("maxValue", maxValue);
-            if (getHibernateTemplate().update(hql, params) == 0) { // 如果没有更新到记录，有可能是修改数值超出字段允许的最大值
-                // 此时，需要将数值字段修改为允许的最大值
-                hql = new StringBuffer("update ").append(getEntityName()).append(" set ")
-                        .append(propertyName).append(Strings.EQUAL).append(":maxValue where ")
-                        .append(leftIdProperty).append("=:leftId and ").append(rightIdProperty)
-                        .append("=:rightId and ").append(propertyName + "+:step>:maxValue");
-                if (getHibernateTemplate().update(hql, params) == 0) {
-                    // 如果还是没有更新到记录，说明根据id无法找到单体，直接返回null
-                    return null;
-                }
+
+            if (stepValue < 0) { // 增量为负时需限定最小值
+                Number minValue = getNumberPropertyMinValue(propertyName);
+                hql.append(propertyName).append("+:step>=:minValue");
+                params.put("minValue", minValue);
+            } else { // 增量为正时需限定最大值
+                Number maxValue = getNumberPropertyMaxValue(propertyName);
+                hql.append(propertyName).append("+:step<=:maxValue");
+                params.put("maxValue", maxValue);
+            }
+            if (getHibernateTemplate().update(hql, params) == 0) {
+                return null;
             }
             // 更新字段后需刷新实体
-            T realtion = find(leftId, rightId);
+            T unity = find(leftId, rightId);
             try {
-                refresh(realtion);
+                refresh(unity);
             } catch (Exception e) { // 忽略刷新失败
                 this.logger.error(e.getMessage(), e);
             }
-            ensurePropertyMinNumber(realtion, propertyName, step);
-            return realtion;
+            return unity;
         }
         return null;
     }
