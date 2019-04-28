@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.mapping.Column;
-import org.truenewx.core.util.MathUtil;
 import org.truenewx.data.model.Entity;
 import org.truenewx.data.orm.dao.Dao;
 import org.truenewx.data.orm.hibernate.HibernateTemplate;
@@ -32,36 +31,6 @@ public abstract class HibernateDaoSupport<T extends Entity> extends HibernateEnt
 
     protected final Column getColumn(String propertyName) {
         return getColumn(getEntityName(), propertyName);
-    }
-
-    @Override
-    protected Number getNumberPropertyMinValue(String propertyName) {
-        Number minValue = super.getNumberPropertyMinValue(propertyName);
-        if (minValue == null) {
-            Class<?> propertyClass = getPropertyClass(propertyName);
-            @SuppressWarnings("unchecked")
-            Class<? extends Number> type = (Class<? extends Number>) propertyClass;
-            Column column = getColumn(propertyName);
-            int precision = column.getPrecision();
-            int scale = column.getScale();
-            minValue = MathUtil.minValue(type, precision, scale);
-        }
-        return minValue;
-    }
-
-    @Override
-    protected Number getNumberPropertyMaxValue(String propertyName) {
-        Number maxValue = super.getNumberPropertyMaxValue(propertyName);
-        if (maxValue == null) {
-            Class<?> propertyClass = getPropertyClass(propertyName);
-            @SuppressWarnings("unchecked")
-            Class<? extends Number> type = (Class<? extends Number>) propertyClass;
-            Column column = getColumn(propertyName);
-            int precision = column.getPrecision();
-            int scale = column.getScale();
-            maxValue = MathUtil.maxValue(type, precision, scale);
-        }
-        return maxValue;
     }
 
     @Override

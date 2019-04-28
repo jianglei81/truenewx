@@ -5,6 +5,8 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 
 import org.apache.commons.lang3.StringUtils;
+import org.truenewx.core.functor.impl.FuncMaxNumber;
+import org.truenewx.core.functor.impl.FuncMinNumber;
 
 /**
  * 数学工具类
@@ -278,27 +280,12 @@ public class MathUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Number> T minValue(Class<T> type) {
-        if (type == Long.class) {
-            return (T) Long.valueOf(Long.MIN_VALUE);
-        } else if (type == Integer.class) {
-            return (T) Integer.valueOf(Integer.MIN_VALUE);
-        } else if (type == Short.class) {
-            return (T) Short.valueOf(Short.MIN_VALUE);
-        } else if (type == Byte.class) {
-            return (T) Byte.valueOf(Byte.MIN_VALUE);
-        } else if (type == Double.class) {
-            return (T) Double.valueOf(Double.MIN_VALUE);
-        } else if (type == Float.class) {
-            return (T) Float.valueOf(Float.MIN_VALUE);
-        } else if (type == BigDecimal.class) {
-            return (T) new BigDecimal(Double.MIN_VALUE);
-        }
-        return null;
+    public static <T extends Number> T minValue(Class<?> type) {
+        return (T) FuncMinNumber.INSTANCE.apply(type);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Number> T minValue(Class<T> type, int precision, int scale) {
+    public static <T extends Number> T minValue(Class<?> type, int precision, int scale) {
         T typeMinValue = minValue(type);
         if (typeMinValue != null) {
             if (precision == 0) {
@@ -343,27 +330,12 @@ public class MathUtil {
      * @return 最大值
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Number> T maxValue(Class<T> type) {
-        if (type == Long.class) {
-            return (T) Long.valueOf(Long.MAX_VALUE);
-        } else if (type == Integer.class) {
-            return (T) Integer.valueOf(Integer.MAX_VALUE);
-        } else if (type == Short.class) {
-            return (T) Short.valueOf(Short.MAX_VALUE);
-        } else if (type == Byte.class) {
-            return (T) Byte.valueOf(Byte.MAX_VALUE);
-        } else if (type == Double.class) {
-            return (T) Double.valueOf(Double.MAX_VALUE);
-        } else if (type == Float.class) {
-            return (T) Float.valueOf(Float.MAX_VALUE);
-        } else if (type == BigDecimal.class) {
-            return (T) new BigDecimal(Double.MAX_VALUE);
-        }
-        return null;
+    public static <T extends Number> T maxValue(Class<?> type) {
+        return (T) FuncMaxNumber.INSTANCE.apply(type);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Number> T maxValue(Class<T> type, int precision, int scale) {
+    public static <T extends Number> T maxValue(Class<?> type, int precision, int scale) {
         T typeMaxValue = maxValue(type);
         if (typeMaxValue != null) {
             if (precision == 0) {
