@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.truenewx.core.Strings;
 import org.truenewx.core.util.EncryptUtil;
 import org.truenewx.core.util.IOUtil;
+import org.truenewx.core.util.ImageUtil;
 import org.truenewx.web.tagext.UiTagSupport;
 
 import com.google.zxing.BarcodeFormat;
@@ -136,7 +137,7 @@ public class QrCodeTag extends UiTagSupport {
             bitMatrix = updateBit(bitMatrix, 0);
             // 将二维码转换为BufferedImage
             BufferedImage image = toBufferedImage(bitMatrix);
-            image = IOUtil.zoomImage(image, this.size);
+            image = ImageUtil.zoom(image, this.size);
             // 载入logo
             if (StringUtils.isNotEmpty(this.logo)) {
                 Image logoImage;
