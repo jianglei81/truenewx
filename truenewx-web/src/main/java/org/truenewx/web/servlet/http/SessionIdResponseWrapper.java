@@ -13,35 +13,15 @@ import javax.servlet.http.HttpSession;
  */
 public class SessionIdResponseWrapper extends HttpServletResponseWrapper {
 
-    public SessionIdResponseWrapper(final HttpServletRequest request,
-            final HttpServletResponse response) {
+    public SessionIdResponseWrapper(HttpServletRequest request,
+            HttpServletResponse response) {
         super(response);
         if (request.isRequestedSessionIdFromURL()) {
-            final HttpSession session = request.getSession(false);
+            HttpSession session = request.getSession(false);
             if (session != null) {
                 session.invalidate();
             }
         }
-    }
-
-    @Override
-    public String encodeRedirectUrl(final String url) {
-        return url;
-    }
-
-    @Override
-    public String encodeRedirectURL(final String url) {
-        return url;
-    }
-
-    @Override
-    public String encodeUrl(final String url) {
-        return url;
-    }
-
-    @Override
-    public String encodeURL(final String url) {
-        return url;
     }
 
 }
