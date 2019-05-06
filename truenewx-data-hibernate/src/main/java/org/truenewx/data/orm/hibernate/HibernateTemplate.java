@@ -150,12 +150,9 @@ public final class HibernateTemplate extends DataAccessTemplate {
     /**
      * 将指定参数名和参数值写入指定Hibernate查询对象中
      *
-     * @param query
-     *            Hibernate查询对象
-     * @param name
-     *            参数名
-     * @param value
-     *            参数值，除常见类型外，还支持Collection、数组、枚举
+     * @param query Hibernate查询对象
+     * @param name  参数名
+     * @param value 参数值，除常见类型外，还支持Collection、数组、枚举
      */
     public void applyParamToQuery(Query<?> query, String name, Object value) {
         if (value instanceof Collection) {
@@ -163,7 +160,7 @@ public final class HibernateTemplate extends DataAccessTemplate {
         } else if (value instanceof Object[]) { // 对象数组
             query.setParameterList(name, (Object[]) value);
         } else if (value != null) {
-            Class<? extends Object> clazz = value.getClass();
+            Class<?> clazz = value.getClass();
             if (clazz.isArray()) { // 基础数据数组
                 Collection<Object> collection = new ArrayList<>();
                 int length = Array.getLength(value);
@@ -198,7 +195,7 @@ public final class HibernateTemplate extends DataAccessTemplate {
 
     public void applyParamToQuery(Query<?> query, int position, Object value) {
         if (value != null) {
-            Class<? extends Object> clazz = value.getClass();
+            Class<?> clazz = value.getClass();
             if (clazz.isEnum()) {
                 Enum<?> enumConstant = (Enum<?>) value;
                 Field field = Enums.getField(enumConstant);
@@ -229,7 +226,6 @@ public final class HibernateTemplate extends DataAccessTemplate {
 
     /**
      * 获取Hibernate自定义映射类型<br/>
-     *
      * 详见：{@link org.hibernate.TypeHelper#custom(Class, Properties)}
      */
     public Type customType(Class<?> userTypeClass, Properties properties) {
