@@ -48,7 +48,7 @@ public class CleanUpFilter implements Filter {
     private boolean cookSessionId = false;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         String contextPathAttributeName = filterConfig.getInitParameter("contextPathAttributeName");
         if (contextPathAttributeName != null) {
             this.contextPathAttributeName = contextPathAttributeName;
@@ -88,6 +88,7 @@ public class CleanUpFilter implements Filter {
             try {
                 return context.getBean(PlaceholderResolver.class);
             } catch (BeansException e) {
+                // 忽略此异常
             }
         }
         return null;
