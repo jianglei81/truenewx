@@ -39,6 +39,7 @@ public class CleanUpFilter implements Filter {
      * 根路径属性名
      */
     private String contextPathAttributeName = "context";
+    private String actionAttributeName;
     private String profile;
     private Map<String, String> attributes = new HashMap<>();
     /**
@@ -47,10 +48,14 @@ public class CleanUpFilter implements Filter {
     private boolean cookSessionId = false;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         String contextPathAttributeName = filterConfig.getInitParameter("contextPathAttributeName");
-        if (StringUtils.isNotBlank(contextPathAttributeName)) {
+        if (contextPathAttributeName != null) {
             this.contextPathAttributeName = contextPathAttributeName;
+        }
+        String actionAttributeName = filterConfig.getInitParameter("actionAttributeName");
+        if (actionAttributeName != null) {
+            this.actionAttributeName = actionAttributeName;
         }
 
         this.profile = filterConfig.getServletContext().getInitParameter("spring.profiles.active");
@@ -83,6 +88,7 @@ public class CleanUpFilter implements Filter {
             try {
                 return context.getBean(PlaceholderResolver.class);
             } catch (BeansException e) {
+                // 忽略此异常
             }
         }
         return null;
@@ -100,8 +106,14 @@ public class CleanUpFilter implements Filter {
         response = new SessionIdResponseWrapper(request, response);
 
         // 生成简单的相对访问根路径属性
-        String contextPath = request.getContextPath();
-        request.setAttribute(this.contextPathAttributeName, contextPath);
+        if (StringUtils.isNotBlank(this.contextPathAttributeName)) {
+            request.setAttribute(this.contextPathAttributeName, request.getContextPath());
+        }
+        // 生成当前请求动作地址
+        if (StringUtils.isNotBlank(this.actionAttributeName)) {
+            request.setAttribute(this.actionAttributeName,
+                    WebUtil.getRelativeRequestAction(request));
+        }
         // 生成环境属性
         if (this.profile != null) {
             request.setAttribute("profile", this.profile);
