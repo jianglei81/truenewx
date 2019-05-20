@@ -30,6 +30,8 @@ import org.springframework.web.util.WebUtils;
 import org.truenewx.core.Strings;
 import org.truenewx.core.util.StringUtil;
 
+import com.aliyun.oss.internal.Mimetypes;
+
 /**
  * Web相关工具类
  *
@@ -543,7 +545,6 @@ public class WebUtil {
      * @param cookieName  cookie名称
      * @param cookieValue cookie值
      * @param maxAge      有效时间，单位：秒
-     *
      * @author jianglei
      */
     public static void addCookie(HttpServletRequest request, HttpServletResponse response,
@@ -572,7 +573,6 @@ public class WebUtil {
      * @param response 响应
      * @param name     cookie名称
      * @param path     cookie路径
-     *
      * @author jianglei
      */
     public static void removeCookie(HttpServletResponse response, String name, String path) {
@@ -587,7 +587,6 @@ public class WebUtil {
      *
      * @param request 请求
      * @return include方式的请求URI
-     *
      * @author jianglei
      */
     public static String getIncludeRequestUri(ServletRequest request) {
@@ -605,13 +604,10 @@ public class WebUtil {
     }
 
     /**
-     * 获取访问者ip地址
-     *
-     * nginx配置i添加 proxy_set_header X-Real-IP $remote_addr;
+     * 获取访问者ip地址 nginx配置i添加 proxy_set_header X-Real-IP $remote_addr;
      *
      * @param request
      * @return
-     *
      * @author jianglei
      */
     public static String getRemoteAddrIp(HttpServletRequest request) {
@@ -676,6 +672,22 @@ public class WebUtil {
             String name = names.nextElement();
             request.setAttribute(name, request.getParameter(name));
         }
+    }
+
+    public static void setDownloadFilename(HttpServletRequest request, HttpServletResponse response,
+            String filename) {
+        response.setContentType(Mimetypes.getInstance().getMimetype(filename));
+        String userAgent = request.getHeader("User-Agent").toUpperCase();
+        try {
+            if (userAgent.contains("MSIE") || userAgent.contains("TRIDENT")) {
+                filename = URLEncoder.encode(filename, Strings.ENCODING_UTF8);
+            } else {
+                filename = new String(filename.getBytes(Strings.ENCODING_UTF8), "ISO8859-1");
+            }
+        } catch (UnsupportedEncodingException e) {
+            LoggerFactory.getLogger(WebUtil.class).error(e.getLocalizedMessage(), e);
+        }
+        response.setHeader("content-disposition", "attachment;filename=" + filename);
     }
 
 }
