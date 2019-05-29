@@ -16,6 +16,7 @@ function rpc(formObj) {
 }
 $(function() {
     selectMenu(1);
+    $.tnx.setContext("${context}", "${context}");
 });
 </script>
 </head>
