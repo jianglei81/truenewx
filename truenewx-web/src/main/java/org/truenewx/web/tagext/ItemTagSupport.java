@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import javax.servlet.jsp.JspException;
 
@@ -22,7 +23,7 @@ public abstract class ItemTagSupport extends UiTagSupport {
     protected Object items;
     protected Object value;
     protected boolean emptyItem;
-    protected String emptyItemValue = "";
+    protected String emptyItemValue = Strings.EMPTY;
     protected String emptyItemText = "&nbsp;";
     protected String itemValueProperty;
     protected String itemTextProperty;
@@ -130,19 +131,17 @@ public abstract class ItemTagSupport extends UiTagSupport {
     }
 
     /**
-     * 判断指定取值是否当前值
+     * 判断指定选项值是否当前值
      *
-     * @param value 取值
-     * @return 指定取值是否当前值
+     * @param itemValue 选项值
+     * @return 指定选项值是否当前值
      */
-    protected boolean isCurrentValue(Object value) {
-        if (this.value == null) {
-            this.value = Strings.EMPTY;
-        }
-        if (!(this.value instanceof String) && value instanceof String) {
-            return this.value.toString().equals(value);
-        } else {
-            return this.value.equals(value);
+    protected boolean isCurrentValue(String itemValue) {
+        String value = this.value == null ? Strings.EMPTY : this.value.toString();
+        if (StringUtils.isEmpty(value)) { // 当前值为空，则看选项值是否为设置的空选项值
+            return Objects.equals(this.emptyItemValue, itemValue);
+        } else { // 当前值不为空，则看选项值是否为当前值
+            return value.equals(itemValue);
         }
     }
 

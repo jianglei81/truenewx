@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
 
-import org.truenewx.core.Strings;
 import org.truenewx.core.enums.support.EnumDictResolver;
 import org.truenewx.core.enums.support.EnumItem;
 import org.truenewx.core.enums.support.EnumType;
@@ -36,14 +35,6 @@ public abstract class EnumItemTagSupport extends ItemTagSupport {
             this.items = enumType.getItems();
             super.doTag();
         }
-    }
-
-    @Override
-    protected boolean isCurrentValue(Object value) {
-        if (this.value == null) {
-            this.value = Strings.EMPTY;
-        }
-        return this.value.toString().equals(value.toString());
     }
 
     @Override

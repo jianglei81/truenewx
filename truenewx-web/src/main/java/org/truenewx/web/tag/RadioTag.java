@@ -35,16 +35,18 @@ public class RadioTag extends ItemTagSupport {
     }
 
     @Override
-    protected boolean isCurrentValue(Object value) {
-        // 当前值为空，则将第一个选项的值视为当前值
-        if (this.value == null
-                || (this.value instanceof String && StringUtils.isBlank((String) this.value))) {
-            Object firstItem = CollectionUtil.get(getItems(), 0);
-            if (firstItem != null) {
-                return getItemValue(firstItem).equals(value);
+    protected boolean isCurrentValue(String itemValue) {
+        // 如果不允许空选项，但当前值为空，则将第一个选项的值视为当前值
+        if (!this.emptyItem) {
+            String value = this.value == null ? Strings.EMPTY : this.value.toString();
+            if (StringUtils.isEmpty(value)) {
+                Object firstItem = CollectionUtil.get(getItems(), 0);
+                if (firstItem != null) {
+                    return getItemValue(firstItem).equals(itemValue);
+                }
             }
         }
-        return super.isCurrentValue(value);
+        return super.isCurrentValue(itemValue);
     }
 
 }

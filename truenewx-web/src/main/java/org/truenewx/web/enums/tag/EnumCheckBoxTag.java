@@ -24,8 +24,8 @@ public class EnumCheckBoxTag extends EnumItemTagSupport {
     }
 
     @Override
-    protected boolean isCurrentValue(Object value) {
-        boolean result = super.isCurrentValue(value);
+    protected boolean isCurrentValue(String itemValue) {
+        boolean result = super.isCurrentValue(itemValue);
         if (!result) {
             String[] values;
             if (this.value instanceof String) {
@@ -35,10 +35,10 @@ public class EnumCheckBoxTag extends EnumItemTagSupport {
             } else {
                 return false;
             }
-            if (value != null) {
-                value = value.toString();
+            if (itemValue != null) {
+                itemValue = itemValue.toString();
             }
-            return ArrayUtils.contains(values, value);
+            return ArrayUtils.contains(values, itemValue);
         }
         return result;
     }

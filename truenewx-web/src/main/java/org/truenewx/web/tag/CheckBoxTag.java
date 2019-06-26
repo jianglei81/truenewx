@@ -20,8 +20,8 @@ public class CheckBoxTag extends ItemTagSupport {
     }
 
     @Override
-    protected boolean isCurrentValue(Object value) {
-        boolean result = super.isCurrentValue(value);
+    protected boolean isCurrentValue(String itemValue) {
+        boolean result = super.isCurrentValue(itemValue);
         if (!result) {
             String[] values;
             if (this.value instanceof String) {
@@ -31,7 +31,7 @@ public class CheckBoxTag extends ItemTagSupport {
             } else {
                 return false;
             }
-            return ArrayUtils.contains(values, value);
+            return ArrayUtils.contains(values, itemValue);
         }
         return result;
     }
