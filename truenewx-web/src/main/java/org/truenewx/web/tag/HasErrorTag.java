@@ -3,8 +3,6 @@ package org.truenewx.web.tag;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.truenewx.core.exception.MultiException;
-import org.truenewx.core.exception.SingleException;
 import org.truenewx.web.tagext.ErrorTagSupport;
 
 /**
@@ -19,21 +17,7 @@ public class HasErrorTag extends ErrorTagSupport {
 
     @Override
     public int doStartTag() throws JspException {
-        final Object obj = getException();
-        if (obj != null) {
-            if (obj instanceof SingleException) {
-                final SingleException se = (SingleException) obj;
-                if (se.matches(this.field)) {
-                    return Tag.EVAL_BODY_INCLUDE;
-                }
-            } else if (obj instanceof MultiException) {
-                final MultiException me = (MultiException) obj;
-                if (me.containsPropertyException(this.field)) {
-                    return Tag.EVAL_BODY_INCLUDE;
-                }
-            }
-        }
-        return Tag.SKIP_BODY;
+        return matches() ? Tag.EVAL_BODY_INCLUDE : Tag.SKIP_BODY;
     }
 
     @Override

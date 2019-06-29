@@ -28,37 +28,36 @@ public class ErrorsTag extends ErrorTagSupport {
 
     private String suffix;
 
-    public void setDelimiter(final String delimiter) {
+    public void setDelimiter(String delimiter) {
         this.delimiter = delimiter;
     }
 
-    public void setSuffix(final String suffix) {
+    public void setSuffix(String suffix) {
         this.suffix = suffix;
     }
 
     @Override
     public int doEndTag() throws JspException {
-        final Object obj = getException();
+        Object obj = getException();
         if (obj != null) {
-            final ApplicationContext context = SpringWebUtil
-                            .getApplicationContext(this.pageContext);
-            final SingleExceptionMessageResolver messageResolver = SpringUtil
-                            .getBeanByDefaultName(context, SingleExceptionMessageResolver.class);
+            ApplicationContext context = SpringWebUtil.getApplicationContext(this.pageContext);
+            SingleExceptionMessageResolver messageResolver = SpringUtil
+                    .getBeanByDefaultName(context, SingleExceptionMessageResolver.class);
 
-            final StringBuffer message = new StringBuffer();
+            StringBuffer message = new StringBuffer();
             if (obj instanceof SingleException) {
-                final SingleException se = (SingleException) obj;
+                SingleException se = (SingleException) obj;
                 if (se.matches(this.field)) {
                     message.append(messageResolver.resolveMessage(se,
-                                    this.pageContext.getRequest().getLocale()));
+                            this.pageContext.getRequest().getLocale()));
                 }
             } else if (obj instanceof MultiException) {
-                final MultiException me = (MultiException) obj;
+                MultiException me = (MultiException) obj;
                 // 遍历同一filed中的多个异常信息
-                for (final SingleException se : me) {
+                for (SingleException se : me) {
                     if (se.matches(this.field)) {
                         message.append(messageResolver.resolveMessage(se,
-                                        this.pageContext.getRequest().getLocale()));
+                                this.pageContext.getRequest().getLocale()));
                         message.append(this.delimiter);
                     }
                 }
@@ -70,10 +69,10 @@ public class ErrorsTag extends ErrorTagSupport {
                 message.append(this.suffix);
             }
 
-            final JspWriter out = this.pageContext.getOut();
+            JspWriter out = this.pageContext.getOut();
             try {
                 out.print(message);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw new JspException(e);
             }
         }

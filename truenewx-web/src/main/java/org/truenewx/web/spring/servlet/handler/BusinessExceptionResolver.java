@@ -80,12 +80,9 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
     /**
      * 以错误消息的方式处理异常
      *
-     * @param e
-     *            异常
-     * @param response
-     *            HTTP响应
-     * @param respondErrorStatus
-     *            是否返回表示业务异常的Response错误状态码
+     * @param e                  异常
+     * @param response           HTTP响应
+     * @param respondErrorStatus 是否返回表示业务异常的Response错误状态码
      * @return 模型视图
      */
     private ModelAndView handleExceptionToMessage(Exception e, Locale locale,
@@ -125,14 +122,10 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
     /**
      * 通过显示错误页面的方式处理异常
      *
-     * @param request
-     *            HTTP请求
-     * @param handlerMethod
-     *            MVC处理方法
-     * @param he
-     *            可处理的异常
+     * @param request       HTTP请求
+     * @param handlerMethod MVC处理方法
+     * @param he            可处理的异常
      * @return 模型视图
-     *
      * @author jianglei
      */
     private ModelAndView handleExceptionToPage(HttpServletRequest request,
@@ -188,12 +181,11 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
     /**
      * 打印业务异常
      *
-     * @param e
-     *            业务异常
+     * @param e 业务异常
      */
     private void logException(BusinessException e) {
         if (this.logger.isErrorEnabled()) {
-            StringBuffer message = new StringBuffer(e.getCode());
+            StringBuffer message = new StringBuffer("====== ").append(e.getCode());
             String args = StringUtils.join(e.getArgs(), Strings.COMMA);
             if (args.length() > 0) {
                 message.append(Strings.COLON).append(args);
@@ -202,6 +194,7 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
                 message.append(Strings.LEFT_BRACKET).append(e.getProperty())
                         .append(Strings.RIGHT_BRACKET);
             }
+            message.append(" ======");
             this.logger.error(message);
         }
     }
