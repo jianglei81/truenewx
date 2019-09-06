@@ -2,11 +2,7 @@ package org.truenewx.core.serializer;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Date;
-
-import org.truenewx.core.util.TemporalUtil;
 
 import com.alibaba.fastjson.parser.DefaultJSONParser;
 import com.alibaba.fastjson.serializer.JSONSerializer;
@@ -26,12 +22,6 @@ public class JsonDateCodec extends LongCodec {
         if (object instanceof Date) {
             Date date = (Date) object;
             serializer.write(date.getTime());
-        } else if (object instanceof Instant) {
-            Instant instant = (Instant) object;
-            serializer.write(instant.toEpochMilli());
-        } else if (object instanceof LocalDateTime) {
-            LocalDateTime dateTime = (LocalDateTime) object;
-            serializer.write(TemporalUtil.toInstant(dateTime).toEpochMilli());
         } else {
             serializer.writeNull();
         }

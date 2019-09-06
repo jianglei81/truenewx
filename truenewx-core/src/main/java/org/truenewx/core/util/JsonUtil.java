@@ -4,8 +4,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -42,14 +40,10 @@ public class JsonUtil {
         serializeConfig.put(Date.class, dateCodec);
         serializeConfig.put(java.sql.Date.class, dateCodec);
         serializeConfig.put(Timestamp.class, dateCodec);
-        serializeConfig.put(Instant.class, dateCodec);
-        serializeConfig.put(LocalDateTime.class, dateCodec);
         ParserConfig parserConfig = ParserConfig.getGlobalInstance();
         parserConfig.putDeserializer(Date.class, dateCodec);
         parserConfig.putDeserializer(java.sql.Date.class, dateCodec);
         parserConfig.putDeserializer(Timestamp.class, dateCodec);
-        parserConfig.putDeserializer(Instant.class, dateCodec);
-        parserConfig.putDeserializer(LocalDateTime.class, dateCodec);
         parserConfig.setAutoTypeSupport(true);
     }
 
