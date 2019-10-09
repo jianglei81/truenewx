@@ -1,15 +1,17 @@
 package org.truenewx.data.query;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * 查询结果实现
  *
+ * @param <R> 结果记录类型
  * @author jianglei
  * @since JDK 1.8
- * @param <R> 结果记录类型
  */
 public class QueryResult<R> implements Iterable<R> {
     /**
@@ -68,6 +70,14 @@ public class QueryResult<R> implements Iterable<R> {
     @Override
     public Iterator<R> iterator() {
         return this.records.iterator();
+    }
+
+    public <T> QueryResult<T> transfer(Function<R, T> function) {
+        List<T> list = new ArrayList<>();
+        this.records.forEach(record -> {
+            list.add(function.apply(record));
+        });
+        return new QueryResult<>(list, this.paging);
     }
 
 }
