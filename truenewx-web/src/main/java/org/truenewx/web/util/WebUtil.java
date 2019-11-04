@@ -690,4 +690,13 @@ public class WebUtil {
         response.setHeader("content-disposition", "attachment;filename=" + filename);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T removeAttribute(HttpSession session, String name) {
+        Object value = session.getAttribute(name);
+        if (value != null) {
+            session.removeAttribute(name);
+        }
+        return (T) value;
+    }
+
 }
