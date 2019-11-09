@@ -44,22 +44,22 @@ $.fn.show = function() {
  * 控制台工具
  */
 $.console = {
-    debug : function(message) {
+    debug: function(message) {
         if (typeof console == "object" && typeof console.debug == "function") {
             console.debug(message);
         }
     },
-    error : function(message) {
+    error: function(message) {
         if (typeof console == "object" && typeof console.error == "function") {
             console.error(message);
         }
     },
-    info : function(message) {
+    info: function(message) {
         if (typeof console == "object" && typeof console.info == "function") {
             console.info(message);
         }
     },
-    warn : function(message) {
+    warn: function(message) {
         if (typeof console == "object" && typeof console.warn == "function") {
             console.warn(message);
         }
@@ -67,7 +67,7 @@ $.console = {
 };
 
 $.bootstrap = {
-    getVersion : function() {
+    getVersion: function() {
         if ($.isFunction($.fn.typeahead)) {
             return 2;
         }
@@ -207,7 +207,7 @@ $.Object = {
     /**
      * 织入函数
      */
-    weave : function(target, before, functionName, after) {
+    weave: function(target, before, functionName, after) {
         if (target) {
             if (typeof before == "string") {
                 after = functionName;
@@ -253,7 +253,7 @@ $.String = {
      * @param url
      *            URL
      */
-    getUpperUrl : function(url) {
+    getUpperUrl: function(url) {
         var index = url.lastIndexOf("/");
         return url.substring(0, index);
     },
@@ -266,7 +266,7 @@ $.String = {
      *            相对路径
      * @returns 绝对路径
      */
-    getUrlToJs : function(jsFileName, relativePath) {
+    getUrlToJs: function(jsFileName, relativePath) {
         if (!jsFileName.startsWith("/")) {
             jsFileName = "/" + jsFileName;
         }
@@ -306,7 +306,7 @@ $.String = {
      * 
      * @returns 处理后的文本
      */
-    cut : function(str, maxLen, replaceStr) {
+    cut: function(str, maxLen, replaceStr) {
         var strLen = str.length, cutLen = maxLen || 0;
         replaceStr = replaceStr || "";
 
@@ -321,7 +321,7 @@ $.String = {
 
         return str.substring(0, cutLen) + replaceStr;
     },
-    getRelativeUrl : function(context, withParameter) {
+    getRelativeUrl: function(context, withParameter) {
         var url = window.location.href;
         // 去掉协议部分
         var index = url.indexOf("://");
@@ -349,20 +349,20 @@ $.String = {
 };
 
 $.tnx = {
-    name : "truenewx",
-    version : "2.0.0",
-    encoding : "UTF-8",
-    context : "",
-    locale : "zh_CN",
-    messages : {
-        "alert.title" : "提示",
-        "alert.ok" : "确定",
-        "confirm.title" : "确定",
-        "confirm.yes" : "确定",
-        "confirm.no" : "取消",
-        "error.title" : "错误"
+    name: "truenewx",
+    version: "2.0.0",
+    encoding: "UTF-8",
+    context: "",
+    locale: "zh_CN",
+    messages: {
+        "alert.title": "提示",
+        "alert.ok": "确定",
+        "confirm.title": "确定",
+        "confirm.yes": "确定",
+        "confirm.no": "取消",
+        "error.title": "错误"
     },
-    setContext : function(context, siteContext, locale) {
+    setContext: function(context, siteContext, locale) {
         this.context = context;
         this.siteContext = siteContext;
         if (locale) { // 最多只允许一个下划线，多余的部分去掉
@@ -376,14 +376,14 @@ $.tnx = {
         }
         this.initMessages($.tnx, locale);
     },
-    getFullSiteContext : function() {
+    getFullSiteContext: function() {
         var root = window.location.protocol + "//" + window.location.hostname;
         if (window.location.port != 80 && window.location.port != 443) {
             root += ":" + window.location.port;
         }
         return root + this.siteContext;
     },
-    initMessages : function(component, locale, context, path, callback) {
+    initMessages: function(component, locale, context, path, callback) {
         component.locale = component.locale || "zh_CN"; // 组件的默认语言区域一律为简体中文
         locale = locale || $.tnx.locale;
         if (component.locale != locale) {
@@ -400,12 +400,12 @@ $.tnx = {
                 var name = path.substr(index + 1);
                 path = path.substr(0, index);
                 $.i18n.properties({
-                    name : name,
-                    path : context + path + "/i18n/",
-                    mode : "map",
-                    language : locale,
-                    cache : true,
-                    callback : function() {
+                    name: name,
+                    path: context + path + "/i18n/",
+                    mode: "map",
+                    language: locale,
+                    cache: true,
+                    callback: function() {
                         $.each(component.messages, function(key, value) {
                             component.messages[key] = $.i18n.map[key];
                         });
@@ -417,7 +417,7 @@ $.tnx = {
             }
         }
     },
-    message : function(component, code, args) {
+    message: function(component, code, args) {
         var messages = component.messages;
         if (code) {
             if (messages) {
@@ -436,7 +436,7 @@ $.tnx = {
             return messages;
         }
     },
-    namespace : function(namespace) {
+    namespace: function(namespace) {
         var names = namespace.split(".");
         var space = null;
         // 判断第一级对象是否已存在，若不存在则初始化为{}
@@ -451,7 +451,7 @@ $.tnx = {
         }
         return space;
     },
-    imports : function(url, callback, serial) {
+    imports: function(url, callback, serial) {
         var cssUrls = [];
         var jsUrls = [];
         var funcTypeUrl = function(url) {
@@ -463,9 +463,9 @@ $.tnx = {
             }
             if (url.toLowerCase().endsWith(".js")) {
                 jsUrls.push({
-                    src : url + params,
-                    type : "text/javascript",
-                    charset : $.tnx.encoding
+                    src: url + params,
+                    type: "text/javascript",
+                    charset: $.tnx.encoding
                 });
             } else if (url.toLowerCase().endsWith(".css")) {
                 cssUrls.push(url + params);
@@ -510,7 +510,7 @@ $.tnx = {
             }
         }
     },
-    maxZIndex : function(objs) {
+    maxZIndex: function(objs) {
         var result = -1;
         $.each(objs, function(i, obj) {
             var zIndex = Number($(obj).css("zIndex"));
@@ -523,7 +523,7 @@ $.tnx = {
     /**
      * 获取最小的可位于界面顶层的ZIndex
      */
-    minTopZIndex : function(step) {
+    minTopZIndex: function(step) {
         var maxValue = 2147483584; // 允许的最大值，取各浏览器支持的最大值中的最小一个（Opera）
         var maxZIndex = this.maxZIndex($("body *")); // 已有DOM元素中的最高层级
         if (maxZIndex > maxValue - step) {
@@ -541,7 +541,7 @@ $.tnx = {
      *            相对URL基于的文件名
      * @returns 模板对象
      */
-    loadTemplate : function(relativeUrl, baseFile) {
+    loadTemplate: function(relativeUrl, baseFile) {
         if (!$.tnx._templates) {
             $.tnx._templates = {};
         }
@@ -554,7 +554,7 @@ $.tnx = {
         if (!$.tnx._templates[baseFile][relativeUrl]) {
             var url = $.String.getUrlToJs(baseFile, relativeUrl);
             var response = $.ajax(url, {
-                async : false
+                async: false
             });
             if (response.status == 200) {
                 $.tnx._templates[baseFile][relativeUrl] = response.responseText.trim();
@@ -562,7 +562,7 @@ $.tnx = {
         }
         return $.tnx._templates[baseFile][relativeUrl];
     },
-    alert : function(content, title, callback) {
+    alert: function(content, title, callback) {
         if (typeof title == "function") {
             callback = title;
             title = undefined;
@@ -571,22 +571,22 @@ $.tnx = {
             title = $.tnx.message($.tnx, "alert.title");
         }
         this.dialog(title, content, [ {
-            text : $.tnx.message($.tnx, "alert.ok"),
-            "class" : "btn-primary",
-            focus : true,
-            click : function() {
+            text: $.tnx.message($.tnx, "alert.ok"),
+            "class": "btn-primary",
+            focus: true,
+            click: function() {
                 if (callback) {
                     callback.apply(this);
                 }
                 this.close();
             }
         } ], {
-            events : {
-                close : callback
+            events: {
+                close: callback
             }
         });
     },
-    confirm : function(content, callback, options) {
+    confirm: function(content, callback, options) {
         // 不限制回调函数和选项对象的顺序
         if (!options) {
             options = {};
@@ -603,30 +603,30 @@ $.tnx = {
             buttonStyle += "margin-left: 10px;";
         }
         this.dialog(title, content, [ {
-            text : yesText,
-            "class" : "btn-primary",
-            style : buttonStyle,
-            focus : true,
-            click : function() {
+            text: yesText,
+            "class": "btn-primary",
+            style: buttonStyle,
+            focus: true,
+            click: function() {
                 if (callback) {
                     callback.call(this, true);
                 }
                 this.close();
             }
         }, {
-            text : noText,
-            "class" : "btn-default",
-            style : buttonStyle,
-            click : function() {
+            text: noText,
+            "class": "btn-default",
+            style: buttonStyle,
+            click: function() {
                 if (callback) {
                     callback.call(this, false);
                 }
                 this.close();
             }
         } ], {
-            maxWidth : options.maxWidth,
-            events : {
-                close : function() {
+            maxWidth: options.maxWidth,
+            events: {
+                close: function() {
                     callback.call(this, false);
                 }
             }
@@ -645,7 +645,7 @@ $.tnx = {
      *            选项，形如：{ title: "标题", type: "GET", //或'POST'，默认为'GET' callback: function(){
      *            //窗体显示完全后调用的回调函数，其this为模态对话框窗体jquery对象，有一个参数为内容的容器jquery对象 } }
      */
-    open : function(url, params, buttons, options) {
+    open: function(url, params, buttons, options) {
         if ($.isArray(params)) {
             options = options || buttons;
             buttons = params;
@@ -653,13 +653,13 @@ $.tnx = {
         }
         options = options || {};
         var resp = $.ajax(url, {
-            cache : false,
-            data : params,
-            type : options.type,
-            dataType : "html",
-            contentType : "application/x-www-form-urlencoded; charset=" + $.tnx.encoding, // 不能更改
-            error : options.error,
-            success : function(html) {
+            cache: false,
+            data: params,
+            type: options.type,
+            dataType: "html",
+            contentType: "application/x-www-form-urlencoded; charset=" + $.tnx.encoding, // 不能更改
+            error: options.error,
+            success: function(html) {
                 html = html.trim();
                 var container;
                 if (html.toLowerCase().startsWith("<body")) {
@@ -690,15 +690,15 @@ $.tnx = {
                     width += "px";
                 }
                 $.tnx.dialog(title, html, buttons, {
-                    width : width,
-                    backdrop : options.backdrop,
-                    events : events
+                    width: width,
+                    backdrop: options.backdrop,
+                    events: events
                 });
             }
         });
         resp.fail(options.error);
     },
-    ajax : function(url, params, callback, type) {
+    ajax: function(url, params, callback, type) {
         if (typeof params == "function") {
             type = callback;
             callback = params;
@@ -709,11 +709,11 @@ $.tnx = {
             callback = undefined;
         }
         var options = {
-            cache : false,
-            data : params,
-            type : type || "GET",
-            dataType : "html",
-            contentType : "application/x-www-form-urlencoded; charset=" + $.tnx.encoding // 不能更改
+            cache: false,
+            data: params,
+            type: type || "GET",
+            dataType: "html",
+            contentType: "application/x-www-form-urlencoded; charset=" + $.tnx.encoding // 不能更改
         };
         if (callback) {
             options.success = callback;
@@ -736,15 +736,15 @@ $.tnx = {
      * @param callback
      *            闪现完成后的回调函数
      */
-    flash : function(content, timeout, callback) {
+    flash: function(content, timeout, callback) {
         if (typeof timeout == "function") {
             callback = timeout;
             timeout = undefined;
         }
         var options = {
-            backdrop : false,
-            events : {
-                shown : function() {
+            backdrop: false,
+            events: {
+                shown: function() {
                     var dialogObj = this;
                     if (typeof timeout != "number" || timeout < 0) {
                         timeout = 1500; // 默认显示1.5秒
@@ -753,17 +753,29 @@ $.tnx = {
                         dialogObj.close();
                     }, timeout);
                 },
-                hidden : callback
+                hidden: callback
             }
         };
-        if (typeof content == "string") {
-            content += "<button type=\"button\" class=\"close\">&times;</button>";
-        } else if (content instanceof jQuery) {
-            content.after("<button type=\"button\" class=\"close\">&times;</button>");
-        }
         this.dialog(undefined, content, undefined, options);
     },
-    cache : function(key, value) {
+    showLoading: function(content) {
+        var _this = this;
+        var options = {
+            width: 300,
+            events: {
+                shown: function() {
+                    _this.loadingDialog = this;
+                }
+            }
+        };
+        this.dialog(undefined, content, undefined, options);
+    },
+    hideLoading: function() {
+        if (this.loadingDialog) {
+            this.loadingDialog.close();
+        }
+    },
+    cache: function(key, value) {
         return $.data(document, key, value);
     }
 };
@@ -775,7 +787,7 @@ $.tnx.pager = {
      * @param pageSize
      *            页大小
      */
-    changePageSize : function(pageSize) {
+    changePageSize: function(pageSize) {
         var formObj = $("#pageNo")[0].form;
         $("#pageSize").val(pageSize);
         if ($.cookie) {
@@ -798,7 +810,7 @@ $.tnx.pager = {
      * @param pageNo
      *            指定页
      */
-    toPage : function(ele, pageNo) {
+    toPage: function(ele, pageNo) {
         var $ele = $(ele), $form = $ele.parents("form")[0];
         if (!pageNo) {
             pageNo = $("#pageNo", $form).val();
@@ -817,14 +829,14 @@ $.tnx.pager = {
             $form.submit();
         }
     },
-    pageNoKeydown : function(event) {
+    pageNoKeydown: function(event) {
         var keyCode = event.which;
         if (keyCode == 13) {
             this.toPage();
             return false;
         }
     },
-    pageNoKeyup : function(el) {
+    pageNoKeyup: function(el) {
         var value = $(el).val();
         if (!(/^\d+$/.test(value)) || parseInt(value) <= 0) {
             var re = /[^\d]/g;
@@ -842,8 +854,8 @@ $.tnx.pager = {
  */
 $.tnx.rpcs = {}; // RPC对象缓存
 $.tnx.rpc = {
-    requestType : "POST",
-    invoke : function(beanId, methodName, args, success, error, contextUrl) {
+    requestType: "POST",
+    invoke: function(beanId, methodName, args, success, error, contextUrl) {
         if (typeof args == "function") {
             contextUrl = error;
             error = success;
@@ -851,14 +863,14 @@ $.tnx.rpc = {
             args = [];
         }
         var options = {
-            cache : false,
-            type : this.requestType,
-            contentType : "application/x-www-form-urlencoded; charset=" + $.tnx.encoding,// 不能更改
-            dataType : "json"
+            cache: false,
+            type: this.requestType,
+            contentType: "application/x-www-form-urlencoded; charset=" + $.tnx.encoding,// 不能更改
+            dataType: "json"
         };
         if ($.isArray(args)) { // 数组型参数
             options.data = {
-                args : $.toJSON(args)
+                args: $.toJSON(args)
             };
         } else { // Map型参数
             options.data = args;
@@ -888,7 +900,7 @@ $.tnx.rpc = {
         }
         return this._request(url, options, error);
     },
-    _request : function(url, options, error) {
+    _request: function(url, options, error) {
         options.contentType = "application/x-www-form-urlencoded; charset=" + $.tnx.encoding; // 不能更改
         var resp = $.ajax(url, options);
         if (options.async === false) { // 同步，则返回结果
@@ -906,7 +918,7 @@ $.tnx.rpc = {
      *            错误回调函数
      * @return 如果没有错误返回true，否则返回false
      */
-    _handleErrors : function(response, error, loginedCallback) {
+    _handleErrors: function(response, error, loginedCallback) {
         if (response.status == 200) {
             return true;
         }
@@ -938,7 +950,7 @@ $.tnx.rpc = {
     /**
      * 默认错误处理函数
      */
-    error : function(error) {
+    error: function(error) {
         var message = undefined;
         if ($.isArray(error)) {
             message = "";
@@ -953,10 +965,10 @@ $.tnx.rpc = {
         }
         this.showErrorMessage(message);
     },
-    showErrorMessage : function(message) {
+    showErrorMessage: function(message) {
         $.tnx.alert(message, $.tnx.message($.tnx, "error.title"));
     },
-    imports : function(beanId, callback, contextUrl) {
+    imports: function(beanId, callback, contextUrl) {
         // 如果callback和contextUrl参数位置相反，则调换过来
         if (typeof (callback) == "string" && typeof (contextUrl) == "function") {
             var temp = callback;
@@ -979,10 +991,10 @@ $.tnx.rpc = {
             url = $.tnx.siteContext + "/rpc/methods/" + beanId + ".json";
         }
         var options = {
-            cache : false,
-            async : false,
-            dataType : "json",
-            contentType : "application/x-www-form-urlencoded; charset=" + $.tnx.encoding // 不能更改
+            cache: false,
+            async: false,
+            dataType: "json",
+            contentType: "application/x-www-form-urlencoded; charset=" + $.tnx.encoding // 不能更改
         };
 
         if (callback) {
@@ -1010,7 +1022,7 @@ $.tnx.rpc = {
             }
         }
     },
-    _buildRpcObject : function(beanId, methodNames, contextUrl) {
+    _buildRpcObject: function(beanId, methodNames, contextUrl) {
         var _this = this;
         var rpcObject = {};
         $.each(methodNames, function(index, methodName) {
@@ -1049,7 +1061,7 @@ $.tnx.rpc = {
         }
         return rpcObject;
     },
-    _buildRpcFunction : function(beanId, methodName, contextUrl) {
+    _buildRpcFunction: function(beanId, methodName, contextUrl) {
         var _this = this;
         return function() {
             var success = undefined;
@@ -1072,13 +1084,13 @@ $.tnx.rpc = {
             return _this.invoke(beanId, methodName, args, success, error, contextUrl);
         }
     },
-    _buildEnumTypeModel : function(enumType) {
+    _buildEnumTypeModel: function(enumType) {
         var model = {
-            name : enumType.name,
-            subname : enumType.subname,
-            caption : enumType.caption,
-            list : [],
-            map : {}
+            name: enumType.name,
+            subname: enumType.subname,
+            caption: enumType.caption,
+            list: [],
+            map: {}
         }
         $.each(enumType.items, function(i, item) {
             model.list.push(item);
