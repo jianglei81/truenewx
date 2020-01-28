@@ -1,16 +1,16 @@
 package org.truenewx.data.orm.hibernate;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.core.spring.beans.ContextInitializedBean;
 import org.truenewx.data.orm.DataQueryTemplate;
 import org.truenewx.data.orm.DataQueryTemplateFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Hibernate数据访问模板工厂
@@ -32,7 +32,12 @@ public class HibernateTemplateFactory implements DataQueryTemplateFactory, Conte
 
     @Override
     public void afterInitialized(final ApplicationContext context) throws Exception {
-        this.templates.addAll(context.getBeansOfType(HibernateTemplate.class).values());
+        Collection<HibernateTemplate> templates = context.getBeansOfType(HibernateTemplate.class).values();
+        templates.forEach(template -> {
+            if (template != null) { // 非常奇怪的现象：此处可能出现null
+                this.templates.add(template);
+            }
+        });
     }
 
     @Override
@@ -66,8 +71,7 @@ public class HibernateTemplateFactory implements DataQueryTemplateFactory, Conte
     /**
      * 获取指定实体对应的Hibernate数据访问模板
      *
-     * @param entityName
-     *            实体名称
+     * @param entityName 实体名称
      * @return Hibernate数据访问模板
      */
     public HibernateTemplate getHibernateTemplate(final String entityName) {
