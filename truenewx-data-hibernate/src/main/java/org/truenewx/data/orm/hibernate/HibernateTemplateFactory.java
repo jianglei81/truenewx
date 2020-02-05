@@ -32,12 +32,7 @@ public class HibernateTemplateFactory implements DataQueryTemplateFactory, Conte
 
     @Override
     public void afterInitialized(final ApplicationContext context) throws Exception {
-        Collection<HibernateTemplate> templates = context.getBeansOfType(HibernateTemplate.class).values();
-        templates.forEach(template -> {
-            if (template != null) { // 非常奇怪的现象：此处可能出现null
-                this.templates.add(template);
-            }
-        });
+        this.templates.addAll(context.getBeansOfType(HibernateTemplate.class).values());
     }
 
     @Override
@@ -54,7 +49,7 @@ public class HibernateTemplateFactory implements DataQueryTemplateFactory, Conte
             }
             // 在已有的Hibernate数据访问模板中查找
             for (final HibernateTemplate template : this.templates) {
-                if (template.getSessionFactory() == sessionFactory) { // 会话工厂相等即为匹配的
+                if (template != null && template.getSessionFactory() == sessionFactory) { // 会话工厂相等即为匹配的
                     this.templateMapping.put(schema, template);
                     return template;
                 }
