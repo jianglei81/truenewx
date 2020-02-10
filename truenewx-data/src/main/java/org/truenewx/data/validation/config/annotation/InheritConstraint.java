@@ -1,14 +1,9 @@
 package org.truenewx.data.validation.config.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.truenewx.core.Strings;
-import org.truenewx.data.model.Entity;
+import org.truenewx.data.model.Model;
+
+import java.lang.annotation.*;
 
 /**
  * 继承约束
@@ -17,7 +12,7 @@ import org.truenewx.data.model.Entity;
  * @since JDK 1.8
  */
 @Documented
-@Target({ ElementType.FIELD, ElementType.METHOD })
+@Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface InheritConstraint {
@@ -33,5 +28,5 @@ public @interface InheritConstraint {
      *
      * @return 被继承的实体类型
      */
-    Class<? extends Entity> type() default Entity.class;
+    Class<? extends Model> type() default Model.class;
 }

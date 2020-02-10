@@ -1,8 +1,5 @@
 package org.truenewx.data.model.support;
 
-import java.lang.reflect.Field;
-import java.util.Locale;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -10,9 +7,12 @@ import org.springframework.stereotype.Component;
 import org.truenewx.core.i18n.PropertyCaptionResolver;
 import org.truenewx.core.util.CaptionUtil;
 import org.truenewx.core.util.ClassUtil;
-import org.truenewx.data.model.Entity;
+import org.truenewx.data.model.Model;
 import org.truenewx.data.model.TransportModel;
 import org.truenewx.data.validation.config.annotation.InheritConstraint;
+
+import java.lang.reflect.Field;
+import java.util.Locale;
 
 /**
  * 模型属性显示名称解决器
@@ -46,7 +46,7 @@ public class ModelPropertyCaptionResolver implements PropertyCaptionResolver {
                     if (StringUtils.isNotBlank(ic.value())) {
                         propertyName = ic.value();
                     }
-                    if (ic.type() != Entity.class) {
+                    if (ic.type() != Model.class) {
                         entityClass = ic.type();
                     }
                     caption = getCaption(entityClass, propertyName, locale);

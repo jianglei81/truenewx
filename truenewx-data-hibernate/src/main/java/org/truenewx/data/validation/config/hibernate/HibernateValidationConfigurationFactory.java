@@ -110,14 +110,14 @@ public class HibernateValidationConfigurationFactory
         for (Field field : fields) {
             // 加入对应实体的校验规则
             // 只加入传输模型中存在的简单属性的校验规则
-            Class<? extends Entity> entityType = entityClass;
+            Class<? extends Model> entityType = entityClass;
             String propertyName = field.getName();
             InheritConstraint ic = field.getAnnotation(InheritConstraint.class);
             if (ic != null) {
                 if (StringUtils.isNotBlank(ic.value())) {
                     propertyName = ic.value();
                 }
-                if (ic.type() != Entity.class) {
+                if (ic.type() != Model.class) {
                     entityType = ic.type();
                 }
             }
