@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,8 +44,7 @@ public class NetUtil {
     /**
      * 获取指定主机名（域名）对应的IP地址
      *
-     * @param host
-     *            主机名（域名）
+     * @param host 主机名（域名）
      * @return IP地址
      */
     public static String getIpByHost(final String host) {
@@ -90,10 +91,30 @@ public class NetUtil {
     }
 
     /**
+     * 获取本机的公网ip，耗时约为700ms
+     *
+     * @return 本机的公网ip
+     */
+    public static String getLocalPublicIp() {
+        String content = null;
+        try {
+            URL url = new URL("http://ip.chinaz.com");
+            content = IOUtils.toString(url, Strings.ENCODING_UTF8);
+            Pattern pattern = Pattern.compile("\\<dd class\\=\"fz24\">(.*?)\\<\\/dd>");
+            Matcher matcher = pattern.matcher(content);
+            if (matcher.find()) {
+                return matcher.group(1);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
      * 获取指定ip地址字符串转换成的IPv4网络地址对象。如果无法转换则返回null
      *
-     * @param ip
-     *            ip地址字符串
+     * @param ip ip地址字符串
      * @return IPv4网络地址对象
      */
     public static Inet4Address getInet4Address(final String ip) {
@@ -110,8 +131,7 @@ public class NetUtil {
     /**
      * 判断指定字符串是否局域网IP地址
      *
-     * @param s
-     *            字符串
+     * @param s 字符串
      * @return true if 指定字符串是局域网IP地址, otherwise false
      */
     public static boolean isLanIp(final String s) {
@@ -133,8 +153,7 @@ public class NetUtil {
     /**
      * 判断指定网络地址是否局域网地址
      *
-     * @param address
-     *            网络地址
+     * @param address 网络地址
      * @return 指定网络地址是否局域网地址
      */
     public static boolean isLanAddress(final InetAddress address) {
@@ -148,8 +167,7 @@ public class NetUtil {
     /**
      * 获取指定IP地址的整数表达形式
      *
-     * @param address
-     *            IP地址
+     * @param address IP地址
      * @return 整数表达形式
      */
     public static int intValueOf(final InetAddress address) {
@@ -160,10 +178,8 @@ public class NetUtil {
     /**
      * 将指定参数集合转换为参数字符串，形如: a=1&b=true
      *
-     * @param params
-     *            参数集合
-     * @param encoding
-     *            字符编码
+     * @param params   参数集合
+     * @param encoding 字符编码
      * @return 参数字符串
      */
     @SuppressWarnings("unchecked")
@@ -209,8 +225,7 @@ public class NetUtil {
     /**
      * 将指定参数字符串（形如: a=1&b=true）转换为Map参数集合
      *
-     * @param paramString
-     *            参数字符串
+     * @param paramString 参数字符串
      * @return 参数集合
      */
     private static Map<String, Object> paramString2Map(final String paramString) {
@@ -240,15 +255,11 @@ public class NetUtil {
     /**
      * 将指定参数集合中的参数与指定URL中的参数合并，返回新的URL
      *
-     * @param url
-     *            URL
-     * @param params
-     *            参数集合
-     * @param encoding
-     *            字符编码
+     * @param url      URL
+     * @param params   参数集合
+     * @param encoding 字符编码
      * @return 合并之后的新URL
-     * @throws UnsupportedEncodingException
-     *             字符编码错误
+     * @throws UnsupportedEncodingException 字符编码错误
      */
     public static String mergeParams(String url, final Map<String, Object> params,
             final String encoding) {
@@ -275,12 +286,9 @@ public class NetUtil {
     /**
      * 下载指定URL和参数表示的资源到指定本地文件
      *
-     * @param url
-     *            下载资源链接
-     * @param params
-     *            下载资源链接的参数
-     * @param localFile
-     *            本地文件
+     * @param url       下载资源链接
+     * @param params    下载资源链接的参数
+     * @param localFile 本地文件
      */
     public static void download(String url, final Map<String, Object> params,
             final File localFile) {
@@ -315,10 +323,8 @@ public class NetUtil {
     /**
      * 从后台向指定URL地址发送GET方式请求，获取响应结果
      *
-     * @param url
-     *            URL地址
-     * @param params
-     *            请求参数
+     * @param url    URL地址
+     * @param params 请求参数
      * @return 响应结果
      */
     public static String requestByGet(String url, final Map<String, Object> params,
