@@ -4,13 +4,13 @@
  * Depends on: truenewx.js
  */
 $.tnx.domain = {
-    Controller : Class.extend({
-        className : "$.tnx.domain.Controller",
-        rpc : undefined,
-        getRpcClassNames : function() {
+    Controller: Class.extend({
+        className: "$.tnx.domain.Controller",
+        rpc: undefined,
+        getRpcClassNames: function() {
             return undefined;
         },
-        init : function() {
+        init: function() {
             var classNames = this.getRpcClassNames();
             if (classNames) {
                 var _this = this;
@@ -22,7 +22,7 @@ $.tnx.domain = {
                 });
             }
         },
-        focusEmpty : function(selector, trim) {
+        focusEmpty: function(selector, trim) {
             var fieldObj = $(selector);
             var fieldValue = trim ? fieldObj.val().trim() : fieldObj.val();
             if (fieldValue.length == 0) {
@@ -34,11 +34,11 @@ $.tnx.domain = {
             }
             return false;
         },
-        getDataModel : function(container, types) {
+        getDataModel: function(container, types) {
             var model = {};
             var fieldObjs = $(
-                    "input[name],textarea[name],select[name],[name][contenteditable='true']",
-                    container);
+                "input[name],textarea[name],select[name],[name][contenteditable='true']",
+                container);
             fieldObjs.each(function() {
                 var $this = $(this);
                 var tagName = this.tagName.toLowerCase();
@@ -60,7 +60,7 @@ $.tnx.domain = {
                                 if (type == "checkbox") { // 如果存在多个相同名称的复选框，则限定字段类型为数组
                                     var name = $this.attr("name");
                                     var nameObjs = $("input[type='checkbox']" + "[name='" + name
-                                            + "']");
+                                        + "']");
                                     if (nameObjs.length > 1) {
                                         requiresArray = true;
                                     }
@@ -79,18 +79,18 @@ $.tnx.domain = {
                                 type = type.substring(0, type.length - 2);
                             }
                             switch (type.toLowerCase()) {
-                            case "int":
-                                value = parseInt(value);
-                                break;
-                            case "float":
-                                value = parseFloat(value);
-                                break;
-                            case "number":
-                                value = Number(value);
-                                break;
-                            case "boolean":
-                                value = Boolean(value);
-                                break;
+                                case "int":
+                                    value = parseInt(value);
+                                    break;
+                                case "float":
+                                    value = parseFloat(value);
+                                    break;
+                                case "number":
+                                    value = Number(value);
+                                    break;
+                                case "boolean":
+                                    value = Boolean(value);
+                                    break;
                             }
                         }
                     }
@@ -98,19 +98,19 @@ $.tnx.domain = {
                         model[name] = value;
                     } else { // 有相同名称字段，则转换为数组
                         if (!$.isArray(model[name])) { // 原来不是数组才转换
-                            model[name] = [ model[name] ];
+                            model[name] = [model[name]];
                         }
                         model[name].push(value);
                     }
                     // 要求为数组却不是数组，则转换为数组
                     if (requiresArray && !$.isArray(model[name])) {
-                        model[name] = [ model[name] ];
+                        model[name] = [model[name]];
                     }
                 }
             });
             return model;
         },
-        validateFieldBusiness : function(fieldObj, controllerId) {
+        validateFieldBusiness: function(fieldObj, controllerId) {
             var fieldName = fieldObj.attr("name");
             if (fieldName) {
                 var fieldValue = fieldObj.val();
@@ -137,7 +137,7 @@ $.tnx.domain = {
                 }
             }
         },
-        bindBusinessValidate : function(controllerId) {
+        bindBusinessValidate: function(controllerId) {
             var _this = this;
             $("form input[name][business]").blur(function() {
                 _this.validateFieldBusiness($(this), controllerId);
@@ -147,16 +147,16 @@ $.tnx.domain = {
     /**
      * 加载容器插件
      */
-    loadContainerAddon : function(container, win) {
+    loadContainerAddon: function(container, win) {
         if (!container) {
             container = $("body");
         }
         // 先加载依赖组件
+        var urls = [];
+        var callbacks = [];
         var components = container.attr("component");
         if (components) {
             components = components.split(",");
-            var urls = [];
-            var callbacks = [];
             components.each(function(component) {
                 component = component.trim();
                 if (component) {
@@ -177,9 +177,13 @@ $.tnx.domain = {
                                 urls.push(componentUrls);
                             }
                         }
+                    } else {
+                        console.error("Could not find component [" + component + "]");
                     }
                 }
             });
+        }
+        if (urls.length) { // 存在有效的依赖组件，则先加载组件
             var _this = this;
             $.tnx.imports(urls, function() {
                 callbacks.each(function(callback) {
@@ -191,7 +195,7 @@ $.tnx.domain = {
             this.onBeforeContainerLoad(container, win);
         }
     },
-    onBeforeContainerLoad : function(container, win) {
+    onBeforeContainerLoad: function(container, win) {
         // 加载功能脚本前，先初始化组件
         $("[render]").each(function() {
             var obj = $(this);
@@ -269,7 +273,7 @@ $.tnx.domain = {
             _this.initImageLazyLoad();
         }
     },
-    bindInputTrim : function() {
+    bindInputTrim: function() {
         $("input,textarea").focusout(function() {
             var fieldObj = $(this);
             // 未设置trim且不是file类型，默认执行trim动作
@@ -278,7 +282,7 @@ $.tnx.domain = {
             }
         });
     },
-    initImageLazyLoad : function(container, placeholderImageUrl, loadingImageUrl) {
+    initImageLazyLoad: function(container, placeholderImageUrl, loadingImageUrl) {
         if (typeof (container) == "string") {
             loadingImageUrl = placeholderImageUrl;
             placeholderImageUrl = container;
@@ -308,15 +312,15 @@ $.tnx.domain = {
                 image.removeAttr("data-src");
             });
             var options = {
-                skip_invisible : false,
-                placeholder : placeholderImageUrl
+                skip_invisible: false,
+                placeholder: placeholderImageUrl
             };
             $("img[data-original]:not([data-container])").lazyload(options);
             $("img[data-original][data-container]").each(function(index, image) {
                 image = $(image);
                 var containerSelector = image.attr("data-container");
                 image.lazyload($.extend({}, options, {
-                    container : $(containerSelector)
+                    container: $(containerSelector)
                 }));
             });
         } else { // 未加载lazyload
@@ -337,28 +341,28 @@ $.tnx.domain = {
  * 站点设置，由具体站点负责初始化
  */
 $.tnx.domain.site = {
-    namespace : "site", // 站点默认命名空间
-    path : {
-        context : $.tnx.siteContext, // 默认站点根路径
-        assets : $.tnx.siteContext + "/assets", // 默认站点资源文件夹相对域名的路径
+    namespace: "site", // 站点默认命名空间
+    path: {
+        context: $.tnx.siteContext, // 默认站点根路径
+        assets: $.tnx.siteContext + "/assets", // 默认站点资源文件夹相对域名的路径
         // 默认站点js文件夹相对域名的路径
-        js : $.tnx.siteContext + "/assets/js"
+        js: $.tnx.siteContext + "/assets/js"
     },
-    requiredClass : "required", // 默认的必填字段样式
-    components : {}, // 组件名称-相关js文件相对域名路径清单的映射集
-    Controller : $.tnx.domain.Controller.extend({
-        init : function() {
+    requiredClass: "required", // 默认的必填字段样式
+    components: {}, // 组件名称-相关js文件相对域名路径清单的映射集
+    Controller: $.tnx.domain.Controller.extend({
+        init: function() {
             this._super(); // 调用父类构造函数
             this.className = $.tnx.domain.site.namespace + ".Controller";
         },
-        onLoad : function() {
+        onLoad: function() {
         }
     }),
-    init : function(container, win) {
+    init: function(container, win) {
         $.tnx.domain.loadContainerAddon(container, win);
     },
-    util : { // 站点工具对象
-        namespace2JsUrl : function(namespace) {
+    util: { // 站点工具对象
+        namespace2JsUrl: function(namespace) {
             var array = namespace.split(".");
             var url = $.tnx.domain.site.path.js;
             for (var i = 1; i < array.length; i++) {
@@ -366,7 +370,7 @@ $.tnx.domain.site = {
             }
             return url + ".js";
         },
-        absUrl : function(url) {
+        absUrl: function(url) {
             if (url.startsWith("/")) {
                 return url;
             }
@@ -374,7 +378,7 @@ $.tnx.domain.site = {
             var extension = url.substring(index + 1);
             return $.tnx.domain.site.path.assets + "/" + extension + "/" + url;
         },
-        jsUrl2Namespace : function(url) {
+        jsUrl2Namespace: function(url) {
             var index = url.indexOf("?");
             if (index >= 0) { // 去掉可能的参数部分
                 url = url.substr(0, index);
@@ -395,7 +399,7 @@ $.tnx.domain.site = {
             }
             return namespace;
         },
-        importJsByNamesapce : function(namespace) {
+        importJsByNamesapce: function(namespace) {
             var url = this.namespace2JsUrl(namespace);
             $.tnx.imports(url);
         }
@@ -416,7 +420,7 @@ $.tnx.domain.site = {
      * @param unLogined
      *            未登录异常处理函数，在指定URL要求用户登录却没登录时调用
      */
-    open : function(url, params, buttons, backdrop, extendToWin, unLogined) {
+    open: function(url, params, buttons, backdrop, extendToWin, unLogined) {
         if (typeof backdrop == "object") {
             extendToWin = backdrop;
             backdrop = undefined;
@@ -427,8 +431,8 @@ $.tnx.domain.site = {
             _controller = controller; // 缓存当前controller变量
         }
         var options = {
-            backdrop : backdrop,
-            callback : function(container) {
+            backdrop: backdrop,
+            callback: function(container) {
                 if (!(container instanceof jQuery)) {
                     container = $(container);
                 }
@@ -438,8 +442,8 @@ $.tnx.domain.site = {
                 }
                 $.tnx.domain.site.init(container, win); // controller变量在此处会被更改
             },
-            events : {
-                hidden : function() {
+            events: {
+                hidden: function() {
                     controller = _controller; // 弹出框关闭后，恢复controller变量
                 }
             }
@@ -457,7 +461,7 @@ $.tnx.domain.site = {
         }
         $.tnx.open(url, params, buttons, options);
     },
-    ajax : function(target, url, params, type, callback) {
+    ajax: function(target, url, params, type, callback) {
         if ($.isFunction(type)) {
             callback = type;
             type = undefined;
@@ -466,7 +470,7 @@ $.tnx.domain.site = {
             result = result.trim();
             if (result.toLowerCase().startsWith("<body")) {
                 result = result.replace(/<body /i, "<div ").replace(/<body>/i, "<div>").replace(
-                        /<\/body *>/i, "</div>");
+                    /<\/body *>/i, "</div>");
                 var container = $(result);
                 target.html(container);
                 $.tnx.domain.loadContainerAddon(container);
