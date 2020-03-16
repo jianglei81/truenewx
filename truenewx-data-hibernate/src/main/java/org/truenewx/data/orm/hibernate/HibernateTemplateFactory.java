@@ -1,16 +1,16 @@
 package org.truenewx.data.orm.hibernate;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.truenewx.core.spring.beans.ContextInitializedBean;
 import org.truenewx.data.orm.DataQueryTemplate;
 import org.truenewx.data.orm.DataQueryTemplateFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Hibernate数据访问模板工厂
@@ -49,7 +49,7 @@ public class HibernateTemplateFactory implements DataQueryTemplateFactory, Conte
             }
             // 在已有的Hibernate数据访问模板中查找
             for (final HibernateTemplate template : this.templates) {
-                if (template.getSessionFactory() == sessionFactory) { // 会话工厂相等即为匹配的
+                if (template != null && template.getSessionFactory() == sessionFactory) { // 会话工厂相等即为匹配的
                     this.templateMapping.put(schema, template);
                     return template;
                 }
@@ -66,8 +66,7 @@ public class HibernateTemplateFactory implements DataQueryTemplateFactory, Conte
     /**
      * 获取指定实体对应的Hibernate数据访问模板
      *
-     * @param entityName
-     *            实体名称
+     * @param entityName 实体名称
      * @return Hibernate数据访问模板
      */
     public HibernateTemplate getHibernateTemplate(final String entityName) {

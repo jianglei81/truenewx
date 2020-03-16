@@ -1,12 +1,5 @@
 package org.truenewx.core.enums.support;
 
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
@@ -26,6 +19,13 @@ import org.truenewx.core.enums.BooleanEnum;
 import org.truenewx.core.enums.support.functor.FuncBuildDefaultEnumType;
 import org.truenewx.core.spring.beans.ContextInitializedBean;
 import org.truenewx.core.util.IOUtil;
+
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * 枚举字典工厂（解析器实现）
@@ -115,12 +115,9 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 构建指定枚举类型，包括其所有子类型
      *
-     * @param type
-     *            枚举类型名称
-     * @param subtype
-     *            子枚举类型名称
-     * @param locale
-     *            地区
+     * @param type    枚举类型名称
+     * @param subtype 子枚举类型名称
+     * @param locale  地区
      * @return 枚举类型
      */
     @SuppressWarnings("unchecked")
@@ -135,14 +132,14 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
             } else {
                 clazz = this.resourcePatternResolver.getClassLoader().loadClass(type);
             }
-            if (clazz.isEnum()) { // 忽略非枚举
+            if (clazz.isEnum()) { // 枚举类型才能动态构建
                 Class<Enum<?>> enumClass = (Class<Enum<?>>) clazz;
                 SAXReader reader = new SAXReader();
                 // 依次尝试从各级国际化配置文件中取枚举类型
                 EnumType enumType = readEnumType(reader, enumClass, subtype, locale);
-                // 配置文件中没有，且没有指定子类型，且为默认区域，则从枚举类中构建默认枚举类型
-                if (enumType == null && StringUtils.isBlank(subtype)) {
-                    enumType = FuncBuildDefaultEnumType.INSTANCE.apply(enumClass, locale);
+                // 配置文件中没有，则从枚举类中构建默认枚举类型
+                if (enumType == null) {
+                    enumType = FuncBuildDefaultEnumType.INSTANCE.apply(enumClass, subtype, locale);
                 }
                 return enumType;
             } else {
@@ -162,14 +159,10 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 从指定枚举类对应的区域配置文件中读取内容并构建枚举类型
      *
-     * @param reader
-     *            XML读取器
-     * @param enumClass
-     *            枚举类
-     * @param subtype
-     *            枚举子类型名
-     * @param locale
-     *            区域
+     * @param reader    XML读取器
+     * @param enumClass 枚举类
+     * @param subtype   枚举子类型名
+     * @param locale    区域
      * @return 枚举类型
      */
     private EnumType readEnumType(SAXReader reader, Class<Enum<?>> enumClass, String subtype,
@@ -194,14 +187,10 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
      * 从指定文件中读取内容并构建枚举类型<br/>
      * 如果指定配置文件不存在，或文件中没有指定的枚举类型，则返回null
      *
-     * @param reader
-     *            XML读取器
-     * @param resource
-     *            配置文件
-     * @param type
-     *            枚举类型名
-     * @param subtype
-     *            枚举子类型名
+     * @param reader   XML读取器
+     * @param resource 配置文件
+     * @param type     枚举类型名
+     * @param subtype  枚举子类型名
      * @return 枚举类型
      */
     private EnumType readEnumType(SAXReader reader, Resource resource, String type,
@@ -249,10 +238,8 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 解析指定枚举项元素中的子枚举项加入指定枚举项中
      *
-     * @param itemElement
-     *            枚举项元素
-     * @param enumItem
-     *            枚举项
+     * @param itemElement 枚举项元素
+     * @param enumItem    枚举项
      */
     @SuppressWarnings("unchecked")
     private void addChildrenToEnumItem(Element itemElement, EnumItem enumItem) {
@@ -267,10 +254,8 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 设置配置文件路径样式
      *
-     * @param locationPattern
-     *            配置文件路径样式，可用逗号分隔多个
-     * @throws IOException
-     *             如果配置文件读取出错
+     * @param locationPattern 配置文件路径样式，可用逗号分隔多个
+     * @throws IOException 如果配置文件读取出错
      */
     public void setLocationPattern(String locationPattern) throws IOException {
         String[] locations = locationPattern.split(Strings.COMMA);
@@ -305,8 +290,7 @@ public class EnumDictFactory implements EnumDictResolver, ContextInitializedBean
     /**
      * 从资源信息中确定区域
      *
-     * @param resource
-     *            资源
+     * @param resourceName 资源名称
      * @return 区域
      */
     private Locale getLocale(String resourceName) {

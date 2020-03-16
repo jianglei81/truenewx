@@ -1,27 +1,8 @@
 package org.truenewx.core.util;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.Random;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
-import javax.annotation.Nullable;
-
+import com.github.stuxuhai.jpinyin.PinyinException;
+import com.github.stuxuhai.jpinyin.PinyinFormat;
+import com.github.stuxuhai.jpinyin.PinyinHelper;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -29,9 +10,14 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.truenewx.core.Strings;
 
-import com.github.stuxuhai.jpinyin.PinyinException;
-import com.github.stuxuhai.jpinyin.PinyinFormat;
-import com.github.stuxuhai.jpinyin.PinyinHelper;
+import javax.annotation.Nullable;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * 字符串工具类
@@ -123,35 +109,35 @@ public class StringUtil {
     public static String random(int type, int length) {
         byte[] b = new byte[length];
         switch (type) {
-        case RANDOM_TYPE_NUMBER: {
-            for (int i = 0; i < b.length; i++) {
-                b[i] = MathUtil.randomByte((byte) '0', (byte) '9');
-            }
-            break;
-        }
-        case RANDOM_TYPE_LETTER: {
-            Random random = new Random();
-            for (int i = 0; i < b.length; i++) {
-                b[i] = MathUtil.randomByte((byte) 'a', (byte) 'z');
-                if (random.nextBoolean()) {
-                    b[i] = MathUtil.randomByte((byte) 'A', (byte) 'Z');
+            case RANDOM_TYPE_NUMBER: {
+                for (int i = 0; i < b.length; i++) {
+                    b[i] = MathUtil.randomByte((byte) '0', (byte) '9');
                 }
+                break;
             }
-            break;
-        }
-        case RANDOM_TYPE_MIXED: {
-            Random random = new Random();
-            for (int i = 0; i < b.length; i++) {
-                b[i] = MathUtil.randomByte((byte) '0', (byte) '9');
-                if (random.nextBoolean()) {
+            case RANDOM_TYPE_LETTER: {
+                Random random = new Random();
+                for (int i = 0; i < b.length; i++) {
                     b[i] = MathUtil.randomByte((byte) 'a', (byte) 'z');
+                    if (random.nextBoolean()) {
+                        b[i] = MathUtil.randomByte((byte) 'A', (byte) 'Z');
+                    }
                 }
-                if (random.nextBoolean()) {
-                    b[i] = MathUtil.randomByte((byte) 'A', (byte) 'Z');
-                }
+                break;
             }
-            break;
-        }
+            case RANDOM_TYPE_MIXED: {
+                Random random = new Random();
+                for (int i = 0; i < b.length; i++) {
+                    b[i] = MathUtil.randomByte((byte) '0', (byte) '9');
+                    if (random.nextBoolean()) {
+                        b[i] = MathUtil.randomByte((byte) 'a', (byte) 'z');
+                    }
+                    if (random.nextBoolean()) {
+                        b[i] = MathUtil.randomByte((byte) 'A', (byte) 'Z');
+                    }
+                }
+                break;
+            }
         }
         return new String(b);
     }
@@ -180,12 +166,12 @@ public class StringUtil {
      * 生成纯字母组合的随机字符串
      *
      * @param length       长度
-     * @param ingoredChars 要忽略的字符集合
+     * @param ignoredChars 要忽略的字符集合
      * @return 纯字母组合的随机字符串
      */
-    public static String randomLetters(int length, String ingoredChars) {
+    public static String randomLetters(int length, String ignoredChars) {
         String s = random(StringUtil.RANDOM_TYPE_LETTER, length);
-        while (containsChar(s, ingoredChars)) {
+        while (containsChar(s, ignoredChars)) {
             s = random(StringUtil.RANDOM_TYPE_LETTER, length);
         }
         return s;
@@ -195,12 +181,12 @@ public class StringUtil {
      * 生成纯数字组合的随机字符串
      *
      * @param length       长度
-     * @param ingoredChars 要忽略的字符集合
+     * @param ignoredChars 要忽略的字符集合
      * @return 纯数字组合的随机字符串
      */
-    public static String randomNumbers(int length, String ingoredChars) {
+    public static String randomNumbers(int length, String ignoredChars) {
         String s = random(StringUtil.RANDOM_TYPE_NUMBER, length);
-        while (containsChar(s, ingoredChars)) {
+        while (containsChar(s, ignoredChars)) {
             s = random(StringUtil.RANDOM_TYPE_NUMBER, length);
         }
         return s;
@@ -210,12 +196,12 @@ public class StringUtil {
      * 生成数字和字母混合的随机字符串
      *
      * @param length       长度
-     * @param ingoredChars 要忽略的字符集合
+     * @param ignoredChars 要忽略的字符集合
      * @return 数字和字母混合的随机字符串
      */
-    public static String randomMixeds(int length, String ingoredChars) {
+    public static String randomMixeds(int length, String ignoredChars) {
         String s = random(StringUtil.RANDOM_TYPE_MIXED, length);
-        while (containsChar(s, ingoredChars)) {
+        while (containsChar(s, ignoredChars)) {
             s = random(StringUtil.RANDOM_TYPE_MIXED, length);
         }
         return s;
@@ -329,8 +315,8 @@ public class StringUtil {
      * 校验指定字符串是否匹配指定多个ANT模式通配符表达式中的一个。<br/>
      * ANT模式通配符表达式是指含有**、*和?的字符串，其中**代表匹配任意级目录，*代表匹配任意个字符 ，?代表匹配任意一个字符
      *
-     * @param s       字符串
-     * @param pattern 通配符
+     * @param s        字符串
+     * @param patterns 通配符集
      * @return true if 指定字符串匹配指定ANT模式通配符表达式, otherwise false
      */
     public static boolean antPathMatchOneOf(String s, String... patterns) {
@@ -346,8 +332,8 @@ public class StringUtil {
      * 校验指定字符串是否匹配指定多个ANT模式通配符表达式中的一个。<br/>
      * ANT模式通配符表达式是指含有**、*和?的字符串，其中**代表匹配任意级目录，*代表匹配任意个字符 ，?代表匹配任意一个字符
      *
-     * @param s       字符串
-     * @param pattern 通配符
+     * @param s        字符串
+     * @param patterns 通配符集
      * @return true if 指定字符串匹配指定ANT模式通配符表达式, otherwise false
      */
     public static boolean antPathMatchOneOf(String s, Collection<String> patterns) {
@@ -459,7 +445,7 @@ public class StringUtil {
     /**
      * 判断字符串是否是标准的URL
      *
-     * @param 字符串
+     * @param s 字符串
      * @return true if 是标准URL，otherwise false
      */
     public static boolean isUrl(String s) {
@@ -554,7 +540,6 @@ public class StringUtil {
      * @param s                          字符串
      * @param convertStaticPropertyValue 是否转换形如@truenewx.core.util.DateUtil@SHORT_DATE_PATTERN的静态属性值
      * @return 转换形成的Map
-     *
      */
     public static Map<String, String> toMapByStandard(String s,
             boolean convertStaticPropertyValue) {
@@ -583,7 +568,7 @@ public class StringUtil {
      * @param key      文本关键字
      * @param args     文本替换参数
      * @return 指定的基本名称、语言环境下的资源文件中的指定关键字对应的文本
-     * @exception MissingResourceException 如果未找到指定基本名称的资源文件
+     * @throws MissingResourceException 如果未找到指定基本名称的资源文件
      */
     public static String getPropertiesText(String baseName, Locale locale, String key,
             String... args) {
@@ -813,7 +798,7 @@ public class StringUtil {
         return sb.toString();
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> T parse(String s, Class<T> type) {
         if (type == String.class) {
             return (T) s;

@@ -36,6 +36,10 @@ public class DateUtil {
     public static final String LONG_DATE_PATTERN = DateUtil.SHORT_DATE_PATTERN + Strings.SPACE
             + DateUtil.TIME_PATTERN;
     /**
+     * 精确到分钟的日期格式
+     */
+    public static final String MINUTE_DATE_PATTERN = DateUtil.SHORT_DATE_PATTERN + " HH:mm";
+    /**
      * 没分隔符长日期格式
      */
     public static final String LONG_DATE_NO_DELIMITER_PATTERN = "yyyyMMddHHmmss";
@@ -318,7 +322,7 @@ public class DateUtil {
      * 获取指定日期加上指定月数后的日期值。若月数为负，则实际进行减操作。
      *
      * @param date 原日期
-     * @param days 月数
+     * @param months 月数
      * @return 计算后的新日期
      */
     public static Date addMonths(Date date, int months) {
@@ -366,7 +370,7 @@ public class DateUtil {
      * 获取指定日期加上指定分钟数后的日期值。若分钟数为负，则实际进行减操作。
      *
      * @param date  原日期
-     * @param hours 分钟数
+     * @param minutes 分钟数
      * @return 计算后的新日期
      */
     public static Date addMinutes(Date date, int minutes) {

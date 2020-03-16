@@ -1,24 +1,18 @@
 package org.truenewx.core.util;
 
 import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.LoggerFactory;
@@ -40,45 +34,21 @@ public class HttpClientUtil {
     private HttpClientUtil() {
     }
 
-    private static List<NameValuePair> toNameValuePairs(Map<String, Object> params) {
-        List<NameValuePair> pairs = new ArrayList<>();
-        for (Entry<String, Object> entry : params.entrySet()) {
-            Object value = entry.getValue();
-            if (value instanceof Iterable) {
-                for (Object element : (Iterable<?>) value) {
-                    if (element != null) {
-                        pairs.add(new BasicNameValuePair(entry.getKey(), element.toString()));
-                    }
-                }
-            } else if (value.getClass().isArray()) {
-                int length = Array.getLength(value);
-                for (int i = 0; i < length; i++) {
-                    Object element = Array.get(value, i);
-                    if (element != null) {
-                        pairs.add(new BasicNameValuePair(entry.getKey(), element.toString()));
-                    }
-                }
-            } else {
-                pairs.add(new BasicNameValuePair(entry.getKey(), value.toString()));
-            }
-        }
-        return pairs;
-    }
-
     private static CloseableHttpResponse execute(String url, Map<String, Object> params,
             HttpRequestMethod method, String encoding, int timeout) throws Exception {
         HttpRequestBase request;
         switch (method) {
-        case GET:
-            request = new HttpGet(NetUtil.mergeParams(url, params, null));
-            break;
-        case POST:
-            HttpPost post = new HttpPost(url);
-            post.setEntity(new UrlEncodedFormEntity(toNameValuePairs(params), encoding));
-            request = post;
-            break;
-        default:
-            request = null;
+            case GET:
+                request = new HttpGet(NetUtil.mergeParams(url, params, null));
+                break;
+            case POST:
+                HttpPost post = new HttpPost(url);
+                post.setEntity(new StringEntity(JsonUtil.toJson(params),
+                        ContentType.create("text/plain", encoding)));
+                request = post;
+                break;
+            default:
+                request = null;
         }
         if (request != null) {
             if (timeout > 0) {

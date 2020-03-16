@@ -1,12 +1,5 @@
 package org.truenewx.web.security.interceptor;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +20,12 @@ import org.truenewx.web.security.mgt.SubjectManager;
 import org.truenewx.web.security.subject.Subject;
 import org.truenewx.web.util.UrlPatternMatchSupport;
 import org.truenewx.web.util.WebUtil;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.text.MessageFormat;
 
 /**
  * 安全校验拦截器
@@ -57,7 +56,6 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
     }
 
     /**
-     *
      * @param userClass 要拦截的用户类型，如果整个系统只有一种用户类型，则可以不设置
      */
     public void setUserClass(Class<?> userClass) {
@@ -65,7 +63,6 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
     }
 
     /**
-     *
      * @param loginUrl 未登录时试图访问需登录才能访问的资源时，跳转至的登录页面URL，可通过{0}附带上原访问链接
      */
     public void setLoginUrl(String loginUrl) {
@@ -142,11 +139,10 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
             HttpServletResponse response) throws ServletException, IOException {
         if (!subject.isLogined()) {
             // 未登录且不允许匿名访问
-            if (WebUtil.isAjaxRequest(request) || StringUtils.isBlank(this.loginUrl)) { // AJAX请求未登录或未指定登录页面地址时，返回错误状态
+            String loginUrl = getLoginUrl(request);
+            if (WebUtil.isAjaxRequest(request) || StringUtils.isBlank(loginUrl)) { // AJAX请求未登录或未指定登录页面地址时，返回错误状态
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
             } else { // 普通请求未登录且已指定登录页面地址时，跳转至登录页面
-                String originalUrl = WebUtil.getRelativeRequestUrlWithQueryString(request, true);
-                String loginUrl = MessageFormat.format(this.loginUrl, originalUrl);
                 if (loginUrl.startsWith(FORWARD_PREFIX)) { // 请求转发
                     loginUrl = loginUrl.substring(FORWARD_PREFIX.length());
                     WebUtil.forward(request, response, loginUrl);
@@ -157,6 +153,14 @@ public class SecurityValidateInterceptor extends UrlPatternMatchSupport
             return false;
         }
         return true;
+    }
+
+    protected String getLoginUrl(HttpServletRequest request) {
+        if (StringUtils.isNotBlank(this.loginUrl)) {
+            String originalUrl = WebUtil.getRelativeRequestUrlWithQueryString(request, true);
+            return MessageFormat.format(this.loginUrl, originalUrl);
+        }
+        return null;
     }
 
     protected boolean validateAuthority(String url, HttpMethod method, Subject subject,

@@ -1,21 +1,7 @@
 package org.truenewx.data.validation.config.hibernate;
 
-import java.beans.PropertyDescriptor;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.time.temporal.Temporal;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.validation.Constraint;
-
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.MappingException;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Property;
@@ -40,6 +26,14 @@ import org.truenewx.data.validation.rule.LengthRule;
 import org.truenewx.data.validation.rule.MarkRule;
 import org.truenewx.data.validation.rule.ValidationRule;
 import org.truenewx.data.validation.rule.builder.ValidationRuleBuilder;
+
+import javax.validation.Constraint;
+import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.time.temporal.Temporal;
+import java.util.*;
 
 /**
  * 校验配置工厂实现
@@ -105,10 +99,8 @@ public class HibernateValidationConfigurationFactory
     /**
      * 从指定传输模型类对应的实体类中添加校验规则到指定校验配置中
      *
-     * @param configuration
-     *            校验配置
-     * @param transportClass
-     *            传输模型类
+     * @param configuration  校验配置
+     * @param transportClass 传输模型类
      */
     private void addEntityClassRulesFromTransportClass(ValidationConfiguration configuration,
             Class<? extends TransportModel<?>> transportClass) {
@@ -118,14 +110,14 @@ public class HibernateValidationConfigurationFactory
         for (Field field : fields) {
             // 加入对应实体的校验规则
             // 只加入传输模型中存在的简单属性的校验规则
-            Class<? extends Entity> entityType = entityClass;
+            Class<? extends Model> entityType = entityClass;
             String propertyName = field.getName();
             InheritConstraint ic = field.getAnnotation(InheritConstraint.class);
             if (ic != null) {
                 if (StringUtils.isNotBlank(ic.value())) {
                     propertyName = ic.value();
                 }
-                if (ic.type() != Entity.class) {
+                if (ic.type() != Model.class) {
                     entityType = ic.type();
                 }
             }
@@ -145,10 +137,8 @@ public class HibernateValidationConfigurationFactory
     /**
      * 从指定实体类对应的持久化配置中添加校验规则到指定校验配置中
      *
-     * @param configuration
-     *            校验配置
-     * @param entityClass
-     *            实体类
+     * @param configuration 校验配置
+     * @param entityClass   实体类
      */
     private void addEntityClassRulesFromPersistentConfig(ValidationConfiguration configuration,
             Class<? extends Entity> entityClass) {
@@ -166,14 +156,10 @@ public class HibernateValidationConfigurationFactory
     /**
      * 向指定校验设置中添加指定类型中指定属性的规则
      *
-     * @param configuration
-     *            校验配置
-     * @param clazz
-     *            类型
-     * @param property
-     *            属性
-     * @param propertyNamePrefix
-     *            属性名前缀
+     * @param configuration      校验配置
+     * @param clazz              类型
+     * @param property           属性
+     * @param propertyNamePrefix 属性名前缀
      */
     private void addRuleByProperty(ValidationConfiguration configuration, Class<?> clazz,
             Property property, String propertyNamePrefix) {
@@ -263,9 +249,13 @@ public class HibernateValidationConfigurationFactory
                 // 必须同时有读方法和写方法才视为有效属性
                 if (pd.getReadMethod() != null && pd.getWriteMethod() != null) {
                     String propertyPath = propertyNamePrefix + pd.getName();
-                    Property referencedProperty = persistentClass
-                            .getReferencedProperty(propertyPath);
-                    addRuleByProperty(configuration, referencedProperty, pd, propertyNamePrefix);
+                    try {
+                        Property referencedProperty = persistentClass
+                                .getReferencedProperty(propertyPath);
+                        addRuleByProperty(configuration, referencedProperty, pd, propertyNamePrefix);
+                    } catch (MappingException e) {
+                        // 忽略找不到属性映射的错误
+                    }
                 }
             }
         }
@@ -274,10 +264,8 @@ public class HibernateValidationConfigurationFactory
     /**
      * 从指定类的校验约束注解中添加校验规则到指定校验配置中
      *
-     * @param configuration
-     *            校验配置
-     * @param clazz
-     *            类
+     * @param configuration 校验配置
+     * @param clazz         类
      */
     private void addRulesByAnnotation(ValidationConfiguration configuration, Class<?> clazz) {
         List<Field> fields = ClassUtil.getSimplePropertyField(clazz);
@@ -326,7 +314,7 @@ public class HibernateValidationConfigurationFactory
     }
 
     @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void afterInitialized(ApplicationContext context) throws Exception {
         Map<String, ValidationRuleBuilder> beans = context
                 .getBeansOfType(ValidationRuleBuilder.class);

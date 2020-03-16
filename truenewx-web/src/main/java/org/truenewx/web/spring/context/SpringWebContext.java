@@ -15,6 +15,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.truenewx.web.spring.util.SpringWebUtil;
+import org.truenewx.web.util.WebUtil;
 
 /**
  * Spring Web上下文工具类<br/>
@@ -34,13 +35,13 @@ public class SpringWebContext {
     }
 
     public static HttpServletRequest getRequest() {
-        final ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder
+        ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder
                 .currentRequestAttributes();
         return sra.getRequest();
     }
 
     public static HttpServletResponse getResponse() {
-        final RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes instanceof ServletWebRequest) {
             return ((ServletWebRequest) requestAttributes).getResponse();
         }
@@ -65,38 +66,34 @@ public class SpringWebContext {
     /**
      * 设置request的属性
      *
-     * @param name
-     *            属性名
-     * @param value
-     *            属性值
+     * @param name  属性名
+     * @param value 属性值
      */
-    public static void set(final String name, final Object value) {
+    public static void set(String name, Object value) {
         getRequest().setAttribute(name, value);
     }
 
     /**
      * 获取request的属性值
      *
-     * @param name
-     *            属性名
+     * @param name 属性名
      * @return 属性值
      */
     @SuppressWarnings("unchecked")
-    public static <T> T get(final String name) {
+    public static <T> T get(String name) {
         return (T) getRequest().getAttribute(name);
     }
 
     /**
      * 移除request的属性
      *
-     * @param name
-     *            属性名
+     * @param name 属性名
      * @return 被移除的属性值，没有该属性则返回null
      */
     @SuppressWarnings("unchecked")
-    public static <T> T remove(final String name) {
-        final HttpServletRequest request = getRequest();
-        final Object value = request.getAttribute(name);
+    public static <T> T remove(String name) {
+        HttpServletRequest request = getRequest();
+        Object value = request.getAttribute(name);
         if (value != null) {
             request.removeAttribute(name);
         }
@@ -106,57 +103,47 @@ public class SpringWebContext {
     /**
      * 设置属性至SESSION中
      *
-     * @param name
-     *            属性名
-     * @param value
-     *            属性值
+     * @param name  属性名
+     * @param value 属性值
      */
-    public static void setToSession(final String name, final Object value) {
+    public static void setToSession(String name, Object value) {
         getSession().setAttribute(name, value);
     }
 
     /**
      * 从SESSION获取指定属性
      *
-     * @param name
-     *            属性
+     * @param name 属性
      * @return 属性值
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getFromSession(final String name) {
+    public static <T> T getFromSession(String name) {
         return (T) getSession().getAttribute(name);
     }
 
     /**
      * 移除SESSION中的指定属性
      *
-     * @param name
-     *            属性名
+     * @param name 属性名
      * @return 被移除的属性值，没有该属性则返回null
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T removeFromSession(final String name) {
-        final HttpSession session = getSession();
-        final Object value = session.getAttribute(name);
-        if (value != null) {
-            session.removeAttribute(name);
-        }
-        return (T) value;
+    public static <T> T removeFromSession(String name) {
+        HttpSession session = getSession();
+        return WebUtil.removeAttribute(session, name);
     }
 
     /**
      * 转换指定结果名为直接重定向的结果名
      *
-     * @param result
-     *            结果名
+     * @param result 结果名
      * @return 直接重定向的结果名
      */
-    public static String toRedirectResult(final String result) {
+    public static String toRedirectResult(String result) {
         return StringUtils.join("redirect:", result);
     }
 
     public static RequestMethod getRequestMethod() {
-        final String method = getRequest().getMethod().toUpperCase();
+        String method = getRequest().getMethod().toUpperCase();
         return EnumUtils.getEnum(RequestMethod.class, method);
     }
 
