@@ -113,7 +113,7 @@ public class BusinessExceptionResolver extends AbstractHandlerExceptionResolver 
                 }
                 return new ModelAndView();
             } catch (IOException ex) {
-                this.logger.error(e.getMessage(), e);
+                this.logger.error(ex.getMessage(), ex);
             }
         }
         return null;
