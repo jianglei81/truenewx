@@ -28,6 +28,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.util.WebUtils;
 import org.truenewx.core.Strings;
+import org.truenewx.core.enums.Device;
+import org.truenewx.core.enums.OS;
+import org.truenewx.core.enums.Program;
+import org.truenewx.core.model.Terminal;
 import org.truenewx.core.util.StringUtil;
 
 import com.aliyun.oss.internal.Mimetypes;
@@ -699,4 +703,40 @@ public class WebUtil {
         return (T) value;
     }
 
+    /**
+     * 获取请求终端信息
+     *
+     * @param request HTTP请求
+     * @return 请求终端
+     */
+    public static Terminal getRequestTerminal(HttpServletRequest request) {
+        String terminal = request.getHeader("Terminal");
+        if (terminal != null) {
+            return new Terminal(terminal);
+        }
+        // 默认视为PC版网页，不限操作系统
+        Device device = Device.PC;
+        Program program = Program.WEB;
+        OS os = null;
+        String userAgent = request.getHeader("User-Agent");
+        if (StringUtils.isNotBlank(userAgent)) {
+            userAgent = userAgent.toLowerCase();
+            if (!userAgent.contains("webkit") && !userAgent.contains("firefox")
+                    && !userAgent.contains("opera") && !userAgent.contains("msie")) {
+                program = Program.NATIVE;
+            }
+            if (userAgent.contains("ipad")) {
+                device = Device.PAD;
+                os = OS.MAC;
+            } else if (userAgent.contains("iphone")) {
+                device = Device.MOBILE;
+                os = OS.MAC;
+            } else if (userAgent.contains("android")) {
+                os = OS.ANDROID;
+            } else if (userAgent.contains("windows")) {
+                os = OS.WINDOWS;
+            }
+        }
+        return new Terminal(device, os, program);
+    }
 }
