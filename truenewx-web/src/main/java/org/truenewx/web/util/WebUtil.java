@@ -733,6 +733,11 @@ public class WebUtil {
                 os = OS.MAC;
             } else if (userAgent.contains("android")) {
                 os = OS.ANDROID;
+                if (userAgent.contains("mobile")) {
+                    device = Device.MOBILE;
+                } else {
+                    device = Device.PAD;
+                }
             } else if (userAgent.contains("windows")) {
                 os = OS.WINDOWS;
             }
