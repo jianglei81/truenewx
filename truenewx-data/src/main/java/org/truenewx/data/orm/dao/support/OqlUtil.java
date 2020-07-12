@@ -71,7 +71,6 @@ public class OqlUtil {
      * @param fieldParamValues 字段参数值
      * @param comparison       条件比较符
      * @return OR条件子句
-     *
      * @author jianglei
      */
     public static String buildOrConditionString(Map<String, Object> params, String fieldName,
@@ -130,7 +129,6 @@ public class OqlUtil {
      * @param fieldParamValues 字段参数值
      * @param comparison       条件比较符
      * @return OR条件子句
-     *
      * @author jianglei
      */
     public static String buildOrConditionString(Map<String, Object> params, String fieldName,
@@ -205,6 +203,25 @@ public class OqlUtil {
         if (ifNull != null) {
             condition.append(fieldName).append(" is");
             if (!ifNull) {
+                condition.append(" not");
+            }
+            condition.append(" null");
+        }
+        return condition.toString();
+    }
+
+    /**
+     * 构建指定字段的为null条件子句
+     *
+     * @param fieldName 字段名
+     * @param notNull   是否非null，其值本身为null表示忽略该字段条件
+     * @return 条件子句
+     */
+    public static String buildNotNullConditionString(String fieldName, Boolean notNull) {
+        StringBuffer condition = new StringBuffer();
+        if (notNull != null) {
+            condition.append(fieldName).append(" is");
+            if (notNull) {
                 condition.append(" not");
             }
             condition.append(" null");
