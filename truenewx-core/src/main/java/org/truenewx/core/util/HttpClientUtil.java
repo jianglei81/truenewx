@@ -29,7 +29,7 @@ import org.truenewx.core.tuple.Binate;
  */
 public class HttpClientUtil {
 
-    private static final CloseableHttpClient CLIENT = HttpClientBuilder.create().build();
+    public static final CloseableHttpClient CLIENT = HttpClientBuilder.create().build();
 
     private HttpClientUtil() {
     }
